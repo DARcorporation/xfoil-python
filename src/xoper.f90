@@ -2667,13 +2667,9 @@ SUBROUTINE VISCAL(NITER1)
 
     RETURN
     !....................................................................
-    2000   FORMAT&
-    (/1X, I3, '   rms: ', E10.4,'   max: ', E10.4, 3X, A1,' at ', I4, I3, &
-            '   RLX:', F6.3)
-    2010   FORMAT&
-    (/1X, I3, '   rms: ', E10.4,'   max: ', E10.4, 3X, A1,' at ', I4, I3)
-    2020   FORMAT&
-    (1X, 3X, '   a =', F7.3, '      CL =', F8.4  /&
+    2000   FORMAT(/1X, I3, '   rms: ', E10.4,'   max: ', E10.4, 3X, A1,' at ', I4, I3, '   RLX:', F6.3)
+    2010   FORMAT(/1X, I3, '   rms: ', E10.4,'   max: ', E10.4, 3X, A1,' at ', I4, I3)
+    2020   FORMAT(1X, 3X, '   a =', F7.3, '      CL =', F8.4  /&
             1X, 3X,'  Cm =', F8.4, '     CD =', F9.5,&
             '   =>   CDf =', F9.5, '    CDp =', F9.5)
 END

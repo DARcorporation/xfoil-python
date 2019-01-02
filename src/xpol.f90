@@ -74,8 +74,6 @@ SUBROUTINE PLRSET(IP)
         IF(IOPT == 0) THEN
             IP = 0
             RETURN
-        ELSEIF(IOPT == 1) THEN
-            CONTINUE
         ELSEIF(IOPT == 2) THEN
             CALL APCOPY(IP)
         ENDIF
