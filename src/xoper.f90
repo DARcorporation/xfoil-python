@@ -95,6 +95,10 @@ SUBROUTINE OPER
         LRECALC = .FALSE.
     ENDIF
     !
+    IF(COMAND.EQ.'    ') THEN
+        !----- just <return> was typed... clean up plotting and exit OPER
+        RETURN
+    ENDIF
     !---- extract command line numeric arguments
     DO I = 1, 20
         IINPUT(I) = 0
@@ -1367,7 +1371,7 @@ END
 
 
 SUBROUTINE MRSHOW(LM, LR)
-    !     !INCLUDE 'XFOIL.INC'
+    INCLUDE 'XFOIL.INC'
     LOGICAL LM, LR
     !
     IF(LM .OR. LR) WRITE(*, *)
