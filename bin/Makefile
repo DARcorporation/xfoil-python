@@ -159,12 +159,6 @@ blu: blu.o profil.o
 blu.o: $(SRC)/blu.f
 	$(FC) -c $(FFLAGS) $(SRC)/blu.f
 
-
-XFOILOBJ = xfoil.o xpanel.o xoper.o xtcam.o xgdes.o xqdes.o xmdes.o \
-xsolve.o xbl.o xblsys.o xpol.o xplots.o pntops.o xgeom.o xutils.o modify.o \
-blplot.o polplt.o aread.o naca.o spline.o plutil.o iopol.o gui.o sort.o \
-dplot.o profil.o
-
 xfoil.o: $(SRC)/xfoil.f  $(SRC)/XFOIL.INC $(SRC)/XBL.INC
 	$(FC) -c $(FFLAGS)  $(SRC)/xfoil.f
 xpanel.o: $(SRC)/xpanel.f  $(SRC)/XFOIL.INC
