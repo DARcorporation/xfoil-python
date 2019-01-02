@@ -39,8 +39,6 @@ C
       DIMENSION RINPUT(20)
       LOGICAL ERROR, LPLNEW
 C
-      EXTERNAL NEWPLOTQ
-C
       SAVE COMOLD, ARGOLD
 C
 C---- statement function for compressible Karman-Tsien velocity
@@ -105,9 +103,6 @@ C------ set Qspec from Cn coefficients
         WRITE(*,1190)
       ENDIF
 C
-      CALL QPLINI(.TRUE.)
-      CALL QSPLOT
-C
 C====================================================
 C---- start of menu loop
  500  CONTINUE
@@ -138,11 +133,6 @@ C---- process previous command ?
 C
       IF(COMAND.EQ.'    ') THEN
 C----- just <return> was typed... clean up plotting and exit OPER
-       IF(LPLOT) CALL PLEND
-       LPLOT = .FALSE.
-       LQSYM = .FALSE.
-       LQSPPL = .FALSE.
-       CALL CLRZOOM
        RETURN
       ENDIF
 C
@@ -169,34 +159,11 @@ C--------------------------------------------------------
      &  //'   Symm   Toggle symmetry flag'
      &   /'   TGAP r Set new TE gap'
      &   /'   TANG r Set new TE angle'
-ccc  &   /'   READ   Read in Qspec'
-     &  //'   Modi   Modify Qspec'
-     &   /'   MARK   Mark off target segment for smoothing'
      &   /'   SMOO   Smooth Qspec inside target segment'
      &   /'   Filt   Apply Hanning filter to entire Qspec'
      &   /'   SLOP   Toggle modified-Qspec slope matching flag'
      &  //'   eXec   Execute  full-inverse calculation'
-     &  //'   Visc   Qvis overlay toggle'
-     &   /'   REFL   Reflected Qspec overlay toggle'
-     &   /'   SPEC   Plot mapping coefficient spectrum'
-     &  //'   Plot   Replot Qspec (line) and Q (symbols)'
-     &   /'   Blow   Blowup plot region'
-     &   /'   Rese   Reset plot scale and origin'
-     &   /'   Wind     Plot window adjust via cursor and keys'
-     &  //'   SIZE r Change absolute plot-object size'
-     &   /'  .ANNO   Annotate plot'
-     &   /'   HARD   Hardcopy current plot'
      &  //'   PERT   Perturb one Cn and generate geometry')
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'Z   ') THEN
-       CALL USETZOOM(.TRUE.,.TRUE.)
-       CALL REPLOT(IDEV)
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'U   ') THEN
-       CALL CLRZOOM
-       CALL REPLOT(IDEV)
 C
 C--------------------------------------------------------
       ELSEIF(COMAND.EQ.'INIT') THEN
@@ -210,8 +177,6 @@ C--------------------------------------------------------
        IF(LQSYM) CALL CNSYMM
        CALL QSPCIR
 C
-       CALL QPLINI(.FALSE.)
-       CALL QSPLOT
        LCNPL = .FALSE.
 C
 C--------------------------------------------------------
@@ -246,8 +211,6 @@ C
        IACQSP = 1
        CALL QSPCIR
 C
-       CALL QPLINI(.FALSE.)
-       CALL QSPLOT
        LCNPL = .FALSE.
 C
 C--------------------------------------------------------
@@ -282,8 +245,6 @@ C
        IACQSP = 2
        CALL QSPCIR
 C
-       CALL QPLINI(.FALSE.)
-       CALL QSPLOT
        LCNPL = .FALSE.
 C
 C--------------------------------------------------------
@@ -298,8 +259,6 @@ ccc       CALL CNCALC(QSPEC(1,KQSP),.FALSE.)
         CALL CNSYMM
         CALL QSPCIR
 C
-        CALL QPLINI(.FALSE.)
-        CALL QSPLOT
         LCNPL = .FALSE.
        ELSE
         WRITE(*,*) 'Qspec symmetry forcing disabled.'
@@ -314,123 +273,12 @@ C--------------------------------------------------------
        CALL AGTSET(RINPUT,NINPUT)
 C
 C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'VISC' .OR.
-     &       COMAND.EQ.'V   '      ) THEN
-C----- toggle Qvis plotting flag
-       LQVDES = .NOT.LQVDES
-       IF(LQVDES) THEN
-        WRITE(*,*) 'Qspec & Qvis will be plotted'
-       ELSE
-        WRITE(*,*) 'Only Qspec will be plotted'
-        CALL QPLINI(.FALSE.)
-       ENDIF
-       CALL QSPLOT
-       LCNPL = .FALSE.
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'REFL') THEN
-C----- toggle reflected Qspec plotting flag
-       LQREFL = .NOT.LQREFL
-       IF(LQREFL) THEN
-        WRITE(*,*) 'Reflected Qspec will be plotted'
-       ELSE
-        WRITE(*,*) 'Reflected Qspec will not be plotted'
-        CALL QPLINI(.FALSE.)
-       ENDIF
-       CALL QSPLOT
-       LCNPL = .FALSE.
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'MODI' .OR. 
-     &       COMAND.EQ.'M   '     ) THEN
-C----- make sure there is a Qspec(s) plot on the screen
-       IF(.NOT.LQSPPL) THEN
-        CALL QPLINI(.FALSE.)
-        CALL QSPLOT
-       ENDIF
-       CALL GETCOLOR(ICOL0)
-C
-C----- set up arrays for calling MODIFY
-       IFRST = 1
-       ILAST = NSP
-       NSIDE = 1
-       NLINE = NQSP
-       DO I = 1, NSP
-         ISP = NSP - I + 1
-         XSP(ISP) = 1.0 - SSPEC(I)
-         DO KQSP = 1, NQSP
-           GCOMP = QCOMP(QSPEC(I,KQSP))/QINF
-           YSP(ISP,KQSP) = QFAC*GCOMP
-         ENDDO
-       ENDDO
-       DO KQSP = 1, NQSP
-         CALL SEGSPL(YSP(1,KQSP),YSPD(1,KQSP),XSP,NSP)
-       ENDDO
-C
-C----- get the user's modifying input
-       XBOX(1) = XMARG
-       XBOX(2) = XPAGE-XMARG
-       YBOX(1) = YMARG
-       YBOX(2) = YPAGE-YMARG
-       CALL MODIFY(IBX,IFRST,ILAST,NSIDE,NLINE,
-     &             XSP,YSP,YSPD, LQSLOP,
-     &             ISP1,ISP2,ISMOD,KQSP,
-     &             XBOX,YBOX, XBOX,YBOX,SIZE,
-     &             XOFF,YOFF,XSF,YSF, 'RED','RED',
-     &             NEWPLOTQ)
-C
-C----- put modified info back into global arrays
-       IQMOD1 = NSP - ISP2 + 1
-       IQMOD2 = NSP - ISP1 + 1
-       DO I=1, NSP
-         ISP = NSP - I + 1
-         QSCOM =  QINF*YSP(ISP,KQSP)/QFAC
-         QSPEC(I,KQSP) = QINCOM(QSCOM,QINF,TKLAM)
-       ENDDO
-C
-C----- calculate new mapping coefficients
-       CALL CNCALC(QSPEC(1,KQSP),LQSYM)
-C
-C----- set new Qspec(s) for all alphas or CLs
-       CALL QSPCIR
-C
-       WRITE(*,1200) ALGAM/DTOR, CLGAM, CMGAM
-C
-       CALL NEWCOLORNAME('MAGENTA')
-       DO KQSP=1, NQSP
-cc         CALL QSPPLT(IQMOD1,IQMOD2,KQSP,NTQSPL)
-cc         IF(LQSYM) CALL QSPPLT(NSP-IQMOD2+1,NSP-IQMOD1+1,KQSP,NTQSPL)
-         CALL QSPPLT(1,NSP,KQSP,NTQSPL)
-C
-         CALL QSPINT(ALQSP(KQSP),QSPEC(1,KQSP),QINF,MINF,
-     &               CLQ,CMQSP(KQSP))
-C
-C------- set new CL only if alpha is prescribed
-         IF(IACQSP.EQ.1) CLQSP(KQSP) = CLQ
-C
-         WRITE(*,1210) KQSP, ALQSP(KQSP)/DTOR,CLQSP(KQSP),CMQSP(KQSP)
-       ENDDO
-       CALL NEWCOLOR(ICOL0)
-C
-       CALL PLFLUSH
-       LQSPPL = .FALSE.
-       LCNPL = .FALSE.
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'MARK') THEN
-C----- get target segment endpoints
-       CALL IQSGET
-       LCNPL = .FALSE.
-C
-C--------------------------------------------------------
       ELSEIF(COMAND.EQ.'READ') THEN
 C----- read in Qspec
        KQSP = 1
        CALL GETVOV(KQSP)
        CALL CNCALC(QSPEC(1,KQSP),.FALSE.)
        IF(LQSYM) CALL CNSYMM
-       CALL QPLINI(.FALSE.)
-       CALL QSPLOT
        LCNPL = .FALSE.
 C
        KQSP = 1
@@ -449,16 +297,7 @@ C----- smooth Qspec within target segment
 C
        WRITE(*,1200) ALGAM/DTOR,CLGAM,CMGAM
 C
-       CALL GETCOLOR(ICOL0)
-       CALL NEWCOLORNAME('MAGENTA')
        DO KQSP=1, NQSP
-         IF(LCNPL) THEN
-           CALL CNPLOT(PLOTAR,CH,.FALSE.)
-         ELSE
-           CALL QSPPLT(IQ1,IQ2,KQSP,NTQSPL)
-           IF(LQSYM) CALL QSPPLT(NSP-IQ2+1,NSP-IQ1+1,KQSP,NTQSPL)
-         ENDIF
-C
          CALL QSPINT(ALQSP(KQSP),QSPEC(1,KQSP),QINF,MINF,
      &               CLQ,CMQSP(KQSP))
 C
@@ -467,8 +306,6 @@ C------- set new CL only if alpha is prescribed
 C
          WRITE(*,1210) KQSP,ALQSP(KQSP)/DTOR,CLQSP(KQSP),CMQSP(KQSP)
        ENDDO
-       CALL NEWCOLOR(ICOL0)
-       CALL PLFLUSH
        LQSPPL = .FALSE.
 C
 C--------------------------------------------------------
@@ -482,16 +319,7 @@ C----- apply modified Hanning filter to Cn coefficients
 C
        WRITE(*,1200) ALGAM/DTOR,CLGAM,CMGAM
 C
-       CALL GETCOLOR(ICOL0)
-       CALL NEWCOLORNAME('MAGENTA')
        DO KQSP=1, NQSP
-         IF(LCNPL) THEN
-           CALL CNPLOT(PLOTAR,CH,.FALSE.)
-         ELSE
-           CALL QSPPLT(1,NSP,KQSP,NTQSPL)
-         ENDIF
-         IF(LQSYM) CALL QSPPLT(NSP-IQ2+1,NSP-IQ1+1,KQSP,NTQSPL)
-C
          CALL QSPINT(ALQSP(KQSP),QSPEC(1,KQSP),QINF,MINF,
      &               CLQ,CMQSP(KQSP))
 C
@@ -500,106 +328,7 @@ C------- set new CL only if alpha is prescribed
 C
          WRITE(*,1210) KQSP,ALQSP(KQSP)/DTOR,CLQSP(KQSP),CMQSP(KQSP)
        ENDDO
-       CALL NEWCOLOR(ICOL0)
-       CALL PLFLUSH
        LQSPPL = .FALSE.
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'SLOP') THEN
-       LQSLOP = .NOT.LQSLOP
-       IF(LQSLOP) THEN
-         WRITE(*,*)
-     &    'Modified Qspec piece will be made tangent at endpoints'
-         NTQSPL = 4
-       ELSE
-         WRITE(*,*)
-     &    'Modified Qspec piece will not be made tangent at endpoints'
-         NTQSPL = 1
-       ENDIF
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'HARD') THEN
-C----- hardcopy current plot
-       IF(LPLOT) CALL PLEND
-       LPLOT = .FALSE.
-       CALL REPLOT(IDEVRP)
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'PLOT' .OR.
-     &       COMAND.EQ.'P   '      ) THEN
-C----- plot Qspec distribution
-       CALL QPLINI(.FALSE.)
-       CALL QSPLOT
-       LCNPL = .FALSE.
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'SPEC') THEN
-C----- plot mapping coefficient spectrum
-       CALL CNPLOT(PLOTAR,CH,.TRUE.)
-       LCNPL = .TRUE.
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'BLOW' .OR.
-     &       COMAND.EQ.'B   '      ) THEN
-C----- get blowup parameters
-       XWS = XWIND/SIZE
-       YWS = YWIND/SIZE
-       CALL OFFGET(XOFF,YOFF,XSF,YSF,XWS,YWS, .FALSE. , .TRUE. )
-       CALL QPLINI(.FALSE.)
-       CALL QSPLOT
-       LCNPL = .FALSE.
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'RESE' .OR.
-     &       COMAND.EQ.'R   '      ) THEN
-C----- reset blowup parameters and replot
-       CALL QPLINI(.TRUE.)
-       CALL QSPLOT
-       LCNPL = .FALSE.
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'WIND' .OR.
-     &       COMAND.EQ.'W   '      ) THEN
-       XWS = XWIND/SIZE
-       YWS = YWIND/SIZE
-C
-       WRITE(*,*) ' '
-       WRITE(*,*) 'Type I,O,P to In,Out,Pan with cursor...'
-C
- 80    CALL QPLINI(.FALSE.)
-       CALL QSPLOT
-C
-       CALL GETCURSORXY(XCRS,YCRS,CHKEY)
-C
-C----- do possible pan,zoom operations based on CHKEY
-       CALL KEYOFF(XCRS,YCRS,CHKEY, XWS,YWS, XOFF,YOFF,XSF,YSF, LPLNEW)
-C
-       IF(LPLNEW) THEN
-        GO TO 80
-       ENDIF
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'SIZE') THEN
-C----- change size
-       IF(NINPUT.GE.1) THEN
-        SIZE = RINPUT(1)
-       ELSE
-        WRITE(*,*) 'Current plot-object size =', SIZE
-        CALL ASKR('Enter new plot-object size^',SIZE)
-       ENDIF
-C
-       CALL QPLINI(.FALSE.)
-       CALL QSPLOT
-       LCNPL = .FALSE.
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'ANNO') THEN
-C----- annotate plot
-       IF(LPLOT) THEN
-        CALL ANNOT(CH)
-       ELSE
-        WRITE(*,*) 'No active plot to annotate'
-       ENDIF
 C
 C--------------------------------------------------------
       ELSEIF(COMAND.EQ.'DUMP') THEN
@@ -629,66 +358,7 @@ C
      &             EI11BT,EI22BT,APX1BT,APX2BT,
      &             THICKB,CAMBRB )
 C
-C----- determine airfoil box size and location
-       CALL AIRLIM(N,X,Y,XMIN,XMAX,YMIN,YMAX)
 C
-C----- y-offset for airfoil in  Cp vs x  plot
-       FACA = FACAIR/(XMAX-XMIN)
-       XOFA = XOFAIR*(XMAX-XMIN) - XMIN
-       YOFA = YOFAIR*(XMAX-XMIN) - YMAX - CPMAX*PFAC*(XMAX-XMIN)
-C
-C----- start new plot
-       CALL PLTINI
-C
-C----- re-origin for  Cp vs x  plot
-       CALL PLOT(0.09 , 0.04 + CPMAX*PFAC + (YMAX-YMIN)*FACA, -3)
-C
-       write(*,*) xofa, yofa, faca
-       write(*,*) cpmin, cpmax, cpdel, pfac
-
-C----- plot Cp(x) axes
-       CALL CPAXES(LCPGRD,
-     &             N,X,Y,XOFA,YOFA,FACA,
-     &             CPMIN,CPMAX,CPDEL,PFAC,CH,
-     &             'XFOIL',VERSION)
-C
-C----- plot current inviscid -Cp distributions
-       CALL NEWPEN(2)
-       CALL XYLINE(N,X,CPI,-XOFA,FACA,0.0,-PFAC,1)
-C
-C----- set initial x,y-positions of sequence plot label top
-       XL = 0.70
-       YL = -CPMIN*PFAC
-C
-C----- plot name and operating parameters
-       CALL COEFPL(XL,YL,CH,.FALSE.,.FALSE.,.TRUE.,
-     &            NAME,NNAME,
-     &            REINF,MINF,ACRIT,ALFA,CL,CM,CD,CDP)
-C
-C----- draw sequence plot label
-       XL = XL - 3.0*CH
-       YL = YL - 1.0*CH
-       CALL SEQLAB(XL,YL,XL1,XL2,XL3,XL4,XL5,XL6,CHSEQ,0,.FALSE.)
-C
-       CALL GETCOLOR(ICOL0)
-       CALL NEWCOLORNAME('magenta')
-C
-C----- plot new airfoil dashed
-       CALL PLBAIR(1,XOFA,YOFA,FACA)
-C
-       YL = YL - 0.2*CH
-       DO K=1, NQSP
-         ALS1 = ALQSP(K)
-         CLS1 = CLQSP(K)
-         CALL NEWPEN(2)
-         CALL QCCALC(IACQSP,ALS1,CLS1,CMS1,MINF,QINF,NC,W1,W2,W5,W6)
-         CALL CRPLOT(NC,W1,W6,XOFA,FACA)
-         CALL SEQPLT(YL,XL1,XL2,XL3,XL4,XL5,XL6,
-     &              CHSEQ,ALS1/DTOR,CLS1,CMS1,.FALSE.)
-       ENDDO
-       CALL NEWCOLOR(ICOL0)
-C
-       CALL PLFLUSH
        LQSPPL = .FALSE.
        LGSAME = .FALSE.
        LCNPL = .FALSE.
@@ -814,74 +484,6 @@ C
 C
       RETURN
       END
-
-
-      SUBROUTINE CRPLOT(NC,XC,QC,XOFA1,FACA1)
-C------------------------------------------------------------
-C     Plots dashed -Cp distribution from speed stored in QC
-C------------------------------------------------------------
-      INCLUDE 'XFOIL.INC'
-      DIMENSION XC(NC),QC(NC)
-C
-      INCR = (NC-1)/128
-      INCR = MAX(INCR,1)
-C
-      DFRAC = 0.15
-C
-      BETA = SQRT(1.0 - MINF**2)
-      BFAC = 0.5*MINF**2 / (1.0 + BETA)
-C
-      DO 60 IC=2, (NC-1-INCR), INCR
-        X1 = XC(IC)
-        X2 = XC(IC+INCR)
-        CPI1 = 1.0 - (QC(IC)     /QINF)**2
-        CPI2 = 1.0 - (QC(IC+INCR)/QINF)**2
-        Y1 = CPI1 / (BETA + BFAC*CPI1)
-        Y2 = CPI2 / (BETA + BFAC*CPI2)
-        DX = X2 - X1
-        DY = Y2 - Y1
-        CALL PLOT((X1 + DX*DFRAC + XOFA1)*FACA1,
-     &            (Y1 + DY*DFRAC        )*(-PFAC),3)
-        CALL PLOT((X2 - DX*DFRAC + XOFA1)*FACA1,
-     &            (Y2 - DY*DFRAC        )*(-PFAC),2)
-   60 CONTINUE
-C
-      RETURN
-      END ! CRPLOT
-
-
-
-      SUBROUTINE PLBAIR(ILINE,XOFA1,YOFA1,FACA1)
-C---------------------------------------------------
-C     Plots solid or dashed buffer airfoil contour.
-C---------------------------------------------------
-      INCLUDE 'XFOIL.INC'
-C
-      CALL NEWPEN(2)
-C
-C---- dash between every other point
-      INCR = 2
-C
-C---- use solid or dashed line
-      IF(ILINE.EQ.0) DFRAC = 0.
-      IF(ILINE.EQ.1) DFRAC = 0.15
-C
-      DO 10 I=1, NB-INCR, INCR
-        X1 = XB(I)
-        Y1 = YB(I)
-        X2 = XB(I+INCR)
-        Y2 = YB(I+INCR)
-        DX = X2 - X1
-        DY = Y2 - Y1
-        CALL PLOT((X1 + DX*DFRAC + XOFA1)*FACA1,
-     &            (Y1 + DY*DFRAC + YOFA1)*FACA1,3)
-        CALL PLOT((X2 - DX*DFRAC + XOFA1)*FACA1,
-     &            (Y2 - DY*DFRAC + YOFA1)*FACA1,2)
-   10 CONTINUE
-C
-      RETURN
-      END ! PLBAIR
-
 
 
       SUBROUTINE MAPGEN(FFILT,N,X,Y)
@@ -1827,81 +1429,6 @@ C
       RETURN
 C
       END ! GETVOV
-
-
-
-      SUBROUTINE CNPLOT(PLOTAR,CH,LAXES)
-C------------------------------------------------------------
-C     Plots Cn coefficient spectrum.
-C------------------------------------------------------------
-      INCLUDE 'CIRCLE.INC'
-      LOGICAL LAXES
-C
-      CPAR = PLOTAR
-      SH = 0.2*CH
-C
-      GNDEL =  1.0
-      GNMAX =  0.0
-      GNMIN = -5.0
-C
-      FNDEL = 10.0
-      FNMAX = FNDEL*( AINT(FLOAT(MC)/FNDEL) + 0.99 )
-      FNMIN = 0.0
-C
-      GSF = CPAR/(GNMAX-GNMIN)
-      FSF =  0.9/(FNMAX-FNMIN)
-C
-      IF(LAXES) THEN
-C
-C------ initialize plot
-        CALL PLTINI
-C
-        CALL PLOT(8.0*CH,4.0*CH,-3)
-C
-ccc      DO 1000 IRC=1, 2
-C
-        CALL PLOT(-FNMIN*FSF,-GNMIN*GSF,-3)
-C
-        CALL XAXIS(FNMIN*FSF,0.0,(FNMAX-FNMIN)*FSF,FNDEL*FSF,
-     &             FNMIN,FNDEL,-CH,-1)
-        CALL YAXIS(0.0,GNMIN*GSF,(GNMAX-GNMIN)*GSF,GNDEL*GSF,
-     &             GNMIN,GNDEL, CH,1)
-C
-        CALL NEWPEN(3)
-        XL = (FNMAX - 1.5*FNDEL)*FSF - 0.6*CH
-        CALL PLCHAR(XL,1.0*CH,1.2*CH,'n',0.0,1)
-C
-        YL = (GNMAX - 1.5*GNDEL)*GSF - 0.6*CH
-        CALL PLCHAR(-5.0*CH,YL,1.0*CH,'log',0.0,3)
-        CALL PLCHAR(-2.0*CH,YL-0.4*CH,0.7*CH,'10',0.0,2)
-C
-        YL = (GNMAX - 2.5*GNDEL)*GSF - 0.6*CH
-        CALL PLMATH(-5.5*CH,YL,1.2*CH,'|  |',0.0,4)
-        CALL PLCHAR(-5.5*CH,YL,1.2*CH,' C  ',0.0,4)
-        CALL PLCHAR(-3.2*CH,YL-0.4*CH,0.8*CH,'n',0.0,1)
-C
-      ENDIF
-C
-      CALL GETCOLOR(ICOL0)
-C
-      IF(.NOT.LAXES) CALL NEWCOLORNAME('magenta')
-      DO 10 M=0, MC
-C
-        FN = FLOAT(M)
-        ACN = ABS(CN(M))
-        ACN = MAX( ACN , 10.0**(GNMIN-1.0) )
-        GN = LOG10( ACN )
-C
-        CALL PLSYMB(FN*FSF,GN*GSF,SH,1,0.0,0)
-C
- 10   CONTINUE
-C
-      IF(.NOT.LAXES) CALL NEWCOLOR(ICOL0)
-      CALL PLFLUSH
-C
-      RETURN
-      END ! CNPLOT
-
 
 
       SUBROUTINE ZLEFIND(ZLE,ZC,WC,NC,PIQ,AGTE)

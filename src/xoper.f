@@ -95,14 +95,6 @@ C---- process previous command ?
         LRECALC = .FALSE.
       ENDIF
 C
-      IF(COMAND.EQ.'    ') THEN
-C----- just <return> was typed... clean up plotting and exit OPER
-       IF(LPLOT) CALL PLEND
-       LPLOT = .FALSE.
-       CALL CLRZOOM
-       RETURN
-      ENDIF
-C
 C---- extract command line numeric arguments
       DO I=1, 20
         IINPUT(I) = 0
@@ -141,7 +133,6 @@ C--------------------------------------------------------
      & /'   Cl   r   Prescribe CL'
      & /'   ASeq rrr Prescribe a sequence of alphas'
      & /'   CSeq rrr Prescribe a sequence of CLs'
-     &//'   SEQP     Toggle polar/Cp(x) sequence plot display'
      & /'   CINC     Toggle  minimum Cp  inclusion in polar'
      & /'   HINC     Toggle hinge moment inclusion in polar'
      & /'   Pacc i   Toggle auto point accumulation to active polar'
@@ -151,28 +142,11 @@ C--------------------------------------------------------
      & /'   PLIS i   List stored polar(s)'
      & /'   PDEL i   Delete stored polar'
      & /'   PSOR i   Sort stored polar'
-     & /'   PPlo ii. Plot stored polar(s)'
-     & /'   APlo ii. Plot stored airfoil(s) for each polar'
      & /'   ASET i   Copy stored airfoil into current airfoil'
      & /'   PREM ir. Remove point(s) from stored polar'
      & /'   PNAM i   Change airfoil name of stored polar'
-     & /'   PPAX     Change polar plot axis limits'
      &//'   RGET f   Read new reference polar from file'
      & /'   RDEL i   Delete stored reference polar'
-     &//'   GRID     Toggle Cp vs x grid overlay'
-     & /'   CPIO     Toggle inviscid Cp overlay on viscous Cp(x)'
-     & /'   CREF     Toggle reference Cp data overlay'
-     & /'   FREF     Toggle reference CL,CD.. data display'
-     &//'   CPx      Plot Cp vs x'
-     & /'   CPV      Plot airfoil with pressure vectors (gee wiz)'
-     & /'  .VPlo     BL variable plots'
-     & /'  .ANNO     Annotate current plot'
-     & /'   HARD     Hardcopy current plot'
-     & /'   SIZE r   Change plot-object size'
-     & /'   CPMI r   Change minimum Cp axis annotation'
-     &//'   BL   i   Plot boundary layer velocity profiles'
-     & /'   BLC      Plot boundary layer velocity profiles at cursor'
-     & /'   BLWT r   Change velocity profile scale weight'
      &//'   FMOM     Calculate flap hinge moment and forces'
      & /'   FNEW rr  Set new flap hinge point'
      & /'   VELS rr  Calculate velocity components at a point'
@@ -182,17 +156,6 @@ C--------------------------------------------------------
      & /'   NAME s   Specify new airfoil name'
      & /'   NINC     Increment name version number')
 c     &//'   IMAG    Toggle image-airfoil'
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'Z   ') THEN
-       CALL USETZOOM(.TRUE.,.TRUE.)
-       CALL REPLOT(IDEV)
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'U   ') THEN
-       CALL CLRZOOM
-       CALL REPLOT(IDEV)
-C
 C--------------------------------------------------------
       ELSEIF(COMAND.EQ.'VISC' .OR.
      &       COMAND.EQ.'V   '      ) THEN
@@ -213,62 +176,6 @@ C
          CALL MRSHOW(.TRUE.,.TRUE.)
        ENDIF
        LVCONV = .FALSE.
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'HARD') THEN
-       IF(LPLOT) CALL PLEND
-       LPLOT = .FALSE.
-       CALL REPLOT(IDEVRP)
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'SIZE') THEN
-       IF(NINPUT.GE.1) THEN
-        SIZE = RINPUT(1)
-       ELSE
-        WRITE(*,*) 'Current plot-object size =', SIZE
-        CALL ASKR('Enter new plot-object size^',SIZE)
-       ENDIF
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'CPMI') THEN
-       IF(NINPUT.GE.1) THEN
-        CPMIN = RINPUT(1)
-       ELSE
-        WRITE(*,*) 'Current CPmin =', CPMIN
-        CALL ASKR('Enter new CPmin^',CPMIN)
-       ENDIF
-C
-       PFAC = PLOTAR/(CPMAX-CPMIN)
-       CPDEL = -0.5
-       IF(CPMIN .LT. -4.01) CPDEL = -1.0
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'UEMA') THEN
-       IF(NINPUT.GE.1) THEN
-        UEMAX = RINPUT(1)
-       ELSE
-        WRITE(*,*) 'Current UEmax =', UEMAX
-        CALL ASKR('Enter new UEMAX^',UEMAX)
-       ENDIF
-C
-       UFAC = PLOTAR/(UEMAX-UEMIN)
-       UEDEL = 0.2
-       IF((UEMAX-UEMIN) .GT. 2.51) UEDEL = 0.5
-       IF((UEMAX-UEMIN) .GT. 5.01) UEDEL = 1.0
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'UEMI') THEN
-       IF(NINPUT.GE.1) THEN
-        UEMIN = RINPUT(1)
-       ELSE
-        WRITE(*,*) 'Current UEmin =', UEMIN
-        CALL ASKR('Enter new UEMIN^',UEMIN)
-       ENDIF
-C
-       UFAC = PLOTAR/(UEMAX-UEMIN)
-       UEDEL = 0.2
-       IF((UEMAX-UEMIN) .GT. 2.51) UEDEL = 0.5
-       IF((UEMAX-UEMIN) .GT. 5.01) UEDEL = 1.0
 C
 C--------------------------------------------------------
       ELSEIF(COMAND.EQ.'VPAR') THEN
@@ -433,7 +340,6 @@ C------- set inviscid solution only if point is not being recalculated
        ENDIF
 C
        IF(LVISC) CALL VISCAL(ITMAX)
-       CALL CPX
        CALL FCPMIN
 C
 ccc    IF( LVISC .AND. LPACC .AND. LVCONV ) THEN
@@ -446,27 +352,6 @@ C
         WRITE(*,*) 'Type "!" to continue iterating'
        ENDIF
 C
-C      WRITE(*,*) 'N NW =', N, NW
-C      call aski('Enter i^',ioff)
-C      call askr('Enter dmass^',dms)
-Cc
-C      do 43 is=1, 2
-C        do 430 ibl=2, nbl(is)
-C          i = ipan(ibl,is)
-C          mass(ibl,is) = 0.
-C          if(i.eq.ioff) mass(ibl,is) = dms
-C  430   continue
-C   43 continue
-Cc
-C      call ueset
-C      call qvfue
-C      call gamqv
-C      call cpcalc(N+NW,QVIS,QINF,MINF,CPV)
-C      call cdcalc
-c      CALL CLCALC(N,X,Y,GAM,GAM_A,ALFA,MINF,QINF,XCMREF,YCMREF,
-c     &            CL,CM,CDP, CL_ALF,CL_MSQ)
-C      call cpx
-Cc
 C
        COMOLD = COMAND
        ARGOLD = COMARG
@@ -490,7 +375,6 @@ C--------------------------------------------------------
        ENDIF
 C
        IF(LVISC) CALL VISCAL(ITMAX)
-       CALL CPX
        CALL FCPMIN
 C
 ccc    IF( LVISC .AND. LPACC .AND. LVCONV ) THEN
@@ -527,7 +411,6 @@ C--------------------------------------------------------
        IF(LVISC) CALL VISCAL(ITMAX)
        CALL FCPMIN
 C
-       CALL CPX
 ccc    IF( LVISC .AND. LPACC .AND. LVCONV ) THEN
        IF( LPACC .AND. (LVCONV .OR. .NOT.LVISC)) THEN
         CALL PLRADD(LUPLR,IPACT)
@@ -611,50 +494,7 @@ C
          IF(DCL .NE. 0.0) NPOINT = INT((CL2-CL1)/DCL + 0.5) + 1
        ENDIF
 C
-C- - - - - - - - - - - - - - - - - - 
-C
-C----- initialize plot
-       CALL PLTINI
-C
-       IF(LPPSHO) THEN
-C------ set up for polar plot
-C
-       ELSE
-C------ set up for Cp(x) plot
-C
-C------ Cp scaling factor
-        PFAC = PLOTAR/(CPMAX-CPMIN)
-C
-C------ determine airfoil box size and location
-        CALL AIRLIM(N,X,Y,XMIN,XMAX,YMIN,YMAX)
-C
-C------ y-offset for airfoil in  Cp vs x  plot
-        FACA = FACAIR/(XMAX-XMIN)
-        XOFA = XOFAIR*(XMAX-XMIN) - XMIN
-        YOFA = YOFAIR*(XMAX-XMIN) - YMAX - CPMAX*PFAC/FACA
-C
-C------ re-origin for  Cp vs x  plot
-        CALL PLOT(0.09 , 0.04 + CPMAX*PFAC + (YMAX-YMIN)*FACA, -3)
-C
-C------ draw axes and airfoil picture for Cp vs x plot
-        CALL CPAXES(LCPGRD,
-     &              N,X,Y,XOFA,YOFA,FACA,
-     &              CPMIN,CPMAX,CPDEL,PFAC,CH,
-     &              'XFOIL',VERSION)
-C
-C------ set initial x,y-positions of sequence plot label top
-        XL = 0.65
-        IF(LVISC) XL = 0.48
-        YL = -CPMIN*PFAC
-C
-C------ draw sequence plot label
-        CALL SEQLAB(XL,YL,XL1,XL2,XL3,XL4,XL5,XL6,CHSEQ,1,LVISC)
-C
-        CALL PLFLUSH
-C
-C------ set label y position
-        YL = YL - 0.2*CH
-       ENDIF
+C- - - - - - - - - - - - - - - - - -
 C
 C----- initialize unconverged-point counter
        ISEQEX = 0
@@ -689,49 +529,6 @@ ccc      IF( LVISC .AND. LPACC .AND. LVCONV ) THEN
           CALL PLRADD(LUPLR,IPACT)
           CALL PLXADD(LUPLX,IPACT)
          ENDIF
-C
-         IF(LPPSHO) THEN
-          CALL PLTINI
-ccc          CALL PLOTABS(0.5,0.5,-3)
-          PSIZE = 1.0*SIZE
-          CALL NEWFACTOR(PSIZE)
-          CALL PLOT(5.0*CH,7.0*CH,-3)
-C
-          CH1 = CH*0.90
-          CH2 = CH*0.75
-          CLEXP = 1.0
-C
-          DO IP=1, NPOL
-           NBLP(IP) = 1
-          ENDDO
-C
-          CALL POLPLT(NAX,NPOL,NAPOL,CPOL,
-     &            REYNP1,MACHP1,ACRITP,PTRATP,ETAPP,
-     &            NAMEPOL,ICOLP,ILINP,
-     &            NFX,NPOLREF,NDREF,CPOLREF,NAMEREF,ICOLR,ISYMR,
-     &            ISX,NBLP,CPOLSD ,IMATYP,IRETYP,
-     &            ' ','XFOIL',VERSION,
-     &            PLOTAR,XCDWID,XALWID,XOCWID,CH1,CH2,CLEXP,
-     &            LPGRID,LPCDW,LPLIST,LPLEGN,LAECEN,LPCDH,LPCMDOT,
-     &            CPOLPLF,' ',0)
-         ELSE
-C-------- add alpha, CL, etc. to plot
-          CALL SEQPLT(YL,XL1,XL2,XL3,XL4,XL5,XL6,CHSEQ,ADEG,CL,CM,LVISC)
-C
-C-------- add sonic Cp dashed line if within plot
-          IF(CPSTAR.GE.CPMIN) CALL DASH(0.0,XL-CH,-CPSTAR*PFAC)
-C
-          CALL NEWPEN(2)
-          IF(LVISC) THEN
-C--------- Plot viscous -Cp distribution on airfoil
-           CALL XYLINE(N+NW,X,CPV,-XOFA,FACA,0.0,-PFAC,1)
-          ELSE
-C--------- Plot inviscid -Cp distribution on airfoil
-           CALL XYLINE(N,X,CPI,-XOFA,FACA,0.0,-PFAC,1)
-          ENDIF
-         ENDIF
-C
-         CALL PLFLUSH
 c###
 ccc    call dcpout
 C
@@ -758,15 +555,6 @@ ccc      CALL ASKC('hit <cr>^',DUMMY,COMARG)
 C
        COMOLD = COMAND
        ARGOLD = COMARG
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'SEQP') THEN
-       LPPSHO = .NOT.LPPSHO
-       IF(LPPSHO) THEN
-        WRITE(*,*) 'Polar will be plotted during point sequence'
-       ELSE
-        WRITE(*,*) 'Cp(x) will be plotted during point sequence'
-       ENDIF
 C
 C--------------------------------------------------------
       ELSEIF(COMAND.EQ.'PACC' .OR.
@@ -1178,77 +966,6 @@ C------- sort polar(s)
         ENDIF
 C
 C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'PPLO' .OR.
-     &       COMAND.EQ.'PP  '      ) THEN
-C------ set temporary polar-size array to plot only selected polars
-        IF(NINPUT.EQ.0) THEN
-C------- no polars specified... plot all of them
-         DO IP=1, NPOL
-           NAPOLT(IP) = NAPOL(IP)
-         ENDDO
-        ELSE
-C------- set up to plot only specified polars
-         DO IP=1, NPOL
-           NAPOLT(IP) = 0
-         ENDDO
-         DO K=1, NINPUT
-           IP = IINPUT(K)
-           IF(IP.GE.1 .AND. IP.LE.NPOL) NAPOLT(IP) = NAPOL(IP)
-         ENDDO
-        ENDIF
-C
-        CALL PLTINI
-ccc        CALL PLOTABS(0.5,0.5,-3)
-        PSIZE = 1.0*SIZE
-        CALL NEWFACTOR(PSIZE)
-        CALL PLOT(5.0*CH,7.0*CH,-3)
-C
-        CH1 = CH*0.90
-        CH2 = CH*0.75
-        CLEXP = 1.0
-        DO IP=1, NPOL
-          NBLP(IP) = 1
-        ENDDO
-C
-        CALL POLPLT(NAX,NPOL,NAPOLT,CPOL,
-     &          REYNP1,MACHP1,ACRITP,PTRATP,ETAPP,
-     &          NAMEPOL,ICOLP,ILINP,
-     &          NFX,NPOLREF,NDREF,CPOLREF,NAMEREF,ICOLR,ISYMR,
-     &          ISX,NBLP,CPOLSD ,IMATYP,IRETYP,
-     &          ' ','XFOIL',VERSION,
-     &          PLOTAR,XCDWID,XALWID,XOCWID,CH1,CH2,CLEXP,
-     &          LPGRID,LPCDW,LPLIST,LPLEGN,LAECEN,LPCDH,LPCMDOT,
-     &          CPOLPLF,' ',0)
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'APLO' .OR.
-     &       COMAND.EQ.'AP  '      ) THEN
-        IF(NPOL.EQ.0) THEN
-         WRITE(*,*)
-         WRITE(*,*) 'No polars are stored'
-         GO TO 500
-        ENDIF
-C
-        IF(NINPUT.EQ.0) THEN
-         NPPAI = NPOL
-         DO K=1, NPPAI
-           IPPAI(K) = K
-         ENDDO
-        ELSE
-         NPPAI = MIN( NINPUT , NPX )
-         DO K=1, NPPAI
-           IINP = IINPUT(K)
-           IF(IINP.GE.1 .AND. IINP.LE.NPOL) THEN
-            IPPAI(K) = IINP
-           ELSE
-            IPPAI(K) = 0
-           ENDIF
-         ENDDO
-        ENDIF
-C
-        CALL PPAPLT(NPPAI,IPPAI)
-C
-C--------------------------------------------------------
       ELSEIF(COMAND.EQ.'ASET') THEN
        IF(NPOL.EQ.0) THEN
         WRITE(*,*)
@@ -1447,64 +1164,6 @@ C
        CALL STRIP(NAMEPOL(IP),NNP)
 C
 C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'PPAX') THEN
-        CALL POLAXI(CPOLPLF,XCDWID,XALWI,XOCWID)
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'CREF') THEN
-       LCPREF = .NOT. LCPREF
-       IF(LCPREF) THEN
-        WRITE(*,*) 'Reference Cp plotting enabled'
-       ELSE
-        WRITE(*,*) 'Reference Cp plotting disabled'
-       ENDIF
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'FREF') THEN
-       LFOREF = .NOT. LFOREF
-       IF(LFOREF) THEN
-        WRITE(*,*) 'Reference force plotting enabled'
-       ELSE
-        WRITE(*,*) 'Reference force plotting disabled'
-       ENDIF
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'CPX ' .OR.
-     &       COMAND.EQ.'CP  '      ) THEN
-       CALL CPX
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'UEX ' .OR.
-     &       COMAND.EQ.'UE  '      ) THEN
-       CALL UEX
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'GRID') THEN
-       LCPGRD = .NOT.LCPGRD
-       IF(LCPGRD) THEN
-        WRITE(*,*) 'Cp grid overlay enabled'
-       ELSE
-        WRITE(*,*) 'Cp grid overlay disabled'
-       ENDIF
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'CPIO') THEN
-       LCPINV = .NOT.LCPINV
-       IF(LCPINV) THEN
-        WRITE(*,*) 'Inviscid Cp overlay enabled'
-       ELSE
-        WRITE(*,*) 'Inviscid Cp overlay disabled'
-       ENDIF
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'CPV ') THEN
-       CALL CPVEC
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'CPVI') THEN
-       CALL CPVECI
-C
-C--------------------------------------------------------
       ELSEIF(COMAND.EQ.'BL  ') THEN
        IF(.NOT.LVCONV) THEN
         WRITE(*,*) 'Compute valid viscous solution first'
@@ -1528,90 +1187,6 @@ C------ set NPR points along surface, offset slightly for the locating logic
           YPR(IPR) = SEVAL(SPR,Y,YP,S,N) - DOFF*DEVAL(SPR,X,XP,S,N)
         ENDDO
        ENDIF
-C
-       CALL CPX
-       CALL DPLOT(NPR,XPR,YPR)
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'BLC ') THEN
-       IF(.NOT.LVCONV) THEN
-        WRITE(*,*) 'Compute valid viscous solution first'
-        GO TO 500
-       ENDIF
-C
-       NPR = 0
-       CALL CPX
-       CALL DPLOT(NPR,XPR,YPR)
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'BLF ') THEN
-C
-       NPR = 2
-       DO IPR = 1, NPR
-C
-c       WRITE(*,'(1X,A,$)') 'Enter  x/c_BL, delta : '
-c       READ(*,1000) LINE
-c       NINP = 2
-c       CALL GETFLT(LINE,RINPUT,NINP,ERROR)
-c       IF(ERROR .OR. NINP.EQ.0) THEN
-c        GO TO 500
-c       ELSE
-c        SGN = SIGN(1.0,RINPUT(1))
-c        XOC = ABS(RINPUT(1))
-c        DPR = RINPUT(2)
-c       ENDIF
-
-        if    (ipr.eq.1) then
-         xoc = 0.4
-         sgn = 1.0
-        elseif(ipr.eq.2) then
-         xoc = 0.4
-         sgn = -1.0
-        endif
-
-        if(ninput .gt. 0) then
-         dpr = rinput(1)
-        else
-         dpr = 0.01
-        endif
-
-C       
-       IF(SGN .GT. 0.0) THEN
-        SPR = SLE + (S(1)-SLE)*XOC
-       ELSE
-        SPR = SLE + (S(N)-SLE)*XOC
-       ENDIF
-C
-       XPRI = XLE + (XTE-XLE)*XOC
-       CALL SINVRT(SPR,XPRI,X,XP,S,N)
-C
-       DOFF = 0.00001*(S(N)-S(1))
-       XPR(IPR) = SEVAL(SPR,X,XP,S,N) + DOFF*DEVAL(SPR,Y,YP,S,N)
-       YPR(IPR) = SEVAL(SPR,Y,YP,S,N) - DOFF*DEVAL(SPR,X,XP,S,N)
-C
-       CALL FBLGET(XPR(IPR),YPR(IPR), DPR,FPR(IPR) )
-C
-       enddo
-
-       WRITE(*,*)
-       DO IPR = 1, NPR
-         WRITE(*,7720) 'xBL, Fint =', XPR(IPR), FPR(IPR)*1.0E4
-       ENDDO
- 7720  FORMAT(1X,A,F7.3,F12.6)
-
-ccc       GO TO 770
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'BLWT') THEN
-       IF(NINPUT.GE.1) THEN
-        UPRWT = RINPUT(1)
-       ELSE
-        WRITE(*,7730) UPRWT
- 7730   FORMAT(/1X,'Current u/Qinf profile plot weight =', G12.4)
-        CALL ASKR('Enter new plot weight^',UPRWT)
-       ENDIF
-C
-       CALL CPX
 C
 C--------------------------------------------------------
       ELSEIF(COMAND.EQ.'FMOM') THEN
@@ -1707,19 +1282,6 @@ C--------------------------------------------------------
        ELSE 
         WRITE(*,*) 'Hinge moment won''t be written to polar save file'
        ENDIF
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'ANNO') THEN
-       IF(LPLOT) THEN
-        CALL ANNOT(CH)
-       ELSE
-        WRITE(*,*) 'No active plot to annotate'
-       ENDIF
-C
-C--------------------------------------------------------
-      ELSEIF(COMAND.EQ.'VPLO' .OR.
-     &       COMAND.EQ.'VP  '      ) THEN
-       CALL BLPLOT
 C
 C--------------------------------------------------------
       ELSEIF(COMAND.EQ.'NAME') THEN

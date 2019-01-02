@@ -70,7 +70,6 @@ C
      &  /'          Repaneling with PANE and/or PPAR suggested'
      &  /'           (doing GDES,CADD before repaneling _may_'
      &  /'            improve excessively coarse LE spacing' )
-         CALL PANPLT
         ENDIF
        ENDIF
       ENDIF
@@ -81,7 +80,6 @@ C
      & //'  .OPER    Direct operating point(s)'
      &  /'  .MDES    Complex mapping design routine'
      &  /'  .QDES    Surface speed design routine'
-     &  /'  .GDES    Geometry design routine'
      & //'   SAVE f  Write airfoil to labeled coordinate file'
      &  /'   PSAV f  Write airfoil to plain coordinate file'
      &  /'   ISAV f  Write airfoil to ISES coordinate file'
@@ -100,13 +98,10 @@ C
      &  /'   PANE    Set current-airfoil panel nodes (',I4,' )',
      &                ' based on curvature'
      &  /'  .PPAR    Show/change paneling'
-     & //'  .PLOP    Plotting options'
      & //'   WDEF f  Write  current-settings file'
      &  /'   RDEF f  Reread current-settings file'
      &  /'   NAME s  Specify new airfoil name'
-     &  /'   NINC    Increment name version number'
-     & //'   Z       Zoom    | (available in all menus)'
-     &  /'   U       Unzoom  | ')
+     &  /'   NINC    Increment name version number')
 C
 C---- start of menu loop
   500 CONTINUE
@@ -133,7 +128,6 @@ C
 C===============================================
       ELSEIF(COMAND.EQ.'QUIT' .OR.
      &       COMAND.EQ.'Q   '      ) THEN
-       CALL PLCLOSE
        STOP
 C
 C===============================================
@@ -147,10 +141,6 @@ C
 C===============================================
       ELSEIF(COMAND.EQ.'QDES') THEN
        CALL QDES
-C
-C===============================================
-      ELSEIF(COMAND.EQ.'GDES') THEN
-       CALL GDES
 C
 C===============================================
       ELSEIF(COMAND.EQ.'SAVE') THEN
@@ -213,7 +203,6 @@ C
         CALL CANG(X,Y,N,0, IMAX,AMAX)
         IF(ABS(AMAX).GT.ANGTOL) THEN
          WRITE(*,1081) AMAX, IMAX
-         CALL PANPLT
         ENDIF
        ENDIF
 C
@@ -287,23 +276,14 @@ C
 C===============================================
       ELSEIF(COMAND.EQ.'PCOP') THEN
        CALL ABCOPY(.TRUE.)
-ccc       CALL PANPLT
 C
 C===============================================
       ELSEIF(COMAND.EQ.'PANE') THEN
        CALL PANGEN(.TRUE.)
-ccc       CALL PANPLT
 C
 C===============================================
       ELSEIF(COMAND.EQ.'PPAR') THEN
        CALL GETPAN
-C
-C===============================================
-      ELSEIF(COMAND.EQ.'PLOP') THEN
-       CALL OPLSET(IDEV,IDEVRP,IPSLU,
-     &             SIZE,PLOTAR,
-     &             XMARG,YMARG,XPAGE,YPAGE,
-     &             CH,SCRNFR,LCURS,LLAND,ICOLS)
 C
 C===============================================
       ELSEIF(COMAND.EQ.'WDEF') THEN
@@ -353,20 +333,6 @@ C===============================================
       ELSEIF(COMAND.EQ.'NINC') THEN
        CALL NAMMOD(NAME,1,1)
        CALL STRIP(NAME,NNAME)
-C
-C===============================================
-      ELSEIF(COMAND.EQ.'Z   ') THEN
-       IF(LPLOT) THEN
-        CALL USETZOOM(.TRUE.,.TRUE.)
-        CALL REPLOT(IDEV)
-       ENDIF
-C
-C===============================================
-      ELSEIF(COMAND.EQ.'U   ') THEN
-       IF(LPLOT) THEN
-        CALL CLRZOOM
-        CALL REPLOT(IDEV)
-       ENDIF
 C
 C===============================================
       ELSE
@@ -589,69 +555,6 @@ C
 C---- u/Qinf scale factor for profile plotting
       UPRWT = 0.02
 C
-C---- polar plot options, grid, list, legend, no CDW
-      LPGRID = .TRUE.
-      LPCDW  = .FALSE.
-      LPLIST = .TRUE.
-      LPLEGN = .TRUE.
-      LAECEN = .FALSE.
-      LPCDH   = .FALSE.
-      LPCMDOT = .FALSE.
-C
-C---- axis limits and annotation deltas for polar plot
-      CPOLPLF(1,ICD) = 0.0
-      CPOLPLF(2,ICD) = 0.04
-      CPOLPLF(3,ICD) = 0.01
-C        
-      CPOLPLF(1,ICL) = 0.
-      CPOLPLF(2,ICL) = 1.5
-      CPOLPLF(3,ICL) = 0.5
-C        
-      CPOLPLF(1,ICM) = -0.25
-      CPOLPLF(2,ICM) =  0.0
-      CPOLPLF(3,ICM) =  0.05
-C        
-      CPOLPLF(1,IAL) = -4.0
-      CPOLPLF(2,IAL) = 10.0
-      CPOLPLF(3,IAL) =  2.0
-C
-C---- widths of plot boxes in polar plot page
-      XCDWID = 0.45
-      XALWID = 0.25
-      XOCWID = 0.20
-C
-C---- line style and color index for each polar
-C
-C     1  *****************************  SOLID
-C     2  **** **** **** **** **** ****  LONG DASHED
-C     3  ** ** ** ** ** ** ** ** ** **  SHORT DASHED
-C     4  * * * * * * * * * * * * * * *  DOTTED
-C     5  ***** * ***** * ***** * *****  DASH-DOT
-C     6  ***** * * ***** * * ***** * *  DASH-DOT-DOT
-C     7  ***** * * * ***** * * * *****  DASH-DOT-DOT-DOT
-C     8  **** **** * * **** **** * *    DASH-DASH-DOT-DOT
-C
-C     3  red
-C     4  orange
-C     5  yellow
-C     6  green
-C     7  cyan
-C     8  blue
-C     9  violet
-C    10  magenta
-C
-      DO IP=1, NPX
-cc        ILINP(IP) = 1 + MOD(IP-1,8)
-cc        ICOLP(IP) = 3 + MOD(IP-1,8)
-C
-C------ normally solid, going to dashed after IP=7
-        ILINP(IP) = 1 + (IP-1)/7
-C
-C------ skip yellow (hard to see on white background)
-        ICOLP(IP) = 3 + MOD(IP-1,7)
-        IF(ICOLP(IP) .GE. 5) ICOLP(IP) = ICOLP(IP) + 1
-      ENDDO
-C
 C---- polar variables to be written to polar save file
       IPOL(1) = IAL
       IPOL(2) = ICL
@@ -708,60 +611,6 @@ C---- default overlay airfoil filename
 C
 C---- default filename prefix
       PREFIX = ' '
-C
-C---- Plotting flag
-      IDEV = 1   ! X11 window only
-c     IDEV = 2                  ! B&W PostScript output file only (no color)
-c     IDEV = 3   ! both X11 and B&W PostScript file
-c     IDEV = 4   ! Color PostScript output file only 
-c     IDEV = 5   ! both X11 and Color PostScript file 
-C
-C---- Re-plotting flag (for hardcopy)
-c     IDEVRP = 2   ! B&W PostScript
-      IDEVRP = 4   ! Color PostScript
-C
-C---- PostScript output logical unit and file specification
-      IPSLU = 0  ! output to file  plot.ps   on LU 4    (default case)
-c     IPSLU = ?  ! output to file  plot?.ps  on LU 10+?
-C
-C---- screen fraction taken up by plot window upon opening
-      SCRNFR = 0.80
-C
-C---- Default plot size in inches
-C-    (Default plot window is 11.0 x 8.5)
-C-   (Must be smaller than XPAGE if objects are to fit on paper page)
-      SIZE = 10.0
-
-C---- plot-window dimensions in inches for plot blowup calculations
-C-    currently,  11.0 x 8.5  default window is hard-wired in libPlt
-      XPAGE = 11.0
-      YPAGE = 8.5
-C
-C---- page margins in inches
-      XMARG = 0.0
-      YMARG = 0.0
-C
-C---- set top and bottom-side colors
-cc      ICOLS(1) = 5
-cc      ICOLS(2) = 7
-      ICOLS(1) = 8
-      ICOLS(2) = 3
-C
-C   3  red
-C   4  orange
-C   5  yellow
-C   6  green
-C   7  cyan
-C   8  blue
-C   9  violet
-C  10  magenta
-C
-C
-      CALL PLINITIALIZE
-C
-C---- set up color spectrum
-      NCOLOR = 64
-      CALL COLORSPECTRUMHUES(NCOLOR,'RYGCBM')
 C
 C
       NNAME  = 32
@@ -1614,7 +1463,6 @@ C
 C
 C---- set paneling
       CALL PANGEN(.TRUE.)
-ccc      CALL PANPLT
 C
       RETURN
       END ! NACA
@@ -2142,11 +1990,6 @@ C
       ENDIF
 C
  5    CONTINUE
-      IF(N.LE.1) THEN
-       WRITE(*,*) 'No current airfoil to plot'
-      ELSE
-       CALL PANPLT
-      ENDIF
       LCHANGE = .FALSE.
 C
    10 WRITE(*,1000) NPAN, CVPAR, CTERAT, CTRRAT,
@@ -2158,31 +2001,9 @@ C
      & /'  T  r   TE/LE panel density ratio  ' , F6.3
      & /'  R  r   Refined area/LE  panel density ratio  ' , F6.3
      & /'  XT rr  Top    side refined area x/c limits   ' , 2F6.3
-     & /'  XB rr  Bottom side refined area x/c limits   ' , 2F6.3
-     & /'  Z oom'
-     & /'  U nzoom'
-     & /'  H ardcopy' )
+     & /'  XB rr  Bottom side refined area x/c limits   ' , 2F6.3)
 C
    12 CALL ASKC('Change what ? (<cr> if nothing else)^',VAR,COMARG)
-C
-      IF(VAR.EQ.'Z   ') THEN
-        CALL USETZOOM(.TRUE.,.TRUE.)
-        CALL REPLOT(IDEV)
-        GO TO 12
-      ENDIF
-C
-      IF(VAR.EQ.'U   ') THEN
-        CALL CLRZOOM
-        CALL REPLOT(IDEV)
-        GO TO 12
-      ENDIF
-C
-      IF(VAR.EQ.'H   ') THEN
-       IF(LPLOT) CALL PLEND
-       LPLOT = .FALSE.
-       CALL REPLOT(IDEVRP)
-       GO TO 12
-      ENDIF
 C
       DO I=1, 20
         IINPUT(I) = 0
@@ -2204,8 +2025,6 @@ C
 C-------- go back to paneling menu
           GO TO 5
         ENDIF
-C
-        CALL CLRZOOM
         RETURN
 C
       ELSE IF(VAR.EQ.'N   ' .OR. VAR.EQ.'n   ') THEN
