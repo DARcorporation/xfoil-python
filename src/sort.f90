@@ -14,13 +14,13 @@ SUBROUTINE HSORT(N, A, INDX)
         INDX(I) = I
     ENDDO
     !
-    IF(N.LE.1) RETURN
+    IF(N <= 1) RETURN
     !
     L = N / 2 + 1
     IR = N
     !
     10   CONTINUE
-    IF(L.GT.1) THEN
+    IF(L > 1) THEN
         L = L - 1
         INDXT = INDX(L)
         Q = A(INDXT)
@@ -30,7 +30,7 @@ SUBROUTINE HSORT(N, A, INDX)
         INDX(IR) = INDX(1)
         !
         IR = IR - 1
-        IF(IR.EQ.1) THEN
+        IF(IR == 1) THEN
             INDX(1) = INDXT
             RETURN
         ENDIF
@@ -39,11 +39,11 @@ SUBROUTINE HSORT(N, A, INDX)
     I = L
     J = L + L
     !
-    20   IF(J.LE.IR) THEN
-        IF(J.LT.IR) THEN
-            IF(A(INDX(J)) .LT. A(INDX(J + 1))) J = J + 1
+    20   IF(J <= IR) THEN
+        IF(J < IR) THEN
+            IF(A(INDX(J)) < A(INDX(J + 1))) J = J + 1
         ENDIF
-        IF(Q .LT. A(INDX(J))) THEN
+        IF(Q < A(INDX(J))) THEN
             INDX(I) = INDX(J)
             !
             I = J
@@ -87,7 +87,7 @@ SUBROUTINE REMD(N, A, INDX, TOL, NNEW)
     INDX(K) = 1
     !
     DO I = 2, N
-        IF(ABS(A(I) - A(I - 1)) .GT. TOL) THEN
+        IF(ABS(A(I) - A(I - 1)) > TOL) THEN
             K = K + 1
             INDX(K) = I
         ENDIF
@@ -110,7 +110,7 @@ SUBROUTINE SORTDUP(KK, S, W)
         DONE = .TRUE.
         DO 101 N = 1, KK - 1
             NP = N + 1
-            IF(S(NP).GE.S(N)) GO TO 101
+            IF(S(NP) >= S(N)) GO TO 101
             TEMP = S(NP)
             S(NP) = S(N)
             S(N) = TEMP
@@ -138,7 +138,7 @@ SUBROUTINE FIXDUP(KK, S, W)
     DONE = .TRUE.
 
     !---- Check first elements for dups
-    IF(S(2).EQ.S(1)) THEN
+    IF(S(2) == S(1)) THEN
         DO N = 1, KK - 1
             S(N) = S(N + 1)
             W(N) = W(N + 1)
@@ -148,7 +148,7 @@ SUBROUTINE FIXDUP(KK, S, W)
     ENDIF
     !
     !---- Check last elements for dups
-    IF(S(KK).EQ.S(KK - 1)) THEN
+    IF(S(KK) == S(KK - 1)) THEN
         S(KK - 1) = S(KK)
         W(KK - 1) = W(KK)
         KK = KK - 1
@@ -158,7 +158,7 @@ SUBROUTINE FIXDUP(KK, S, W)
     !--- Eliminate more than 2 succeeding identical elements
     10   CONTINUE
     DO N = 1, KK - 2
-        IF(S(N).EQ.S(N + 1) .AND. S(N).EQ.S(N + 2)) THEN
+        IF(S(N) == S(N + 1) .AND. S(N) == S(N + 2)) THEN
             DO I = N, KK - 1
                 S(I) = S(I + 1)
                 W(I) = W(I + 1)
@@ -188,7 +188,7 @@ SUBROUTINE SORT(KK, S, W)
         DONE = .TRUE.
         DO 101 N = 1, KK - 1
             NP = N + 1
-            IF(S(NP).GE.S(N)) GO TO 101
+            IF(S(NP) >= S(N)) GO TO 101
             TEMP = S(NP)
             S(NP) = S(N)
             S(N) = TEMP
@@ -204,8 +204,8 @@ SUBROUTINE SORT(KK, S, W)
     !---- search for duplicate pairs and eliminate each one
     11 KKS = KK
     DO 20 K = 1, KKS
-        IF(K.GE.KK) RETURN
-        IF(S(K).NE.S(K + 1)) GO TO 20
+        IF(K >= KK) RETURN
+        IF(S(K) /= S(K + 1)) GO TO 20
         !------- eliminate pair
         KK = KK - 2
         DO 201 KT = K, KK
@@ -227,7 +227,7 @@ SUBROUTINE SORTOL(TOL, KK, S, W)
         DONE = .TRUE.
         DO N = 1, KK - 1
             NP = N + 1
-            IF(S(NP).LT.S(N)) THEN
+            IF(S(NP) < S(N)) THEN
                 TEMP = S(NP)
                 S(NP) = S(N)
                 S(N) = TEMP
@@ -249,9 +249,9 @@ SUBROUTINE SORTOL(TOL, KK, S, W)
     10   KKS = KK
     DONE = .TRUE.
     DO 20 K = 1, KKS
-        IF(K.GE.KK) GO TO 20
+        IF(K >= KK) GO TO 20
         DSQ = (S(K) - S(K + 1))**2 + (W(K) - W(K + 1))**2
-        IF(DSQ.GE.TOL * TOL) GO TO 20
+        IF(DSQ >= TOL * TOL) GO TO 20
         !------- eliminate extra point pairs
         !cc         write(*,*) 'extra on point ',k,kks
         KK = KK - 1

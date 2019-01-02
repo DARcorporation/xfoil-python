@@ -24,15 +24,15 @@ SUBROUTINE SETEXP(S, DS1, SMAX, NN)
     DISC = BBB**2 - 4.0 * AAA * CCC
     DISC = MAX(0.0, DISC)
     !
-    IF(NEX.LE.1) THEN
+    IF(NEX <= 1) THEN
         STOP 'SETEXP: Cannot fill array.  N too small.'
-    ELSE IF(NEX.EQ.2) THEN
+    ELSE IF(NEX == 2) THEN
         RATIO = -CCC / BBB + 1.0
     ELSE
         RATIO = (-BBB + SQRT(DISC)) / (2.0 * AAA) + 1.0
     ENDIF
     !
-    IF(RATIO.EQ.1.0) GO TO 11
+    IF(RATIO == 1.0) GO TO 11
     !
     !---- Newton iteration for actual geometric ratio
     DO 1 ITER = 1, 100
@@ -44,7 +44,7 @@ SUBROUTINE SETEXP(S, DS1, SMAX, NN)
         DRATIO = -RES / DRESDR
         RATIO = RATIO + DRATIO
         !
-        IF(ABS(DRATIO) .LT. 1.0E-5) GO TO 11
+        IF(ABS(DRATIO) < 1.0E-5) GO TO 11
         !
     1 CONTINUE
     WRITE(*, *) 'SETEXP: Convergence failed.  Continuing anyway ...'

@@ -52,17 +52,17 @@ PROGRAM XFOIL
     !---- try to read airfoil from command line argument, if any
     FNAME = ' '
     NARG = IARGC()
-    IF(NARG.GT.0) CALL GETARG(NARG, FNAME)
+    IF(NARG > 0) CALL GETARG(NARG, FNAME)
     !
-    IF(FNAME(1:1) .NE. ' ') THEN
+    IF(FNAME(1:1) /= ' ') THEN
         CALL LOAD(FNAME, ITYPE)
         !
-        IF(ITYPE.GT.0 .AND. NB.GT.0) THEN
+        IF(ITYPE > 0 .AND. NB > 0) THEN
             !cc     CALL PANGEN(.TRUE.)
             CALL ABCOPY(.TRUE.)
             !
             CALL CANG(X, Y, N, 0, IMAX, AMAX)
-            IF(ABS(AMAX).GT.ANGTOL) THEN
+            IF(ABS(AMAX) > ANGTOL) THEN
                 WRITE(*, 1081) AMAX, IMAX
                 1081    FORMAT(&
                         /' WARNING: Poor input coordinate distribution'&
@@ -118,52 +118,52 @@ PROGRAM XFOIL
     CALL GETFLT(COMARG, RINPUT, NINPUT, ERROR)
     !
     !===============================================
-    IF(COMAND.EQ.'    ') THEN
+    IF(COMAND == '    ') THEN
         GO TO 500
         !
         !===============================================
-    ELSEIF(COMAND.EQ.'?   ') THEN
+    ELSEIF(COMAND == '?   ') THEN
         WRITE(*, 1100) XCMREF, YCMREF, NPAN
         !
         !===============================================
-    ELSEIF(COMAND.EQ.'QUIT' .OR.&
-            COMAND.EQ.'Q   ') THEN
+    ELSEIF(COMAND == 'QUIT' .OR.&
+            COMAND == 'Q   ') THEN
         STOP
         !
         !===============================================
-    ELSEIF(COMAND.EQ.'OPER') THEN
+    ELSEIF(COMAND == 'OPER') THEN
         CALL OPER
         !
         !===============================================
-    ELSEIF(COMAND.EQ.'MDES') THEN
+    ELSEIF(COMAND == 'MDES') THEN
         CALL MDES
         !
         !===============================================
-    ELSEIF(COMAND.EQ.'QDES') THEN
+    ELSEIF(COMAND == 'QDES') THEN
         CALL QDES
         !
         !===============================================
-    ELSEIF(COMAND.EQ.'SAVE') THEN
+    ELSEIF(COMAND == 'SAVE') THEN
         CALL SAVE(1, COMARG)
         !
         !===============================================
-    ELSEIF(COMAND.EQ.'PSAV') THEN
+    ELSEIF(COMAND == 'PSAV') THEN
         CALL SAVE(0, COMARG)
         !
         !===============================================
-    ELSEIF(COMAND.EQ.'USAV') THEN
+    ELSEIF(COMAND == 'USAV') THEN
         CALL SAVE(-1, COMARG)
         !
         !===============================================
-    ELSEIF(COMAND.EQ.'ISAV') THEN
+    ELSEIF(COMAND == 'ISAV') THEN
         CALL SAVE(2, COMARG)
         !
         !===============================================
-    ELSEIF(COMAND.EQ.'MSAV') THEN
+    ELSEIF(COMAND == 'MSAV') THEN
         CALL MSAVE(COMARG)
         !
         !===============================================
-    ELSEIF(COMAND.EQ.'REVE') THEN
+    ELSEIF(COMAND == 'REVE') THEN
         LCLOCK = .NOT.LCLOCK
         IF(LCLOCK) THEN
             WRITE(*, *) 'Airfoil will be written in clockwise order'
@@ -172,9 +172,9 @@ PROGRAM XFOIL
         ENDIF
         !
         !===============================================
-    ELSEIF(COMAND.EQ.'DELI') THEN
+    ELSEIF(COMAND == 'DELI') THEN
         40  CONTINUE
-        IF(NINPUT.GE.1) THEN
+        IF(NINPUT >= 1) THEN
             KDNEW = IINPUT(1)
         ELSE
             WRITE(*, 2100) KDELIM
@@ -186,7 +186,7 @@ PROGRAM XFOIL
             CALL ASKI('Enter new delimiter', KDNEW)
         ENDIF
         !
-        IF(KDNEW.LT.0 .OR. KDNEW.GT.2) THEN
+        IF(KDNEW < 0 .OR. KDNEW > 2) THEN
             NINPUT = 0
             GO TO 40
         ELSE
@@ -194,32 +194,32 @@ PROGRAM XFOIL
         ENDIF
         !
         !===============================================
-    ELSEIF(COMAND.EQ.'LOAD') THEN
+    ELSEIF(COMAND == 'LOAD') THEN
         CALL LOAD(COMARG, ITYPE)
-        IF(ITYPE.GT.0 .AND. NB.GT.0) THEN
+        IF(ITYPE > 0 .AND. NB > 0) THEN
             !cc       CALL PANGEN(.TRUE.)
             CALL ABCOPY(.TRUE.)
             !
             CALL CANG(X, Y, N, 0, IMAX, AMAX)
-            IF(ABS(AMAX).GT.ANGTOL) THEN
+            IF(ABS(AMAX) > ANGTOL) THEN
                 WRITE(*, 1081) AMAX, IMAX
             ENDIF
         ENDIF
         !
         !===============================================
-    ELSEIF(COMAND.EQ.'NACA') THEN
+    ELSEIF(COMAND == 'NACA') THEN
         CALL NACA(IINPUT(1))
         !
         !===============================================
-    ELSEIF(COMAND.EQ.'INTE') THEN
+    ELSEIF(COMAND == 'INTE') THEN
         CALL INTE
         !
         !===============================================
-    ELSEIF(COMAND.EQ.'INTX') THEN
+    ELSEIF(COMAND == 'INTX') THEN
         CALL INTX
         !
         !===============================================
-    ELSEIF(COMAND.EQ.'NORM') THEN
+    ELSEIF(COMAND == 'NORM') THEN
         LNORM = .NOT.LNORM
         IF(LNORM) THEN
             WRITE(*, *) 'Loaded airfoil will  be normalized'
@@ -228,7 +228,7 @@ PROGRAM XFOIL
         ENDIF
         !
         !===============================================
-    ELSEIF(COMAND.EQ.'HALF') THEN
+    ELSEIF(COMAND == 'HALF') THEN
         CALL HALF(XB, YB, SB, NB)
         CALL SCALC(XB, YB, SB, NB)
         CALL SEGSPL(XB, XBP, SB, NB)
@@ -241,8 +241,8 @@ PROGRAM XFOIL
                 THICKB, CAMBRB)
         !
         !==========================================
-    ELSEIF(COMAND.EQ.'XYCM') THEN
-        IF(NINPUT.GE.2) THEN
+    ELSEIF(COMAND == 'XYCM') THEN
+        IF(NINPUT >= 2) THEN
             XCMREF = RINPUT(1)
             YCMREF = RINPUT(2)
         ELSE
@@ -251,8 +251,8 @@ PROGRAM XFOIL
         ENDIF
         !
         !===============================================
-    ELSEIF(COMAND.EQ.'BEND') THEN
-        IF(N.EQ.0) THEN
+    ELSEIF(COMAND == 'BEND') THEN
+        IF(N == 0) THEN
             WRITE(*, *)
             WRITE(*, *) '***  No airfoil available  ***'
             GO TO 500
@@ -261,8 +261,8 @@ PROGRAM XFOIL
         CALL BENDUMP(N, X, Y)
         !
         !===============================================
-    ELSEIF(COMAND.EQ.'BENP') THEN
-        IF(N.EQ.0) THEN
+    ELSEIF(COMAND == 'BENP') THEN
+        IF(N == 0) THEN
             WRITE(*, *)
             WRITE(*, *) '***  No airfoil available  ***'
             GO TO 500
@@ -274,21 +274,21 @@ PROGRAM XFOIL
         CALL BENDUMP2(N, X, Y, W1)
         !
         !===============================================
-    ELSEIF(COMAND.EQ.'PCOP') THEN
+    ELSEIF(COMAND == 'PCOP') THEN
         CALL ABCOPY(.TRUE.)
         !
         !===============================================
-    ELSEIF(COMAND.EQ.'PANE') THEN
+    ELSEIF(COMAND == 'PANE') THEN
         CALL PANGEN(.TRUE.)
         !
         !===============================================
-    ELSEIF(COMAND.EQ.'PPAR') THEN
+    ELSEIF(COMAND == 'PPAR') THEN
         CALL GETPAN
         !
         !===============================================
-    ELSEIF(COMAND.EQ.'WDEF') THEN
+    ELSEIF(COMAND == 'WDEF') THEN
         LU = 8
-        IF(COMARG(1:1).EQ.' ') THEN
+        IF(COMARG(1:1) == ' ') THEN
             FNAME = 'xfoil.def'
         ELSE
             FNAME = COMARG
@@ -298,7 +298,7 @@ PROGRAM XFOIL
         WRITE(*, 701) FNAME(1:NFN)
         701   FORMAT(/'  File  ', A, '  exists.  Overwrite?  Y')
         READ(*, 1000) ANS
-        IF(INDEX('Nn', ANS).EQ.0) GO TO 706
+        IF(INDEX('Nn', ANS) == 0) GO TO 706
         WRITE(*, *)
         WRITE(*, *) 'No action taken'
         CLOSE(LU)
@@ -310,8 +310,8 @@ PROGRAM XFOIL
         CLOSE(LU)
         !
         !===============================================
-    ELSEIF(COMAND.EQ.'RDEF') THEN
-        IF(COMARG(1:1).EQ.' ') THEN
+    ELSEIF(COMAND == 'RDEF') THEN
+        IF(COMARG(1:1) == ' ') THEN
             FNAME = 'xfoil.def'
         ELSE
             FNAME = COMARG
@@ -321,8 +321,8 @@ PROGRAM XFOIL
         CALL GETDEF(LU, FNAME, .FALSE.)
         !
         !===============================================
-    ELSEIF(COMAND.EQ.'NAME') THEN
-        IF(COMARG.EQ.' ') THEN
+    ELSEIF(COMAND == 'NAME') THEN
+        IF(COMARG == ' ') THEN
             CALL NAMMOD(NAME, 0, -1)
         ELSE
             NAME = COMARG
@@ -330,7 +330,7 @@ PROGRAM XFOIL
         CALL STRIP(NAME, NNAME)
         !
         !===============================================
-    ELSEIF(COMAND.EQ.'NINC') THEN
+    ELSEIF(COMAND == 'NINC') THEN
         CALL NAMMOD(NAME, 1, 1)
         CALL STRIP(NAME, NNAME)
         !
@@ -643,29 +643,29 @@ SUBROUTINE MRCL(CLS, M_CLS, R_CLS)
     !
     CLA = MAX(CLS, 0.000001)
     !
-    IF(RETYP.LT.1 .OR. RETYP.GT.3) THEN
+    IF(RETYP < 1 .OR. RETYP > 3) THEN
         WRITE(*, *) 'MRCL:  Illegal Re(CL) dependence trigger.'
         WRITE(*, *) '       Setting fixed Re.'
         RETYP = 1
     ENDIF
-    IF(MATYP.LT.1 .OR. MATYP.GT.3) THEN
+    IF(MATYP < 1 .OR. MATYP > 3) THEN
         WRITE(*, *) 'MRCL:  Illegal Mach(CL) dependence trigger.'
         WRITE(*, *) '       Setting fixed Mach.'
         MATYP = 1
     ENDIF
     !
     !
-    IF(MATYP.EQ.1) THEN
+    IF(MATYP == 1) THEN
         !
         MINF = MINF1
         M_CLS = 0.
         !
-    ELSE IF(MATYP.EQ.2) THEN
+    ELSE IF(MATYP == 2) THEN
         !
         MINF = MINF1 / SQRT(CLA)
         M_CLS = -0.5 * MINF / CLA
         !
-    ELSE IF(MATYP.EQ.3) THEN
+    ELSE IF(MATYP == 3) THEN
         !
         MINF = MINF1
         M_CLS = 0.
@@ -673,17 +673,17 @@ SUBROUTINE MRCL(CLS, M_CLS, R_CLS)
     ENDIF
     !
     !
-    IF(RETYP.EQ.1) THEN
+    IF(RETYP == 1) THEN
         !
         REINF = REINF1
         R_CLS = 0.
         !
-    ELSE IF(RETYP.EQ.2) THEN
+    ELSE IF(RETYP == 2) THEN
         !
         REINF = REINF1 / SQRT(CLA)
         R_CLS = -0.5 * REINF / CLA
         !
-    ELSE IF(RETYP.EQ.3) THEN
+    ELSE IF(RETYP == 3) THEN
         !
         REINF = REINF1 / CLA
         R_CLS = -REINF / CLA
@@ -691,7 +691,7 @@ SUBROUTINE MRCL(CLS, M_CLS, R_CLS)
     ENDIF
     !
     !
-    IF(MINF .GE. 0.99) THEN
+    IF(MINF >= 0.99) THEN
         WRITE(*, *)
         WRITE(*, *) 'MRCL: CL too low for chosen Mach(CL) dependence'
         WRITE(*, *) '      Aritificially limiting Mach to  0.99'
@@ -700,9 +700,9 @@ SUBROUTINE MRCL(CLS, M_CLS, R_CLS)
     ENDIF
     !
     RRAT = 1.0
-    IF(REINF1 .GT. 0.0) RRAT = REINF / REINF1
+    IF(REINF1 > 0.0) RRAT = REINF / REINF1
     !
-    IF(RRAT .GT. 100.0) THEN
+    IF(RRAT > 100.0) THEN
         WRITE(*, *)
         WRITE(*, *) 'MRCL: CL too low for chosen Re(CL) dependence'
         WRITE(*, *) '      Aritificially limiting Re to ', REINF1 * 100.0
@@ -734,7 +734,7 @@ SUBROUTINE GETDEF(LU, FILNAM, LASK)
         WRITE(*, 1050) FILNAM
         1050  FORMAT(/'  Read settings from file  ', A, ' ?  Y')
         READ(*, 1000) ANS
-        IF(INDEX('Nn', ANS).NE.0) THEN
+        IF(INDEX('Nn', ANS) /= 0) THEN
             CLOSE(LU)
             RETURN
         ENDIF
@@ -828,7 +828,7 @@ SUBROUTINE WRTDEF(LU)
     INCLUDE 'XFOIL.INC'
     LOGICAL LCOLOR
     !
-    LCOLOR = IDEVRP.EQ.4
+    LCOLOR = IDEVRP == 4
     !
     !---- default paneling parameters (viscous)
     WRITE(LU, 1010) NPAN, CVPAR, CTERAT, CTRRAT
@@ -892,7 +892,7 @@ SUBROUTINE COMSET
             - 2.0 * TKLAM / (1.0 + BETA) * BETA_MSQ
     !
     !---- set sonic Pressure coefficient and speed
-    IF(MINF.EQ.0.0) THEN
+    IF(MINF == 0.0) THEN
         CPSTAR = -999.0
         QSTAR = 999.0
     ELSE
@@ -927,7 +927,7 @@ SUBROUTINE CPCALC(N, Q, QINF, MINF, CP)
         CPINC = 1.0 - (Q(I) / QINF)**2
         DEN = BETA + BFAC * CPINC
         CP(I) = CPINC / DEN
-        IF(DEN .LE. 0.0) DENNEG = .TRUE.
+        IF(DEN <= 0.0) DENNEG = .TRUE.
     20  CONTINUE
     !
     IF(DENNEG) THEN
@@ -985,7 +985,7 @@ SUBROUTINE CLCALC(N, X, Y, GAM, GAM_A, ALFA, MINF, QINF, &
     !
     DO 10 I = 1, N
         IP = I + 1
-        IF(I.EQ.N) IP = 1
+        IF(I == N) IP = 1
         !
         CGINC = 1.0 - (GAM(IP) / QINF)**2
         CPG2 = CGINC / (BETA + BFAC * CGINC)
@@ -1076,18 +1076,18 @@ SUBROUTINE LOAD(FILNAM, ITYPE)
     CHARACTER*(*) FILNAM
     !
     FNAME = FILNAM
-    IF(FNAME(1:1) .EQ. ' ') CALL ASKS('Enter filename^', FNAME)
+    IF(FNAME(1:1) == ' ') CALL ASKS('Enter filename^', FNAME)
     !
     LU = 9
     CALL AREAD(LU, FNAME, IBX, XB, YB, NB, NAME, ISPARS, ITYPE, 1)
-    IF(ITYPE.EQ.0) RETURN
+    IF(ITYPE == 0) RETURN
     !
-    IF(ITYPE.EQ.1) CALL ASKS('Enter airfoil name^', NAME)
+    IF(ITYPE == 1) CALL ASKS('Enter airfoil name^', NAME)
     CALL STRIP(NAME, NNAME)
     !
     !---- set default prefix for other filenames
     KDOT = INDEX(FNAME, '.')
-    IF(KDOT.EQ.0) THEN
+    IF(KDOT == 0) THEN
         PREFIX = FNAME
     ELSE
         PREFIX = FNAME(1:KDOT - 1)
@@ -1098,11 +1098,11 @@ SUBROUTINE LOAD(FILNAM, ITYPE)
     AREA = 0.0
     DO 50 I = 1, NB
         IP = I + 1
-        IF(I.EQ.NB) IP = 1
+        IF(I == NB) IP = 1
         AREA = AREA + 0.5 * (YB(I) + YB(IP)) * (XB(I) - XB(IP))
     50 CONTINUE
     !
-    IF(AREA.GE.0.0) THEN
+    IF(AREA >= 0.0) THEN
         LCLOCK = .FALSE.
         WRITE(*, 1010) NB
     ELSE
@@ -1143,7 +1143,7 @@ SUBROUTINE LOAD(FILNAM, ITYPE)
             XBTE, YBTE
     !
     !---- set reasonable MSES domain parameters for non-MSES coordinate file
-    IF(ITYPE.LE.2 .AND. ISPARS.EQ.' ') THEN
+    IF(ITYPE <= 2 .AND. ISPARS == ' ') THEN
         XBLE = SEVAL(SBLE, XB, XBP, SB, NB)
         YBLE = SEVAL(SBLE, YB, YBP, SB, NB)
         XINL = XBLE - 2.0 * CHORDB
@@ -1191,11 +1191,11 @@ SUBROUTINE SAVE(IFTYP, FNAME1)
     CHARACTER*1 ANS, DELIM
     CHARACTER*128 LINE
     !
-    IF    (KDELIM.EQ.0) THEN
+    IF    (KDELIM == 0) THEN
         DELIM = ' '
-    ELSEIF(KDELIM.EQ.1) THEN
+    ELSEIF(KDELIM == 1) THEN
         DELIM = ','
-    ELSEIF(KDELIM.EQ.2) THEN
+    ELSEIF(KDELIM == 2) THEN
         DELIM = CHAR(9)
     ELSE
         WRITE(*, *) '? Illegal delimiter.  Using blank.'
@@ -1206,7 +1206,7 @@ SUBROUTINE SAVE(IFTYP, FNAME1)
     LU = 2
     !
     !---- get output filename if it was not supplied
-    IF(FNAME1(1:1) .NE. ' ') THEN
+    IF(FNAME1(1:1) /= ' ') THEN
         FNAME = FNAME1
     ELSE
         CALL ASKS('Enter output filename^', FNAME)
@@ -1216,7 +1216,7 @@ SUBROUTINE SAVE(IFTYP, FNAME1)
     WRITE(*, *)
     WRITE(*, *) 'Output file exists.  Overwrite?  Y'
     READ(*, 1000) ANS
-    IF(INDEX('Nn', ANS).EQ.0) GO TO 6
+    IF(INDEX('Nn', ANS) == 0) GO TO 6
     !
     CLOSE(LU)
     WRITE(*, *) 'Current airfoil not saved.'
@@ -1225,15 +1225,15 @@ SUBROUTINE SAVE(IFTYP, FNAME1)
     5    OPEN(LU, FILE = FNAME, STATUS = 'NEW', ERR = 90)
     6    REWIND(LU)
     !
-    IF(IFTYP.GE.1) THEN
+    IF(IFTYP >= 1) THEN
         !----- write name to first line
         WRITE(LU, 1000) NAME(1:NNAME)
     ENDIF
     !
-    IF(IFTYP.GE.2) THEN
+    IF(IFTYP >= 2) THEN
         !----- write MSES domain parameters to second line
         DO K = 80, 1, -1
-            IF(INDEX(ISPARS(K:K), ' ') .NE. 1) GO TO 11
+            IF(INDEX(ISPARS(K:K), ' ') /= 1) GO TO 11
         ENDDO
         11    CONTINUE
         !
@@ -1252,7 +1252,7 @@ SUBROUTINE SAVE(IFTYP, FNAME1)
         INCR = 1
     ENDIF
     !
-    IF(IFTYP.EQ.-1) THEN
+    IF(IFTYP == -1) THEN
         DO I = IBEG, IEND, INCR
             WRITE(LU, 1400) INT(X(I) + SIGN(0.5, X(I))), &
                     INT(Y(I) + SIGN(0.5, Y(I)))
@@ -1260,7 +1260,7 @@ SUBROUTINE SAVE(IFTYP, FNAME1)
         !
     ELSE
         DO I = IBEG, IEND, INCR
-            IF(KDELIM .EQ. 0) THEN
+            IF(KDELIM == 0) THEN
                 WRITE(LU, 1100) X(I), Y(I)
                 !
             ELSE
@@ -1305,7 +1305,7 @@ SUBROUTINE MSAVE(FNAME1)
     LU = 2
     !
     !---- get output filename if it was not supplied
-    IF(FNAME1(1:1) .NE. ' ') THEN
+    IF(FNAME1(1:1) /= ' ') THEN
         FNAME = FNAME1
     ELSE
         CALL ASKS('Enter output filename for element replacement^', FNAME)
@@ -1317,12 +1317,12 @@ SUBROUTINE MSAVE(FNAME1)
     READ(LU, 1000, ERR = 9010) ISPARS1
     !
     DO NN1 = 80, 2, -1
-        IF(NAME1(NN1:NN1) .NE. ' ') GO TO 10
+        IF(NAME1(NN1:NN1) /= ' ') GO TO 10
     ENDDO
     10   CONTINUE
     !
     DO NI1 = 80, 2, -1
-        IF(ISPARS1(NI1:NI1) .NE. ' ') GO TO 20
+        IF(ISPARS1(NI1:NI1) /= ' ') GO TO 20
     ENDDO
     20   CONTINUE
     !
@@ -1330,7 +1330,7 @@ SUBROUTINE MSAVE(FNAME1)
     40 DO 55 IEL = 1, NEX
         DO 50 I = 1, 2 * IQX + 1
             READ(LU, *, END = 56) XTMP(I, IEL), YTMP(I, IEL)
-            IF(XTMP(I, IEL).EQ.999.0) THEN
+            IF(XTMP(I, IEL) == 999.0) THEN
                 NTMP(IEL) = I - 1
                 GO TO 55
             ENDIF
@@ -1339,7 +1339,7 @@ SUBROUTINE MSAVE(FNAME1)
     55 CONTINUE
     NEL = NEX
     !
-    56 IF(I.EQ.1) THEN
+    56 IF(I == 1) THEN
         !----- coordinate file has "999.0 999.0" at the end ...
         NEL = IEL - 1
     ELSE
@@ -1352,11 +1352,11 @@ SUBROUTINE MSAVE(FNAME1)
     WRITE(*, 3010) NEL
     CALL ASKI('Enter element to be replaced by current airfoil^', IEL)
     !
-    IF(IEL.LT.1 .OR. IEL.GT.NEL + 1) THEN
+    IF(IEL < 1 .OR. IEL > NEL + 1) THEN
         WRITE(*, *) 'Element number inappropriate.  Airfoil not written.'
         CLOSE(LU)
         RETURN
-    ELSE IF(IEL.EQ.NEL + 1) THEN
+    ELSE IF(IEL == NEL + 1) THEN
         NEL = NEL + 1
     ENDIF
     !
@@ -1385,7 +1385,7 @@ SUBROUTINE MSAVE(FNAME1)
         DO 805 I = 1, NTMP(IEL)
             WRITE(LU, 1100) XTMP(I, IEL), YTMP(I, IEL)
         805   CONTINUE
-        IF(IEL.LT.NEL) WRITE(LU, *) ' 999.0  999.0'
+        IF(IEL < NEL) WRITE(LU, *) ' 999.0  999.0'
     80 CONTINUE
     !
     CLOSE(LU)
@@ -1432,27 +1432,27 @@ SUBROUTINE NACA(IDES1)
     !---- number of points per side
     NSIDE = IQX / 3
     !
-    IF(IDES1 .LE. 0) THEN
+    IF(IDES1 <= 0) THEN
         CALL ASKI('Enter NACA 4 or 5-digit airfoil designation^', IDES)
     ELSE
         IDES = IDES1
     ENDIF
     !
     ITYPE = 0
-    IF(IDES.LE.25099) ITYPE = 5
-    IF(IDES.LE.9999) ITYPE = 4
+    IF(IDES <= 25099) ITYPE = 5
+    IF(IDES <= 9999) ITYPE = 4
     !
-    IF(ITYPE.EQ.0) THEN
+    IF(ITYPE == 0) THEN
         WRITE(*, *) 'This designation not implemented.'
         RETURN
     ENDIF
     !
-    IF(ITYPE.EQ.4) CALL NACA4(IDES, W1, W2, W3, NSIDE, XB, YB, NB, NAME)
-    IF(ITYPE.EQ.5) CALL NACA5(IDES, W1, W2, W3, NSIDE, XB, YB, NB, NAME)
+    IF(ITYPE == 4) CALL NACA4(IDES, W1, W2, W3, NSIDE, XB, YB, NB, NAME)
+    IF(ITYPE == 5) CALL NACA5(IDES, W1, W2, W3, NSIDE, XB, YB, NB, NAME)
     CALL STRIP(NAME, NNAME)
     !
     !---- see if routines didn't recognize designator
-    IF(IDES.EQ.0) RETURN
+    IF(IDES == 0) RETURN
     !
     LCLOCK = .FALSE.
     !
@@ -1494,7 +1494,7 @@ SUBROUTINE PANGEN(SHOPAR)
     INCLUDE 'XFOIL.INC'
     LOGICAL SHOPAR
     !
-    IF(NB.LT.2) THEN
+    IF(NB < 2) THEN
         WRITE(*, *) 'PANGEN: Buffer airfoil not available.'
         N = 0
         RETURN
@@ -1510,7 +1510,7 @@ SUBROUTINE PANGEN(SHOPAR)
     !
     !C---- number of wake points
     !      NW = NPAN/8 + 2
-    !      IF(NW.GT.IWX) THEN
+    !      IF(NW > IWX) THEN
     !       WRITE(*,*)
     !     &  'Array size (IWX) too small.  Last wake point index reduced.'
     !       NW = IWX
@@ -1538,7 +1538,7 @@ SUBROUTINE PANGEN(SHOPAR)
     !---- check for doubled point (sharp corner) at LE
     IBLE = 0
     DO I = 1, NB - 1
-        IF(SBLE.EQ.SB(I) .AND. SBLE.EQ.SB(I + 1)) THEN
+        IF(SBLE == SB(I) .AND. SBLE == SB(I + 1)) THEN
             IBLE = I
             WRITE(*, *)
             WRITE(*, *) 'Sharp leading edge'
@@ -1566,7 +1566,7 @@ SUBROUTINE PANGEN(SHOPAR)
     CVAVG = CVSUM / FLOAT(2 * NK + 1)
     !
     !---- dummy curvature for sharp LE
-    IF(IBLE.NE.0) CVAVG = 10.0
+    IF(IBLE /= 0) CVAVG = 10.0
     !
     !---- set curvature attraction coefficient actually used
     CC = 6.0 * CVPAR
@@ -1596,7 +1596,7 @@ SUBROUTINE PANGEN(SHOPAR)
         DSP = SB(I + 1) - SB(I)
         DSO = 0.5 * (SB(I + 1) - SB(I - 1))
         !
-        IF(DSM.EQ.0.0 .OR. DSP.EQ.0.0) THEN
+        IF(DSM == 0.0 .OR. DSP == 0.0) THEN
             !------- leave curvature at corner point unchanged
             W1(I) = 0.0
             W2(I) = 1.0
@@ -1613,13 +1613,13 @@ SUBROUTINE PANGEN(SHOPAR)
     !
     !---- fix curvature at LE point by modifying equations adjacent to LE
     DO I = 2, NB - 1
-        IF(SB(I).EQ.SBLE .OR. I.EQ.IBLE .OR. I.EQ.IBLE + 1) THEN
+        IF(SB(I) == SBLE .OR. I == IBLE .OR. I == IBLE + 1) THEN
             !------- if node falls right on LE point, fix curvature there
             W1(I) = 0.
             W2(I) = 1.0
             W3(I) = 0.
             W5(I) = CVLE
-        ELSE IF(SB(I - 1).LT.SBLE .AND. SB(I).GT.SBLE) THEN
+        ELSE IF(SB(I - 1) < SBLE .AND. SB(I) > SBLE) THEN
             !------- modify equation at node just before LE point
             DSM = SB(I - 1) - SB(I - 2)
             DSP = SBLE - SB(I - 1)
@@ -1650,9 +1650,9 @@ SUBROUTINE PANGEN(SHOPAR)
         XOC = ((XB(I) - XBLE) * (XBTE - XBLE)&
                 + (YB(I) - YBLE) * (YBTE - YBLE)) / CHBSQ
         !
-        IF(SB(I).LT.SBLE) THEN
+        IF(SB(I) < SBLE) THEN
             !------- check if top side point is in refinement area
-            IF(XOC.GT.XSREF1 .AND. XOC.LT.XSREF2) THEN
+            IF(XOC > XSREF1 .AND. XOC < XSREF2) THEN
                 W1(I) = 0.
                 W2(I) = 1.0
                 W3(I) = 0.
@@ -1660,7 +1660,7 @@ SUBROUTINE PANGEN(SHOPAR)
             ENDIF
         ELSE
             !------- check if bottom side point is in refinement area
-            IF(XOC.GT.XPREF1 .AND. XOC.LT.XPREF2) THEN
+            IF(XOC > XPREF1 .AND. XOC < XPREF2) THEN
                 W1(I) = 0.
                 W2(I) = 1.0
                 W3(I) = 0.
@@ -1670,7 +1670,7 @@ SUBROUTINE PANGEN(SHOPAR)
     ENDDO
     !
     !---- solve for smoothed curvature array W5
-    IF(IBLE.EQ.0) THEN
+    IF(IBLE == 0) THEN
         CALL TRISOL(W2, W1, W3, W5, NB)
     ELSE
         I = 1
@@ -1702,7 +1702,7 @@ SUBROUTINE PANGEN(SHOPAR)
     RDSTE = 0.667
     RTF = (RDSTE - 1.0) * 2.0 + 1.0
     !
-    IF(IBLE.EQ.0) THEN
+    IF(IBLE == 0) THEN
         !
         DSAVG = (SB(NB) - SB(1)) / (FLOAT(NN - 3) + 2.0 * RTF)
         SNEW(1) = SB(1)
@@ -1741,7 +1741,7 @@ SUBROUTINE PANGEN(SHOPAR)
         CVS2 = DEVAL(SNEW(2), W5, W6, SB, NB)
         !
         CAVM = SQRT(CV1**2 + CV2**2)
-        IF(CAVM .EQ. 0.0) THEN
+        IF(CAVM == 0.0) THEN
             CAVM_S1 = 0.
             CAVM_S2 = 0.
         ELSE
@@ -1756,7 +1756,7 @@ SUBROUTINE PANGEN(SHOPAR)
             CVS3 = DEVAL(SNEW(I + 1), W5, W6, SB, NB)
             !
             CAVP = SQRT(CV3**2 + CV2**2)
-            IF(CAVP .EQ. 0.0) THEN
+            IF(CAVP == 0.0) THEN
                 CAVP_S2 = 0.
                 CAVP_S3 = 0.
             ELSE
@@ -1795,7 +1795,7 @@ SUBROUTINE PANGEN(SHOPAR)
         W2(NN) = 1.0
         W4(NN) = 0.0
         !
-        IF(RTF .NE. 1.0) THEN
+        IF(RTF /= 1.0) THEN
             !------- fudge equations adjacent to TE to get TE panel length ratio RTF
             !
             I = 2
@@ -1813,7 +1813,7 @@ SUBROUTINE PANGEN(SHOPAR)
         !
         !
         !------ fix sharp LE point
-        IF(IBLE.NE.0) THEN
+        IF(IBLE /= 0) THEN
             I = NN1
             W1(I) = 0.0
             W2(I) = 1.0
@@ -1831,8 +1831,8 @@ SUBROUTINE PANGEN(SHOPAR)
             DS = SNEW(I + 1) - SNEW(I)
             DDS = W4(I + 1) - W4(I)
             DSRAT = 1.0 + RLX * DDS / DS
-            IF(DSRAT.GT.4.0) RLX = (4.0 - 1.0) * DS / DDS
-            IF(DSRAT.LT.0.2) RLX = (0.2 - 1.0) * DS / DDS
+            IF(DSRAT > 4.0) RLX = (4.0 - 1.0) * DS / DDS
+            IF(DSRAT < 0.2) RLX = (0.2 - 1.0) * DS / DDS
             DMAX = MAX(ABS(W4(I)), DMAX)
         ENDDO
         !
@@ -1841,9 +1841,9 @@ SUBROUTINE PANGEN(SHOPAR)
             SNEW(I) = SNEW(I) + RLX * W4(I)
         ENDDO
         !
-        !CC        IF(RLX.EQ.1.0) WRITE(*,*) DMAX
-        !CC        IF(RLX.NE.1.0) WRITE(*,*) DMAX,'    RLX =',RLX
-        IF(ABS(DMAX).LT.1.E-3) GO TO 11
+        !CC        IF(RLX == 1.0) WRITE(*,*) DMAX
+        !CC        IF(RLX /= 1.0) WRITE(*,*) DMAX,'    RLX =',RLX
+        IF(ABS(DMAX) < 1.E-3) GO TO 11
     10 CONTINUE
     WRITE(*, *) 'Paneling convergence failed.  Continuing anyway...'
     !
@@ -1861,7 +1861,7 @@ SUBROUTINE PANGEN(SHOPAR)
     !---- go over buffer airfoil again, checking for corners (double points)
     NCORN = 0
     DO 25 IB = 1, NB - 1
-        IF(SB(IB) .EQ. SB(IB + 1)) THEN
+        IF(SB(IB) == SB(IB + 1)) THEN
             !------- found one !
             !
             NCORN = NCORN + 1
@@ -1873,7 +1873,7 @@ SUBROUTINE PANGEN(SHOPAR)
             DO 252 I = 1, N
                 !
                 !--------- keep stepping until first node past corner
-                IF(S(I) .LE. SBCORN) GO TO 252
+                IF(S(I) <= SBCORN) GO TO 252
                 !
                 !---------- move remainder of panel nodes to make room for additional node
                 DO 2522 J = N, I, -1
@@ -1883,7 +1883,7 @@ SUBROUTINE PANGEN(SHOPAR)
                 2522       CONTINUE
                 N = N + 1
                 !
-                IF(N .GT. IQX - 1)&
+                IF(N > IQX - 1)&
                         STOP 'PANEL: Too many panels. Increase IQX in XFOIL.INC'
                 !
                 X(I) = XBCORN
@@ -1891,13 +1891,13 @@ SUBROUTINE PANGEN(SHOPAR)
                 S(I) = SBCORN
                 !
                 !---------- shift nodes adjacent to corner to keep panel sizes comparable
-                IF(I - 2 .GE. 1) THEN
+                IF(I - 2 >= 1) THEN
                     S(I - 1) = 0.5 * (S(I) + S(I - 2))
                     X(I - 1) = SEVAL(S(I - 1), XB, XBP, SB, NB)
                     Y(I - 1) = SEVAL(S(I - 1), YB, YBP, SB, NB)
                 ENDIF
                 !
-                IF(I + 2 .LE. N) THEN
+                IF(I + 2 <= N) THEN
                     S(I + 1) = 0.5 * (S(I) + S(I + 2))
                     X(I + 1) = SEVAL(S(I + 1), XB, XBP, SB, NB)
                     Y(I + 1) = SEVAL(S(I + 1), YB, YBP, SB, NB)
@@ -1926,7 +1926,7 @@ SUBROUTINE PANGEN(SHOPAR)
     DSMAX = -1000.0
     DO 40 I = 1, N - 1
         DS = S(I + 1) - S(I)
-        IF(DS .EQ. 0.0) GO TO 40
+        IF(DS == 0.0) GO TO 40
         DSMIN = MIN(DSMIN, DS)
         DSMAX = MAX(DSMAX, DS)
     40 CONTINUE
@@ -1998,7 +1998,7 @@ SUBROUTINE GETPAN
     DIMENSION RINPUT(20)
     LOGICAL ERROR
     !
-    IF(NB.LE.1) THEN
+    IF(NB <= 1) THEN
         WRITE(*, *) 'GETPAN: Buffer airfoil not available.'
         RETURN
     ENDIF
@@ -2028,63 +2028,63 @@ SUBROUTINE GETPAN
     NINPUT = 0
     CALL GETFLT(COMARG, RINPUT, NINPUT, ERROR)
     !
-    IF     (VAR.EQ.'    ') THEN
+    IF     (VAR == '    ') THEN
         !
         IF(LCHANGE) THEN
             !
             !-------- set new panel distribution, and display max panel corner angle
             CALL PANGEN(.FALSE.)
-            IF(N.GT.0) CALL CANG(X, Y, N, 1, IMAX, AMAX)
+            IF(N > 0) CALL CANG(X, Y, N, 1, IMAX, AMAX)
             !
             !-------- go back to paneling menu
             GO TO 5
         ENDIF
         RETURN
         !
-    ELSE IF(VAR.EQ.'N   ' .OR. VAR.EQ.'n   ') THEN
+    ELSE IF(VAR == 'N   ' .OR. VAR == 'n   ') THEN
         !
-        IF(NINPUT.GE.1) THEN
+        IF(NINPUT >= 1) THEN
             NPAN = IINPUT(1)
         ELSE
             CALL ASKI('Enter number of panel nodes^', NPAN)
         ENDIF
-        IF(NPAN .GT. IQX - 6) THEN
+        IF(NPAN > IQX - 6) THEN
             NPAN = IQX - 6
             WRITE(*, 1200) NPAN
             1200     FORMAT(1X, ' Number of panel nodes reduced to array limit:', I4)
         ENDIF
         LCHANGE = .TRUE.
         !
-    ELSE IF(VAR.EQ.'P   ' .OR. VAR.EQ.'p   ') THEN
+    ELSE IF(VAR == 'P   ' .OR. VAR == 'p   ') THEN
         !
-        IF(NINPUT.GE.1) THEN
+        IF(NINPUT >= 1) THEN
             CVPAR = RINPUT(1)
         ELSE
             CALL ASKR('Enter panel bunching parameter (0 to ~1)^', CVPAR)
         ENDIF
         LCHANGE = .TRUE.
         !
-    ELSE IF(VAR.EQ.'T   ' .OR. VAR.EQ.'t   ') THEN
+    ELSE IF(VAR == 'T   ' .OR. VAR == 't   ') THEN
         !
-        IF(NINPUT.GE.1) THEN
+        IF(NINPUT >= 1) THEN
             CTERAT = RINPUT(1)
         ELSE
             CALL ASKR('Enter TE/LE panel density ratio^', CTERAT)
         ENDIF
         LCHANGE = .TRUE.
         !
-    ELSE IF(VAR.EQ.'R   ' .OR. VAR.EQ.'r   ') THEN
+    ELSE IF(VAR == 'R   ' .OR. VAR == 'r   ') THEN
         !
-        IF(NINPUT.GE.1) THEN
+        IF(NINPUT >= 1) THEN
             CTRRAT = RINPUT(1)
         ELSE
             CALL ASKR('Enter refined-area panel density ratio^', CTRRAT)
         ENDIF
         LCHANGE = .TRUE.
         !
-    ELSE IF(VAR.EQ.'XT  ' .OR. VAR.EQ.'xt  ') THEN
+    ELSE IF(VAR == 'XT  ' .OR. VAR == 'xt  ') THEN
         !
-        IF(NINPUT.GE.2) THEN
+        IF(NINPUT >= 2) THEN
             XSREF1 = RINPUT(1)
             XSREF2 = RINPUT(2)
         ELSE
@@ -2093,9 +2093,9 @@ SUBROUTINE GETPAN
         ENDIF
         LCHANGE = .TRUE.
         !
-    ELSE IF(VAR.EQ.'XB  ' .OR. VAR.EQ.'xb  ') THEN
+    ELSE IF(VAR == 'XB  ' .OR. VAR == 'xb  ') THEN
         !
-        IF(NINPUT.GE.2) THEN
+        IF(NINPUT >= 2) THEN
             XPREF1 = RINPUT(1)
             XPREF2 = RINPUT(2)
         ELSE
@@ -2138,7 +2138,7 @@ SUBROUTINE TECALC
     !---- total TE gap area
     DSTE = SQRT(DXTE**2 + DYTE**2)
     !
-    SHARP = DSTE .LT. 0.0001 * CHORD
+    SHARP = DSTE < 0.0001 * CHORD
     !
     IF(SHARP) THEN
         SCS = 1.0
@@ -2183,17 +2183,17 @@ SUBROUTINE INTE
     !
     WRITE(*, 1100) NAME
     DO IP = 1, NPOL
-        IF(NXYPOL(IP).GT.0) THEN
+        IF(NXYPOL(IP) > 0) THEN
             WRITE(*, 1200) IP, NAMEPOL(IP)
         ENDIF
     ENDDO
-    IF    (NPOL.EQ.0) THEN
+    IF    (NPOL == 0) THEN
         PROMPTN = '" ( F C ):  '
         NPR = 12
-    ELSEIF(NPOL.EQ.1) THEN
+    ELSEIF(NPOL == 1) THEN
         PROMPTN = '" ( F C 1 ):  '
         NPR = 14
-    ELSEIF(NPOL.EQ.2) THEN
+    ELSEIF(NPOL == 2) THEN
         PROMPTN = '" ( F C 1 2 ):  '
         NPR = 16
     ELSE
@@ -2212,15 +2212,15 @@ SUBROUTINE INTE
         20     WRITE(*, 2100) IAIR, PROMPTN(1:NPR)
         READ(*, 1000) CAIR
         !
-        IF    (INDEX('Ff', CAIR(1:1)).NE.0) THEN
+        IF    (INDEX('Ff', CAIR(1:1)) /= 0) THEN
             CALL ASKS('Enter filename^', FNAME)
             CALL AREAD(LU, FNAME, IBX, &
                     XINT(1, K), YINT(1, K), NINT(K), &
                     NAMEINT(K), ISPARST, ITYPE, 0)
-            IF(ITYPE.EQ.0) RETURN
+            IF(ITYPE == 0) RETURN
             !
-        ELSEIF(INDEX('Cc', CAIR(1:1)).NE.0) THEN
-            IF(N.LE.1) THEN
+        ELSEIF(INDEX('Cc', CAIR(1:1)) /= 0) THEN
+            IF(N <= 1) THEN
                 WRITE(*, *) 'No current airfoil available'
                 GO TO 20
             ENDIF
@@ -2234,9 +2234,9 @@ SUBROUTINE INTE
             !
         ELSE
             READ(CAIR, *, ERR = 90) IP
-            IF(IP.LT.1 .OR. IP.GT.NPOL) THEN
+            IF(IP < 1 .OR. IP > NPOL) THEN
                 GO TO 90
-            ELSEIF(NXYPOL(IP).LE.0) THEN
+            ELSEIF(NXYPOL(IP) <= 0) THEN
                 GO TO 90
             ELSE
                 NINT(K) = NXYPOL(IP)
@@ -2316,17 +2316,17 @@ SUBROUTINE INTX
     !
     WRITE(*, 1100) NAME
     DO IP = 1, NPOL
-        IF(NXYPOL(IP).GT.0) THEN
+        IF(NXYPOL(IP) > 0) THEN
             WRITE(*, 1200) IP, NAMEPOL(IP)
         ENDIF
     ENDDO
-    IF    (NPOL.EQ.0) THEN
+    IF    (NPOL == 0) THEN
         PROMPTN = '" ( F C ):  '
         NPR = 12
-    ELSEIF(NPOL.EQ.1) THEN
+    ELSEIF(NPOL == 1) THEN
         PROMPTN = '" ( F C 1 ):  '
         NPR = 14
-    ELSEIF(NPOL.EQ.2) THEN
+    ELSEIF(NPOL == 2) THEN
         PROMPTN = '" ( F C 1 2 ):  '
         NPR = 16
     ELSE
@@ -2345,18 +2345,18 @@ SUBROUTINE INTX
         20     WRITE(*, 2100) IAIR, PROMPTN(1:NPR)
         READ(*, 1000, ERR = 90, END = 90) CAIR
         !
-        IF(CAIR .EQ. ' ') THEN
+        IF(CAIR == ' ') THEN
             GO TO 90
             !
-        ELSEIF(INDEX('Ff', CAIR(1:1)).NE.0) THEN
+        ELSEIF(INDEX('Ff', CAIR(1:1)) /= 0) THEN
             CALL ASKS('Enter filename^', FNAME)
             CALL AREAD(LU, FNAME, IBX, &
                     XINT(1, K), YINT(1, K), NINT(K), &
                     NAMEINT(K), ISPARST, ITYPE, 0)
-            IF(ITYPE.EQ.0) RETURN
+            IF(ITYPE == 0) RETURN
             !
-        ELSEIF(INDEX('Cc', CAIR(1:1)).NE.0) THEN
-            IF(N.LE.1) THEN
+        ELSEIF(INDEX('Cc', CAIR(1:1)) /= 0) THEN
+            IF(N <= 1) THEN
                 WRITE(*, *) 'No current airfoil available'
                 GO TO 20
             ENDIF
@@ -2370,9 +2370,9 @@ SUBROUTINE INTX
             !
         ELSE
             READ(CAIR, *, ERR = 90) IP
-            IF(IP.LT.1 .OR. IP.GT.NPOL) THEN
+            IF(IP < 1 .OR. IP > NPOL) THEN
                 GO TO 90
-            ELSEIF(NXYPOL(IP).LE.0) THEN
+            ELSEIF(NXYPOL(IP) <= 0) THEN
                 GO TO 90
             ELSE
                 NINT(K) = NXYPOL(IP)

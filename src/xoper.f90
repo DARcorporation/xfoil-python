@@ -48,13 +48,13 @@ SUBROUTINE OPER
     LRECALC = .FALSE.
     LCPX = .FALSE.
     !
-    IF(N.EQ.0) THEN
+    IF(N == 0) THEN
         WRITE(*, *)
         WRITE(*, *) '***  No airfoil available  ***'
         RETURN
     ENDIF
     !
-    IF(IPACT.NE.0) THEN
+    IF(IPACT /= 0) THEN
         WRITE(*, 5000) IPACT
         5000  FORMAT(/'  Polar', I3, '  is active')
     ENDIF
@@ -82,8 +82,8 @@ SUBROUTINE OPER
     ENDIF
     !
     !---- process previous command ?
-    IF(COMAND(1:1).EQ.'!') THEN
-        IF(COMOLD.EQ.'****') THEN
+    IF(COMAND(1:1) == '!') THEN
+        IF(COMOLD == '****') THEN
             WRITE(*, *) 'Previous .OPER command not valid'
             GO TO 500
         ELSE
@@ -95,7 +95,7 @@ SUBROUTINE OPER
         LRECALC = .FALSE.
     ENDIF
     !
-    IF(COMAND.EQ.'    ') THEN
+    IF(COMAND == '    ') THEN
         !----- just <return> was typed... clean up plotting and exit OPER
         RETURN
     ENDIF
@@ -109,7 +109,7 @@ SUBROUTINE OPER
     !
     !---- don't try to read integers, since might get integer overflow
     DO I = 1, NINPUT
-        IF(ABS(RINPUT(I)) .GT. 2.1E9) THEN
+        IF(ABS(RINPUT(I)) > 2.1E9) THEN
             IINPUT(I) = 2**30
         ELSE
             IINPUT(I) = INT(RINPUT(I))
@@ -120,7 +120,7 @@ SUBROUTINE OPER
     !cc      CALL GETINT(COMARG,IINPUT,NINPUT,ERROR)
     !
     !--------------------------------------------------------
-    IF(COMAND.EQ.'?   ') THEN
+    IF(COMAND == '?   ') THEN
         WRITE(*, 1050)
         1050  FORMAT(&
                 /'   <cr>     Return to Top Level'&
@@ -161,8 +161,8 @@ SUBROUTINE OPER
                 /'   NINC     Increment name version number')
         !     &//'   IMAG    Toggle image-airfoil'
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'VISC' .OR.&
-            COMAND.EQ.'V   ') THEN
+    ELSEIF(COMAND == 'VISC' .OR.&
+            COMAND == 'V   ') THEN
         IF(LPACC) THEN
             WRITE(*, 2100)
             GO TO 500
@@ -171,9 +171,9 @@ SUBROUTINE OPER
         LVISC = .NOT. LVISC
         !
         IF(LVISC) THEN
-            IF(NINPUT.GE.1) THEN
+            IF(NINPUT >= 1) THEN
                 REINF1 = RINPUT(1)
-            ELSE IF(REINF1 .EQ. 0.0) THEN
+            ELSE IF(REINF1 == 0.0) THEN
                 CALL ASKR('Enter Reynolds number^', REINF1)
             ENDIF
             !
@@ -182,18 +182,18 @@ SUBROUTINE OPER
         LVCONV = .FALSE.
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'VPAR') THEN
+    ELSEIF(COMAND == 'VPAR') THEN
         CALL VPAR
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'RE  ' .OR.&
-            COMAND.EQ.'R   ') THEN
+    ELSEIF(COMAND == 'RE  ' .OR.&
+            COMAND == 'R   ') THEN
         IF(LPACC .AND. LVISC) THEN
             WRITE(*, 2100)
             GO TO 500
         ENDIF
         !
-        IF(NINPUT.GE.1) THEN
+        IF(NINPUT >= 1) THEN
             REINF1 = RINPUT(1)
         ELSE
             WRITE(*, *)
@@ -207,15 +207,15 @@ SUBROUTINE OPER
         LVCONV = .FALSE.
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'MACH' .OR.&
-            COMAND.EQ.'M   ') THEN
+    ELSEIF(COMAND == 'MACH' .OR.&
+            COMAND == 'M   ') THEN
         IF(LPACC) THEN
             WRITE(*, 2100)
             GO TO 500
         ENDIF
         !
         15    CONTINUE
-        IF(NINPUT.GE.1) THEN
+        IF(NINPUT >= 1) THEN
             MINF1 = RINPUT(1)
         ELSE
             WRITE(*, *)
@@ -224,7 +224,7 @@ SUBROUTINE OPER
             CALL ASKR('Enter Mach number^', MINF1)
         ENDIF
         !
-        IF(MINF1.GE.1.0) THEN
+        IF(MINF1 >= 1.0) THEN
             WRITE(*, *) 'Supersonic freestream not allowed'
             NINPUT = 0
             GO TO 15
@@ -233,7 +233,7 @@ SUBROUTINE OPER
         CALL MRCL(1.0, MINF_CL, REINF_CL)
         CALL COMSET
         !
-        IF(MINF.GT.0.0) WRITE(*, 1300) CPSTAR, QSTAR / QINF
+        IF(MINF > 0.0) WRITE(*, 1300) CPSTAR, QSTAR / QINF
         1300  FORMAT(/' Sonic Cp =', F10.2, '      Sonic Q/Qinf =', F10.3/)
         !
         CALL CPCALC(N, QINV, QINF, MINF, CPI)
@@ -244,15 +244,15 @@ SUBROUTINE OPER
         LVCONV = .FALSE.
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'TYPE' .OR.&
-            COMAND.EQ.'T') THEN
+    ELSEIF(COMAND == 'TYPE' .OR.&
+            COMAND == 'T') THEN
         IF(LPACC) THEN
             WRITE(*, 2100)
             GO TO 500
         ENDIF
         !
         17  CONTINUE
-        IF(NINPUT.GE.1) THEN
+        IF(NINPUT >= 1) THEN
             ITYP = IINPUT(1)
         ELSE
             WRITE(*, 1105)
@@ -265,18 +265,18 @@ SUBROUTINE OPER
             CALL ASKI('Enter type of Mach,Re variation with CL^', ITYP)
         ENDIF
         !
-        IF(ITYP.EQ.1) THEN
+        IF(ITYP == 1) THEN
             MATYP = 1
             RETYP = 1
-        ELSE IF(ITYP.EQ.2) THEN
+        ELSE IF(ITYP == 2) THEN
             MATYP = 2
             RETYP = 2
-        ELSE IF(ITYP.EQ.3) THEN
+        ELSE IF(ITYP == 3) THEN
             MATYP = 1
             RETYP = 3
         ENDIF
         !
-        IF(ITYP.LT.1 .OR. ITYP.GT.3) THEN
+        IF(ITYP < 1 .OR. ITYP > 3) THEN
             NINPUT = 0
             GO TO 17
         ENDIF
@@ -287,22 +287,22 @@ SUBROUTINE OPER
         LVCONV = .FALSE.
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'ITER') THEN
+    ELSEIF(COMAND == 'ITER') THEN
         18    CONTINUE
-        IF(NINPUT.GE.1) THEN
+        IF(NINPUT >= 1) THEN
             ITMAX = IINPUT(1)
         ELSE
             WRITE(*, *) 'Current iteration limit:', ITMAX
             CALL ASKI('Enter new iteration limit^', ITMAX)
         ENDIF
         !
-        IF(ITMAX.LT.1) THEN
+        IF(ITMAX < 1) THEN
             NINPUT = 0
             GO TO 18
         ENDIF
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'INIT') THEN
+    ELSEIF(COMAND == 'INIT') THEN
         LBLINI = .NOT.LBLINI
         IF(LBLINI) THEN
             WRITE(*, *) 'BLs are assumed to be initialized'
@@ -312,7 +312,7 @@ SUBROUTINE OPER
         ENDIF
         !
         !--------------------------------------------------------
-        !      ELSEIF(COMAND.EQ.'IMAG') THEN
+        !      ELSEIF(COMAND == 'IMAG') THEN
         !       LIMAGE = .NOT.LIMAGE
         !       IF(LIMAGE) THEN
         !        CALL ASKR('Enter y-position of image plane^',YIMAGE)
@@ -324,11 +324,11 @@ SUBROUTINE OPER
         !       LQAIJ = .FALSE.
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'ALFA' .OR.&
-            COMAND.EQ.'A   ') THEN
+    ELSEIF(COMAND == 'ALFA' .OR.&
+            COMAND == 'A   ') THEN
         IF(.NOT.LRECALC) THEN
             !------- set inviscid solution only if point is not being recalculated
-            IF(NINPUT.GE.1) THEN
+            IF(NINPUT >= 1) THEN
                 ADEG = RINPUT(1)
             ELSE
                 ADEG = ALFA / DTOR
@@ -338,9 +338,9 @@ SUBROUTINE OPER
             ALFA = DTOR * ADEG
             QINF = 1.0
             CALL SPECAL
-            IF(ABS(ALFA - AWAKE) .GT. 1.0E-5) LWAKE = .FALSE.
-            IF(ABS(ALFA - AVISC) .GT. 1.0E-5) LVCONV = .FALSE.
-            IF(ABS(MINF - MVISC) .GT. 1.0E-5) LVCONV = .FALSE.
+            IF(ABS(ALFA - AWAKE) > 1.0E-5) LWAKE = .FALSE.
+            IF(ABS(ALFA - AVISC) > 1.0E-5) LVCONV = .FALSE.
+            IF(ABS(MINF - MVISC) > 1.0E-5) LVCONV = .FALSE.
         ENDIF
         !
         IF(LVISC) CALL VISCAL(ITMAX)
@@ -361,9 +361,9 @@ SUBROUTINE OPER
         ARGOLD = COMARG
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'CLI ') THEN
+    ELSEIF(COMAND == 'CLI ') THEN
         IF(.NOT.LRECALC) THEN
-            IF(NINPUT.GE.1) THEN
+            IF(NINPUT >= 1) THEN
                 CLSPEC = RINPUT(1)
             ELSE
                 CALL ASKR('Enter inviscid lift coefficient^', CLSPEC)
@@ -373,9 +373,9 @@ SUBROUTINE OPER
             QINF = 1.0
             CALL SPECCL
             ADEG = ALFA / DTOR
-            IF(ABS(ALFA - AWAKE) .GT. 1.0E-5) LWAKE = .FALSE.
-            IF(ABS(ALFA - AVISC) .GT. 1.0E-5) LVCONV = .FALSE.
-            IF(ABS(MINF - MVISC) .GT. 1.0E-5) LVCONV = .FALSE.
+            IF(ABS(ALFA - AWAKE) > 1.0E-5) LWAKE = .FALSE.
+            IF(ABS(ALFA - AVISC) > 1.0E-5) LVCONV = .FALSE.
+            IF(ABS(MINF - MVISC) > 1.0E-5) LVCONV = .FALSE.
         ENDIF
         !
         IF(LVISC) CALL VISCAL(ITMAX)
@@ -395,10 +395,10 @@ SUBROUTINE OPER
         ARGOLD = COMARG
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'CL  ' .OR.&
-            COMAND.EQ.'C   ') THEN
+    ELSEIF(COMAND == 'CL  ' .OR.&
+            COMAND == 'C   ') THEN
         IF(.NOT.LRECALC) THEN
-            IF(NINPUT.GE.1) THEN
+            IF(NINPUT >= 1) THEN
                 CLSPEC = RINPUT(1)
             ELSE
                 CALL ASKR('Enter lift coefficient^', CLSPEC)
@@ -408,9 +408,9 @@ SUBROUTINE OPER
             QINF = 1.0
             CALL SPECCL
             ADEG = ALFA / DTOR
-            IF(ABS(ALFA - AWAKE) .GT. 1.0E-5) LWAKE = .FALSE.
-            IF(ABS(ALFA - AVISC) .GT. 1.0E-5) LVCONV = .FALSE.
-            IF(ABS(MINF - MVISC) .GT. 1.0E-5) LVCONV = .FALSE.
+            IF(ABS(ALFA - AWAKE) > 1.0E-5) LWAKE = .FALSE.
+            IF(ABS(ALFA - AVISC) > 1.0E-5) LVCONV = .FALSE.
+            IF(ABS(MINF - MVISC) > 1.0E-5) LVCONV = .FALSE.
         ENDIF
         IF(LVISC) CALL VISCAL(ITMAX)
         CALL FCPMIN
@@ -429,24 +429,24 @@ SUBROUTINE OPER
         ARGOLD = COMARG
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'ASEQ' .OR.&
-            COMAND.EQ.'AS  ' .OR.&
-            COMAND.EQ.'CSEQ' .OR.&
-            COMAND.EQ.'CS  ') THEN
-        LALFA = COMAND.EQ.'ASEQ' .OR.&
-                COMAND.EQ.'AS  '
+    ELSEIF(COMAND == 'ASEQ' .OR.&
+            COMAND == 'AS  ' .OR.&
+            COMAND == 'CSEQ' .OR.&
+            COMAND == 'CS  ') THEN
+        LALFA = COMAND == 'ASEQ' .OR.&
+                COMAND == 'AS  '
         !
         IF(LALFA) THEN
-            IF    (NINPUT.GE.3) THEN
+            IF    (NINPUT >= 3) THEN
                 AA1 = RINPUT(1)
                 AA2 = RINPUT(2)
                 DAA = RINPUT(3)
-            ELSEIF(NINPUT.GE.2) THEN
+            ELSEIF(NINPUT >= 2) THEN
                 AA1 = RINPUT(1)
                 AA2 = RINPUT(2)
                 DAA = DAA / DTOR
                 CALL ASKR('Enter alfa increment   (deg)^', DAA)
-            ELSEIF(NINPUT.GE.1) THEN
+            ELSEIF(NINPUT >= 1) THEN
                 AA1 = RINPUT(1)
                 AA2 = AA2 / DTOR
                 CALL ASKR('Enter last  alfa value (deg)^', AA2)
@@ -460,7 +460,7 @@ SUBROUTINE OPER
                 DAA = DAA / DTOR
                 CALL ASKR('Enter alfa increment   (deg)^', DAA)
             ENDIF
-            IF(AA2.LT.AA1) THEN
+            IF(AA2 < AA1) THEN
                 DAA = -ABS(DAA)
             ELSE
                 DAA = ABS(DAA)
@@ -469,18 +469,18 @@ SUBROUTINE OPER
             AA2 = AA2 * DTOR
             DAA = DAA * DTOR
             NPOINT = 1
-            IF(DAA .NE. 0.0) NPOINT = INT((AA2 - AA1) / DAA + 0.5) + 1
+            IF(DAA /= 0.0) NPOINT = INT((AA2 - AA1) / DAA + 0.5) + 1
             !
         ELSE
-            IF    (NINPUT.GE.3) THEN
+            IF    (NINPUT >= 3) THEN
                 CL1 = RINPUT(1)
                 CL2 = RINPUT(2)
                 DCL = RINPUT(3)
-            ELSEIF(NINPUT.GE.2) THEN
+            ELSEIF(NINPUT >= 2) THEN
                 CL1 = RINPUT(1)
                 CL2 = RINPUT(2)
                 CALL ASKR('Enter CL increment  ^', DCL)
-            ELSEIF(NINPUT.GE.1) THEN
+            ELSEIF(NINPUT >= 1) THEN
                 CL1 = RINPUT(1)
                 CALL ASKR('Enter last  CL value^', CL2)
                 CALL ASKR('Enter CL increment  ^', DCL)
@@ -489,13 +489,13 @@ SUBROUTINE OPER
                 CALL ASKR('Enter last  CL value^', CL2)
                 CALL ASKR('Enter CL increment  ^', DCL)
             ENDIF
-            IF(CL2.LT.CL1) THEN
+            IF(CL2 < CL1) THEN
                 DCL = -ABS(DCL)
             ELSE
                 DCL = ABS(DCL)
             ENDIF
             NPOINT = 1
-            IF(DCL .NE. 0.0) NPOINT = INT((CL2 - CL1) / DCL + 0.5) + 1
+            IF(DCL /= 0.0) NPOINT = INT((CL2 - CL1) / DCL + 0.5) + 1
         ENDIF
         !
         !- - - - - - - - - - - - - - - - - -
@@ -516,9 +516,9 @@ SUBROUTINE OPER
                 CALL SPECCL
             ENDIF
             !
-            IF(ABS(ALFA - AWAKE) .GT. 1.0E-5) LWAKE = .FALSE.
-            IF(ABS(ALFA - AVISC) .GT. 1.0E-5) LVCONV = .FALSE.
-            IF(ABS(MINF - MVISC) .GT. 1.0E-5) LVCONV = .FALSE.
+            IF(ABS(ALFA - AWAKE) > 1.0E-5) LWAKE = .FALSE.
+            IF(ABS(ALFA - AVISC) > 1.0E-5) LVCONV = .FALSE.
+            IF(ABS(MINF - MVISC) > 1.0E-5) LVCONV = .FALSE.
             CALL SPECAL
             ITMAXS = ITMAX + 5
             IF(LVISC) CALL VISCAL(ITMAXS)
@@ -539,7 +539,7 @@ SUBROUTINE OPER
             IF(LVISC .AND. .NOT.LVCONV) THEN
                 !-------- increment unconverged-point counter
                 ISEQEX = ISEQEX + 1
-                IF(ISEQEX .GE. NSEQEX) THEN
+                IF(ISEQEX >= NSEQEX) THEN
                     WRITE(*, 1150) ISEQEX, ALAST, CLAST
                     1150      FORMAT(&
                             /' Sequence halted since previous', I3, ' points did not converge'&
@@ -561,12 +561,12 @@ SUBROUTINE OPER
         ARGOLD = COMARG
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'PACC' .OR.&
-            COMAND.EQ.'P   ') THEN
+    ELSEIF(COMAND == 'PACC' .OR.&
+            COMAND == 'P   ') THEN
         LPACC = .NOT.LPACC
         !
         IF(LPACC) THEN
-            IF(NINPUT.GE.1) THEN
+            IF(NINPUT >= 1) THEN
                 !------- slot into which accumulated polar will go
                 IP = MIN(MAX(IINPUT(1), 0), NPOL + 1)
             ELSE
@@ -576,8 +576,8 @@ SUBROUTINE OPER
                 PFNAMX(IP) = ' '
             ENDIF
             !
-            IF(IP.GT.NPOL) THEN
-                IF(NPOL.EQ.NPX) THEN
+            IF(IP > NPOL) THEN
+                IF(NPOL == NPX) THEN
                     WRITE(*, *)
                     WRITE(*, *) 'Number of polars is at array limit'
                     WRITE(*, *) 'New polar will not be stored'
@@ -597,7 +597,7 @@ SUBROUTINE OPER
             CALL PLRSET(IPACT)
             !
             !------ jump out if decision was made to abort polar accumulation
-            IF(IPACT.LE.0) THEN
+            IF(IPACT <= 0) THEN
                 LPACC = .FALSE.
                 GO TO 500
             ENDIF
@@ -615,8 +615,8 @@ SUBROUTINE OPER
         ENDIF
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'PGET') THEN
-        IF(NPOL.GE.NPX) THEN
+    ELSEIF(COMAND == 'PGET') THEN
+        IF(NPOL >= NPX) THEN
             WRITE(*, *)
             WRITE(*, *) 'Number of polars is at array limit'
             WRITE(*, *) 'Delete with PDEL if necessary'
@@ -625,7 +625,7 @@ SUBROUTINE OPER
         !
         IP = NPOL + 1
         !
-        IF(COMARG.EQ.' ') THEN
+        IF(COMARG == ' ') THEN
             CALL ASKS('Enter polar filename^', FNAME)
         ELSE
             FNAME = COMARG
@@ -659,23 +659,23 @@ SUBROUTINE OPER
         ENDIF
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'PWRT') THEN
+    ELSEIF(COMAND == 'PWRT') THEN
         75     CONTINUE
-        IF(NPOL.EQ.1) THEN
+        IF(NPOL == 1) THEN
             IP = 1
-        ELSEIF(NINPUT.EQ.0) THEN
+        ELSEIF(NINPUT == 0) THEN
             CALL PLRSUM(1, NPOL, IPACT)
             CALL ASKI(&
                     'Enter index of polar to write (0=all, -1=abort)^', IP)
-            IF(IP.EQ.-1) GO TO 500
+            IF(IP == -1) GO TO 500
         ELSE
             IP = IINPUT(1)
         ENDIF
         !
-        IF(IP.EQ.0) THEN
+        IF(IP == 0) THEN
             IP1 = 1
             IP2 = NPOL
-        ELSEIF(IP.GE.1 .AND. IP.LE.NPOL) THEN
+        ELSEIF(IP >= 1 .AND. IP <= NPOL) THEN
             IP1 = IP
             IP2 = IP
         ELSE
@@ -688,14 +688,14 @@ SUBROUTINE OPER
             LU = 19
             CALL PLRSUM(IP, IP, IPACT)
             CALL STRIP(PFNAME(IP), NPF)
-            IF(NPF.EQ.0) THEN
+            IF(NPF == 0) THEN
                 LINE = 'Enter polar output filename^'
             ELSE
                 LINE = 'Enter polar output filename ['&
                         // PFNAME(IP)(1:NPF) // ']^'
             ENDIF
             CALL ASKS(LINE, FNAME)
-            IF(NPF.NE.0 .AND. FNAME.EQ.' ') FNAME = PFNAME(IP)
+            IF(NPF /= 0 .AND. FNAME == ' ') FNAME = PFNAME(IP)
             !
             NIPOL = NIPOL0
             IF(LCMINP) THEN
@@ -723,8 +723,8 @@ SUBROUTINE OPER
         ENDDO
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'RGET') THEN
-        IF(NPOLREF.GE.NPX) THEN
+    ELSEIF(COMAND == 'RGET') THEN
+        IF(NPOLREF >= NPX) THEN
             WRITE(*, *)
             WRITE(*, *) 'Number of reference polars is at array limit'
             WRITE(*, *) 'Delete with RDEL if necessary'
@@ -733,7 +733,7 @@ SUBROUTINE OPER
         !
         IR = NPOLREF + 1
         !
-        IF(COMARG.EQ.' ') THEN
+        IF(COMARG == ' ') THEN
             CALL ASKS('Enter reference polar filename^', FNAME)
         ELSE
             FNAME = COMARG
@@ -749,7 +749,7 @@ SUBROUTINE OPER
         NPOLREF = IR
         !
         CALL STRIP(NAMEREF(IR), NNREF)
-        IF(NNREF.EQ.0) THEN
+        IF(NNREF == 0) THEN
             CALL ASKS('Enter label for reference polar^', NAMEREF(IR))
             CALL STRIP(NAMEREF(IR), NNREF)
         ELSE
@@ -767,13 +767,13 @@ SUBROUTINE OPER
         WRITE(*, *) 'File OPEN error'
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'RDEL') THEN
-        IF(NPOLREF.EQ.0) THEN
+    ELSEIF(COMAND == 'RDEL') THEN
+        IF(NPOLREF == 0) THEN
             WRITE(*, *) 'No reference polars are stored'
             GO TO 500
         ENDIF
         !
-        IF(NINPUT.GE.1) THEN
+        IF(NINPUT >= 1) THEN
             IR = IINPUT(1)
         ELSE
             IR = NPOLREF + 1
@@ -781,15 +781,15 @@ SUBROUTINE OPER
         !
         35     CONTINUE
         !
-        IF(IR.EQ.0) THEN
+        IF(IR == 0) THEN
             !------- delete all polars
             NPOLREF = 0
             !
-        ELSEIF(IR.EQ.-1) THEN
+        ELSEIF(IR == -1) THEN
             !------- abort
             GO TO 500
             !
-        ELSEIF(IR.LT.-1 .OR. IR.GT.NPOLREF) THEN
+        ELSEIF(IR < -1 .OR. IR > NPOLREF) THEN
             CALL PRFSUM(1, NPOLREF)
             CALL ASKI(&
                     'Specify ref. polar to delete (0 = all, -1 = abort)^', IR)
@@ -806,8 +806,8 @@ SUBROUTINE OPER
         ENDIF
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'PSUM') THEN
-        IF(NPOL.EQ.0) THEN
+    ELSEIF(COMAND == 'PSUM') THEN
+        IF(NPOL == 0) THEN
             WRITE(*, *)
             WRITE(*, *) 'No polars are stored'
             GO TO 500
@@ -816,22 +816,22 @@ SUBROUTINE OPER
         CALL PLRSUM(1, NPOL, IPACT)
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'PLIS') THEN
-        IF(NPOL.EQ.0) THEN
+    ELSEIF(COMAND == 'PLIS') THEN
+        IF(NPOL == 0) THEN
             WRITE(*, *)
             WRITE(*, *) 'No polars are stored'
             GO TO 500
         ENDIF
         !
-        IF(NINPUT.EQ.0) THEN
+        IF(NINPUT == 0) THEN
             IP1 = 1
             IP2 = NPOL
         ELSE
             IP = IINPUT(1)
-            IF(IP.EQ.0) THEN
+            IF(IP == 0) THEN
                 IP1 = 1
                 IP2 = NPOL
-            ELSEIF(IP.GE.1 .AND. IP.LE.NPOL) THEN
+            ELSEIF(IP >= 1 .AND. IP <= NPOL) THEN
                 IP1 = IP
                 IP2 = IP
             ELSE
@@ -870,13 +870,13 @@ SUBROUTINE OPER
         NIPOL = NIPOL0
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'PDEL') THEN
-        IF(NPOL.EQ.0) THEN
+    ELSEIF(COMAND == 'PDEL') THEN
+        IF(NPOL == 0) THEN
             WRITE(*, *) 'No polars are stored'
             GO TO 500
         ENDIF
         !
-        IF(NINPUT.GE.1) THEN
+        IF(NINPUT >= 1) THEN
             !------- use command argument
             IP = IINPUT(1)
         ELSE
@@ -885,17 +885,17 @@ SUBROUTINE OPER
         ENDIF
         !
         40     CONTINUE
-        IF(IP.EQ.0) THEN
+        IF(IP == 0) THEN
             !------- delete all polars
             NPOL = 0
             IPACT = 0
             LPACC = .FALSE.
             !
-        ELSEIF(IP.EQ.-1) THEN
+        ELSEIF(IP == -1) THEN
             !------- abort
             GO TO 500
             !
-        ELSEIF(IP.LT.-1 .OR. IP.GT.NPOL) THEN
+        ELSEIF(IP < -1 .OR. IP > NPOL) THEN
             CALL PLRSUM(1, NPOL, IPACT)
             CALL ASKI(&
                     'Specify polar to delete (0 = all, -1 = abort)^', IP)
@@ -903,7 +903,7 @@ SUBROUTINE OPER
             !
         ELSE
             !------- delete polar IP
-            IF(IPACT.EQ.IP) THEN
+            IF(IPACT == IP) THEN
                 WRITE(*, *) 'Active polar deleted.  Accumulation turned off'
                 IPACT = 0
                 LPACC = .FALSE.
@@ -913,7 +913,7 @@ SUBROUTINE OPER
                 CALL PLRCOP(JP, JP - 1)
                 WRITE(*, 1310) JP, JP - 1
                 1310      FORMAT(' Polar', I3, '  moved into polar', I3)
-                IF(IPACT.EQ.JP) THEN
+                IF(IPACT == JP) THEN
                     IPACT = JP - 1
                 ENDIF
             ENDDO
@@ -921,19 +921,19 @@ SUBROUTINE OPER
             !
         ENDIF
         !
-        IF(IPACT.GT.0) THEN
+        IF(IPACT > 0) THEN
             WRITE(*, 1320) IPACT
             1320    FORMAT(' Polar', I3, '  is now active')
         ENDIF
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'PSOR') THEN
-        IF(NPOL.EQ.0) THEN
+    ELSEIF(COMAND == 'PSOR') THEN
+        IF(NPOL == 0) THEN
             WRITE(*, *) 'No polars are stored'
             GO TO 500
         ENDIF
         !
-        IF(NINPUT.GE.1) THEN
+        IF(NINPUT >= 1) THEN
             !------- use command argument
             IP = IINPUT(1)
         ELSE
@@ -945,11 +945,11 @@ SUBROUTINE OPER
         IDSORT = IAL
         !
         42     CONTINUE
-        IF    (IP.EQ.-1) THEN
+        IF    (IP == -1) THEN
             !------- abort
             GO TO 500
             !
-        ELSEIF(IP.LT.-1 .OR. IP.GT.NPOL) THEN
+        ELSEIF(IP < -1 .OR. IP > NPOL) THEN
             CALL PLRSUM(1, NPOL, IPACT)
             CALL ASKI(&
                     'Specify polar to sort (0 = all, -1 = abort)^', IP)
@@ -957,7 +957,7 @@ SUBROUTINE OPER
             !
         ELSE
             !------- sort polar(s)
-            IF(IP.EQ.0) THEN
+            IF(IP == 0) THEN
                 IP1 = 1
                 IP2 = NPOL
             ELSE
@@ -970,16 +970,16 @@ SUBROUTINE OPER
         ENDIF
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'ASET') THEN
-        IF(NPOL.EQ.0) THEN
+    ELSEIF(COMAND == 'ASET') THEN
+        IF(NPOL == 0) THEN
             WRITE(*, *)
             WRITE(*, *) 'No polar airfoils are stored'
             GO TO 500
         ENDIF
         !
         50    CONTINUE
-        IF(NINPUT.EQ.0) THEN
-            IF(NPOL.EQ.1) THEN
+        IF(NINPUT == 0) THEN
+            IF(NPOL == 1) THEN
                 IP = 1
             ELSE
                 CALL PLRSUM(1, NPOL, IPACT)
@@ -989,9 +989,9 @@ SUBROUTINE OPER
             IP = IINPUT(1)
         ENDIF
         !
-        IF(IP.EQ.0) THEN
+        IF(IP == 0) THEN
             GO TO 500
-        ELSEIF(IP.LT.1 .OR. IP.GT.NPOL) THEN
+        ELSEIF(IP < 1 .OR. IP > NPOL) THEN
             WRITE(*, *)
             WRITE(*, *) 'Specified polar airfoil does not exist'
             NINPUT = 0
@@ -1003,7 +1003,7 @@ SUBROUTINE OPER
         READ(*, 1000) ANS
         1000  FORMAT(A)
         !
-        IF(INDEX('Nn', ANS) .NE. 0) THEN
+        IF(INDEX('Nn', ANS) /= 0) THEN
             WRITE(*, *) 'No action taken'
             GO TO 500
         ELSE
@@ -1011,16 +1011,16 @@ SUBROUTINE OPER
         ENDIF
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'PREM') THEN
-        IF(NPOL.EQ.0) THEN
+    ELSEIF(COMAND == 'PREM') THEN
+        IF(NPOL == 0) THEN
             WRITE(*, *)
             WRITE(*, *) 'No polars are stored'
             GO TO 500
         ENDIF
         !
         52    CONTINUE
-        IF(NINPUT.EQ.0) THEN
-            IF(NPOL.EQ.1) THEN
+        IF(NINPUT == 0) THEN
+            IF(NPOL == 1) THEN
                 IP = 1
             ELSE
                 CALL PLRSUM(1, NPOL, IPACT)
@@ -1030,16 +1030,16 @@ SUBROUTINE OPER
             IP = IINPUT(1)
         ENDIF
         !
-        IF(IP.EQ.0) THEN
+        IF(IP == 0) THEN
             GO TO 500
-        ELSEIF(IP.LT.1 .OR. IP.GT.NPOL) THEN
+        ELSEIF(IP < 1 .OR. IP > NPOL) THEN
             WRITE(*, *)
             WRITE(*, *) 'Specified polar airfoil does not exist'
             NINPUT = 0
             GO TO 52
         ENDIF
         !
-        IF(NINPUT.GE.2) THEN
+        IF(NINPUT >= 2) THEN
             NREM = NINPUT - 1
         ELSE
             NIPOL = NIPOL0
@@ -1075,7 +1075,7 @@ SUBROUTINE OPER
             !------- check all alpha points in polar IP
             DO IA = 1, NAPOL(IP)
                 ADIF = CPOL(IA, IAL, IP) - RINPUT(IREM + 1)
-                IF(ABS(ADIF) .LT. 0.0005) THEN
+                IF(ABS(ADIF) < 0.0005) THEN
                     !---------- alphas match within 3-digit print tolerance...
                     !-             remove point by pulling down all points above it
                     DO JA = IA, NAPOL(IP) - 1
@@ -1090,16 +1090,16 @@ SUBROUTINE OPER
                     !---------- shrink polar by 1
                     NAPOL(IP) = NAPOL(IP) - 1
                     !
-                    IF(NAPOL(IP).LE.0) THEN
+                    IF(NAPOL(IP) <= 0) THEN
                         !----------- last point has been removed... eliminate this polar IP
                         DO JP = IP + 1, NPOL
                             CALL PLRCOP(JP, JP - 1)
-                            IF(IPACT.EQ.JP) IPACT = JP - 1
+                            IF(IPACT == JP) IPACT = JP - 1
                             WRITE(*, 1310) JP, JP - 1
                         ENDDO
                         NPOL = NPOL - 1
                         !
-                        IF(IPACT.GT.0) THEN
+                        IF(IPACT > 0) THEN
                             WRITE(*, 1320) IPACT
                         ENDIF
                         !
@@ -1113,16 +1113,16 @@ SUBROUTINE OPER
         55    CONTINUE
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'PNAM') THEN
-        IF(NPOL.EQ.0) THEN
+    ELSEIF(COMAND == 'PNAM') THEN
+        IF(NPOL == 0) THEN
             WRITE(*, *)
             WRITE(*, *) 'No polars are stored'
             GO TO 500
         ENDIF
         !
         58    CONTINUE
-        IF(NINPUT.EQ.0) THEN
-            IF(NPOL.EQ.1) THEN
+        IF(NINPUT == 0) THEN
+            IF(NPOL == 1) THEN
                 IP = 1
             ELSE
                 CALL PLRSUM(1, NPOL, IPACT)
@@ -1132,9 +1132,9 @@ SUBROUTINE OPER
             IP = IINPUT(1)
         ENDIF
         !
-        IF(IP.EQ.0) THEN
+        IF(IP == 0) THEN
             GO TO 500
-        ELSEIF(IP.LT.1 .OR. IP.GT.NPOL) THEN
+        ELSEIF(IP < 1 .OR. IP > NPOL) THEN
             WRITE(*, *)
             WRITE(*, *) 'Specified polar airfoil does not exist'
             NINPUT = 0
@@ -1168,20 +1168,20 @@ SUBROUTINE OPER
         CALL STRIP(NAMEPOL(IP), NNP)
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'BL  ') THEN
+    ELSEIF(COMAND == 'BL  ') THEN
         IF(.NOT.LVCONV) THEN
             WRITE(*, *) 'Compute valid viscous solution first'
             GO TO 500
         ENDIF
         !
-        IF(NINPUT.GE.1) THEN
+        IF(NINPUT >= 1) THEN
             NPR = MIN(IINPUT(1), NPRX)
         ELSE
             NPR = 21
             WRITE(*, *) 'Using default number of profiles:', NPR
         ENDIF
         !
-        IF(NPR.GT.1) THEN
+        IF(NPR > 1) THEN
             !------ set NPR points along surface, offset slightly for the locating logic
             DOFF = 0.00001 * (S(N) - S(1))
             DO IPR = 1, NPR
@@ -1193,7 +1193,7 @@ SUBROUTINE OPER
         ENDIF
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'FMOM') THEN
+    ELSEIF(COMAND == 'FMOM') THEN
         CALL MHINGE
         WRITE(*, 1500) XOF, YOF, HMOM, HFX, HFY
         1500  FORMAT(/' Flap hinge x,y :', 2F8.4/&
@@ -1205,11 +1205,11 @@ SUBROUTINE OPER
                 ' y-Force     /span = ', F8.6, '  x  1/2 rho V  c '/)
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'FNEW') THEN
-        IF    (NINPUT.GE.2) THEN
+    ELSEIF(COMAND == 'FNEW') THEN
+        IF    (NINPUT >= 2) THEN
             XOF = RINPUT(1)
             YOF = RINPUT(2)
-        ELSEIF(NINPUT.GE.1) THEN
+        ELSEIF(NINPUT >= 1) THEN
             XOF = RINPUT(1)
             YOF = -999.0
         ELSE
@@ -1219,11 +1219,11 @@ SUBROUTINE OPER
         LFLAP = .FALSE.
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'VELS') THEN
-        IF    (NINPUT.GE.2) THEN
+    ELSEIF(COMAND == 'VELS') THEN
+        IF    (NINPUT >= 2) THEN
             XXX = RINPUT(1)
             YYY = RINPUT(2)
-        ELSEIF(NINPUT.GE.1) THEN
+        ELSEIF(NINPUT >= 1) THEN
             XXX = RINPUT(1)
             CALL ASKR('Enter y^', YYY)
         ELSE
@@ -1242,19 +1242,19 @@ SUBROUTINE OPER
         ARGOLD = COMARG
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'DUMP') THEN
+    ELSEIF(COMAND == 'DUMP') THEN
         CALL BLDUMP(COMARG)
 
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'DMP ') THEN
+    ELSEIF(COMAND == 'DMP ') THEN
         CALL BLDUMP2(COMARG)
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'CPWR') THEN
+    ELSEIF(COMAND == 'CPWR') THEN
         CALL CPDUMP(COMARG)
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'CPMN') THEN
+    ELSEIF(COMAND == 'CPMN') THEN
         IF(LVISC)THEN
             WRITE(*, 1769) CPMNI, XCPMNI, CPMNV, XCPMNV
             1769   FORMAT('  Minimum Inviscid Cp =', F8.4, '   at x =', F8.4&
@@ -1265,7 +1265,7 @@ SUBROUTINE OPER
         ENDIF
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'CINC') THEN
+    ELSEIF(COMAND == 'CINC') THEN
         LCMINP = .NOT.LCMINP
         IF(LCMINP) THEN
             WRITE(*, *) 'Min Cp will be written to polar save file'
@@ -1274,7 +1274,7 @@ SUBROUTINE OPER
         ENDIF
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'HINC') THEN
+    ELSEIF(COMAND == 'HINC') THEN
         LHMOMP = .NOT.LHMOMP
         IF(LHMOMP) THEN
             WRITE(*, *) 'Hinge moment will be written to polar save file'
@@ -1288,8 +1288,8 @@ SUBROUTINE OPER
         ENDIF
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'NAME') THEN
-        IF(COMARG.EQ.' ') THEN
+    ELSEIF(COMAND == 'NAME') THEN
+        IF(COMARG == ' ') THEN
             CALL NAMMOD(NAME, 0, -1)
         ELSE
             NAME = COMARG
@@ -1297,18 +1297,18 @@ SUBROUTINE OPER
         CALL STRIP(NAME, NNAME)
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'NINC') THEN
+    ELSEIF(COMAND == 'NINC') THEN
         CALL NAMMOD(NAME, 1, 1)
         CALL STRIP(NAME, NNAME)
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'NDEC') THEN
+    ELSEIF(COMAND == 'NDEC') THEN
         CALL NAMMOD(NAME, -1, 1)
         CALL STRIP(NAME, NNAME)
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'DAMP') THEN
-        IF(IDAMP.EQ.0) THEN
+    ELSEIF(COMAND == 'DAMP') THEN
+        IF(IDAMP == 0) THEN
             IDAMP = 1
             WRITE(*, *) 'Modified amplification used'
         ELSE
@@ -1344,11 +1344,11 @@ SUBROUTINE FCPMIN
     CPMNV = CPV(1)
     !
     DO I = 2, N + NW
-        IF(CPI(I) .LT. CPMNI) THEN
+        IF(CPI(I) < CPMNI) THEN
             XCPMNI = X(I)
             CPMNI = CPI(I)
         ENDIF
-        IF(CPV(I) .LT. CPMNV) THEN
+        IF(CPV(I) < CPMNV) THEN
             XCPMNV = X(I)
             CPMNV = CPV(I)
         ENDIF
@@ -1377,15 +1377,15 @@ SUBROUTINE MRSHOW(LM, LR)
     IF(LM .OR. LR) WRITE(*, *)
     !
     IF(LM) THEN
-        IF(MATYP.EQ.1) WRITE(*, 1100) MINF1
-        IF(MATYP.EQ.2) WRITE(*, 1100) MINF1, ' / sqrt(CL)'
-        IF(MATYP.EQ.3) WRITE(*, 1100) MINF1, ' / CL'
+        IF(MATYP == 1) WRITE(*, 1100) MINF1
+        IF(MATYP == 2) WRITE(*, 1100) MINF1, ' / sqrt(CL)'
+        IF(MATYP == 3) WRITE(*, 1100) MINF1, ' / CL'
     ENDIF
     !
     IF(LR) THEN
-        IF(RETYP.EQ.1) WRITE(*, 1200) REINF1
-        IF(RETYP.EQ.2) WRITE(*, 1200) REINF1, ' / sqrt(CL)'
-        IF(RETYP.EQ.3) WRITE(*, 1200) REINF1, ' / CL'
+        IF(RETYP == 1) WRITE(*, 1200) REINF1
+        IF(RETYP == 2) WRITE(*, 1200) REINF1, ' / sqrt(CL)'
+        IF(RETYP == 3) WRITE(*, 1200) REINF1, ' / CL'
     ENDIF
     !
     RETURN
@@ -1419,29 +1419,29 @@ SUBROUTINE NAMMOD(NAME, KDEL, KMOD0)
     !
     NAMDEF = NAME(1:NNAME)
     !
-    IF(KBRACK1.NE.0 .AND.&
-            KBRACK2.NE.0 .AND. KBRACK2 - KBRACK1.GT.1) THEN
+    IF(KBRACK1 /= 0 .AND.&
+            KBRACK2 /= 0 .AND. KBRACK2 - KBRACK1 > 1) THEN
         !----- brackets exist... get number, (go get user's input on READ error)
         READ(NAME(KBRACK1 + 1:KBRACK2 - 1), *, ERR = 40) KMOD
         KMOD = IABS(KMOD)
         KMODP = MOD(KMOD + KDEL, 100)
-        IF(KBRACK1.GE.2) THEN
+        IF(KBRACK1 >= 2) THEN
             NAME = NAME(1:KBRACK1 - 1)
         ELSE
             NAME = ' '
         ENDIF
         CALL STRIP(NAME, NNAME)
-    ELSEIF(KMOD0.GT.0) THEN
+    ELSEIF(KMOD0 > 0) THEN
         KMODP = MOD(KMOD0, 100)
     ELSE
         KMODP = 0
     ENDIF
     !
-    IF    (KMODP.GE.10) THEN
+    IF    (KMODP >= 10) THEN
         NAMDEF = NAME(1:NNAME) // ' [  ]'
         WRITE(NAMDEF(NNAME + 3:NNAME + 4), 1020) KMODP
         1020  FORMAT(I2)
-    ELSEIF(KMODP.GE. 1) THEN
+    ELSEIF(KMODP >= 1) THEN
         NAMDEF = NAME(1:NNAME) // ' [ ]'
         WRITE(NAMDEF(NNAME + 3:NNAME + 3), 1025) KMODP
         1025  FORMAT(I1)
@@ -1451,7 +1451,7 @@ SUBROUTINE NAMMOD(NAME, KDEL, KMOD0)
     1040 FORMAT(/' Enter airfoil name or <return> for default:  ', A)
     READ(*, 1000) NAME
     1000 FORMAT(A)
-    IF(NAME .EQ. ' ') NAME = NAMDEF
+    IF(NAME == ' ') NAME = NAMDEF
     !
     RETURN
 END
@@ -1468,11 +1468,11 @@ SUBROUTINE BLDUMP(FNAME1)
     CHARACTER*1 DELIM
     CHARACTER*256 LINE
     !
-    IF    (KDELIM.EQ.0) THEN
+    IF    (KDELIM == 0) THEN
         DELIM = ' '
-    ELSEIF(KDELIM.EQ.1) THEN
+    ELSEIF(KDELIM == 1) THEN
         DELIM = ','
-    ELSEIF(KDELIM.EQ.2) THEN
+    ELSEIF(KDELIM == 2) THEN
         DELIM = CHAR(9)
     ELSE
         WRITE(*, *) '? Illegal delimiter.  Using blank.'
@@ -1481,18 +1481,18 @@ SUBROUTINE BLDUMP(FNAME1)
     !
     1000 FORMAT(20(A))
     !
-    IF(FNAME1(1:1).NE.' ') THEN
+    IF(FNAME1(1:1) /= ' ') THEN
         FNAME = FNAME1
     ELSE
         !----- no argument... get it somehow
-        IF(NPREFIX.GT.0) THEN
+        IF(NPREFIX > 0) THEN
             !------ offer default using existing prefix
             FILDEF = PREFIX(1:NPREFIX) // '.bl'
             WRITE(*, 1100) FILDEF
             1100   FORMAT(/' Enter filename:  ', A)
             READ(*, 1000) FNAME
             CALL STRIP(FNAME, NFN)
-            IF(NFN.EQ.0) FNAME = FILDEF
+            IF(NFN == 0) FNAME = FILDEF
         ELSE
             !------ nothing available... just ask for filename
             CALL ASKS('Enter filename^', FNAME)
@@ -1503,7 +1503,7 @@ SUBROUTINE BLDUMP(FNAME1)
     OPEN(LU, FILE = FNAME, STATUS = 'UNKNOWN')
     REWIND(LU)
     !
-    IF(KDELIM.EQ.0) THEN
+    IF(KDELIM == 0) THEN
         WRITE(LU, 1000)&
                 '#    s        x        y     Ue/Vinf    Dstar     Theta ', &
                 '     Cf       H'&
@@ -1526,10 +1526,10 @@ SUBROUTINE BLDUMP(FNAME1)
     !
     DO 10 I = 1, N
         IS = 1
-        IF(GAM(I) .LT. 0.0) IS = 2
+        IF(GAM(I) < 0.0) IS = 2
         !
         IF(LIPAN .AND. LVISC) THEN
-            IF(IS.EQ.1) THEN
+            IF(IS == 1) THEN
                 IBL = IBLTE(IS) - I + 1
             ELSE
                 IBL = IBLTE(IS) + I - N
@@ -1539,7 +1539,7 @@ SUBROUTINE BLDUMP(FNAME1)
             TS = TSTR(IBL, IS)
             CF = TAU(IBL, IS) / (0.5 * QINF**2)
             CDIS = DIS(IBL, IS) / (QINF**3)
-            IF(TH.EQ.0.0) THEN
+            IF(TH == 0.0) THEN
                 H = 1.0
                 HS = 1.0
             ELSE
@@ -1558,7 +1558,7 @@ SUBROUTINE BLDUMP(FNAME1)
         AMSQ = UE * UE * HSTINV / (GAMM1 * (1.0 - 0.5 * UE * UE * HSTINV))
         CALL HKIN(H, AMSQ, HK, DUMMY, DUMMY)
         !
-        IF(KDELIM.EQ.0) THEN
+        IF(KDELIM == 0) THEN
             WRITE(LU, 8500) S(I), X(I), Y(I), UE, DS, TH, CF, HK&
                     , HS, TH * UE**2, DS * UE, TS * UE**3
             !    &     TAU(IBL,IS), DIS(IBL,IS), cdis
@@ -1595,7 +1595,7 @@ SUBROUTINE BLDUMP(FNAME1)
             AMSQ = UE * UE * HSTINV / (GAMM1 * (1.0 - 0.5 * UE * UE * HSTINV))
             CALL HKIN(H, AMSQ, HK, DUMMY, DUMMY)
             !
-            IF(KDELIM.EQ.0) THEN
+            IF(KDELIM == 0) THEN
                 WRITE(LU, 8500) S(I), X(I), Y(I), UE, DS, TH, CF, HK
                 !
             ELSE
@@ -1632,11 +1632,11 @@ SUBROUTINE BLDUMP2(FNAME1)
     !
     REAL PTAU(IVX, ISX), EDIS(IVX, ISX)
     !
-    IF    (KDELIM.EQ.0) THEN
+    IF    (KDELIM == 0) THEN
         DELIM = ' '
-    ELSEIF(KDELIM.EQ.1) THEN
+    ELSEIF(KDELIM == 1) THEN
         DELIM = ','
-    ELSEIF(KDELIM.EQ.2) THEN
+    ELSEIF(KDELIM == 2) THEN
         DELIM = CHAR(9)
     ELSE
         WRITE(*, *) '? Illegal delimiter.  Using blank.'
@@ -1645,18 +1645,18 @@ SUBROUTINE BLDUMP2(FNAME1)
     !
     1000 FORMAT(20(A))
     !
-    IF(FNAME1(1:1).NE.' ') THEN
+    IF(FNAME1(1:1) /= ' ') THEN
         FNAME = FNAME1
     ELSE
         !----- no argument... get it somehow
-        IF(NPREFIX.GT.0) THEN
+        IF(NPREFIX > 0) THEN
             !------ offer default using existing prefix
             FILDEF = PREFIX(1:NPREFIX) // '.bl'
             WRITE(*, 1100) FILDEF
             1100   FORMAT(/' Enter filename:  ', A)
             READ(*, 1000) FNAME
             CALL STRIP(FNAME, NFN)
-            IF(NFN.EQ.0) FNAME = FILDEF
+            IF(NFN == 0) FNAME = FILDEF
         ELSE
             !------ nothing available... just ask for filename
             CALL ASKS('Enter filename^', FNAME)
@@ -1715,29 +1715,29 @@ SUBROUTINE BLDUMP2(FNAME1)
         DO 210 IBL = 2, NBL(IS)
             I = IPAN(IBL, IS)
 
-            IF(IBL.EQ.2) THEN
+            IF(IBL == 2) THEN
                 IBLM = IBL
             ELSE
                 IBLM = IBL - 1
             ENDIF
 
-            IF(IBL.EQ.IBLTE(IS)) THEN
+            IF(IBL == IBLTE(IS)) THEN
                 IBLP = IBL
             ELSE
                 IBLP = IBL + 1
             ENDIF
 
-            IF(IS.EQ.2) THEN
-                IF(IBL.EQ.IBLTE(IS) + 1) THEN
+            IF(IS == 2) THEN
+                IF(IBL == IBLTE(IS) + 1) THEN
                     IBLM = IBL
                 ENDIF
-                IF(IBL.EQ.NBL(IS)) THEN
+                IF(IBL == NBL(IS)) THEN
                     IBLP = IBL
                 ENDIF
             ENDIF
 
             XS = XSSI(IBL, IS)
-            IF(IS.EQ.2 .AND. IBL.GT.IBLTE(2)) THEN
+            IF(IS == 2 .AND. IBL > IBLTE(2)) THEN
                 XS = XS - XSSI(IBLTE(2), 2) + XSSI(IBLTE(1), 1)
             ENDIF
 
@@ -1755,7 +1755,7 @@ SUBROUTINE BLDUMP2(FNAME1)
                 DPREI = (1.0 - UE**2) * 0.5
                 HAVG = 0.5 * (DS / TH + 1.0)
                 SQFAC = UE**HAVG
-                IF(TH.EQ.0.0) THEN
+                IF(TH == 0.0) THEN
                     H = 1.0
                     HS = 1.0
                 ELSE
@@ -1817,11 +1817,11 @@ SUBROUTINE BLDUMP2(FNAME1)
                     F11.7, &
                     F11.3)
             !
-            IF(IS.EQ.2 .AND. IBL.EQ.IBLTE(2)) THEN
+            IF(IS == 2 .AND. IBL == IBLTE(2)) THEN
                 WRITE(LU, *)
             ENDIF
         210  CONTINUE
-        IF(IS.EQ.1) THEN
+        IF(IS == 1) THEN
             WRITE(LU, *)
         ENDIF
 
@@ -1843,11 +1843,11 @@ SUBROUTINE CPDUMP(FNAME1)
     CHARACTER*1 DELIM
     CHARACTER*128 LINE
     !
-    IF    (KDELIM.EQ.0) THEN
+    IF    (KDELIM == 0) THEN
         DELIM = ' '
-    ELSEIF(KDELIM.EQ.1) THEN
+    ELSEIF(KDELIM == 1) THEN
         DELIM = ','
-    ELSEIF(KDELIM.EQ.2) THEN
+    ELSEIF(KDELIM == 2) THEN
         DELIM = CHAR(9)
     ELSE
         WRITE(*, *) '? Illegal delimiter.  Using blank.'
@@ -1856,18 +1856,18 @@ SUBROUTINE CPDUMP(FNAME1)
     !
     1000 FORMAT(8A)
     !
-    IF(FNAME1(1:1).NE.' ') THEN
+    IF(FNAME1(1:1) /= ' ') THEN
         FNAME = FNAME1
     ELSE
         !----- no argument... get it somehow
-        IF(NPREFIX.GT.0) THEN
+        IF(NPREFIX > 0) THEN
             !------ offer default using existing prefix
             FILDEF = PREFIX(1:NPREFIX) // '.cp'
             WRITE(*, 1100) FILDEF
             1100   FORMAT(/' Enter filename:  ', A)
             READ(*, 1000) FNAME
             CALL STRIP(FNAME, NFN)
-            IF(NFN.EQ.0) FNAME = FILDEF
+            IF(NFN == 0) FNAME = FILDEF
         ELSE
             !------ nothing available... just ask for filename
             CALL ASKS('Enter filename^', FNAME)
@@ -1879,7 +1879,7 @@ SUBROUTINE CPDUMP(FNAME1)
     OPEN(LU, FILE = FNAME, STATUS = 'UNKNOWN')
     REWIND(LU)
     !
-    IF(KDELIM.EQ.0) THEN
+    IF(KDELIM == 0) THEN
         WRITE(LU, 1000)&
                 '#      x          Cp  '
         !            0.23451    0.23451
@@ -1900,7 +1900,7 @@ SUBROUTINE CPDUMP(FNAME1)
         DEN = BETA + BFAC * CPINC
         CPCOM = CPINC / DEN
         !
-        IF(KDELIM.EQ.0) THEN
+        IF(KDELIM == 0) THEN
             WRITE(LU, 8500) X(I), CPCOM
             8500    FORMAT(1X, 2F11.5)
         ELSE
@@ -1954,7 +1954,7 @@ SUBROUTINE MHINGE
     !
     !---- integrate pressures on top and bottom sides of flap
     DO 20 I = 2, N
-        IF(S(I - 1).GE.TOPS .AND. S(I).LE.BOTS) GO TO 20
+        IF(S(I - 1) >= TOPS .AND. S(I) <= BOTS) GO TO 20
         !
         DX = X(I) - X(I - 1)
         DY = Y(I) - Y(I - 1)
@@ -1972,7 +1972,7 @@ SUBROUTINE MHINGE
     !
     !---- find S(I)..S(I-1) interval containing s=TOPS
     DO I = 2, N
-        IF(S(I).GT.TOPS) GO TO 31
+        IF(S(I) > TOPS) GO TO 31
     ENDDO
     !
     31 CONTINUE
@@ -1981,7 +1981,7 @@ SUBROUTINE MHINGE
     DY = TOPY - Y(I - 1)
     XMID = 0.5 * (TOPX + X(I - 1)) - XOF
     YMID = 0.5 * (TOPY + Y(I - 1)) - YOF
-    IF(S(I) .NE. S(I - 1)) THEN
+    IF(S(I) /= S(I - 1)) THEN
         FRAC = (TOPS - S(I - 1)) / (S(I) - S(I - 1))
     ELSE
         FRAC = 0.
@@ -2008,7 +2008,7 @@ SUBROUTINE MHINGE
     !
     !---- find S(I)..S(I-1) interval containing s=BOTS
     DO I = N, 2, -1
-        IF(S(I - 1).LT.BOTS) GO TO 41
+        IF(S(I - 1) < BOTS) GO TO 41
     ENDDO
     !
     41 CONTINUE
@@ -2017,7 +2017,7 @@ SUBROUTINE MHINGE
     DY = Y(I) - BOTY
     XMID = 0.5 * (BOTX + X(I)) - XOF
     YMID = 0.5 * (BOTY + Y(I)) - YOF
-    IF(S(I) .NE. S(I - 1)) THEN
+    IF(S(I) /= S(I - 1)) THEN
         FRAC = (BOTS - S(I - 1)) / (S(I) - S(I - 1))
     ELSE
         FRAC = 0.
@@ -2114,11 +2114,11 @@ SUBROUTINE VPAR
     CALL GETFLT(COMARG, RINPUT, NINPUT, ERROR)
     !
     !--------------------------------------------------------------
-    IF(COMAND.EQ.'    ') THEN
+    IF(COMAND == '    ') THEN
         RETURN
         !
         !--------------------------------------------------------------
-    ELSEIF(COMAND.EQ.'?   ') THEN
+    ELSEIF(COMAND == '?   ') THEN
         WRITE(*, 1050)
         1050  FORMAT(&
                 /'   <cr>    Return to OPER menu'&
@@ -2136,17 +2136,17 @@ SUBROUTINE VPAR
                 /'   REST    restore BL calibration to baseline')
         !
         !--------------------------------------------------------------
-    ELSEIF(COMAND.EQ.'SHOW') THEN
+    ELSEIF(COMAND == 'SHOW') THEN
         GO TO 10
         !
         !--------------------------------------------------------------
-    ELSEIF(COMAND.EQ.'XTR ' .OR.&
-            COMAND.EQ.'X   ') THEN
+    ELSEIF(COMAND == 'XTR ' .OR.&
+            COMAND == 'X   ') THEN
         IF(LPACC .AND. LVISC) THEN
             WRITE(*, 2100)
             GO TO 500
         ENDIF
-        IF(NINPUT.GE.2) THEN
+        IF(NINPUT >= 2) THEN
             XSTRIP(1) = RINPUT(1)
             XSTRIP(2) = RINPUT(2)
         ELSE
@@ -2156,12 +2156,12 @@ SUBROUTINE VPAR
         LVCONV = .FALSE.
         !
         !--------------------------------------------------------------
-    ELSEIF(COMAND.EQ.'N   ') THEN
+    ELSEIF(COMAND == 'N   ') THEN
         IF(LPACC .AND. LVISC) THEN
             WRITE(*, 2100)
             GO TO 500
         ENDIF
-        IF    (NINPUT.GE.1) THEN
+        IF    (NINPUT >= 1) THEN
             ACRIT(1) = RINPUT(1)
             ACRIT(2) = RINPUT(1)
         ELSE
@@ -2171,12 +2171,12 @@ SUBROUTINE VPAR
         LVCONV = .FALSE.
         !
         !--------------------------------------------------------------
-    ELSEIF(COMAND.EQ.'NT  ') THEN
+    ELSEIF(COMAND == 'NT  ') THEN
         IF(LPACC .AND. LVISC) THEN
             WRITE(*, 2100)
             GO TO 500
         ENDIF
-        IF(NINPUT.GE.1) THEN
+        IF(NINPUT >= 1) THEN
             ACRIT(1) = RINPUT(1)
         ELSE
             CALL ASKR('Enter top-surface critical amplification^', ACRIT(1))
@@ -2184,12 +2184,12 @@ SUBROUTINE VPAR
         LVCONV = .FALSE.
         !
         !--------------------------------------------------------------
-    ELSEIF(COMAND.EQ.'NB  ') THEN
+    ELSEIF(COMAND == 'NB  ') THEN
         IF(LPACC .AND. LVISC) THEN
             WRITE(*, 2100)
             GO TO 500
         ENDIF
-        IF(NINPUT.GE.1) THEN
+        IF(NINPUT >= 1) THEN
             ACRIT(2) = RINPUT(1)
         ELSE
             CALL ASKR('Enter bot-surface critical amplification^', ACRIT(2))
@@ -2197,19 +2197,19 @@ SUBROUTINE VPAR
         LVCONV = .FALSE.
         !
         !--------------------------------------------------------------
-    ELSEIF(COMAND.EQ.'VACC' .OR.&
-            COMAND.EQ.'V   ') THEN
-        IF(NINPUT.GE.1) THEN
+    ELSEIF(COMAND == 'VACC' .OR.&
+            COMAND == 'V   ') THEN
+        IF(NINPUT >= 1) THEN
             VACCEL = RINPUT(1)
         ELSE
             CALL ASKR('Enter viscous acceleration parameter^', VACCEL)
         ENDIF
         !
         !--------------------------------------------------------------
-    ELSEIF(COMAND.EQ.'WAKE' .OR.&
-            COMAND.EQ.'W   ') THEN
+    ELSEIF(COMAND == 'WAKE' .OR.&
+            COMAND == 'W   ') THEN
         WAKLEN0 = WAKLEN
-        IF(NINPUT.GE.1) THEN
+        IF(NINPUT >= 1) THEN
             WAKLEN = RINPUT(1)
         ELSE
             CALL ASKR('Enter wake length/chord^', WAKLEN)
@@ -2220,19 +2220,19 @@ SUBROUTINE VPAR
         LIPAN = .FALSE.
         !
         !--------------------------------------------------------------
-    ELSEIF(COMAND.EQ.'INIT') THEN
+    ELSEIF(COMAND == 'INIT') THEN
         LBLINI = .NOT.LBLINI
         IF(.NOT.LBLINI) WRITE(*, *)'BLs will be initialized on next point'
         IF(LBLINI) WRITE(*, *)'BLs are assumed to be initialized'
         IF(.NOT.LBLINI) LIPAN = .FALSE.
         !
         !--------------------------------------------------------------
-    ELSEIF(COMAND.EQ.'LAG ') THEN
+    ELSEIF(COMAND == 'LAG ') THEN
         IF(LPACC .AND. LVISC) THEN
             WRITE(*, 2100)
             GO TO 500
         ENDIF
-        IF(NINPUT.GE.3) THEN
+        IF(NINPUT >= 3) THEN
             SCCON = RINPUT(1)
             DUXCON = RINPUT(2)
             DLCON = RINPUT(3)
@@ -2243,12 +2243,12 @@ SUBROUTINE VPAR
         ENDIF
         !
         !--------------------------------------------------------------
-    ELSEIF(COMAND.EQ.'GB  ') THEN
+    ELSEIF(COMAND == 'GB  ') THEN
         IF(LPACC .AND. LVISC) THEN
             WRITE(*, 2100)
             GO TO 500
         ENDIF
-        IF(NINPUT.GE.2) THEN
+        IF(NINPUT >= 2) THEN
             GACON = RINPUT(1)
             GBCON = RINPUT(2)
         ELSE
@@ -2258,12 +2258,12 @@ SUBROUTINE VPAR
         CTCON = 0.5 / (GACON**2 * GBCON)
         !
         !--------------------------------------------------------------
-    ELSEIF(COMAND.EQ.'CTR ') THEN
+    ELSEIF(COMAND == 'CTR ') THEN
         IF(LPACC .AND. LVISC) THEN
             WRITE(*, 2100)
             GO TO 500
         ENDIF
-        IF(NINPUT.GE.2) THEN
+        IF(NINPUT >= 2) THEN
             CTRCON = RINPUT(1)
             CTRCEX = RINPUT(2)
         ELSE
@@ -2272,15 +2272,15 @@ SUBROUTINE VPAR
         ENDIF
         !
         !--------------------------------------------------------------
-    ELSEIF(COMAND.EQ.'CFAC') THEN
-        IF(NINPUT.GE.1) THEN
+    ELSEIF(COMAND == 'CFAC') THEN
+        IF(NINPUT >= 1) THEN
             CFFAC = RINPUT(1)
         ELSE
             CALL ASKR('Enter Cf scaling factor^', CFFAC)
         ENDIF
         !
         !--------------------------------------------------------------
-    ELSEIF(COMAND.EQ.'REST') THEN
+    ELSEIF(COMAND == 'REST') THEN
         IF(LPACC .AND. LVISC) THEN
             WRITE(*, 2100)
             GO TO 500
@@ -2356,7 +2356,7 @@ SUBROUTINE SPECAL
             CALL MRCL(CLM, MINF_CLM, REINF_CLM)
             !
             !-------- if Mach is OK, go do next Newton iteration
-            IF(MATYP.EQ.1 .OR. MINF.EQ.0.0 .OR. MINF_CLM.NE.0.0) GO TO 91
+            IF(MATYP == 1 .OR. MINF == 0.0 .OR. MINF_CLM /= 0.0) GO TO 91
             !
             RLX = 0.5 * RLX
         90   CONTINUE
@@ -2367,7 +2367,7 @@ SUBROUTINE SPECAL
         CALL CLCALC(N, X, Y, GAM, GAM_A, ALFA, MINF, QINF, XCMREF, YCMREF, &
                 CL, CM, CDP, CL_ALF, CL_MSQ)
         !
-        IF(ABS(DCLM).LE.1.0E-6) GO TO 110
+        IF(ABS(DCLM) <= 1.0E-6) GO TO 110
         !
     100 CONTINUE
     WRITE(*, *) 'SPECAL:  Minf convergence failed'
@@ -2439,7 +2439,7 @@ SUBROUTINE SPECCL
         CALL CLCALC(N, X, Y, GAM, GAM_A, ALFA, MINF, QINF, XCMREF, YCMREF, &
                 CL, CM, CDP, CL_ALF, CL_MSQ)
         !
-        IF(ABS(DALFA).LE.1.0E-6) GO TO 110
+        IF(ABS(DALFA) <= 1.0E-6) GO TO 110
     100 CONTINUE
     WRITE(*, *) 'SPECCL:  CL convergence failed'
     110 CONTINUE
@@ -2535,7 +2535,7 @@ SUBROUTINE VISCAL(NITER1)
     IF(.NOT.LWDIJ .OR. .NOT.LADIJ) CALL QDCALC
     !
     !---- Newton iteration for entire BL solution
-    IF(NITER.EQ.0) CALL ASKI('Enter number of iterations^', NITER)
+    IF(NITER == 0) CALL ASKI('Enter number of iterations^', NITER)
     WRITE(*, *)
     WRITE(*, *) 'Solving BL system ...'
     DO 1000 ITER = 1, NITER
@@ -2574,16 +2574,16 @@ SUBROUTINE VISCAL(NITER1)
         CALL CDCALC
         !
         !------ display changes and test for convergence
-        IF(RLX.LT.1.0)&
+        IF(RLX < 1.0)&
                 WRITE(*, 2000) ITER, RMSBL, RMXBL, VMXBL, IMXBL, ISMXBL, RLX
-        IF(RLX.EQ.1.0)&
+        IF(RLX == 1.0)&
                 WRITE(*, 2010) ITER, RMSBL, RMXBL, VMXBL, IMXBL, ISMXBL
         CDPDIF = CD - CDF
         WRITE(*, 2020) ALFA / DTOR, CL, CM, CD, CDF, CDPDIF
         !         CDSURF = CDP + CDF
         !         WRITE(*,2025) CDSURF, CDF, CDP
 
-        IF(RMSBL .LT. EPS1) THEN
+        IF(RMSBL < EPS1) THEN
             LVCONV = .TRUE.
             AVISC = ALFA
             MVISC = MINF
@@ -2606,15 +2606,15 @@ SUBROUTINE VISCAL(NITER1)
     do ibl = 2, iblte(is)
         hki = dstr(ibl, is) / thet(ibl, is)
         hkmax = max(hki, hkmax)
-        if(hkm .lt. 4.0 .and.&
-                hki .ge. 4.0) then
+        if(hkm < 4.0 .and.&
+                hki >= 4.0) then
             hfrac = (4.0 - hkm) / (hki - hkm)
             pdefm = uedg(ibl - 1, is)**2 * thet(ibl - 1, is)
             pdefi = uedg(ibl, is)**2 * thet(ibl, is)
             psep = pdefm * (1.0 - hfrac) + pdefi * hfrac
         endif
-        if(hkm .gt. 4.0 .and.&
-                hki .lt. 4.0) then
+        if(hkm > 4.0 .and.&
+                hki < 4.0) then
             hfrac = (4.0 - hkm) / (hki - hkm)
             pdefm = uedg(ibl - 1, is)**2 * thet(ibl - 1, is)
             pdefi = uedg(ibl, is)**2 * thet(ibl, is)

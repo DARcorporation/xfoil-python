@@ -26,7 +26,7 @@ SUBROUTINE APCALC
     DO 10 I = 1, N - 1
         SX = X(I + 1) - X(I)
         SY = Y(I + 1) - Y(I)
-        IF(SX.EQ.0.0 .AND. SY.EQ.0.0) THEN
+        IF(SX == 0.0 .AND. SY == 0.0) THEN
             APANEL(I) = ATAN2(-NY(I), -NX(I))
         ELSE
             APANEL(I) = ATAN2(SX, -SY)
@@ -55,7 +55,7 @@ SUBROUTINE NCALC(X, Y, S, N, XN, YN)
     !---------------------------------------
     DIMENSION X(N), Y(N), S(N), XN(N), YN(N)
     !
-    IF(N.LE.1) RETURN
+    IF(N <= 1) RETURN
     !
     CALL SEGSPL(X, XN, S, N)
     CALL SEGSPL(Y, YN, S, N)
@@ -63,7 +63,7 @@ SUBROUTINE NCALC(X, Y, S, N, XN, YN)
         SX = YN(I)
         SY = -XN(I)
         SMOD = SQRT(SX * SX + SY * SY)
-        IF(SMOD .EQ. 0.0) THEN
+        IF(SMOD == 0.0) THEN
             XN(I) = -1.0
             YN(I) = 0.0
         ELSE
@@ -74,11 +74,11 @@ SUBROUTINE NCALC(X, Y, S, N, XN, YN)
     !
     !---- average normal vectors at corner points
     DO 20 I = 1, N - 1
-        IF(S(I) .EQ. S(I + 1)) THEN
+        IF(S(I) == S(I + 1)) THEN
             SX = 0.5 * (XN(I) + XN(I + 1))
             SY = 0.5 * (YN(I) + YN(I + 1))
             SMOD = SQRT(SX * SX + SY * SY)
-            IF(SMOD .EQ. 0.0) THEN
+            IF(SMOD == 0.0) THEN
                 XN(I) = -1.0
                 YN(I) = 0.0
                 XN(I + 1) = -1.0
@@ -165,19 +165,19 @@ SUBROUTINE PSILIN(I, XI, YI, NXI, NYI, PSI, PSI_NI, GEOLIN, SIGLIN)
         JM = JO - 1
         JQ = JP + 1
         !
-        IF(JO.EQ.1) THEN
+        IF(JO == 1) THEN
             JM = JO
-        ELSE IF(JO.EQ.N - 1) THEN
+        ELSE IF(JO == N - 1) THEN
             JQ = JP
-        ELSE IF(JO.EQ.N) THEN
+        ELSE IF(JO == N) THEN
             JP = 1
-            IF((X(JO) - X(JP))**2 + (Y(JO) - Y(JP))**2 .LT. SEPS**2) GO TO 12
+            IF((X(JO) - X(JP))**2 + (Y(JO) - Y(JP))**2 < SEPS**2) GO TO 12
         ENDIF
         !
         DSO = SQRT((X(JO) - X(JP))**2 + (Y(JO) - Y(JP))**2)
         !
         !------ skip null panel
-        IF(DSO .EQ. 0.0) GO TO 10
+        IF(DSO == 0.0) GO TO 10
         !
         DSIO = 1.0 / DSO
         !
@@ -199,7 +199,7 @@ SUBROUTINE PSILIN(I, XI, YI, NXI, NYI, PSI, PSI_NI, GEOLIN, SIGLIN)
         RS2 = RX2 * RX2 + RY2 * RY2
         !
         !------ set reflection flag SGN to avoid branch problems with arctan
-        IF(IO.GE.1 .AND. IO.LE.N) THEN
+        IF(IO >= 1 .AND. IO <= N) THEN
             !------- no problem on airfoil surface
             SGN = 1.0
         ELSE
@@ -208,7 +208,7 @@ SUBROUTINE PSILIN(I, XI, YI, NXI, NYI, PSI, PSI_NI, GEOLIN, SIGLIN)
         ENDIF
         !
         !------ set log(r^2) and arctan(x/y), correcting for reflection if any
-        IF(IO.NE.JO .AND. RS1.GT.0.0) THEN
+        IF(IO /= JO .AND. RS1 > 0.0) THEN
             G1 = LOG(RS1)
             T1 = ATAN2(SGN * X1, SGN * YY) + (0.5 - 0.5 * SGN) * PI
         ELSE
@@ -216,7 +216,7 @@ SUBROUTINE PSILIN(I, XI, YI, NXI, NYI, PSI, PSI_NI, GEOLIN, SIGLIN)
             T1 = 0.0
         ENDIF
         !
-        IF(IO.NE.JP .AND. RS2.GT.0.0) THEN
+        IF(IO /= JP .AND. RS2 > 0.0) THEN
             G2 = LOG(RS2)
             T2 = ATAN2(SGN * X2, SGN * YY) + (0.5 - 0.5 * SGN) * PI
         ELSE
@@ -242,7 +242,7 @@ SUBROUTINE PSILIN(I, XI, YI, NXI, NYI, PSI, PSI_NI, GEOLIN, SIGLIN)
             YYP = -((RX1 - X1 * SY) * NYP - (RY1 + X1 * SX) * NXP) * DSIO
         ENDIF
         !
-        IF(JO.EQ.N) GO TO 11
+        IF(JO == N) GO TO 11
         !
         IF(SIGLIN) THEN
             !
@@ -495,19 +495,19 @@ SUBROUTINE PSILIN(I, XI, YI, NXI, NYI, PSI, PSI_NI, GEOLIN, SIGLIN)
         JM = JO - 1
         JQ = JP + 1
         !
-        IF(JO.EQ.1) THEN
+        IF(JO == 1) THEN
             JM = JO
-        ELSE IF(JO.EQ.N - 1) THEN
+        ELSE IF(JO == N - 1) THEN
             JQ = JP
-        ELSE IF(JO.EQ.N) THEN
+        ELSE IF(JO == N) THEN
             JP = 1
-            IF((X(JO) - X(JP))**2 + (Y(JO) - Y(JP))**2 .LT. SEPS**2) GO TO 22
+            IF((X(JO) - X(JP))**2 + (Y(JO) - Y(JP))**2 < SEPS**2) GO TO 22
         ENDIF
         !
         DSO = SQRT((X(JO) - X(JP))**2 + (Y(JO) - Y(JP))**2)
         !
         !------ skip null panel
-        IF(DSO .EQ. 0.0) GO TO 20
+        IF(DSO == 0.0) GO TO 20
         !
         DSIO = 1.0 / DSO
         !
@@ -535,7 +535,7 @@ SUBROUTINE PSILIN(I, XI, YI, NXI, NYI, PSI, PSI_NI, GEOLIN, SIGLIN)
         RS2 = RX2 * RX2 + RY2 * RY2
         !
         !------ set reflection flag SGN to avoid branch problems with arctan
-        IF(IO.GE.1 .AND. IO.LE.N) THEN
+        IF(IO >= 1 .AND. IO <= N) THEN
             !------- no problem on airfoil surface
             SGN = 1.0
         ELSE
@@ -568,7 +568,7 @@ SUBROUTINE PSILIN(I, XI, YI, NXI, NYI, PSI, PSI_NI, GEOLIN, SIGLIN)
             YYP = -((RX1 - X1 * SY) * NYP - (RY1 + X1 * SX) * NXP) * DSIO
         ENDIF
         !
-        IF(JO.EQ.N) GO TO 21
+        IF(JO == N) GO TO 21
         !
         IF(SIGLIN) THEN
             !
@@ -832,9 +832,9 @@ SUBROUTINE PSWLIN(I, XI, YI, NXI, NYI, PSI, PSI_NI)
         !
         JM = JO - 1
         JQ = JP + 1
-        IF(JO.EQ.N + 1) THEN
+        IF(JO == N + 1) THEN
             JM = JO
-        ELSE IF(JO.EQ.N + NW - 1) THEN
+        ELSE IF(JO == N + NW - 1) THEN
             JQ = JP
         ENDIF
         !
@@ -858,13 +858,13 @@ SUBROUTINE PSWLIN(I, XI, YI, NXI, NYI, PSI, PSI_NI)
         RS1 = RX1 * RX1 + RY1 * RY1
         RS2 = RX2 * RX2 + RY2 * RY2
         !
-        IF(IO.GE.N + 1 .AND. IO.LE.N + NW) THEN
+        IF(IO >= N + 1 .AND. IO <= N + NW) THEN
             SGN = 1.0
         ELSE
             SGN = SIGN(1.0, YY)
         ENDIF
         !
-        IF(IO.NE.JO .AND. RS1.GT.0.0) THEN
+        IF(IO /= JO .AND. RS1 > 0.0) THEN
             G1 = LOG(RS1)
             T1 = ATAN2(SGN * X1, SGN * YY) - (0.5 - 0.5 * SGN) * PI
         ELSE
@@ -872,7 +872,7 @@ SUBROUTINE PSWLIN(I, XI, YI, NXI, NYI, PSI, PSI_NI)
             T1 = 0.0
         ENDIF
         !
-        IF(IO.NE.JP .AND. RS2.GT.0.0) THEN
+        IF(IO /= JP .AND. RS2 > 0.0) THEN
             G2 = LOG(RS2)
             T2 = ATAN2(SGN * X2, SGN * YY) - (0.5 - 0.5 * SGN) * PI
         ELSE
@@ -1275,7 +1275,7 @@ SUBROUTINE XYWAKE
     !
     !---- number of wake points
     NW = N / 12 + 10 * INT(WAKLEN)
-    IF(NW.GT.IWX) THEN
+    IF(NW > IWX) THEN
         WRITE(*, *)&
                 'Array size (IWX) too small.  Last wake point index reduced.'
         NW = IWX
@@ -1325,7 +1325,7 @@ SUBROUTINE XYWAKE
         Y(I) = Y(I - 1) + DS * NX(I)
         S(I) = S(I - 1) + DS
         !
-        IF(I.EQ.N + NW) GO TO 10
+        IF(I == N + NW) GO TO 10
         !
         !------- calculate normal vector for next point
         CALL PSILIN(I, X(I), Y(I), 1.0, 0.0, PSI, PSI_X, .FALSE., .FALSE.)
@@ -1358,7 +1358,7 @@ SUBROUTINE STFIND
     INCLUDE 'XFOIL.INC'
     !
     DO 10 I = 1, N - 1
-        IF(GAM(I).GE.0.0 .AND. GAM(I + 1).LT.0.0) GO TO 11
+        IF(GAM(I) >= 0.0 .AND. GAM(I + 1) < 0.0) GO TO 11
     10 CONTINUE
     !
     WRITE(*, *) 'STFIND: Stagnation point not found. Continuing ...'
@@ -1371,15 +1371,15 @@ SUBROUTINE STFIND
     DS = S(I + 1) - S(I)
     !
     !---- evaluate so as to minimize roundoff for very small GAM(I) or GAM(I+1)
-    IF(GAM(I) .LT. -GAM(I + 1)) THEN
+    IF(GAM(I) < -GAM(I + 1)) THEN
         SST = S(I) - DS * (GAM(I) / DGAM)
     ELSE
         SST = S(I + 1) - DS * (GAM(I + 1) / DGAM)
     ENDIF
     !
     !---- tweak stagnation point if it falls right on a node (very unlikely)
-    IF(SST .LE. S(I)) SST = S(I) + 1.0E-7
-    IF(SST .GE. S(I + 1)) SST = S(I + 1) - 1.0E-7
+    IF(SST <= S(I)) SST = S(I) + 1.0E-7
+    IF(SST >= S(I + 1)) SST = S(I + 1) - 1.0E-7
     !
     SST_GO = (SST - S(I + 1)) / DGAM
     SST_GP = (S(I) - SST) / DGAM
@@ -1437,7 +1437,7 @@ SUBROUTINE IBLPAN
     !
     !
     IBLMAX = MAX(IBLTE(1), IBLTE(2)) + NW
-    IF(IBLMAX.GT.IVX) THEN
+    IF(IBLMAX > IVX) THEN
         WRITE(*, *) ' ***  BL array overflow.'
         WRITE(*, *) ' ***  Increase IVX to at least', IBLMAX
         STOP
@@ -1527,7 +1527,7 @@ SUBROUTINE XICALC
             IBL = IBLTE(IS) + IW
             ZN = 1.0 - (XSSI(IBL, IS) - XSSI(IBLTE(IS), IS)) / (TELRAT * ANTE)
             WGAP(IW) = 0.
-            IF(ZN.GE.0.0) WGAP(IW) = ANTE * (AA + BB * ZN) * ZN**2
+            IF(ZN >= 0.0) WGAP(IW) = ANTE * (AA + BB * ZN) * ZN**2
         35  CONTINUE
     ENDIF
     !
@@ -1631,7 +1631,7 @@ SUBROUTINE STMOVE
     ISTOLD = IST
     CALL STFIND
     !
-    IF(ISTOLD.EQ.IST) THEN
+    IF(ISTOLD == IST) THEN
         !
         !----- recalculate new arc length array
         CALL XICALC
@@ -1652,7 +1652,7 @@ SUBROUTINE STMOVE
         !----- set  BL position -> system line  pointers
         CALL IBLSYS
         !
-        IF(IST.GT.ISTOLD) THEN
+        IF(IST > ISTOLD) THEN
             !------ increase in number of points on top side (IS=1)
             IDIF = IST - ISTOLD
             !
@@ -1730,7 +1730,7 @@ SUBROUTINE STMOVE
         DO IS = 1, 2
             DO IBL = 2, NBL(IS)
                 I = IPAN(IBL, IS)
-                IF(UEDG(IBL, IS).LE.UEPS) THEN
+                IF(UEDG(IBL, IS) <= UEPS) THEN
                     UEDG(IBL, IS) = UEPS
                     QVIS(I) = VTI(IBL, IS) * UEPS
                     GAM(I) = VTI(IBL, IS) * UEPS

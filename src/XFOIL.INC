@@ -259,7 +259,7 @@ EQUIVALENCE (VM(1, 1, 1), BIJ(1, 1)), (VM(1, 1, IZX / 2), CIJ(1, 1))
 !   SIGTE_A     dSIGTE/dALFA
 !   DSTE        TE panel length
 !   ANTE,ASTE   projected TE thickness perp.,para. to TE bisector
-!   SHARP       .TRUE.  if  DSTE.EQ.0.0 ,  .FALSE. otherwise
+!   SHARP       .TRUE.  if  DSTE == 0.0 ,  .FALSE. otherwise
 !
 !   SSPEC(.)    normalized arc length around airfoil (QSPEC coordinate)
 !   XSPOC(.)    x/c at SSPEC points

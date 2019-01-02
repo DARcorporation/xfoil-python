@@ -45,13 +45,13 @@ SUBROUTINE LEFIND(SLE, X, XP, Y, YP, S, N)
         DX = X(I + 1) - X(I)
         DY = Y(I + 1) - Y(I)
         DOTP = DXTE * DX + DYTE * DY
-        IF(DOTP .LT. 0.0) GO TO 11
+        IF(DOTP < 0.0) GO TO 11
     10 CONTINUE
     !
     11 SLE = S(I)
     !
     !---- check for sharp LE case
-    IF(S(I) .EQ. S(I - 1)) THEN
+    IF(S(I) == S(I - 1)) THEN
         !cc        WRITE(*,*) 'Sharp LE found at ',I,SLE
         RETURN
     ENDIF
@@ -79,7 +79,7 @@ SUBROUTINE LEFIND(SLE, X, XP, Y, YP, S, N)
         DSLE = MAX(DSLE, -0.02 * ABS(XCHORD + YCHORD))
         DSLE = MIN(DSLE, 0.02 * ABS(XCHORD + YCHORD))
         SLE = SLE + DSLE
-        IF(ABS(DSLE) .LT. DSEPS) RETURN
+        IF(ABS(DSLE) < DSEPS) RETURN
     20 CONTINUE
     WRITE(*, *) 'LEFIND:  LE point not found.  Continuing...'
     SLE = S(I)
@@ -107,7 +107,7 @@ SUBROUTINE SOPPS(SOPP, SI, X, XP, Y, YP, S, N, SLE)
     DXC = (XTE - XLE) / CHORD
     DYC = (YTE - YLE) / CHORD
     !
-    IF(SI.LT.SLE) THEN
+    IF(SI < SLE) THEN
         IN = 1
         INOPP = N
     ELSE
@@ -117,7 +117,7 @@ SUBROUTINE SOPPS(SOPP, SI, X, XP, Y, YP, S, N, SLE)
     SFRAC = (SI - SLE) / (S(IN) - SLE)
     SOPP = SLE + SFRAC * (S(INOPP) - SLE)
     !
-    IF(ABS(SFRAC) .LE. 1.0E-5) THEN
+    IF(ABS(SFRAC) <= 1.0E-5) THEN
         SOPP = SLE
         RETURN
     ENDIF
@@ -139,13 +139,13 @@ SUBROUTINE SOPPS(SOPP, SI, X, XP, Y, YP, S, N, SLE)
         RES = (XOPP - XLE) * DXC + (YOPP - YLE) * DYC - XBAR
         RESD = XOPPD * DXC + YOPPD * DYC
         !
-        IF(ABS(RES) / SLEN .LT. 1.0E-5) GO TO 305
-        IF(RESD .EQ. 0.0) GO TO 303
+        IF(ABS(RES) / SLEN < 1.0E-5) GO TO 305
+        IF(RESD == 0.0) GO TO 303
         !
         DSOPP = -RES / RESD
         SOPP = SOPP + DSOPP
         !
-        IF(ABS(DSOPP) / SLEN .LT. 1.0E-5) GO TO 305
+        IF(ABS(DSOPP) / SLEN < 1.0E-5) GO TO 305
     300  CONTINUE
     303  WRITE(*, *)&
             'SOPPS: Opposite-point location failed. Continuing...'
@@ -212,7 +212,7 @@ SUBROUTINE GEOPAR(X, XP, Y, YP, S, N, T, &
     CURVLE = CURV(SLE, X, XP, Y, YP, S, N)
     !
     RADLE = 0.0
-    IF(ABS(CURVLE) .GT. 0.001 * (S(N) - S(1))) RADLE = 1.0 / CURVLE
+    IF(ABS(CURVLE) > 0.001 * (S(N) - S(1))) RADLE = 1.0 / CURVLE
     !
     ANG1 = ATAN2(-YP(1), -XP(1))
     ANG2 = ATANC(YP(N), XP(N), ANG1)
@@ -280,7 +280,7 @@ SUBROUTINE AECALC(N, X, Y, T, ITYPE, &
     YYINT = 0.0
     !
     DO 10 IO = 1, N
-        IF(IO.EQ.N) THEN
+        IF(IO == N) THEN
             IP = 1
         ELSE
             IP = IO + 1
@@ -295,7 +295,7 @@ SUBROUTINE AECALC(N, X, Y, T, ITYPE, &
         DS = SQRT(DX * DX + DY * DY)
         SINT = SINT + DS
 
-        IF(ITYPE.EQ.1) THEN
+        IF(ITYPE == 1) THEN
             !-------- integrate over airfoil cross-section
             DA = YA * DX
             AINT = AINT + DA
@@ -319,7 +319,7 @@ SUBROUTINE AECALC(N, X, Y, T, ITYPE, &
     !
     AREA = AINT
     !
-    IF(AINT .EQ. 0.0) THEN
+    IF(AINT == 0.0) THEN
         XCEN = 0.0
         YCEN = 0.0
         EI11 = 0.0
@@ -345,12 +345,12 @@ SUBROUTINE AECALC(N, X, Y, T, ITYPE, &
     EI11 = 0.5 * (EIXX + EIYY) - SGN * SQRT(EISQ)
     EI22 = 0.5 * (EIXX + EIYY) + SGN * SQRT(EISQ)
     !
-    IF(EI11.EQ.0.0 .OR. EI22.EQ.0.0) THEN
+    IF(EI11 == 0.0 .OR. EI22 == 0.0) THEN
         !----- vanishing section stiffness
         APX1 = 0.0
         APX2 = ATAN2(1.0, 0.0)
         !
-    ELSEIF(EISQ / (EI11 * EI22) .LT. (0.001 * SINT)**4) THEN
+    ELSEIF(EISQ / (EI11 * EI22) < (0.001 * SINT)**4) THEN
         !----- rotationally-invariant section (circle, square, etc.)
         APX1 = 0.0
         APX2 = ATAN2(1.0, 0.0)
@@ -363,7 +363,7 @@ SUBROUTINE AECALC(N, X, Y, T, ITYPE, &
         C2 = EIXY
         S2 = EIXX - EI22
         !
-        IF(ABS(S1).GT.ABS(S2)) THEN
+        IF(ABS(S1) > ABS(S2)) THEN
             APX1 = ATAN2(S1, C1)
             APX2 = APX1 + 0.5 * PI
         ELSE
@@ -371,10 +371,10 @@ SUBROUTINE AECALC(N, X, Y, T, ITYPE, &
             APX1 = APX2 - 0.5 * PI
         ENDIF
 
-        IF(APX1.LT.-0.5 * PI) APX1 = APX1 + PI
-        IF(APX1.GT.+0.5 * PI) APX1 = APX1 - PI
-        IF(APX2.LT.-0.5 * PI) APX2 = APX2 + PI
-        IF(APX2.GT.+0.5 * PI) APX2 = APX2 - PI
+        IF(APX1 < -0.5 * PI) APX1 = APX1 + PI
+        IF(APX1 > +0.5 * PI) APX1 = APX1 - PI
+        IF(APX2 < -0.5 * PI) APX2 = APX2 + PI
+        IF(APX2 > +0.5 * PI) APX2 = APX2 - PI
         !
     ENDIF
     !
@@ -433,11 +433,11 @@ SUBROUTINE TCCALC(X, XP, Y, YP, S, N, &
         YC = 0.5 * (YBAR + YBAROP)
         YT = ABS(YBAR - YBAROP)
         !
-        IF(ABS(YC) .GT. ABS(CAMBR)) THEN
+        IF(ABS(YC) > ABS(CAMBR)) THEN
             CAMBR = YC
             XCAMBR = XOPP
         ENDIF
-        IF(ABS(YT) .GT. ABS(THICK)) THEN
+        IF(ABS(YT) > ABS(THICK)) THEN
             THICK = YT
             XTHICK = XOPP
         ENDIF
@@ -462,7 +462,7 @@ SUBROUTINE CANG(X, Y, N, IPRINT, IMAX, AMAX)
     IMAX = 1
     !
     !---- go over each point, calculating corner angle
-    IF(IPRINT.EQ.2) WRITE(*, 1050)
+    IF(IPRINT == 2) WRITE(*, 1050)
     DO 30 I = 2, N - 1
         DX1 = X(I) - X(I - 1)
         DY1 = Y(I) - Y(I - 1)
@@ -470,11 +470,11 @@ SUBROUTINE CANG(X, Y, N, IPRINT, IMAX, AMAX)
         DY2 = Y(I) - Y(I + 1)
         !
         !------ allow for doubled points
-        IF(DX1.EQ.0.0 .AND. DY1.EQ.0.0) THEN
+        IF(DX1 == 0.0 .AND. DY1 == 0.0) THEN
             DX1 = X(I) - X(I - 2)
             DY1 = Y(I) - Y(I - 2)
         ENDIF
-        IF(DX2.EQ.0.0 .AND. DY2.EQ.0.0) THEN
+        IF(DX2 == 0.0 .AND. DY2 == 0.0) THEN
             DX2 = X(I) - X(I + 2)
             DY2 = Y(I) - Y(I + 2)
         ENDIF
@@ -482,14 +482,14 @@ SUBROUTINE CANG(X, Y, N, IPRINT, IMAX, AMAX)
         CROSSP = (DX2 * DY1 - DY2 * DX1)&
                 / SQRT((DX1**2 + DY1**2) * (DX2**2 + DY2**2))
         ANGL = ASIN(CROSSP) * (180.0 / 3.1415926)
-        IF(IPRINT.EQ.2) WRITE(*, 1100) I, X(I), Y(I), ANGL
-        IF(ABS(ANGL) .GT. ABS(AMAX)) THEN
+        IF(IPRINT == 2) WRITE(*, 1100) I, X(I), Y(I), ANGL
+        IF(ABS(ANGL) > ABS(AMAX)) THEN
             AMAX = ANGL
             IMAX = I
         ENDIF
     30 CONTINUE
     !
-    IF(IPRINT.GE.1) WRITE(*, 1200) AMAX, IMAX, X(IMAX), Y(IMAX)
+    IF(IPRINT >= 1) WRITE(*, 1200) AMAX, IMAX, X(IMAX), Y(IMAX)
     !
     RETURN
     !
@@ -541,13 +541,13 @@ SUBROUTINE INTER(X0, XP0, Y0, YP0, S0, N0, SLE0, &
     DO 50 I = 1, N
         !
         !------ normalized spline parameter is taken from airfoil 0 value
-        IF(S0(I).LT.SLE0) SN = (S0(I) - SLE0) / TOPS0    ! top side
-        IF(S0(I).GE.SLE0) SN = (S0(I) - SLE0) / BOTS0    ! bottom side
+        IF(S0(I) < SLE0) SN = (S0(I) - SLE0) / TOPS0    ! top side
+        IF(S0(I) >= SLE0) SN = (S0(I) - SLE0) / BOTS0    ! bottom side
         !
         !------ set actual spline parameters
         ST0 = S0(I)
-        IF(ST0.LT.SLE0) ST1 = SLE1 + TOPS1 * SN
-        IF(ST0.GE.SLE0) ST1 = SLE1 + BOTS1 * SN
+        IF(ST0 < SLE0) ST1 = SLE1 + TOPS1 * SN
+        IF(ST0 >= SLE0) ST1 = SLE1 + BOTS1 * SN
         !
         !------ set input coordinates at common spline parameter location
         XT0 = SEVAL(ST0, X0, XP0, S0, N0)
@@ -600,13 +600,13 @@ SUBROUTINE INTERX(X0, XP0, Y0, YP0, S0, N0, SLE0, &
     DO 50 I = 1, N
         !
         !------ normalized x parameter is taken from airfoil 0 value
-        IF(S0(I).LT.SLE0) XN = (X0(I) - XLE0) / (X0(1) - XLE0)
-        IF(S0(I).GE.SLE0) XN = (X0(I) - XLE0) / (X0(N0) - XLE0)
+        IF(S0(I) < SLE0) XN = (X0(I) - XLE0) / (X0(1) - XLE0)
+        IF(S0(I) >= SLE0) XN = (X0(I) - XLE0) / (X0(N0) - XLE0)
         !
         !------ set target x and initial spline parameters
         XT0 = X0(I)
         ST0 = S0(I)
-        IF(ST0.LT.SLE0) THEN
+        IF(ST0 < SLE0) THEN
             XT1 = XLE1 + (X1(1) - XLE1) * XN
             ST1 = SLE1 + (S1(1) - SLE1) * XN
         ELSE
@@ -861,7 +861,7 @@ SUBROUTINE IJSECT(N, X, Y, PEX, &
     AREA = -Y_DX
     SLEN = C_DS
     !
-    IF(AREA.EQ.0.0) RETURN
+    IF(AREA == 0.0) RETURN
     !
     XC = XX_DY / (2.0 * X_DY)
     XCT = X_DS / C_DS
@@ -891,7 +891,7 @@ SUBROUTINE IJSECT(N, X, Y, PEX, &
     20   CONTINUE
     !
     DO I = 1, N - 1
-        IF(X(I + 1) .GE. X(I)) GO TO 30
+        IF(X(I + 1) >= X(I)) GO TO 30
     ENDDO
     IMID = N / 2
     30   IMID = I
@@ -902,17 +902,17 @@ SUBROUTINE IJSECT(N, X, Y, PEX, &
         YAVG = 0.5 * (Y(I) + Y(I - 1))
         DX = X(I - 1) - X(I)
         !
-        IF(XAVG.GT.X(N)) THEN
+        IF(XAVG > X(N)) THEN
             YOPP = Y(N)
             GO TO 41
         ENDIF
-        IF(XAVG.LE.X(IMID)) THEN
+        IF(XAVG <= X(IMID)) THEN
             YOPP = Y(IMID)
             GO TO 41
         ENDIF
         !
         DO J = N, IMID, -1
-            IF(XAVG.GT.X(J - 1) .AND. XAVG.LE.X(J)) THEN
+            IF(XAVG > X(J - 1) .AND. XAVG <= X(J)) THEN
                 FRAC = (XAVG - X(J - 1))&
                         / (X(J) - X(J - 1))
                 YOPP = Y(J - 1) + (Y(J) - Y(J - 1)) * FRAC
@@ -944,7 +944,7 @@ SUBROUTINE HALF(X, Y, S, N)
     INEXT = 3
     DO 20 I = 2, N - 1
         !------ if corner is found, preserve it.
-        IF(S(I) .EQ. S(I + 1)) THEN
+        IF(S(I) == S(I + 1)) THEN
             K = K + 1
             X(K) = X(I)
             Y(K) = Y(I)
@@ -954,7 +954,7 @@ SUBROUTINE HALF(X, Y, S, N)
             INEXT = I + 3
         ENDIF
         !
-        IF(I.EQ.INEXT) THEN
+        IF(I == INEXT) THEN
             K = K + 1
             X(K) = X(I)
             Y(K) = Y(I)

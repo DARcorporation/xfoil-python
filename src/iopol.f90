@@ -37,7 +37,7 @@ SUBROUTINE POLREAD(LU, FNPOL, ERROR, &
     !  Input:
     !     LU      logical unit to use for reading
     !     FNPOL   name of polar file to be read,
-    !               if FNPOL(1:1).eq.' ', unit LU will be read
+    !               if FNPOL(1:1) == ' ', unit LU will be read
     !               if it is already open
     !     NAX     polar point array dimension
     !     ISX     airfoil side array dimension
@@ -94,7 +94,7 @@ SUBROUTINE POLREAD(LU, FNPOL, ERROR, &
     IMATYP = 0
     !
     !---- do we have to open the file?
-    LOPEN = FNPOL .NE. ' '
+    LOPEN = FNPOL /= ' '
     !
     IF(LOPEN) OPEN(LU, FILE = FNPOL, STATUS = 'OLD', ERR = 90)
     !
@@ -102,7 +102,7 @@ SUBROUTINE POLREAD(LU, FNPOL, ERROR, &
     !---- start data reading loop
     500  CONTINUE
     READ(LU, 1000, END = 80) LINE
-    IF(LINE.EQ.' ') GO TO 500
+    IF(LINE == ' ') GO TO 500
     !
     IF(LHEAD) THEN
         !----- parse to get header info
@@ -112,14 +112,14 @@ SUBROUTINE POLREAD(LU, FNPOL, ERROR, &
         !
         !--------------------------------------------
         K = INDEX(LINE, 'Version')
-        IF(K.NE.0) THEN
+        IF(K /= 0) THEN
             !------ code,version line
             DO K1 = 1, 128
-                IF(LINE(K1:K1).NE.' ') GO TO 10
+                IF(LINE(K1:K1) /= ' ') GO TO 10
             ENDDO
             !
             10     CONTINUE
-            IF(K.GT.K1) THEN
+            IF(K > K1) THEN
                 CODE = LINE(K1:K - 1)
                 READ(LINE(K + 7:128), *, ERR = 11) VERSION
             ENDIF
@@ -129,7 +129,7 @@ SUBROUTINE POLREAD(LU, FNPOL, ERROR, &
         !
         !--------------------------------------------
         KF = INDEX(LINE, 'for:')
-        IF(KF.NE.0) THEN
+        IF(KF /= 0) THEN
             !------ airfoil name line
             NAME = LINE(KF + 5:128)
             LDLAB = .FALSE.
@@ -137,13 +137,13 @@ SUBROUTINE POLREAD(LU, FNPOL, ERROR, &
         !
         !--------------------------------------------
         KE = INDEX(LINE, 'elements')
-        IF(KE.GT.0) THEN
+        IF(KE > 0) THEN
             !------ element-number line
             READ(LINE(KE - 4:KE - 1), *, ERR = 60) NBL
             !------ truncate name line to eliminate elements #
             NAME = LINE(KF + 5:KE - 4)
             !
-            IF(2 * NBL .GT. ISX) THEN
+            IF(2 * NBL > ISX) THEN
                 NBL = ISX / 2
                 WRITE(*, *)&
                         'POLREAD: Number of elements set to array limit', NBL
@@ -155,35 +155,35 @@ SUBROUTINE POLREAD(LU, FNPOL, ERROR, &
         KR = INDEX(LINE, 'Reynolds number')
         KM = INDEX(LINE, 'Mach number')
         !
-        IF(KR.NE.0) THEN
+        IF(KR /= 0) THEN
             !------ Re-type line
-            IF(KM.GT.KR) THEN
+            IF(KM > KR) THEN
                 KEND = KM - 1
             ELSE
                 KEND = 128
             ENDIF
-            IF    (INDEX(LINE(KR:KEND), 'fixed').NE.0) THEN
+            IF    (INDEX(LINE(KR:KEND), 'fixed') /= 0) THEN
                 IRETYP = 1
-            ELSEIF(INDEX(LINE(KR:KEND), '1/sqrt(CL)').NE.0) THEN
+            ELSEIF(INDEX(LINE(KR:KEND), '1/sqrt(CL)') /= 0) THEN
                 IRETYP = 2
-            ELSEIF(INDEX(LINE(KR:KEND), '1/CL').NE.0) THEN
+            ELSEIF(INDEX(LINE(KR:KEND), '1/CL') /= 0) THEN
                 IRETYP = 3
             ENDIF
             LDLAB = .FALSE.
         ENDIF
         !
-        IF(KM.NE.0) THEN
+        IF(KM /= 0) THEN
             !------ Ma-type line
-            IF(KR.GT.KM) THEN
+            IF(KR > KM) THEN
                 KEND = KR - 1
             ELSE
                 KEND = 128
             ENDIF
-            IF    (INDEX(LINE(KM:KEND), 'fixed').NE.0) THEN
+            IF    (INDEX(LINE(KM:KEND), 'fixed') /= 0) THEN
                 IMATYP = 1
-            ELSEIF(INDEX(LINE(KM:KEND), '1/sqrt(CL)').NE.0) THEN
+            ELSEIF(INDEX(LINE(KM:KEND), '1/sqrt(CL)') /= 0) THEN
                 IMATYP = 2
-            ELSEIF(INDEX(LINE(KM:KEND), '1/CL').NE.0) THEN
+            ELSEIF(INDEX(LINE(KM:KEND), '1/CL') /= 0) THEN
                 IMATYP = 3
             ENDIF
             LDLAB = .FALSE.
@@ -192,7 +192,7 @@ SUBROUTINE POLREAD(LU, FNPOL, ERROR, &
         !--------------------------------------------
         !---- find specified BL trip location
         K = INDEX(LINE, 'xtrf')
-        IF(K.NE.0) THEN
+        IF(K /= 0) THEN
             !------ new style xtrip line
             KT = INDEX(LINE, '(top)')
             KB = INDEX(LINE, '(bottom)')
@@ -201,20 +201,20 @@ SUBROUTINE POLREAD(LU, FNPOL, ERROR, &
             KS = INDEX(LINE, '(suc')
             KP = INDEX(LINE, '(pre')
             !
-            IF(KE.NE.0) THEN
+            IF(KE /= 0) THEN
                 READ(LINE(KE + 7:KE + 12), *, ERR = 21) N
             ELSE
                 N = 1
             ENDIF
-            IF(N.LE.NBL) THEN
+            IF(N <= NBL) THEN
                 IS1 = 2 * N - 1
                 IS2 = 2 * N
                 XTRIP(IS1) = 1.0
                 XTRIP(IS2) = 1.0
-                IF(KT.GT.0)  READ(LINE(K + 6:KT - 1), *, ERR = 21) XTRIP(IS1)
-                IF(KB.GT.KT) READ(LINE(KT + 5:KB - 1), *, ERR = 21) XTRIP(IS2)
-                IF(KS.GT.0)  READ(LINE(K + 6:KS - 1), *, ERR = 21) XTRIP(IS1)
-                IF(KP.GT.KS) READ(LINE(KS + 5:KP - 1), *, ERR = 21) XTRIP(IS2)
+                IF(KT > 0)  READ(LINE(K + 6:KT - 1), *, ERR = 21) XTRIP(IS1)
+                IF(KB > KT) READ(LINE(KT + 5:KB - 1), *, ERR = 21) XTRIP(IS2)
+                IF(KS > 0)  READ(LINE(K + 6:KS - 1), *, ERR = 21) XTRIP(IS1)
+                IF(KP > KS) READ(LINE(KS + 5:KP - 1), *, ERR = 21) XTRIP(IS2)
             ENDIF
             21     CONTINUE
             LDLAB = .FALSE.
@@ -222,7 +222,7 @@ SUBROUTINE POLREAD(LU, FNPOL, ERROR, &
         !
         !--------------------------------------------
         K = INDEX(LINE, 'Mach =')
-        IF(K.NE.0) THEN
+        IF(K /= 0) THEN
             READ(LINE(K + 6:128), *, ERR = 31) MACH1
             31     CONTINUE
             LDLAB = .FALSE.
@@ -230,7 +230,7 @@ SUBROUTINE POLREAD(LU, FNPOL, ERROR, &
         !
         !--------------------------------------------
         K = INDEX(LINE, 'Re =')
-        IF(K.NE.0) THEN
+        IF(K /= 0) THEN
             READ(LINE(K + 4:128), *, ERR = 32) REYN1
             REYN1 = REYN1 * 1.0E6
             32     CONTINUE
@@ -239,12 +239,12 @@ SUBROUTINE POLREAD(LU, FNPOL, ERROR, &
         !
         !--------------------------------------------
         K = INDEX(LINE, 'Ncrit =')
-        IF(K.NE.0) THEN
+        IF(K /= 0) THEN
             NINP = 2
             CALL GETFLT(LINE(k + 7:128), RINP(1), NINP, ERROR)
-            IF(NINP.LE.0 .OR. ERROR) GO TO 33
+            IF(NINP <= 0 .OR. ERROR) GO TO 33
             !
-            IF(NINP.EQ.1) THEN
+            IF(NINP == 1) THEN
                 ACRIT(1) = RINP(1)
                 ACRIT(2) = RINP(1)
             ELSE
@@ -257,7 +257,7 @@ SUBROUTINE POLREAD(LU, FNPOL, ERROR, &
         !
         !--------------------------------------------
         K = INDEX(LINE, 'pi_p =')
-        IF(K.NE.0) THEN
+        IF(K /= 0) THEN
             READ(LINE(K + 6:128), *, ERR = 34) PTRAT
             34     CONTINUE
             LDLAB = .FALSE.
@@ -265,14 +265,14 @@ SUBROUTINE POLREAD(LU, FNPOL, ERROR, &
         !
         !--------------------------------------------
         K = INDEX(LINE, 'eta_p =')
-        IF(K.NE.0) THEN
+        IF(K /= 0) THEN
             READ(LINE(K + 7:128), *, ERR = 35) ETAP
             35     CONTINUE
             LDLAB = .FALSE.
         ENDIF
         !
         !--------------------------------------------
-        IF(LDLAB .AND. NIPOL.EQ.0) THEN
+        IF(LDLAB .AND. NIPOL == 0) THEN
             !------ process line for possible data labels
             DO IP = 1, IPTOT
                 CALL STRIP(CPOLNAME(IP), NNAME)
@@ -304,7 +304,7 @@ SUBROUTINE POLREAD(LU, FNPOL, ERROR, &
             !------ bubble-sort data label positions in line string
             DO IPASS = 1, IPTOT + 2 * JPTOT
                 DO IP = 1, IPTOT + 2 * JPTOT - 1
-                    IF(ITMP(IP).GT.ITMP(IP + 1)) THEN
+                    IF(ITMP(IP) > ITMP(IP + 1)) THEN
                         ITMPP1 = ITMP(IP + 1)
                         ITMP(IP + 1) = ITMP(IP)
                         ITMP(IP) = ITMPP1
@@ -314,14 +314,14 @@ SUBROUTINE POLREAD(LU, FNPOL, ERROR, &
             !
             !------ assign data position to each parameter
             DO IPT = 1, IPTOT + 2 * JPTOT
-                IF(ITMP(IPT).GT.0) THEN
+                IF(ITMP(IPT) > 0) THEN
                     NIPOL = NIPOL + 1
                     DO IP = 1, IPTOT
-                        IF(ITMP(IPT).EQ.ITMP0(IP)) IPOL(IP) = NIPOL
+                        IF(ITMP(IPT) == ITMP0(IP)) IPOL(IP) = NIPOL
                     ENDDO
                     DO JP = 1, JPTOT
-                        IF(ITMP(IPT).EQ.ITMP0(IPTOT + JP)) ISPOL(1, JP) = NIPOL
-                        IF(ITMP(IPT).EQ.ITMP0(IPTOT + JPTOT + JP)) ISPOL(2, JP) = NIPOL
+                        IF(ITMP(IPT) == ITMP0(IPTOT + JP)) ISPOL(1, JP) = NIPOL
+                        IF(ITMP(IPT) == ITMP0(IPTOT + JPTOT + JP)) ISPOL(2, JP) = NIPOL
                     ENDDO
                 ENDIF
             ENDDO
@@ -329,7 +329,7 @@ SUBROUTINE POLREAD(LU, FNPOL, ERROR, &
         ENDIF
         !
         !--------------------------------------------
-        IF(INDEX(LINE, '-----').NE.0) THEN
+        IF(INDEX(LINE, '-----') /= 0) THEN
             LHEAD = .FALSE.
         ENDIF
         !
@@ -364,30 +364,30 @@ SUBROUTINE POLREAD(LU, FNPOL, ERROR, &
         LJNC = .FALSE.
         LJTP = .FALSE.
         DO KP = 1, NIPOL
-            IF(IPOL(KP) .EQ. IRE) LIRE = .TRUE.
-            IF(IPOL(KP) .EQ. IMA) LIMA = .TRUE.
-            IF(ISPOL(1, KP) .EQ. JNC) LJNC = .TRUE.
-            IF(ISPOL(1, KP) .EQ. JTP) LJTP = .TRUE.
+            IF(IPOL(KP) == IRE) LIRE = .TRUE.
+            IF(IPOL(KP) == IMA) LIMA = .TRUE.
+            IF(ISPOL(1, KP) == JNC) LJNC = .TRUE.
+            IF(ISPOL(1, KP) == JTP) LJTP = .TRUE.
         ENDDO
         !
         IF(.NOT. LIRE) THEN
             !------ Re was not in polar data... set using header info
-            IF    (IRETYP.EQ.1) THEN
+            IF    (IRETYP == 1) THEN
                 CPOL(IA, IRE) = REYN1
-            ELSEIF(IRETYP.EQ.2) THEN
+            ELSEIF(IRETYP == 2) THEN
                 CPOL(IA, IRE) = REYN1 / SQRT(ACL)
-            ELSEIF(IRETYP.EQ.3) THEN
+            ELSEIF(IRETYP == 3) THEN
                 CPOL(IA, IRE) = REYN1 / ACL
             ENDIF
         ENDIF
         !
         IF(.NOT. LIMA) THEN
             !------ Mach was not in polar data... set using header info
-            IF    (IMATYP.EQ.1) THEN
+            IF    (IMATYP == 1) THEN
                 CPOL(IA, IMA) = MACH1
-            ELSEIF(IMATYP.EQ.2) THEN
+            ELSEIF(IMATYP == 2) THEN
                 CPOL(IA, IMA) = MACH1 / SQRT(ACL)
-            ELSEIF(IMATYP.EQ.3) THEN
+            ELSEIF(IMATYP == 3) THEN
                 CPOL(IA, IMA) = MACH1 / ACL
             ENDIF
         ENDIF
@@ -450,7 +450,7 @@ SUBROUTINE POLWRIT(LU, FNPOL, ERROR, LHEAD, &
     !  Input:
     !     LU       logical unit to use for writing
     !     FNPOL    name of polar file to be read,
-    !                if FNPOL(1:1).eq.' ', unit LU is assumed
+    !                if FNPOL(1:1) == ' ', unit LU is assumed
     !                to be already open
     !     NAX      polar point array dimension
     !     ISX      airfoil side array dimension
@@ -487,7 +487,7 @@ SUBROUTINE POLWRIT(LU, FNPOL, ERROR, LHEAD, &
     ERROR = .FALSE.
     !
     !---- do we have to open the file?
-    LOPEN = FNPOL .NE. ' '
+    LOPEN = FNPOL /= ' '
     !
     IF(LOPEN) THEN
         OPEN(LU, FILE = FNPOL, STATUS = 'OLD', ERR = 20)
@@ -497,7 +497,7 @@ SUBROUTINE POLWRIT(LU, FNPOL, ERROR, LHEAD, &
             WRITE(*, *) 'Output file exists.  Overwrite?  Y'
             READ(*, 1000) ANS
             !
-            IF(INDEX('Nn', ANS).EQ.0) GO TO 22
+            IF(INDEX('Nn', ANS) == 0) GO TO 22
             !
             CLOSE(LU)
             WRITE(*, *) 'Polar file not saved'
@@ -512,7 +512,7 @@ SUBROUTINE POLWRIT(LU, FNPOL, ERROR, LHEAD, &
         WRITE(LU, *) ' '
         WRITE(LU, 8000) CODE, VERSION
         WRITE(LU, *) ' '
-        IF(NBL.EQ.1) THEN
+        IF(NBL == 1) THEN
             WRITE(LU, 9001) NAME
         ELSE
             WRITE(LU, 9002) NAME, NBL
@@ -521,17 +521,17 @@ SUBROUTINE POLWRIT(LU, FNPOL, ERROR, LHEAD, &
         IFFBC = 0
         ISMOM = 0
         !
-        IF(IFFBC.NE.0 .AND. ISMOM.NE.0) THEN
-            IF(IFFBC.EQ.1)  LINE1 = ' Solid wall far field        '
-            IF(IFFBC.EQ.2)  LINE1 = ' Vortex + doublet far field  '
-            IF(IFFBC.EQ.3)  LINE1 = ' Constant pressure far field '
-            IF(IFFBC.EQ.4)  LINE1 = ' Supersonic wave far field   '
-            IF(IFFBC.GE.5)  LINE1 = '                             '
-            IF(ISMOM.EQ.1)  LINE2 = '   S-momentum conserved      '
-            IF(ISMOM.EQ.2)  LINE2 = '   Entropy conserved         '
-            IF(ISMOM.EQ.3)  LINE2 = '   Entropy conserved near LE '
-            IF(ISMOM.EQ.4)  LINE2 = '   S-mom conserved at shocks '
-            IF(ISMOM.GE.5)  LINE2 = '                             '
+        IF(IFFBC /= 0 .AND. ISMOM /= 0) THEN
+            IF(IFFBC == 1)  LINE1 = ' Solid wall far field        '
+            IF(IFFBC == 2)  LINE1 = ' Vortex + doublet far field  '
+            IF(IFFBC == 3)  LINE1 = ' Constant pressure far field '
+            IF(IFFBC == 4)  LINE1 = ' Supersonic wave far field   '
+            IF(IFFBC >= 5)  LINE1 = '                             '
+            IF(ISMOM == 1)  LINE2 = '   S-momentum conserved      '
+            IF(ISMOM == 2)  LINE2 = '   Entropy conserved         '
+            IF(ISMOM == 3)  LINE2 = '   Entropy conserved near LE '
+            IF(ISMOM == 4)  LINE2 = '   S-mom conserved at shocks '
+            IF(ISMOM >= 5)  LINE2 = '                             '
             WRITE(LU, 9006) LINE1, LINE2
             9006   FORMAT(1X, 3X, 2A29)
         ENDIF
@@ -540,26 +540,26 @@ SUBROUTINE POLWRIT(LU, FNPOL, ERROR, LHEAD, &
         !
         LINE1 = ' '
         LINE2 = ' '
-        IF(IRETYP.EQ.1) LINE1 = ' Reynolds number fixed       '
-        IF(IRETYP.EQ.2) LINE1 = ' Reynolds number ~ 1/sqrt(CL)'
-        IF(IRETYP.EQ.3) LINE1 = ' Reynolds number ~ 1/CL      '
-        IF(IMATYP.EQ.1) LINE2 = '   Mach number fixed         '
-        IF(IMATYP.EQ.2) LINE2 = '   Mach number ~ 1/sqrt(CL)  '
-        IF(IMATYP.EQ.3) LINE2 = '   Mach number ~ 1/CL        '
+        IF(IRETYP == 1) LINE1 = ' Reynolds number fixed       '
+        IF(IRETYP == 2) LINE1 = ' Reynolds number ~ 1/sqrt(CL)'
+        IF(IRETYP == 3) LINE1 = ' Reynolds number ~ 1/CL      '
+        IF(IMATYP == 1) LINE2 = '   Mach number fixed         '
+        IF(IMATYP == 2) LINE2 = '   Mach number ~ 1/sqrt(CL)  '
+        IF(IMATYP == 3) LINE2 = '   Mach number ~ 1/CL        '
         WRITE(LU, 9005) IRETYP, IMATYP, LINE1, LINE2
         !
         WRITE(LU, *) ' '
         DO N = 1, NBL
             IS1 = 2 * N - 1
             IS2 = 2 * N
-            IF(NBL.EQ.1) THEN
+            IF(NBL == 1) THEN
                 WRITE(LU, 9011) XTRIP(IS1), XTRIP(IS2)
             ELSE
                 WRITE(LU, 9012) XTRIP(IS1), XTRIP(IS2), N
             ENDIF
         ENDDO
         WRITE(LU, 9015) MACH1, REYN1 / 1.0E6, ACRIT(1), ACRIT(2)
-        IF(PTRAT .NE. 0.0) WRITE(LU, 9017) PTRAT, ETAP
+        IF(PTRAT /= 0.0) WRITE(LU, 9017) PTRAT, ETAP
         WRITE(LU, *) ' '
         !
         LINEL = ' '
@@ -570,10 +570,10 @@ SUBROUTINE POLWRIT(LU, FNPOL, ERROR, LHEAD, &
         !
         DO 30 KP = 1, NIPOL
             IP = IPOL(KP)
-            IF(IP.EQ.0) GO TO 30
+            IF(IP == 0) GO TO 30
             !
             KDOT = INDEX(CPOLFORM(IP), '.')
-            IF(KDOT.EQ.0) KDOT = LEN(CPOLFORM(IP))
+            IF(KDOT == 0) KDOT = LEN(CPOLFORM(IP))
             READ(CPOLFORM(IP)(2:KDOT - 1), *, ERR = 95) NFORM
             !
             CALL STRIP(CPOLNAME(IP), NNAME)
@@ -588,10 +588,10 @@ SUBROUTINE POLWRIT(LU, FNPOL, ERROR, LHEAD, &
         !
         DO 32 KP = 1, NJPOL
             JP = JPOL(KP)
-            IF(JP.EQ.0) GO TO 32
+            IF(JP == 0) GO TO 32
             !
             KDOT = INDEX(CPOLSFORM(JP), '.')
-            IF(KDOT.EQ.0) KDOT = LEN(CPOLSFORM(JP))
+            IF(KDOT == 0) KDOT = LEN(CPOLSFORM(JP))
             READ(CPOLSFORM(JP)(2:KDOT - 1), *, ERR = 95) NFORM
             !
             CALL STRIP(CPOLSNAME(JP), NNAME)
@@ -712,7 +712,7 @@ SUBROUTINE POLREF(LU, FNREF, ERROR, &
     !  Input:
     !     LU      logical unit to use for reading
     !     FNREF   name of polar file to be read,
-    !               if FNREF(1:1).eq.' ', unit LU is assumed
+    !               if FNREF(1:1) == ' ', unit LU is assumed
     !               to be already open
     !     NFX     polar point array dimension
     !
@@ -726,7 +726,7 @@ SUBROUTINE POLREF(LU, FNREF, ERROR, &
     CHARACTER*80 LINE
     !
     ERROR = .FALSE.
-    LOPEN = FNREF(1:1) .NE. ' '
+    LOPEN = FNREF(1:1) /= ' '
     IF(LOPEN) OPEN(LU, FILE = FNREF, STATUS = 'OLD', ERR = 900)
     !
     !---- try to read data label
@@ -734,7 +734,7 @@ SUBROUTINE POLREF(LU, FNREF, ERROR, &
     1000 FORMAT(A)
     !
     !---- set data label if present
-    IF(LINE(1:1).EQ.'#') THEN
+    IF(LINE(1:1) == '#') THEN
         LABREF = LINE(2:80)
     ELSE
         LABREF = ' '
@@ -744,7 +744,7 @@ SUBROUTINE POLREF(LU, FNREF, ERROR, &
     DO 100 K = 1, 4
         DO 10 I = 1, NFX
             READ(LU, *, END = 11, ERR = 900) XYREF(I, 1, K), XYREF(I, 2, K)
-            IF(XYREF(I, 1, K) .EQ. 999.0) GO TO 11
+            IF(XYREF(I, 1, K) == 999.0) GO TO 11
         10   CONTINUE
         11   NF(K) = I - 1
     100 CONTINUE

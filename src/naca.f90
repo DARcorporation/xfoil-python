@@ -42,7 +42,7 @@ SUBROUTINE NACA4(IDES, XX, YT, YC, NSIDE, XB, YB, NB, NAME)
     ANP = AN + 1.0
     DO 10 I = 1, NSIDE
         FRAC = FLOAT(I - 1) / FLOAT(NSIDE - 1)
-        IF(I.EQ.NSIDE) THEN
+        IF(I == NSIDE) THEN
             XX(I) = 1.0
         ELSE
             XX(I) = 1.0 - ANP * FRAC * (1.0 - FRAC)**AN - (1.0 - FRAC)**ANP
@@ -52,7 +52,7 @@ SUBROUTINE NACA4(IDES, XX, YT, YC, NSIDE, XB, YB, NB, NAME)
                 - 0.35160 * XX(I)**2&
                 + 0.28430 * XX(I)**3&
                 - 0.10150 * XX(I)**4) * T / 0.20
-        IF(XX(I).LT.P) THEN
+        IF(XX(I) < P) THEN
             YC(I) = M / P**2 * (2.0 * P * XX(I) - XX(I)**2)
         ELSE
             YC(I) = M / (1.0 - P)**2 * ((1.0 - 2.0 * P) + 2.0 * P * XX(I) - XX(I)**2)
@@ -103,23 +103,23 @@ SUBROUTINE NACA5(IDES, XX, YT, YC, NSIDE, XB, YB, NB, NAME)
     !
     N543 = 100 * N5 + 10 * N4 + N3
     !
-    IF      (N543 .EQ. 210) THEN
+    IF      (N543 == 210) THEN
         !c     P = 0.05
         M = 0.0580
         C = 361.4
-    ELSE IF (N543 .EQ. 220) THEN
+    ELSE IF (N543 == 220) THEN
         !c     P = 0.10
         M = 0.1260
         C = 51.64
-    ELSE IF (N543 .EQ. 230) THEN
+    ELSE IF (N543 == 230) THEN
         !c     P = 0.15
         M = 0.2025
         C = 15.957
-    ELSE IF (N543 .EQ. 240) THEN
+    ELSE IF (N543 == 240) THEN
         !c     P = 0.20
         M = 0.2900
         C = 6.643
-    ELSE IF (N543 .EQ. 250) THEN
+    ELSE IF (N543 == 250) THEN
         !c     P = 0.25
         M = 0.3910
         C = 3.230
@@ -136,7 +136,7 @@ SUBROUTINE NACA5(IDES, XX, YT, YC, NSIDE, XB, YB, NB, NAME)
     ANP = AN + 1.0
     DO 10 I = 1, NSIDE
         FRAC = FLOAT(I - 1) / FLOAT(NSIDE - 1)
-        IF(I.EQ.NSIDE) THEN
+        IF(I == NSIDE) THEN
             XX(I) = 1.0
         ELSE
             XX(I) = 1.0 - ANP * FRAC * (1.0 - FRAC)**AN - (1.0 - FRAC)**ANP
@@ -147,7 +147,7 @@ SUBROUTINE NACA5(IDES, XX, YT, YC, NSIDE, XB, YB, NB, NAME)
                 - 0.35160 * XX(I)**2&
                 + 0.28430 * XX(I)**3&
                 - 0.10150 * XX(I)**4) * T / 0.20
-        IF(XX(I).LT.M) THEN
+        IF(XX(I) < M) THEN
             YC(I) = (C / 6.0) * (XX(I)**3 - 3.0 * M * XX(I)**2&
                     + M * M * (3.0 - M) * XX(I))
         ELSE

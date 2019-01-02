@@ -171,17 +171,17 @@ SUBROUTINE SETBL
             !
             IV = ISYS(IBL, IS)
             !
-            SIMI = IBL.EQ.2
-            WAKE = IBL.GT.IBLTE(IS)
-            TRAN = IBL.EQ.ITRAN(IS)
-            TURB = IBL.GT.ITRAN(IS)
+            SIMI = IBL == 2
+            WAKE = IBL > IBLTE(IS)
+            TRAN = IBL == ITRAN(IS)
+            TURB = IBL > ITRAN(IS)
             !
             I = IPAN(IBL, IS)
             !
             !---- set primary variables for current station
             XSI = XSSI(IBL, IS)
-            IF(IBL.LT.ITRAN(IS)) AMI = CTAU(IBL, IS)
-            IF(IBL.GE.ITRAN(IS)) CTI = CTAU(IBL, IS)
+            IF(IBL < ITRAN(IS)) AMI = CTAU(IBL, IS)
+            IF(IBL >= ITRAN(IS)) CTI = CTAU(IBL, IS)
             UEI = UEDG(IBL, IS)
             THI = THET(IBL, IS)
             MDI = MASS(IBL, IS)
@@ -224,14 +224,14 @@ SUBROUTINE SETBL
                 CALL TRCHEK
                 AMI = AMPL2
             ENDIF
-            IF(IBL.EQ.ITRAN(IS) .AND. .NOT.TRAN) THEN
+            IF(IBL == ITRAN(IS) .AND. .NOT.TRAN) THEN
                 WRITE(*, *) 'SETBL: Xtr???  n1 n2: ', AMPL1, AMPL2
             ENDIF
             !
             !---- assemble 10x4 linearized system for dCtau, dTh, dDs, dUe, dXi
             !     at the previous "1" station and the current "2" station
             !
-            IF(IBL.EQ.IBLTE(IS) + 1) THEN
+            IF(IBL == IBLTE(IS) + 1) THEN
                 !
                 !----- define quantities at start of wake, adding TE base thickness to Dstar
                 TTE = THET(IBLTE(1), 1) + THET(IBLTE(2), 2)
@@ -291,7 +291,7 @@ SUBROUTINE SETBL
             !      IF(TURB .AND. .NOT.WAKE) THEN
             !        GCC = GCCON
             !        HKC     = HK2 - 1.0 - GCC/RT2
-            !        IF(HKC .LT. 0.01) THEN
+            !        IF(HKC < 0.01) THEN
             !         HKC = 0.01
             !        ENDIF
             !       ELSE
@@ -305,7 +305,7 @@ SUBROUTINE SETBL
             !        IBLP = MIN(IBL+1,NBL(IS))
             !        IBLM = MAX(IBL-1,2      )
             !        DXSSI = XSSI(IBLP,IS) - XSSI(IBLM,IS)
-            !        IF(DXXSI.EQ.0.0) DXSSI = 1.0
+            !        IF(DXXSI == 0.0) DXSSI = 1.0
             !        GUXD(IBL,IS) = -LOG(UEDG(IBLP,IS)/UEDG(IBLM,IS)) / DXSSI
             !        GUXQ(IBL,IS) = -UQ
             !       ELSE
@@ -315,7 +315,7 @@ SUBROUTINE SETBL
             !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
             !
             !---- set XI sensitivities wrt LE Ue changes
-            IF(IS.EQ.1) THEN
+            IF(IS == 1) THEN
                 XI_ULE1 = SST_GO
                 XI_ULE2 = -SST_GP
             ELSE
@@ -415,7 +415,7 @@ SUBROUTINE SETBL
                             * (XI_ULE1 * DULE1 + XI_ULE2 * DULE2)
             !
             !
-            IF(IBL.EQ.IBLTE(IS) + 1) THEN
+            IF(IBL == IBLTE(IS) + 1) THEN
                 !
                 !----- redefine coefficients for TTE, DTE, etc
                 VZ(1, 1) = VS1(1, 1) * CTE_CTE1
@@ -446,7 +446,7 @@ SUBROUTINE SETBL
                 !
                 !------ interpolate airfoil geometry to find transition x/c
                 !-      (for user output)
-                IF(IS.EQ.1) THEN
+                IF(IS == 1) THEN
                     STR = SST - XT
                 ELSE
                     STR = SST + XT
@@ -462,7 +462,7 @@ SUBROUTINE SETBL
             !
             TRAN = .FALSE.
             !
-            IF(IBL.EQ.IBLTE(IS)) THEN
+            IF(IBL == IBLTE(IS)) THEN
                 !----- set "2" variables at TE to wake correlations for next station
                 !
                 TURB = .TRUE.
@@ -485,8 +485,8 @@ SUBROUTINE SETBL
             DUE1 = DUE2
             DDS1 = DDS2
             !
-            IF(IBL .EQ. ITRAN(IS) .AND. X2 .GT. X1) THEN
-                IF(IS.EQ.1) THEN
+            IF(IBL == ITRAN(IS) .AND. X2 > X1) THEN
+                IF(IS == 1) THEN
                     TINDEX(IS) = FLOAT(IST - ITRAN(IS) + 3) - (XT - X1) / (X2 - X1)
                 ELSE
                     TINDEX(IS) = FLOAT(IST + ITRAN(IS) - 2) + (XT - X1) / (X2 - X1)
@@ -532,7 +532,7 @@ SUBROUTINE IBLSYS
     10 CONTINUE
     !
     NSYS = IV
-    IF(NSYS.GT.2 * IVX) STOP '*** IBLSYS: BL system array overflow. ***'
+    IF(NSYS > 2 * IVX) STOP '*** IBLSYS: BL system array overflow. ***'
     !
     RETURN
 END
@@ -590,8 +590,8 @@ SUBROUTINE MRCHUE
             !
             IW = IBL - IBLTE(IS)
             !
-            SIMI = IBL.EQ.2
-            WAKE = IBL.GT.IBLTE(IS)
+            SIMI = IBL == 2
+            WAKE = IBL > IBLTE(IS)
             !
             !------ prescribed quantities
             XSI = XSSI(IBL, IS)
@@ -624,7 +624,7 @@ SUBROUTINE MRCHUE
                     !
                     IF(TRAN) THEN
                         ITRAN(IS) = IBL
-                        IF(CTI.LE.0.0) THEN
+                        IF(CTI <= 0.0) THEN
                             CTI = 0.03
                             S2 = CTI
                         ENDIF
@@ -635,7 +635,7 @@ SUBROUTINE MRCHUE
                     !
                 ENDIF
                 !
-                IF(IBL.EQ.IBLTE(IS) + 1) THEN
+                IF(IBL == IBLTE(IS) + 1) THEN
                     TTE = THET(IBLTE(1), 1) + THET(IBLTE(2), 2)
                     DTE = DSTR(IBLTE(1), 1) + DSTR(IBLTE(2), 2) + ANTE
                     CTE = (CTAU(IBLTE(1), 1) * THET(IBLTE(1), 1)&
@@ -661,14 +661,14 @@ SUBROUTINE MRCHUE
                     !--------- determine max changes and underrelax if necessary
                     DMAX = MAX(ABS(VSREZ(2) / THI), &
                             ABS(VSREZ(3) / DSI))
-                    IF(IBL.LT.ITRAN(IS)) DMAX = MAX(DMAX, ABS(VSREZ(1) / 10.0))
-                    IF(IBL.GE.ITRAN(IS)) DMAX = MAX(DMAX, ABS(VSREZ(1) / CTI))
+                    IF(IBL < ITRAN(IS)) DMAX = MAX(DMAX, ABS(VSREZ(1) / 10.0))
+                    IF(IBL >= ITRAN(IS)) DMAX = MAX(DMAX, ABS(VSREZ(1) / CTI))
                     !
                     RLX = 1.0
-                    IF(DMAX.GT.0.3) RLX = 0.3 / DMAX
+                    IF(DMAX > 0.3) RLX = 0.3 / DMAX
                     !
                     !--------- see if direct mode is not applicable
-                    IF(IBL .NE. IBLTE(IS) + 1) THEN
+                    IF(IBL /= IBLTE(IS) + 1) THEN
                         !
                         !---------- calculate resulting kinematic shape parameter Hk
                         MSQ = UEI * UEI * HSTINV / (GM1BL * (1.0 - 0.5 * UEI * UEI * HSTINV))
@@ -676,23 +676,23 @@ SUBROUTINE MRCHUE
                         CALL HKIN(HTEST, MSQ, HKTEST, DUMMY, DUMMY)
                         !
                         !---------- decide whether to do direct or inverse problem based on Hk
-                        IF(IBL.LT.ITRAN(IS)) HMAX = HLMAX
-                        IF(IBL.GE.ITRAN(IS)) HMAX = HTMAX
-                        DIRECT = HKTEST.LT.HMAX
+                        IF(IBL < ITRAN(IS)) HMAX = HLMAX
+                        IF(IBL >= ITRAN(IS)) HMAX = HTMAX
+                        DIRECT = HKTEST < HMAX
                     ENDIF
                     !
                     IF(DIRECT) THEN
                         !---------- update as usual
-                        !cc            IF(IBL.LT.ITRAN(IS)) AMI = AMI + RLX*VSREZ(1)
-                        IF(IBL.GE.ITRAN(IS)) CTI = CTI + RLX * VSREZ(1)
+                        !cc            IF(IBL < ITRAN(IS)) AMI = AMI + RLX*VSREZ(1)
+                        IF(IBL >= ITRAN(IS)) CTI = CTI + RLX * VSREZ(1)
                         THI = THI + RLX * VSREZ(2)
                         DSI = DSI + RLX * VSREZ(3)
                     ELSE
                         !---------- set prescribed Hk for inverse calculation at the current station
-                        IF(IBL.LT.ITRAN(IS)) THEN
+                        IF(IBL < ITRAN(IS)) THEN
                             !----------- laminar case: relatively slow increase in Hk downstream
                             HTARG = HK1 + 0.03 * (X2 - X1) / T1
-                        ELSE IF(IBL.EQ.ITRAN(IS)) THEN
+                        ELSE IF(IBL == ITRAN(IS)) THEN
                             !----------- transition interval: weighted laminar and turbulent case
                             HTARG = HK1 + (0.03 * (XT - X1) - 0.15 * (X2 - XT)) / T1
                         ELSE IF(WAKE) THEN
@@ -742,14 +742,14 @@ SUBROUTINE MRCHUE
                     DMAX = MAX(ABS(VSREZ(2) / THI), &
                             ABS(VSREZ(3) / DSI), &
                             ABS(VSREZ(4) / UEI))
-                    IF(IBL.GE.ITRAN(IS)) DMAX = MAX(DMAX, ABS(VSREZ(1) / CTI))
+                    IF(IBL >= ITRAN(IS)) DMAX = MAX(DMAX, ABS(VSREZ(1) / CTI))
                     !
                     RLX = 1.0
-                    IF(DMAX.GT.0.3) RLX = 0.3 / DMAX
+                    IF(DMAX > 0.3) RLX = 0.3 / DMAX
                     !
                     !--------- update variables
-                    !cc           IF(IBL.LT.ITRAN(IS)) AMI = AMI + RLX*VSREZ(1)
-                    IF(IBL.GE.ITRAN(IS)) CTI = CTI + RLX * VSREZ(1)
+                    !cc           IF(IBL < ITRAN(IS)) AMI = AMI + RLX*VSREZ(1)
+                    IF(IBL >= ITRAN(IS)) CTI = CTI + RLX * VSREZ(1)
                     THI = THI + RLX * VSREZ(2)
                     DSI = DSI + RLX * VSREZ(3)
                     UEI = UEI + RLX * VSREZ(4)
@@ -757,12 +757,12 @@ SUBROUTINE MRCHUE
                 ENDIF
                 !
                 !-------- eliminate absurd transients
-                IF(IBL.GE.ITRAN(IS)) THEN
+                IF(IBL >= ITRAN(IS)) THEN
                     CTI = MIN(CTI, 0.30)
                     CTI = MAX(CTI, 0.0000001)
                 ENDIF
                 !
-                IF(IBL.LE.IBLTE(IS)) THEN
+                IF(IBL <= IBLTE(IS)) THEN
                     HKLIM = 1.02
                 ELSE
                     HKLIM = 1.00005
@@ -772,7 +772,7 @@ SUBROUTINE MRCHUE
                 CALL DSLIM(DSW, THI, UEI, MSQ, HKLIM)
                 DSI = DSW + DSWAKI
                 !
-                IF(DMAX.LE.1.0E-5) GO TO 110
+                IF(DMAX <= 1.0E-5) GO TO 110
                 !
             100   CONTINUE
             WRITE(*, 1350) IBL, IS, DMAX
@@ -780,15 +780,15 @@ SUBROUTINE MRCHUE
                     '    Res =', E12.4)
             !
             !------ the current unconverged solution might still be reasonable...
-            !CC        IF(DMAX .LE. 0.1) GO TO 110
-            IF(DMAX .LE. 0.1) GO TO 109
+            !CC        IF(DMAX <= 0.1) GO TO 110
+            IF(DMAX <= 0.1) GO TO 109
             !
             !------- the current solution is garbage --> extrapolate values instead
-            IF(IBL.GT.3) THEN
-                IF(IBL.LE.IBLTE(IS)) THEN
+            IF(IBL > 3) THEN
+                IF(IBL <= IBLTE(IS)) THEN
                     THI = THET(IBM, IS) * (XSSI(IBL, IS) / XSSI(IBM, IS))**0.5
                     DSI = DSTR(IBM, IS) * (XSSI(IBL, IS) / XSSI(IBM, IS))**0.5
-                ELSE IF(IBL.EQ.IBLTE(IS) + 1) THEN
+                ELSE IF(IBL == IBLTE(IS) + 1) THEN
                     CTI = CTE
                     THI = TTE
                     DSI = DTE
@@ -797,11 +797,11 @@ SUBROUTINE MRCHUE
                     RATLEN = (XSSI(IBL, IS) - XSSI(IBM, IS)) / (10.0 * DSTR(IBM, IS))
                     DSI = (DSTR(IBM, IS) + THI * RATLEN) / (1.0 + RATLEN)
                 ENDIF
-                IF(IBL.EQ.ITRAN(IS)) CTI = 0.05
-                IF(IBL.GT.ITRAN(IS)) CTI = CTAU(IBM, IS)
+                IF(IBL == ITRAN(IS)) CTI = 0.05
+                IF(IBL > ITRAN(IS)) CTI = CTAU(IBM, IS)
                 !
                 UEI = UEDG(IBL, IS)
-                IF(IBL.GT.2 .AND. IBL.LT.NBL(IS))&
+                IF(IBL > 2 .AND. IBL < NBL(IS))&
                         UEI = 0.5 * (UEDG(IBL - 1, IS) + UEDG(IBL + 1, IS))
             ENDIF
             !
@@ -817,20 +817,20 @@ SUBROUTINE MRCHUE
             ENDIF
             !
             !------- set all other extrapolated values for current station
-            IF(IBL.LT.ITRAN(IS)) CALL BLVAR(1)
-            IF(IBL.GE.ITRAN(IS)) CALL BLVAR(2)
+            IF(IBL < ITRAN(IS)) CALL BLVAR(1)
+            IF(IBL >= ITRAN(IS)) CALL BLVAR(2)
             IF(WAKE) CALL BLVAR(3)
             !
-            IF(IBL.LT.ITRAN(IS)) CALL BLMID(1)
-            IF(IBL.GE.ITRAN(IS)) CALL BLMID(2)
+            IF(IBL < ITRAN(IS)) CALL BLMID(1)
+            IF(IBL >= ITRAN(IS)) CALL BLMID(2)
             IF(WAKE) CALL BLMID(3)
             !
             !------ pick up here after the Newton iterations
             110   CONTINUE
             !
             !------ store primary variables
-            IF(IBL.LT.ITRAN(IS)) CTAU(IBL, IS) = AMI
-            IF(IBL.GE.ITRAN(IS)) CTAU(IBL, IS) = CTI
+            IF(IBL < ITRAN(IS)) CTAU(IBL, IS) = AMI
+            IF(IBL >= ITRAN(IS)) CTAU(IBL, IS) = CTI
             THET(IBL, IS) = THI
             DSTR(IBL, IS) = DSI
             UEDG(IBL, IS) = UEI
@@ -849,7 +849,7 @@ SUBROUTINE MRCHUE
             310   CONTINUE
             !
             !------ turbulent intervals will follow transition interval or TE
-            IF(TRAN .OR. IBL.EQ.IBLTE(IS)) THEN
+            IF(TRAN .OR. IBL == IBLTE(IS)) THEN
                 TURB = .TRUE.
                 !
                 !------- save transition location
@@ -859,7 +859,7 @@ SUBROUTINE MRCHUE
             !
             TRAN = .FALSE.
             !
-            IF(IBL.EQ.IBLTE(IS)) THEN
+            IF(IBL == IBLTE(IS)) THEN
                 THI = THET(IBLTE(1), 1) + THET(IBLTE(2), 2)
                 DSI = DSTR(IBLTE(1), 1) + DSTR(IBLTE(2), 2) + ANTE
             ENDIF
@@ -919,8 +919,8 @@ SUBROUTINE MRCHDU
         DO 1000 IBL = 2, NBL(IS)
             IBM = IBL - 1
             !
-            SIMI = IBL.EQ.2
-            WAKE = IBL.GT.IBLTE(IS)
+            SIMI = IBL == 2
+            WAKE = IBL > IBLTE(IS)
             !
             !------ initialize current station to existing variables
             XSI = XSSI(IBL, IS)
@@ -931,12 +931,12 @@ SUBROUTINE MRCHDU
             !CC        MDI = MASS(IBL,IS)
             !
             !------ fixed BUG   MD 7 June 99
-            IF(IBL.LT.ITROLD) THEN
+            IF(IBL < ITROLD) THEN
                 AMI = CTAU(IBL, IS)
                 CTI = 0.03
             ELSE
                 CTI = CTAU(IBL, IS)
-                IF(CTI.LE.0.0) CTI = 0.03
+                IF(CTI <= 0.0) CTI = 0.03
             ENDIF
             !
             !CC        DSI = MDI/UEI
@@ -948,8 +948,8 @@ SUBROUTINE MRCHDU
                 DSWAKI = 0.
             ENDIF
             !
-            IF(IBL.LE.IBLTE(IS)) DSI = MAX(DSI - DSWAKI, 1.02000 * THI) + DSWAKI
-            IF(IBL.GT.IBLTE(IS)) DSI = MAX(DSI - DSWAKI, 1.00005 * THI) + DSWAKI
+            IF(IBL <= IBLTE(IS)) DSI = MAX(DSI - DSWAKI, 1.02000 * THI) + DSWAKI
+            IF(IBL > IBLTE(IS)) DSI = MAX(DSI - DSWAKI, 1.00005 * THI) + DSWAKI
             !
             !------ Newton iteration loop for current station
             DO 100 ITBL = 1, 25
@@ -969,7 +969,7 @@ SUBROUTINE MRCHDU
                     IF(.NOT.TRAN) ITRAN(IS) = IBL + 2
                 ENDIF
                 !
-                IF(IBL.EQ.IBLTE(IS) + 1) THEN
+                IF(IBL == IBLTE(IS) + 1) THEN
                     TTE = THET(IBLTE(1), 1) + THET(IBLTE(2), 2)
                     DTE = DSTR(IBLTE(1), 1) + DSTR(IBLTE(2), 2) + ANTE
                     CTE = (CTAU(IBLTE(1), 1) * THET(IBLTE(1), 1)&
@@ -980,14 +980,14 @@ SUBROUTINE MRCHDU
                 ENDIF
                 !
                 !-------- set stuff at first iteration...
-                IF(ITBL.EQ.1) THEN
+                IF(ITBL == 1) THEN
                     !
                     !--------- set "baseline" Ue and Hk for forming  Ue(Hk)  relation
                     UEREF = U2
                     HKREF = HK2
                     !
                     !--------- if current point IBL was turbulent and is now laminar, then...
-                    IF(IBL.LT.ITRAN(IS) .AND. IBL.GE.ITROLD) THEN
+                    IF(IBL < ITRAN(IS) .AND. IBL >= ITROLD) THEN
                         !---------- extrapolate baseline Hk
                         UEM = UEDG(IBL - 1, IS)
                         DSM = DSTR(IBL - 1, IS)
@@ -997,7 +997,7 @@ SUBROUTINE MRCHDU
                     ENDIF
                     !
                     !--------- if current point IBL was laminar, then...
-                    IF(IBL.LT.ITROLD) THEN
+                    IF(IBL < ITROLD) THEN
                         !---------- reinitialize or extrapolate Ctau if it's now turbulent
                         IF(TRAN) CTAU(IBL, IS) = 0.03
                         IF(TURB) CTAU(IBL, IS) = CTAU(IBL - 1, IS)
@@ -1010,7 +1010,7 @@ SUBROUTINE MRCHDU
                 ENDIF
                 !
                 !
-                IF(SIMI .OR. IBL.EQ.IBLTE(IS) + 1) THEN
+                IF(SIMI .OR. IBL == IBLTE(IS) + 1) THEN
                     !
                     !--------- for similarity station or first wake point, prescribe Ue
                     VS2(4, 1) = 0.
@@ -1042,9 +1042,9 @@ SUBROUTINE MRCHDU
                     !
                     !--------- set  SENSWT * (normalized dUe/dHk)
                     SENNEW = SENSWT * VZTMP(4) * HKREF / UEREF
-                    IF(ITBL.LE.5) THEN
+                    IF(ITBL <= 5) THEN
                         SENS = SENNEW
-                    ELSE IF(ITBL.LE.15) THEN
+                    ELSE IF(ITBL <= 15) THEN
                         SENS = 0.5 * (SENS + SENNEW)
                     ENDIF
                     !
@@ -1066,25 +1066,25 @@ SUBROUTINE MRCHDU
                 DMAX = MAX(ABS(VSREZ(2) / THI), &
                         ABS(VSREZ(3) / DSI), &
                         ABS(VSREZ(4) / UEI))
-                IF(IBL.GE.ITRAN(IS)) DMAX = MAX(DMAX, ABS(VSREZ(1) / (10.0 * CTI)))
+                IF(IBL >= ITRAN(IS)) DMAX = MAX(DMAX, ABS(VSREZ(1) / (10.0 * CTI)))
                 !
                 RLX = 1.0
-                IF(DMAX.GT.0.3) RLX = 0.3 / DMAX
+                IF(DMAX > 0.3) RLX = 0.3 / DMAX
                 !
                 !-------- update as usual
-                IF(IBL.LT.ITRAN(IS)) AMI = AMI + RLX * VSREZ(1)
-                IF(IBL.GE.ITRAN(IS)) CTI = CTI + RLX * VSREZ(1)
+                IF(IBL < ITRAN(IS)) AMI = AMI + RLX * VSREZ(1)
+                IF(IBL >= ITRAN(IS)) CTI = CTI + RLX * VSREZ(1)
                 THI = THI + RLX * VSREZ(2)
                 DSI = DSI + RLX * VSREZ(3)
                 UEI = UEI + RLX * VSREZ(4)
                 !
                 !-------- eliminate absurd transients
-                IF(IBL.GE.ITRAN(IS)) THEN
+                IF(IBL >= ITRAN(IS)) THEN
                     CTI = MIN(CTI, 0.30)
                     CTI = MAX(CTI, 0.0000001)
                 ENDIF
                 !
-                IF(IBL.LE.IBLTE(IS)) THEN
+                IF(IBL <= IBLTE(IS)) THEN
                     HKLIM = 1.02
                 ELSE
                     HKLIM = 1.00005
@@ -1094,7 +1094,7 @@ SUBROUTINE MRCHDU
                 CALL DSLIM(DSW, THI, UEI, MSQ, HKLIM)
                 DSI = DSW + DSWAKI
                 !
-                IF(DMAX.LE.DEPS) GO TO 110
+                IF(DMAX <= DEPS) GO TO 110
                 !
             100   CONTINUE
             !
@@ -1103,16 +1103,16 @@ SUBROUTINE MRCHDU
                     '    Res =', E12.4)
             !
             !------ the current unconverged solution might still be reasonable...
-            !CC        IF(DMAX .LE. 0.1) GO TO 110
-            IF(DMAX .LE. 0.1) GO TO 109
+            !CC        IF(DMAX <= 0.1) GO TO 110
+            IF(DMAX <= 0.1) GO TO 109
             !
             !------- the current solution is garbage --> extrapolate values instead
-            IF(IBL.GT.3) THEN
-                IF(IBL.LE.IBLTE(IS)) THEN
+            IF(IBL > 3) THEN
+                IF(IBL <= IBLTE(IS)) THEN
                     THI = THET(IBM, IS) * (XSSI(IBL, IS) / XSSI(IBM, IS))**0.5
                     DSI = DSTR(IBM, IS) * (XSSI(IBL, IS) / XSSI(IBM, IS))**0.5
                     UEI = UEDG(IBM, IS)
-                ELSE IF(IBL.EQ.IBLTE(IS) + 1) THEN
+                ELSE IF(IBL == IBLTE(IS) + 1) THEN
                     CTI = CTE
                     THI = TTE
                     DSI = DTE
@@ -1123,8 +1123,8 @@ SUBROUTINE MRCHDU
                     DSI = (DSTR(IBM, IS) + THI * RATLEN) / (1.0 + RATLEN)
                     UEI = UEDG(IBM, IS)
                 ENDIF
-                IF(IBL.EQ.ITRAN(IS)) CTI = 0.05
-                IF(IBL.GT.ITRAN(IS)) CTI = CTAU(IBM, IS)
+                IF(IBL == ITRAN(IS)) CTI = 0.05
+                IF(IBL > ITRAN(IS)) CTI = CTAU(IBM, IS)
             ENDIF
             !
             109     CALL BLPRV(XSI, AMI, CTI, THI, DSI, DSWAKI, UEI)
@@ -1139,12 +1139,12 @@ SUBROUTINE MRCHDU
             ENDIF
             !
             !------- set all other extrapolated values for current station
-            IF(IBL.LT.ITRAN(IS)) CALL BLVAR(1)
-            IF(IBL.GE.ITRAN(IS)) CALL BLVAR(2)
+            IF(IBL < ITRAN(IS)) CALL BLVAR(1)
+            IF(IBL >= ITRAN(IS)) CALL BLVAR(2)
             IF(WAKE) CALL BLVAR(3)
             !
-            IF(IBL.LT.ITRAN(IS)) CALL BLMID(1)
-            IF(IBL.GE.ITRAN(IS)) CALL BLMID(2)
+            IF(IBL < ITRAN(IS)) CALL BLMID(1)
+            IF(IBL >= ITRAN(IS)) CALL BLMID(2)
             IF(WAKE) CALL BLMID(3)
             !
             !------ pick up here after the Newton iterations
@@ -1153,8 +1153,8 @@ SUBROUTINE MRCHDU
             SENS = SENNEW
             !
             !------ store primary variables
-            IF(IBL.LT.ITRAN(IS)) CTAU(IBL, IS) = AMI
-            IF(IBL.GE.ITRAN(IS)) CTAU(IBL, IS) = CTI
+            IF(IBL < ITRAN(IS)) CTAU(IBL, IS) = AMI
+            IF(IBL >= ITRAN(IS)) CTAU(IBL, IS) = CTI
             THET(IBL, IS) = THI
             DSTR(IBL, IS) = DSI
             UEDG(IBL, IS) = UEI
@@ -1174,7 +1174,7 @@ SUBROUTINE MRCHDU
             !
             !
             !------ turbulent intervals will follow transition interval or TE
-            IF(TRAN .OR. IBL.EQ.IBLTE(IS)) THEN
+            IF(TRAN .OR. IBL == IBLTE(IS)) THEN
                 TURB = .TRUE.
                 !
                 !------- save transition location
@@ -1199,7 +1199,7 @@ SUBROUTINE XIFSET(IS)
     INCLUDE 'XFOIL.INC'
     INCLUDE 'XBL.INC'
     !
-    IF(XSTRIP(IS).GE.1.0) THEN
+    IF(XSTRIP(IS) >= 1.0) THEN
         XIFORC = XSSI(IBLTE(IS), IS)
         RETURN
     ENDIF
@@ -1217,7 +1217,7 @@ SUBROUTINE XIFSET(IS)
     CALL SPLIND(W1, W3, S, N, -999.0, -999.0)
     CALL SPLIND(W2, W4, S, N, -999.0, -999.0)
     !
-    IF(IS.EQ.1) THEN
+    IF(IS == 1) THEN
         !
         !----- set approximate arc length of forced transition point for SINVRT
         STR = SLE + (S(1) - SLE) * XSTRIP(IS)
@@ -1237,7 +1237,7 @@ SUBROUTINE XIFSET(IS)
         !
     ENDIF
     !
-    IF(XIFORC .LT. 0.0) THEN
+    IF(XIFORC < 0.0) THEN
         WRITE(*, 1000) IS
         1000  FORMAT(/' ***  Stagnation point is past trip on side', I2, '  ***')
         XIFORC = XSSI(IBLTE(IS), IS)
@@ -1272,7 +1272,7 @@ SUBROUTINE UPDATE
     !---- max allowable CL change per iteration
     DCLMAX = 0.5
     DCLMIN = -0.5
-    IF(MATYP.NE.1) DCLMIN = MAX(-0.5, -0.9*CL)
+    IF(MATYP /= 1) DCLMIN = MAX(-0.5, -0.9*CL)
     !
     HSTINV = GAMM1*(MINF/QINF)**2 / (1.0 + 0.5*GAMM1*MINF**2)
     !
@@ -1343,7 +1343,7 @@ SUBROUTINE UPDATE
     !
     DO 3 I = 1, N
         IP = I+1
-        IF(I.EQ.N) IP = 1
+        IF(I == N) IP = 1
         !
         CGINC = 1.0 - (QNEW(IP)/QINF)**2
         CPG2 = CGINC / (BETA + BFAC*CGINC)
@@ -1380,8 +1380,8 @@ SUBROUTINE UPDATE
         DAC = (CLNEW - CL) / (1.0 - CL_AC - CL_MS*2.0*MINF*MINF_CL)
         !
         !----- set under-relaxation factor if Re change is too large
-        IF(RLX*DAC .GT. DCLMAX) RLX = DCLMAX/DAC
-        IF(RLX*DAC .LT. DCLMIN) RLX = DCLMIN/DAC
+        IF(RLX*DAC > DCLMAX) RLX = DCLMAX/DAC
+        IF(RLX*DAC < DCLMIN) RLX = DCLMIN/DAC
         !
     ELSE
         !===== CL is prescribed: AC is alpha
@@ -1390,8 +1390,8 @@ SUBROUTINE UPDATE
         DAC = (CLNEW - CLSPEC) / (0.0 - CL_AC - CL_A)
         !
         !----- set under-relaxation factor if alpha change is too large
-        IF(RLX*DAC .GT. DALMAX) RLX = DALMAX/DAC
-        IF(RLX*DAC .LT. DALMIN) RLX = DALMIN/DAC
+        IF(RLX*DAC > DALMAX) RLX = DALMAX/DAC
+        IF(RLX*DAC < DALMIN) RLX = DALMIN/DAC
         !
     ENDIF
     !
@@ -1416,8 +1416,8 @@ SUBROUTINE UPDATE
             DDSTR = (DMASS - DSTR(IBL, IS)*DUEDG)/UEDG(IBL, IS)
             !
             !-------- normalize changes
-            IF(IBL.LT.ITRAN(IS)) DN1 = DCTAU / 10.0
-            IF(IBL.GE.ITRAN(IS)) DN1 = DCTAU / CTAU(IBL, IS)
+            IF(IBL < ITRAN(IS)) DN1 = DCTAU / 10.0
+            IF(IBL >= ITRAN(IS)) DN1 = DCTAU / CTAU(IBL, IS)
             DN2 = DTHET / THET(IBL, IS)
             DN3 = DDSTR / DSTR(IBL, IS)
             DN4 = ABS(DUEDG)/0.25
@@ -1427,48 +1427,48 @@ SUBROUTINE UPDATE
             !
             !-------- see if Ctau needs underrelaxation
             RDN1 = RLX*DN1
-            IF(ABS(DN1) .GT. ABS(RMXBL)) THEN
+            IF(ABS(DN1) > ABS(RMXBL)) THEN
                 RMXBL = DN1
-                IF(IBL.LT.ITRAN(IS)) VMXBL = 'n'
-                IF(IBL.GE.ITRAN(IS)) VMXBL = 'C'
+                IF(IBL < ITRAN(IS)) VMXBL = 'n'
+                IF(IBL >= ITRAN(IS)) VMXBL = 'C'
                 IMXBL = IBL
                 ISMXBL = IS
             ENDIF
-            IF(RDN1 .GT. DHI) RLX = DHI/DN1
-            IF(RDN1 .LT. DLO) RLX = DLO/DN1
+            IF(RDN1 > DHI) RLX = DHI/DN1
+            IF(RDN1 < DLO) RLX = DLO/DN1
             !
             !-------- see if Theta needs underrelaxation
             RDN2 = RLX*DN2
-            IF(ABS(DN2) .GT. ABS(RMXBL)) THEN
+            IF(ABS(DN2) > ABS(RMXBL)) THEN
                 RMXBL = DN2
                 VMXBL = 'T'
                 IMXBL = IBL
                 ISMXBL = IS
             ENDIF
-            IF(RDN2 .GT. DHI) RLX = DHI/DN2
-            IF(RDN2 .LT. DLO) RLX = DLO/DN2
+            IF(RDN2 > DHI) RLX = DHI/DN2
+            IF(RDN2 < DLO) RLX = DLO/DN2
             !
             !-------- see if Dstar needs underrelaxation
             RDN3 = RLX*DN3
-            IF(ABS(DN3) .GT. ABS(RMXBL)) THEN
+            IF(ABS(DN3) > ABS(RMXBL)) THEN
                 RMXBL = DN3
                 VMXBL = 'D'
                 IMXBL = IBL
                 ISMXBL = IS
             ENDIF
-            IF(RDN3 .GT. DHI) RLX = DHI/DN3
-            IF(RDN3 .LT. DLO) RLX = DLO/DN3
+            IF(RDN3 > DHI) RLX = DHI/DN3
+            IF(RDN3 < DLO) RLX = DLO/DN3
             !
             !-------- see if Ue needs underrelaxation
             RDN4 = RLX*DN4
-            IF(ABS(DN4) .GT. ABS(RMXBL)) THEN
+            IF(ABS(DN4) > ABS(RMXBL)) THEN
                 RMXBL = DUEDG
                 VMXBL = 'U'
                 IMXBL = IBL
                 ISMXBL = IS
             ENDIF
-            IF(RDN4 .GT. DHI) RLX = DHI/DN4
-            IF(RDN4 .LT. DLO) RLX = DLO/DN4
+            IF(RDN4 > DHI) RLX = DHI/DN4
+            IF(RDN4 < DLO) RLX = DLO/DN4
             !
         40   CONTINUE
     4 CONTINUE
@@ -1502,7 +1502,7 @@ SUBROUTINE UPDATE
             DSTR(IBL, IS) = DSTR(IBL, IS) + RLX*DDSTR
             UEDG(IBL, IS) = UEDG(IBL, IS) + RLX*DUEDG
             !
-            IF(IBL.GT.IBLTE(IS)) THEN
+            IF(IBL > IBLTE(IS)) THEN
                 IW = IBL - IBLTE(IS)
                 DSWAKI = WGAP(IW)
             ELSE
@@ -1510,10 +1510,10 @@ SUBROUTINE UPDATE
             ENDIF
             !
             !-------- eliminate absurd transients
-            IF(IBL.GE.ITRAN(IS))&
+            IF(IBL >= ITRAN(IS))&
                     CTAU(IBL, IS) = MIN(CTAU(IBL, IS) , 0.25)
             !
-            IF(IBL.LE.IBLTE(IS)) THEN
+            IF(IBL <= IBLTE(IS)) THEN
                 HKLIM = 1.02
             ELSE
                 HKLIM = 1.00005
@@ -1531,8 +1531,8 @@ SUBROUTINE UPDATE
         !
         !------ make sure there are no "islands" of negative Ue
         DO IBL = 3, IBLTE(IS)
-            IF(UEDG(IBL-1, IS) .GT. 0.0 .AND.&
-                    UEDG(IBL, IS) .LE. 0.0) THEN
+            IF(UEDG(IBL-1, IS) > 0.0 .AND.&
+                    UEDG(IBL, IS) <= 0.0) THEN
                 UEDG(IBL, IS) = UEDG(IBL-1, IS)
                 MASS(IBL, IS) = DSTR(IBL, IS) * UEDG(IBL, IS)
             ENDIF

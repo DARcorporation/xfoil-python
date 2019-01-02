@@ -69,7 +69,7 @@ SUBROUTINE GAUSS(NSIZ, NN, Z, R, NRHS)
         DO 15 K = NP1, NN
             ZTMP = Z(K, NP)
             !
-            !          IF(ZTMP.EQ.0.0) GO TO 15
+            !          IF(ZTMP == 0.0) GO TO 15
             !
             DO 151 L = NP1, NN
                 Z(K, L) = Z(K, L) - ZTMP * Z(NP, L)
@@ -140,7 +140,7 @@ SUBROUTINE CGAUSS(NSIZ, NN, Z, R, NRHS)
         DO 15 K = NP1, NN
             ZTMP = Z(K, NP)
             !
-            !          IF(ZTMP.EQ.0.0) GO TO 15
+            !          IF(ZTMP == 0.0) GO TO 15
             !
             DO 151 L = NP1, NN
                 Z(K, L) = Z(K, L) - ZTMP * Z(NP, L)
@@ -192,7 +192,7 @@ SUBROUTINE LUDCMP(NSIZ, N, A, INDX)
     PARAMETER (NVX = 500)
     DIMENSION VV(NVX)
     !
-    IF(N.GT.NVX) STOP 'LUDCMP: Array overflow. Increase NVX.'
+    IF(N > NVX) STOP 'LUDCMP: Array overflow. Increase NVX.'
     !
     DO 12 I = 1, N
         AAMAX = 0.
@@ -220,13 +220,13 @@ SUBROUTINE LUDCMP(NSIZ, N, A, INDX)
             A(I, J) = SUM
             !
             DUM = VV(I) * ABS(SUM)
-            IF(DUM.GE.AAMAX) THEN
+            IF(DUM >= AAMAX) THEN
                 IMAX = I
                 AAMAX = DUM
             ENDIF
         16   CONTINUE
         !
-        IF(J.NE.IMAX) THEN
+        IF(J /= IMAX) THEN
             DO 17 K = 1, N
                 DUM = A(IMAX, K)
                 A(IMAX, K) = A(J, K)
@@ -236,7 +236,7 @@ SUBROUTINE LUDCMP(NSIZ, N, A, INDX)
         ENDIF
         !
         INDX(J) = IMAX
-        IF(J.NE.N) THEN
+        IF(J /= N) THEN
             DUM = 1.0 / A(J, J)
             DO 18 I = J + 1, N
                 A(I, J) = A(I, J) * DUM
@@ -258,11 +258,11 @@ SUBROUTINE BAKSUB(NSIZ, N, A, INDX, B)
         LL = INDX(I)
         SUM = B(LL)
         B(LL) = B(I)
-        IF(II.NE.0) THEN
+        IF(II /= 0) THEN
             DO 11 J = II, I - 1
                 SUM = SUM - A(I, J) * B(J)
             11    CONTINUE
-        ELSE IF(SUM.NE.0.0) THEN
+        ELSE IF(SUM /= 0.0) THEN
             II = I
         ENDIF
         B(I) = SUM
@@ -270,7 +270,7 @@ SUBROUTINE BAKSUB(NSIZ, N, A, INDX, B)
     !
     DO 14 I = N, 1, -1
         SUM = B(I)
-        IF(I.LT.N) THEN
+        IF(I < N) THEN
             DO 13 J = I + 1, N
                 SUM = SUM - A(I, J) * B(J)
             13    CONTINUE
@@ -387,7 +387,7 @@ SUBROUTINE BLSOLV
         VDEL(1, 2, IV) = VDEL(1, 2, IV) - VTMP * VDEL(2, 2, IV)
         !
         !
-        IF(IV.EQ.NSYS) GO TO 1000
+        IF(IV == NSYS) GO TO 1000
         !
         !====== Eliminate VB(IV+1) block, rows  1 -> 3
         DO 50 K = 1, 3
@@ -410,7 +410,7 @@ SUBROUTINE BLSOLV
                             + VTMP3 * VDEL(3, 2, IV))
         50   CONTINUE
         !
-        IF(IV.EQ.IVTE1) THEN
+        IF(IV == IVTE1) THEN
             !------- eliminate VZ block
             IVZ = ISYS(IBLTE(2) + 1, 2)
             !
@@ -431,7 +431,7 @@ SUBROUTINE BLSOLV
             55    CONTINUE
         ENDIF
         !
-        IF(IVP.EQ.NSYS) GO TO 1000
+        IF(IVP == NSYS) GO TO 1000
         !
         !====== Eliminate lower VM column
         DO 60 KV = IV + 2, NSYS
@@ -439,7 +439,7 @@ SUBROUTINE BLSOLV
             VTMP2 = VM(2, IV, KV)
             VTMP3 = VM(3, IV, KV)
             !
-            IF(ABS(VTMP1).GT.VACC1) THEN
+            IF(ABS(VTMP1) > VACC1) THEN
                 DO 610 L = IVP, NSYS
                     VM(1, L, KV) = VM(1, L, KV) - VTMP1 * VM(3, L, IV)
                 610     CONTINUE
@@ -447,7 +447,7 @@ SUBROUTINE BLSOLV
                 VDEL(1, 2, KV) = VDEL(1, 2, KV) - VTMP1 * VDEL(3, 2, IV)
             ENDIF
             !
-            IF(ABS(VTMP2).GT.VACC2) THEN
+            IF(ABS(VTMP2) > VACC2) THEN
                 DO 620 L = IVP, NSYS
                     VM(2, L, KV) = VM(2, L, KV) - VTMP2 * VM(3, L, IV)
                 620     CONTINUE
@@ -455,7 +455,7 @@ SUBROUTINE BLSOLV
                 VDEL(2, 2, KV) = VDEL(2, 2, KV) - VTMP2 * VDEL(3, 2, IV)
             ENDIF
             !
-            IF(ABS(VTMP3).GT.VACC3) THEN
+            IF(ABS(VTMP3) > VACC3) THEN
                 DO 630 L = IVP, NSYS
                     VM(3, L, KV) = VM(3, L, KV) - VTMP3 * VM(3, L, IV)
                 630     CONTINUE

@@ -23,17 +23,17 @@ SUBROUTINE ABCOPY(LCONF)
     INCLUDE 'XFOIL.INC'
     LOGICAL LCONF
     !
-    IF(NB.LE.1) THEN
+    IF(NB <= 1) THEN
         WRITE(*, *) 'ABCOPY: Buffer airfoil not available.'
         RETURN
-    ELSEIF(NB.GT.IQX - 5) THEN
+    ELSEIF(NB > IQX - 5) THEN
         WRITE(*, *) 'Maximum number of panel nodes  : ', IQX - 5
         WRITE(*, *) 'Number of buffer airfoil points: ', NB
         WRITE(*, *) 'Current airfoil cannot be set.'
         WRITE(*, *) 'Try executing PANE at Top Level instead.'
         RETURN
     ENDIF
-    IF(N.NE.NB) LBLINI = .FALSE.
+    IF(N /= NB) LBLINI = .FALSE.
     !
     N = NB
     DO 101 I = 1, N
@@ -52,14 +52,14 @@ SUBROUTINE ABCOPY(LCONF)
     I = 1
     102  CONTINUE
     I = I + 1
-    IF(X(I - 1).EQ.X(I) .AND. Y(I - 1).EQ.Y(I)) THEN
+    IF(X(I - 1) == X(I) .AND. Y(I - 1) == Y(I)) THEN
         DO 104 J = I, N - 1
             X(J) = X(J + 1)
             Y(J) = Y(J + 1)
         104    CONTINUE
         N = N - 1
     ENDIF
-    IF(I.LT.N) GO TO 102
+    IF(I < N) GO TO 102
     !
     CALL SCALC(X, Y, S, N)
     CALL SEGSPL(X, XP, S, N)
@@ -100,7 +100,7 @@ END
 SUBROUTINE GETXYF(X, XP, Y, YP, S, N, TOPS, BOTS, XF, YF)
     DIMENSION X(N), XP(N), Y(N), YP(N), S(N)
     !
-    IF(XF .EQ. -999.0)&
+    IF(XF == -999.0)&
             CALL ASKR('Enter flap hinge x location^', XF)
     !
     !---- find top and bottom y at hinge x location
@@ -115,11 +115,11 @@ SUBROUTINE GETXYF(X, XP, Y, YP, S, N, TOPS, BOTS, XF, YF)
     1000 FORMAT(/'  Top    surface:  y =', F8.4, '     y/t = 1.0'&
             /'  Bottom surface:  y =', F8.4, '     y/t = 0.0')
     !
-    IF(YF .EQ. -999.0)&
+    IF(YF == -999.0)&
             CALL ASKR(&
                     'Enter flap hinge y location (or 999 to specify y/t)^', YF)
     !
-    IF(YF .EQ. 999.0) THEN
+    IF(YF == 999.0) THEN
         CALL ASKR('Enter flap hinge relative y/t location^', YREL)
         YF = TOPY * YREL + BOTY * (1.0 - YREL)
     ENDIF

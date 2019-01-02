@@ -47,7 +47,7 @@ SUBROUTINE QDES
     COMARG = ' '
     LRECALC = .FALSE.
     !
-    IF(N.EQ.0) THEN
+    IF(N == 0) THEN
         WRITE(*, *)
         WRITE(*, *) '***  No airfoil available  ***'
         RETURN
@@ -63,7 +63,7 @@ SUBROUTINE QDES
     CALL SPECAL
     !
     !---- see if current Qspec, if any, didn't come from Full-Inverse
-    IF(NSP.NE.N) THEN
+    IF(NSP /= N) THEN
         LQSPEC = .FALSE.
         LIQSET = .FALSE.
     ENDIF
@@ -110,8 +110,8 @@ SUBROUTINE QDES
     !
     !--------------------------------------------------------
     !---- process previous command ?
-    IF(COMAND(1:1).EQ.'!') THEN
-        IF(COMOLD.EQ.'****') THEN
+    IF(COMAND(1:1) == '!') THEN
+        IF(COMOLD == '****') THEN
             WRITE(*, *) 'Previous .QDES command not valid'
             GO TO 501
         ELSE
@@ -123,7 +123,7 @@ SUBROUTINE QDES
         LRECALC = .FALSE.
     ENDIF
     !
-    IF(COMAND.EQ.'    ') THEN
+    IF(COMAND == '    ') THEN
         !----- just <return> was typed... clean up plotting and exit OPER
         RETURN
     ENDIF
@@ -139,7 +139,7 @@ SUBROUTINE QDES
     CALL GETFLT(COMARG, RINPUT, NINPUT, ERROR)
     !
     !--------------------------------------------------------
-    IF(COMAND.EQ.'?   ') THEN
+    IF(COMAND == '?   ') THEN
         WRITE(*, 1050)
         1050  FORMAT(&
                 /'   <cr>   Return to Top Level'&
@@ -151,13 +151,13 @@ SUBROUTINE QDES
         !
         !--------------------------------------------------------
         !---- re-initialize Qspec to Q
-    ELSEIF(COMAND.EQ.'QSET') THEN
+    ELSEIF(COMAND == 'QSET') THEN
         CALL GAMQSP(1)
         GO TO 500
         !
         !--------------------------------------------------------
         !---- smooth Qspec within target segment, or entire Qspec if not marked off
-    ELSEIF(COMAND.EQ.'SMOO') THEN
+    ELSEIF(COMAND == 'SMOO') THEN
         !
         KQSP = 1
         CALL SMOOQ(IQ1, IQ2, KQSP)
@@ -170,7 +170,7 @@ SUBROUTINE QDES
         !
         !--------------------------------------------------------
         !---- toggle Qspec endpoint slope matching
-    ELSEIF(COMAND.EQ.'SLOP') THEN
+    ELSEIF(COMAND == 'SLOP') THEN
         LQSLOP = .NOT.LQSLOP
         IF(LQSLOP) THEN
             WRITE(*, *)&
@@ -183,7 +183,7 @@ SUBROUTINE QDES
         !
         !--------------------------------------------------------
         !---- toggle CPxx preservation constraints
-    ELSEIF(COMAND.EQ.'CPXX') THEN
+    ELSEIF(COMAND == 'CPXX') THEN
         LCPXX = .NOT.LCPXX
         IF(LCPXX) THEN
             WRITE(*, *) 'CPxx will be constrained'
@@ -194,7 +194,7 @@ SUBROUTINE QDES
         !
         !--------------------------------------------------------
         !---- restore and spline old airfoil
-    ELSEIF(COMAND.EQ.'REST') THEN
+    ELSEIF(COMAND == 'REST') THEN
         DO I = 1, N
             X(I) = XB(I)
             Y(I) = YB(I)
@@ -272,7 +272,7 @@ SUBROUTINE SMOOQ(KQ1, KQ2, KQSP)
     INCLUDE 'XFOIL.INC'
     !
     !C---- calculate smoothing coordinate
-    !cc      IF(NSP.EQ.NC1) THEN
+    !cc      IF(NSP == NC1) THEN
     !C
     !C------ mapping inverse: use circle plane coordinate
     !        I = 1
@@ -302,7 +302,7 @@ SUBROUTINE SMOOQ(KQ1, KQ2, KQSP)
     !cc      ENDIF
     !
     !
-    IF(KQ2 - KQ1 .LT. 2) THEN
+    IF(KQ2 - KQ1 < 2) THEN
         WRITE(*, *) 'Segment is too short.  No smoothing possible.'
         RETURN
     ENDIF
@@ -379,7 +379,7 @@ FUNCTION QINCOM(QC, QINF, TKLAM)
     !     Karman-Tsien compressible speed
     !-------------------------------------
     !
-    IF(TKLAM.LT.1.0E-4 .OR. ABS(QC).LT.1.0E-4) THEN
+    IF(TKLAM < 1.0E-4 .OR. ABS(QC) < 1.0E-4) THEN
         !----- for nearly incompressible case or very small speed, use asymptotic
         !      expansion of singular quadratic formula to avoid numerical problems
         QINCOM = QC / (1.0 - TKLAM)

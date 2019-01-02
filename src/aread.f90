@@ -9,7 +9,7 @@ SUBROUTINE AREAD(LU, FNAME, NMAX, X, Y, N, NAME, ISPARS, ITYPE, INFO)
     !  Input:
     !       LU      logical unit to use for reading
     !       FNAME   name of coordinate file to be read,
-    !               if FNAME(1:1).eq.' ', unit LU is assumed
+    !               if FNAME(1:1) == ' ', unit LU is assumed
     !               to be already open
     !       INFO   0 keep quiet
     !              1 print info on airfoil
@@ -35,27 +35,27 @@ SUBROUTINE AREAD(LU, FNAME, NMAX, X, Y, N, NAME, ISPARS, ITYPE, INFO)
     !---- assume read error will occur
     ITYPE = 0
     !
-    LOPEN = FNAME(1:1) .NE. ' '
+    LOPEN = FNAME(1:1) /= ' '
     IF(LOPEN) OPEN(LU, FILE = FNAME, STATUS = 'OLD', ERR = 98)
     !
     11   READ(LU, 1000, END = 99, ERR = 98) LINE1
-    IF(INDEX('#!', LINE1(1:1)) .NE. 0) GO TO 11
+    IF(INDEX('#!', LINE1(1:1)) /= 0) GO TO 11
     !
     12   READ(LU, 1000, END = 99) LINE2
-    IF(INDEX('#!', LINE2(1:1)) .NE. 0) GO TO 12
+    IF(INDEX('#!', LINE2(1:1)) /= 0) GO TO 12
     !
     I = 1
     !
     !---- try to read two numbers from first line
     NA = 2
     CALL GETFLT(LINE1, A, NA, ERROR)
-    IF(ERROR .OR. NA.LT.2) THEN
+    IF(ERROR .OR. NA < 2) THEN
         !------ must be a name string
         NAME = LINE1
     ELSE
         !------ no name, just two valid numbers... must be plain airfoil file
         NAME = ' '
-        IF(INFO.GT.0) THEN
+        IF(INFO > 0) THEN
             WRITE(*, *)
             WRITE(*, *) 'Plain airfoil file'
         ENDIF
@@ -68,14 +68,14 @@ SUBROUTINE AREAD(LU, FNAME, NMAX, X, Y, N, NAME, ISPARS, ITYPE, INFO)
     !-    so now try to read four MSES domain numbers from second line
     NA = 4
     CALL GETFLT(LINE2, A, NA, ERROR)
-    IF(ERROR .OR. NA.LT.2) THEN
+    IF(ERROR .OR. NA < 2) THEN
         !------ less than two valid numbers... not a valid format
         GO TO 99
         !
-    ELSEIF(NA.LT.4) THEN
+    ELSEIF(NA < 4) THEN
         !------ less than four numbers... usual .dat labeled file
         NAME = LINE1
-        IF(INFO.GT.0) THEN
+        IF(INFO > 0) THEN
             WRITE(*, *)
             WRITE(*, *) 'Labeled airfoil file.  Name:  ', NAME
         ENDIF
@@ -86,7 +86,7 @@ SUBROUTINE AREAD(LU, FNAME, NMAX, X, Y, N, NAME, ISPARS, ITYPE, INFO)
         !
     ELSE
         !------ four or more numbers... MSES or MISES file
-        IF(INFO.GT.0) THEN
+        IF(INFO > 0) THEN
             WRITE(*, *)
             WRITE(*, *) 'MSES airfoil file.  Name:  ', NAME
         ENDIF
@@ -100,29 +100,29 @@ SUBROUTINE AREAD(LU, FNAME, NMAX, X, Y, N, NAME, ISPARS, ITYPE, INFO)
         51     READ(LU, 1000, END = 60) LINE
         !
         !------ skip comment line
-        IF(INDEX('#!', LINE(1:1)) .NE. 0) GO TO 51
+        IF(INDEX('#!', LINE(1:1)) /= 0) GO TO 51
         !
         NA = 2
         CALL GETFLT(LINE, A, NA, ERROR)
         IF(ERROR) GO TO 99
         !
         !------ skip line without at least two numbers
-        IF(NA.LT.2) GO TO 51
+        IF(NA < 2) GO TO 51
         !
         X(I) = A(1)
         Y(I) = A(2)
         !
-        IF (X(I) .EQ. 999.0 .AND. Y(I) .EQ. 999.0) THEN
+        IF (X(I) == 999.0 .AND. Y(I) == 999.0) THEN
             !-------- if this is the element we want, just exit
-            IF(IEL .EQ. NEL) GO TO 60
+            IF(IEL == NEL) GO TO 60
             !
-            IF(IEL.EQ.0) THEN
+            IF(IEL == 0) THEN
                 CALL ASKI('Enter element number^', IEL)
                 ITYPE = 4
             ENDIF
             !
             !-------- if this is the specified element, exit.
-            IF(IEL .EQ. NEL) GO TO 60
+            IF(IEL == NEL) GO TO 60
             GO TO 50
         ENDIF
     55 CONTINUE

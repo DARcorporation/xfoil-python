@@ -27,11 +27,11 @@ SUBROUTINE PLRSET(IP)
     INCLUDE 'XFOIL.INC'
     LOGICAL ERROR
     !
-    IF(IP.LE.0) THEN
+    IF(IP <= 0) THEN
         !----- invalid polar index
         RETURN
         !
-    ELSEIF(IP.GE.1 .AND. IP.LE.NPOL) THEN
+    ELSEIF(IP >= 1 .AND. IP <= NPOL) THEN
         WRITE(*, *)
         WRITE(*, *) 'Existing stored polar is chosen for appending...'
         NIPOL = NIPOL0
@@ -53,12 +53,12 @@ SUBROUTINE PLRSET(IP)
         NIPOL = NIPOL0
         !
         !----- check if geometries differ...
-        IF(N.NE.NXYPOL(IP)) GO TO 10
+        IF(N /= NXYPOL(IP)) GO TO 10
         SIZREF = S(N) - S(1)
         DO I = 1, N
             DSQ = (X(I) - CPOLXY(I, 1, IP))**2 + (Y(I) - CPOLXY(I, 2, IP))**2
             DSFRAC = SQRT(DSQ) / SIZREF
-            IF(DSFRAC .GT. 0.00001) GO TO 10
+            IF(DSFRAC > 0.00001) GO TO 10
         ENDDO
         GO TO 20
         !
@@ -71,12 +71,12 @@ SUBROUTINE PLRSET(IP)
                 /'    2  compute with stored  airfoil', &
                 ' (overwrite current airfoil)')
         CALL ASKI('   Select action^', IOPT)
-        IF(IOPT.EQ.0) THEN
+        IF(IOPT == 0) THEN
             IP = 0
             RETURN
-        ELSEIF(IOPT.EQ.1) THEN
+        ELSEIF(IOPT == 1) THEN
             CONTINUE
-        ELSEIF(IOPT.EQ.2) THEN
+        ELSEIF(IOPT == 2) THEN
             CALL APCOPY(IP)
         ENDIF
         !
@@ -171,7 +171,7 @@ SUBROUTINE APCOPY(IP)
     LIPAN = .FALSE.
     LVCONV = .FALSE.
     LSCINI = .FALSE.
-    IF(NOLD.NE.N) LBLINI = .FALSE.
+    IF(NOLD /= N) LBLINI = .FALSE.
     !
     RETURN
 END
@@ -200,7 +200,7 @@ SUBROUTINE PLRINI(LU, IP)
     REAL RINP(IPTOT)
     !
     CALL STRIP(PFNAME(IP), NPF)
-    IF(NPF.EQ.0) THEN
+    IF(NPF == 0) THEN
         PROMPT = 'Enter  polar save filename'&
                 // '  OR  <return> for no file^'
     ELSE
@@ -213,14 +213,14 @@ SUBROUTINE PLRINI(LU, IP)
     CALL ASKS(PROMPT, FNAME)
     CALL STRIP(FNAME, NFN)
     !
-    IF(NFN.EQ.0) THEN
+    IF(NFN == 0) THEN
         FNAME = PFNAME(IP)
         NFN = NPF
-    ELSEIF(INDEX('NONEnone', FNAME(1:4)).NE.0) THEN
+    ELSEIF(INDEX('NONEnone', FNAME(1:4)) /= 0) THEN
         NFN = 0
     ENDIF
     !
-    IF(NFN.EQ.0) THEN
+    IF(NFN == 0) THEN
         LPFILE = .FALSE.
         WRITE(*, *)
         WRITE(*, *) 'Polar save file will NOT be written'
@@ -246,25 +246,25 @@ SUBROUTINE PLRINI(LU, IP)
     CALL STRIP(NAMEPOL(IP), NNAMEP)
     !
     !---- check to see if the names are different
-    IF(NNAME .NE. NNAMEP) THEN
+    IF(NNAME /= NNAMEP) THEN
         NAMDIF = .TRUE.
     ELSE
         NAMDIF = .FALSE.
         DO K = 1, NNAME
-            IF(NAME(K:K).NE.NAMEPOL(IP)(K:K)) NAMDIF = .TRUE.
+            IF(NAME(K:K) /= NAMEPOL(IP)(K:K)) NAMDIF = .TRUE.
         ENDDO
     ENDIF
     !
     !---- check if the polar save file is for the same airfoil and conditions
     IF(NAMDIF                   .OR.&
-            REYNP1(IP) .NE. REINF1   .OR.&
-            MACHP1(IP) .NE. MINF1    .OR.&
-            IRETYP(IP) .NE. RETYP    .OR.&
-            IMATYP(IP) .NE. MATYP    .OR.&
-            ACRITP(1, IP) .NE. ACRIT(1)    .OR.&
-            ACRITP(2, IP) .NE. ACRIT(2)    .OR.&
-            XSTRIPP(1, IP) .NE. XSTRIP(1)  .OR.&
-            XSTRIPP(2, IP) .NE. XSTRIP(2)) THEN
+            REYNP1(IP) /= REINF1   .OR.&
+            MACHP1(IP) /= MINF1    .OR.&
+            IRETYP(IP) /= RETYP    .OR.&
+            IMATYP(IP) /= MATYP    .OR.&
+            ACRITP(1, IP) /= ACRIT(1)    .OR.&
+            ACRITP(2, IP) /= ACRIT(2)    .OR.&
+            XSTRIPP(1, IP) /= XSTRIP(1)  .OR.&
+            XSTRIPP(2, IP) /= XSTRIP(2)) THEN
         !
         WRITE(*, 6600)  NAME, NAMEPOL(IP), &
                 REINF1, REYNP1(IP), &
@@ -404,7 +404,7 @@ SUBROUTINE PLXINI(LU, IP)
     LOGICAL NAMDIF
     !
     CALL STRIP(PFNAMX(IP), NPF)
-    IF(NPF.EQ.0) THEN
+    IF(NPF == 0) THEN
         PROMPT = 'Enter  polar dump filename'&
                 // '  OR  <return> for no file^'
     ELSE
@@ -417,9 +417,9 @@ SUBROUTINE PLXINI(LU, IP)
     CALL ASKS(PROMPT, FNAME)
     CALL STRIP(FNAME, NFN)
     !
-    IF(INDEX('NONEnone', FNAME(1:4)).NE.0) NFN = 0
+    IF(INDEX('NONEnone', FNAME(1:4)) /= 0) NFN = 0
     !
-    IF(NFN.EQ.0) THEN
+    IF(NFN == 0) THEN
         LPFILX = .FALSE.
         WRITE(*, *)
         WRITE(*, *) 'Polar dump file will NOT be written'
@@ -451,23 +451,23 @@ SUBROUTINE PLXINI(LU, IP)
     CALL STRIP(NAMEX, NNAMEX)
     !
     !---- check to see if the names are different
-    IF(NNAME .NE. NNAMEX) THEN
+    IF(NNAME /= NNAMEX) THEN
         NAMDIF = .TRUE.
     ELSE
         NAMDIF = .FALSE.
         DO 50 K = 1, NNAME
-            IF(NAME(K:K).NE.NAMEX(K:K)) NAMDIF = .TRUE.
+            IF(NAME(K:K) /= NAMEX(K:K)) NAMDIF = .TRUE.
         50   CONTINUE
     ENDIF
     !
     !---- check if the polar save file is for the same airfoil and conditions
     IF(NAMDIF               .OR.&
-            REYNX  .NE. REINF1   .OR.&
-            MACHX  .NE. MINF1    .OR.&
-            RETYPX .NE. RETYP    .OR.&
-            MATYPX .NE. MATYP    .OR.&
-            ACRITX(1) .NE. ACRIT(1) .OR.&
-            ACRITX(2) .NE. ACRIT(2)) THEN
+            REYNX /= REINF1   .OR.&
+            MACHX /= MINF1    .OR.&
+            RETYPX /= RETYP    .OR.&
+            MATYPX /= MATYP    .OR.&
+            ACRITX(1) /= ACRIT(1) .OR.&
+            ACRITX(2) /= ACRIT(2)) THEN
         !
         WRITE(*, 6600) NAMEX, NAME, &
                 REYNX, REINF1, &
@@ -559,11 +559,11 @@ SUBROUTINE PLRADD(LU, IP)
     !c 1000 FORMAT(/' CL =', F7.3, '    Cd =', F9.5, '    Cm =', F8.4)
     !
     !---- add point to storage arrays
-    IF(IP.EQ.0) THEN
+    IF(IP == 0) THEN
         WRITE(*, *) 'No active polar is declared. Point not stored.'
         !
     ELSE
-        IF(NAPOL(IP).EQ.NAX) THEN
+        IF(NAPOL(IP) == NAX) THEN
             WRITE(*, *) 'Polar storage arrays full. Point not stored'
             !
         ELSE
@@ -782,7 +782,7 @@ SUBROUTINE PLRSUM(IP1, IP2, IPACTT)
     !CC     1234567890123456789012345678901234567890123456789012345678901234567890
     !
     DO IP = IP1, IP2
-        IF(IP.EQ.IPACTT) THEN
+        IF(IP == IPACTT) THEN
             CACC = '>'
             IF(LPFILE) THEN
                 CFIL = '>'
@@ -797,7 +797,7 @@ SUBROUTINE PLRSUM(IP1, IP2, IPACTT)
         IRET = IRETYP(IP)
         IMAT = IMATYP(IP)
         !
-        IF(REYNP1(IP).GT.0.0) THEN
+        IF(REYNP1(IP) > 0.0) THEN
             IEXP = INT(LOG10(REYNP1(IP)))
             IEXP = MAX(MIN(IEXP, 9), 0)
             RMAN = REYNP1(IP) / 10.0**IEXP

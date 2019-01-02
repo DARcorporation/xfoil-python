@@ -48,7 +48,7 @@ SUBROUTINE MDES
     COMARG = ' '
     LRECALC = .FALSE.
     !
-    IF(N.EQ.0) THEN
+    IF(N == 0) THEN
         WRITE(*, *)
         WRITE(*, *) '***  No airfoil available  ***'
         RETURN
@@ -63,7 +63,7 @@ SUBROUTINE MDES
     1 CONTINUE
     !
     !---- see if current Qspec, if any, didn't come from Mixed-Inverse
-    IF(NSP.NE.NC1) THEN
+    IF(NSP /= NC1) THEN
         LQSPEC = .FALSE.
         IQ1 = 1
         IQ2 = NC1
@@ -74,7 +74,7 @@ SUBROUTINE MDES
     LEIW = .TRUE.
     !
     !---- if Qspec alpha has never been set, set it to current alpha
-    IF(NQSP .EQ. 0) THEN
+    IF(NQSP == 0) THEN
         IACQSP = 1
         ALQSP(1) = ALFA
         NQSP = 1
@@ -118,8 +118,8 @@ SUBROUTINE MDES
     505  CONTINUE
     !
     !---- process previous command ?
-    IF(COMAND(1:1).EQ.'!') THEN
-        IF(COMOLD.EQ.'****') THEN
+    IF(COMAND(1:1) == '!') THEN
+        IF(COMOLD == '****') THEN
             WRITE(*, *) 'Previous .MDES command not valid'
             GO TO 501
         ELSE
@@ -131,7 +131,7 @@ SUBROUTINE MDES
         LRECALC = .FALSE.
     ENDIF
     !
-    IF(COMAND.EQ.'    ') THEN
+    IF(COMAND == '    ') THEN
         !----- just <return> was typed... clean up plotting and exit OPER
         RETURN
     ENDIF
@@ -147,7 +147,7 @@ SUBROUTINE MDES
     CALL GETFLT(COMARG, RINPUT, NINPUT, ERROR)
     !
     !--------------------------------------------------------
-    IF(COMAND.EQ.'?   ') THEN
+    IF(COMAND == '?   ') THEN
         WRITE(*, 1050)
         1050  FORMAT(&
                 /'   <cr>   Return to Top Level'&
@@ -166,13 +166,13 @@ SUBROUTINE MDES
                 //'   PERT   Perturb one Cn and generate geometry')
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'INIT') THEN
+    ELSEIF(COMAND == 'INIT') THEN
         LQSPEC = .FALSE.
         LSCINI = .FALSE.
         GO TO 1
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'QSET') THEN
+    ELSEIF(COMAND == 'QSET') THEN
         CALL CNCALC(QGAMM, .FALSE.)
         IF(LQSYM) CALL CNSYMM
         CALL QSPCIR
@@ -180,9 +180,9 @@ SUBROUTINE MDES
         LCNPL = .FALSE.
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'AQ  ') THEN
+    ELSEIF(COMAND == 'AQ  ') THEN
         !----- set Qspec(s) for specified alphas
-        IF(NINPUT.GE.1) THEN
+        IF(NINPUT >= 1) THEN
             NQSP = MIN(NINPUT, IPX)
             DO K = 1, NQSP
                 ALQSP(K) = RINPUT(K) * DTOR
@@ -200,7 +200,7 @@ SUBROUTINE MDES
             NTMP = MIN(NTMP, IPX)
             !
             !------ if just <return> was hit, don't do anything
-            IF(NTMP .EQ. 0) GO TO 500
+            IF(NTMP == 0) GO TO 500
             !
             NQSP = NTMP
             DO K = 1, NQSP
@@ -214,9 +214,9 @@ SUBROUTINE MDES
         LCNPL = .FALSE.
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'CQ  ') THEN
+    ELSEIF(COMAND == 'CQ  ') THEN
         !----- set Qspec(s) for specified CLs
-        IF(NINPUT.GE.1) THEN
+        IF(NINPUT >= 1) THEN
             NQSP = MIN(NINPUT, IPX)
             DO K = 1, NQSP
                 CLQSP(K) = RINPUT(K)
@@ -234,7 +234,7 @@ SUBROUTINE MDES
             NTMP = MIN(NTMP, IPX)
             !
             !------ if just <return> was hit, don't do anything
-            IF(NTMP .EQ. 0) GO TO 500
+            IF(NTMP == 0) GO TO 500
             !
             NQSP = NTMP
             DO K = 1, NQSP
@@ -248,8 +248,8 @@ SUBROUTINE MDES
         LCNPL = .FALSE.
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'SYMM' .OR.&
-            COMAND.EQ.'S   ') THEN
+    ELSEIF(COMAND == 'SYMM' .OR.&
+            COMAND == 'S   ') THEN
         LQSYM = .NOT.LQSYM
         IF(LQSYM) THEN
             WRITE(*, *) 'Qspec symmetry forcing enabled.'
@@ -265,15 +265,15 @@ SUBROUTINE MDES
         ENDIF
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'TGAP') THEN
+    ELSEIF(COMAND == 'TGAP') THEN
         CALL DZTSET(RINPUT, NINPUT)
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'TANG') THEN
+    ELSEIF(COMAND == 'TANG') THEN
         CALL AGTSET(RINPUT, NINPUT)
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'READ') THEN
+    ELSEIF(COMAND == 'READ') THEN
         !----- read in Qspec
         KQSP = 1
         CALL GETVOV(KQSP)
@@ -288,7 +288,7 @@ SUBROUTINE MDES
         WRITE(*, 1210) KQSP, ALQSP(KQSP) / DTOR, CLQSP(KQSP), CMQSP(KQSP)
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'SMOO') THEN
+    ELSEIF(COMAND == 'SMOO') THEN
         !----- smooth Qspec within target segment
         KQSP = KQTARG
         CALL SMOOQ(IQ1, IQ2, KQSP)
@@ -302,15 +302,15 @@ SUBROUTINE MDES
                     CLQ, CMQSP(KQSP))
             !
             !------- set new CL only if alpha is prescribed
-            IF(IACQSP.EQ.1) CLQSP(KQSP) = CLQ
+            IF(IACQSP == 1) CLQSP(KQSP) = CLQ
             !
             WRITE(*, 1210) KQSP, ALQSP(KQSP) / DTOR, CLQSP(KQSP), CMQSP(KQSP)
         ENDDO
         LQSPPL = .FALSE.
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'FILT' .OR.&
-            COMAND.EQ.'F   ') THEN
+    ELSEIF(COMAND == 'FILT' .OR.&
+            COMAND == 'F   ') THEN
         !----- apply modified Hanning filter to Cn coefficients
         CFILT = 0.2
         CALL CNFILT(CFILT)
@@ -324,16 +324,16 @@ SUBROUTINE MDES
                     CLQ, CMQSP(KQSP))
             !
             !------- set new CL only if alpha is prescribed
-            IF(IACQSP.EQ.1) CLQSP(KQSP) = CLQ
+            IF(IACQSP == 1) CLQSP(KQSP) = CLQ
             !
             WRITE(*, 1210) KQSP, ALQSP(KQSP) / DTOR, CLQSP(KQSP), CMQSP(KQSP)
         ENDDO
         LQSPPL = .FALSE.
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'DUMP') THEN
+    ELSEIF(COMAND == 'DUMP') THEN
         FNAME = COMARG
-        IF(FNAME(1:1).EQ.' ')&
+        IF(FNAME(1:1) == ' ')&
                 CALL ASKS('Enter Cn output filename^', FNAME)
         !
         LU = 19
@@ -342,8 +342,8 @@ SUBROUTINE MDES
         CLOSE(LU)
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'EXEC' .OR.&
-            COMAND.EQ.'X   ') THEN
+    ELSEIF(COMAND == 'EXEC' .OR.&
+            COMAND == 'X   ') THEN
         !----- execute full-inverse calculation
         CALL MAPGEN(FFILT, NB, XB, YB)
         !
@@ -368,7 +368,7 @@ SUBROUTINE MDES
                 /' Execute PANE at Top Level to set new current airfoil'/)
         !
         !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'PERT') THEN
+    ELSEIF(COMAND == 'PERT') THEN
         CALL PERT(QSPEC(1, 1))
         !----- set Q(s) for changed Cn
         CALL QSPCIR
@@ -406,7 +406,7 @@ SUBROUTINE DZTSET(RINPUT, NINPUT)
     INCLUDE 'CIRCLE.INC'
     DIMENSION RINPUT(*)
     !
-    IF(NINPUT.GE.2) THEN
+    IF(NINPUT >= 2) THEN
         DXNEW = RINPUT(1)
         DYNEW = RINPUT(2)
     ELSE
@@ -425,7 +425,7 @@ SUBROUTINE AGTSET(RINPUT, NINPUT)
     INCLUDE 'CIRCLE.INC'
     DIMENSION RINPUT(*)
     !
-    IF(NINPUT.GE.2) THEN
+    IF(NINPUT >= 2) THEN
         AGTED = RINPUT(1)
     ELSE
         WRITE(*, 1180) AGTE * 180.0
@@ -555,7 +555,7 @@ SUBROUTINE MAPGEN(FFILT, N, X, Y)
         CALL ZCNORM(MCT)
         !
         WRITE(*, *) ITERCN, DCNMAX
-        IF(DCNMAX.LE.5.0E-5) GO TO 101
+        IF(DCNMAX <= 5.0E-5) GO TO 101
     100 CONTINUE
     WRITE(*, *)
     WRITE(*, *) 'MAPGEN: Geometric constraints not fully converged'
@@ -687,7 +687,7 @@ SUBROUTINE SCINIT(N, X, XP, Y, YP, S, SLE)
             CN(1) = CN(1) + DCN
             !
             CALL PIQSUM
-            IF(ABS(DCN) .LT. CEPS) GO TO 41
+            IF(ABS(DCN) < CEPS) GO TO 41
         40 CONTINUE
         41 CONTINUE
         !
@@ -697,7 +697,7 @@ SUBROUTINE SCINIT(N, X, XP, Y, YP, S, SLE)
         50 CONTINUE
         !
         WRITE(*, *) IPASS, '     max(dw) =', DSCMAX
-        IF(DSCMAX .LT. SEPS) GO TO 505
+        IF(DSCMAX < SEPS) GO TO 505
         !
     500 CONTINUE
     505 CONTINUE
@@ -715,7 +715,7 @@ SUBROUTINE SCINIT(N, X, XP, Y, YP, S, SLE)
     DO 600 IC = 1, NC
         SINW = 2.0 * SIN(0.5 * WC(IC))
         SINWE = 0.
-        IF(SINW.GT.0.0) SINWE = SINW**(1.0 - AGTE)
+        IF(SINW > 0.0) SINWE = SINW**(1.0 - AGTE)
         !
         HWC = 0.5 * (WC(IC) - PI) * (1.0 + AGTE) - 0.5 * PI
         ZCOLDW(IC) = SINWE * EXP(PIQ(IC) + CMPLX(0.0, HWC))
@@ -782,7 +782,7 @@ SUBROUTINE CNCALC(QC, LSYMM)
     !
     !c      REAL WCJ(2)
     !
-    IF(NC .GT. ICX) STOP 'CNCALC: Array overflow.'
+    IF(NC > ICX) STOP 'CNCALC: Array overflow.'
     !
     !cC---- assume q(w) segment is entire airfoil
     !c      WCJ(1) = WC(1)
@@ -799,7 +799,7 @@ SUBROUTINE CNCALC(QC, LSYMM)
     !
     !---- get approximate w value at stagnation point
     DO 10 IC = 2, NC
-        IF(QC(IC).LT.0.0) GO TO 11
+        IF(QC(IC) < 0.0) GO TO 11
     10 CONTINUE
     11 WCLE = WC(IC)
     !
@@ -816,10 +816,10 @@ SUBROUTINE CNCALC(QC, LSYMM)
         SINW = 2.0 * SIN(0.5 * WC(IC))
         SINWE = SINW**AGTE
         !
-        !c        IF(WC(IC).GE.WCJ(1) .AND. WC(IC).LE.WCJ(2)) THEN
+        !c        IF(WC(IC) >= WCJ(1) .AND. WC(IC) <= WCJ(2)) THEN
         !
         !------- set P(w) from q(w)
-        IF(ABS(COSW).LT.1.0E-4) THEN
+        IF(ABS(COSW) < 1.0E-4) THEN
             !-------- use asymptotic form near stagnation point
             PFUN = ABS(SINWE / QCW(IC))
         ELSE
@@ -906,13 +906,13 @@ SUBROUTINE CNFILT(FFILT)
     !-------------------------------------
     INCLUDE 'CIRCLE.INC'
     !
-    IF(FFILT.EQ.0.0) RETURN
+    IF(FFILT == 0.0) RETURN
     !
     DO 10 M = 0, MC
         FREQ = FLOAT(M) / FLOAT(MC)
         CWT = 0.5 * (1.0 + COS(PI * FREQ))
         CWTX = CWT
-        IF(FFILT.GT.0.0) CWTX = CWT**FFILT
+        IF(FFILT > 0.0) CWTX = CWT**FFILT
         CN(M) = CN(M) * CWTX
     10 CONTINUE
     !
@@ -941,7 +941,7 @@ SUBROUTINE ZCCALC(MTEST)
     !
     SINW = 2.0 * SIN(0.5 * WC(IC))
     SINWE = 0.
-    IF(SINW.GT.0.0) SINWE = SINW**(1.0 - AGTE)
+    IF(SINW > 0.0) SINWE = SINW**(1.0 - AGTE)
     !
     HWC = 0.5 * (WC(IC) - PI) * (1.0 + AGTE) - 0.5 * PI
     DZDW1 = SINWE * EXP(PIQ(IC) + CMPLX(0.0, HWC))
@@ -949,7 +949,7 @@ SUBROUTINE ZCCALC(MTEST)
         !
         SINW = 2.0 * SIN(0.5 * WC(IC))
         SINWE = 0.
-        IF(SINW.GT.0.0) SINWE = SINW**(1.0 - AGTE)
+        IF(SINW > 0.0) SINWE = SINW**(1.0 - AGTE)
         !
         HWC = 0.5 * (WC(IC) - PI) * (1.0 + AGTE) - 0.5 * PI
         DZDW2 = SINWE * EXP(PIQ(IC) + CMPLX(0.0, HWC))
@@ -1070,9 +1070,9 @@ SUBROUTINE QCCALC(ISPEC, ALFA, CL, CM, MINF, QINF, &
             EPPP = EXP(-PPP)
             SINW = 2.0 * SIN(0.5 * WC(IC))
             !
-            IF(AGTE.EQ.0.0) THEN
+            IF(AGTE == 0.0) THEN
                 SINWE = 1.0
-            ELSE IF(SINW.GT.0.0) THEN
+            ELSE IF(SINW > 0.0) THEN
                 SINWE = SINW**AGTE
             ELSE
                 SINWE = 0.0
@@ -1095,7 +1095,7 @@ SUBROUTINE QCCALC(ISPEC, ALFA, CL, CM, MINF, QINF, &
         CPC_A1 = CPC_Q1 * QC_A(IC)
         DO 20 IC = 1, NC
             ICP = IC + 1
-            IF(IC.EQ.NC) ICP = 1
+            IF(IC == NC) ICP = 1
             !
             CPINC2 = 1.0 - (QCIR(ICP) / QINF)**2
             CPI_Q2 = -2.0 * QCIR(ICP) / QINF**2
@@ -1127,7 +1127,7 @@ SUBROUTINE QCCALC(ISPEC, ALFA, CL, CM, MINF, QINF, &
         !------ moment is real part of complex moment
         CM = REAL(CMT)
         !
-        IF(ISPEC.EQ.1) THEN
+        IF(ISPEC == 1) THEN
             !------- if alpha is prescribed, we're done
             CL = CLT
             RETURN
@@ -1135,7 +1135,7 @@ SUBROUTINE QCCALC(ISPEC, ALFA, CL, CM, MINF, QINF, &
             !------- adjust alpha with Newton-Raphson to get specified CL
             DALFA = (CL - CLT) / CLT_A
             ALFA = ALFA + DALFA
-            IF(ABS(DALFA) .LT. AEPS) RETURN
+            IF(ABS(DALFA) < AEPS) RETURN
         ENDIF
         !
     1 CONTINUE
@@ -1171,7 +1171,7 @@ SUBROUTINE QSPINT(ALQSP, QSPEC, QINF, MINF, CLQSP, CMQSP)
     !
     DO 10 I = 1, NC
         IP = I + 1
-        IF(I.EQ.NC) IP = 1
+        IF(I == NC) IP = 1
         !
         CQINC = 1.0 - (QSPEC(IP) / QINF)**2
         CPQ2 = CQINC / (BETA + BFAC * CQINC)
@@ -1234,7 +1234,7 @@ SUBROUTINE EIWSET(NC1)
     MC = NC1 / 4
     MCT = NC1 / 16
     !
-    IF(NC.GT.ICX) STOP 'EIWSET: Array overflow. Increase ICX.'
+    IF(NC > ICX) STOP 'EIWSET: Array overflow. Increase ICX.'
     !
     DWC = 2.0 * PI / FLOAT(NC - 1)
     !
@@ -1300,9 +1300,9 @@ SUBROUTINE PERT(QSPEC)
     10   WRITE(*, 1050)
     1050 FORMAT(/4X, 'Enter  n, delta(Cnr), delta(Cni):  ', $)
     READ(*, *, ERR = 10) M, DCNR, DCNI
-    IF(M.LE.0) THEN
+    IF(M <= 0) THEN
         GO TO 10
-    ELSEIF(M.GT.NC) THEN
+    ELSEIF(M > NC) THEN
         WRITE(*, *) 'Max number of modes is', NC
         GO TO 10
     ENDIF
@@ -1350,7 +1350,7 @@ SUBROUTINE PERT(QSPEC)
         CALL ZCNORM(MCT)
         !
         WRITE(*, *) ITERCN, DCNMAX
-        IF(DCNMAX.LE.5.0E-5) GO TO 101
+        IF(DCNMAX <= 5.0E-5) GO TO 101
     100  CONTINUE
     WRITE(*, *) 'TE gap,chord did not converge'
     101  CONTINUE
@@ -1465,7 +1465,7 @@ SUBROUTINE ZLEFIND(ZLE, ZC, WC, NC, PIQ, AGTE)
     DO 30 IC = 1, NC
         DIST = ABS(ZC(IC) - ZTE)
         !
-        IF(DIST.GT.DMAX) THEN
+        IF(DIST > DMAX) THEN
             DMAX = DIST
             ICLE = IC
         ENDIF
@@ -1524,7 +1524,7 @@ SUBROUTINE ZLEFIND(ZLE, ZC, WC, NC, PIQ, AGTE)
         DWCLE = -RES / RESW
         WCLE = WCLE + DWCLE
         !
-        IF(ABS(DWCLE).LT.1.0E-5) GO TO 51
+        IF(ABS(DWCLE) < 1.0E-5) GO TO 51
     50 CONTINUE
     WRITE(*, *) 'ZLEFIND: LE location failed.'
     WCLE = WC(ICLE)

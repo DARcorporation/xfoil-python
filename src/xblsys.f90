@@ -66,7 +66,7 @@ SUBROUTINE AXSET(HK1, T1, RT1, A1, &
     !
     !==========================
     !---- 2nd-order
-    IF(IDAMPV.EQ.0) THEN
+    IF(IDAMPV == 0) THEN
         CALL DAMPL(HK1, T1, RT1, AX1, AX1_HK1, AX1_T1, AX1_RT1)
         CALL DAMPL(HK2, T2, RT2, AX2, AX2_HK2, AX2_T2, AX2_RT2)
     ELSE
@@ -76,7 +76,7 @@ SUBROUTINE AXSET(HK1, T1, RT1, A1, &
     !
     !C---- simple-average version
     !      AXA = 0.5*(AX1 + AX2)
-    !      IF(AXA .LE. 0.0) THEN
+    !      IF(AXA <= 0.0) THEN
     !       AXA = 0.0
     !       AXA_AX1 = 0.0
     !       AXA_AX2 = 0.0
@@ -87,7 +87,7 @@ SUBROUTINE AXSET(HK1, T1, RT1, A1, &
     !
     !---- rms-average version (seems a little better on coarse grids)
     AXSQ = 0.5 * (AX1**2 + AX2**2)
-    IF(AXSQ .LE. 0.0) THEN
+    IF(AXSQ <= 0.0) THEN
         AXA = 0.0
         AXA_AX1 = 0.0
         AXA_AX2 = 0.0
@@ -99,7 +99,7 @@ SUBROUTINE AXSET(HK1, T1, RT1, A1, &
     !
     !----- small additional term to ensure  dN/dx > 0  near  N = Ncrit
     ARG = MIN(20.0 * (ACRIT - 0.5 * (A1 + A2)), 20.0)
-    IF(ARG.LE.0.0) THEN
+    IF(ARG <= 0.0) THEN
         EXN = 1.0
         !C      EXN_AC = 0.
         EXN_A1 = 0.
@@ -171,8 +171,8 @@ END
 !      AMPL2 = AMPL1 + AX*(X2-X1)
 !C
 !C---- test for free or forced transition
-!      TRFREE = AMPL2.GE.AMCRIT
-!      TRFORC = XIFORC.GT.X1 .AND. XIFORC.LE.X2
+!      TRFREE = AMPL2 >= AMCRIT
+!      TRFORC = XIFORC > X1 .AND. XIFORC <= X2
 !C
 !C---- set transition interval flag
 !      TRAN = TRFORC .OR. TRFREE
@@ -183,8 +183,8 @@ END
 !C---- resolve if both forced and free transition
 !      IF(TRFREE .AND. TRFORC) THEN
 !       XT = (AMCRIT-AMPL1)/AX  +  X1
-!       TRFORC = XIFORC .LT. XT
-!       TRFREE = XIFORC .GE. XT
+!       TRFORC = XIFORC < XT
+!       TRFREE = XIFORC >= XT
 !      ENDIF
 !C
 !      IF(TRFORC) THEN
@@ -277,7 +277,7 @@ SUBROUTINE TRCHEK2
         !
         !---- define weighting factors WF1,WF2 for defining "T" quantities from 1,2
         !
-        IF(AMPL2 .LE. AMCRIT) THEN
+        IF(AMPL2 <= AMCRIT) THEN
             !------ there is no transition yet,  "T" is the same as "2"
             AMPLT = AMPL2
             AMPLT_A2 = 1.0
@@ -293,7 +293,7 @@ SUBROUTINE TRCHEK2
             SFA_A2 = (- SFA) / (AMPL2 - AMPL1)
         ENDIF
         !
-        IF(XIFORC.LT.X2) THEN
+        IF(XIFORC < X2) THEN
             SFX = (XIFORC - X1) / (X2 - X1)
             SFX_X1 = (SFX - 1.0) / (X2 - X1)
             SFX_X2 = (- SFX) / (X2 - X1)
@@ -306,7 +306,7 @@ SUBROUTINE TRCHEK2
         ENDIF
         !
         !---- set weighting factor from free or forced transition
-        IF(SFA.LT.SFX) THEN
+        IF(SFA < SFX) THEN
             WF2 = SFA
             WF2_A1 = SFA_A1
             WF2_A2 = SFA_A2
@@ -386,7 +386,7 @@ SUBROUTINE TRCHEK2
                 AX_HKT, AX_TT, AX_RTT, AX_AT)
         !
         !---- punch out early if there is no amplification here
-        IF(AX .LE. 0.0) GO TO 101
+        IF(AX <= 0.0) GO TO 101
         !
         !---- set sensitivity of AX(A2)
         AX_A2 = (AX_HKT * HKT_TT + AX_TT + AX_RTT * RTT_TT) * TT_A2&
@@ -403,14 +403,14 @@ SUBROUTINE TRCHEK2
         RLX = 1.0
         DXT = XT_A2 * DA2
         !
-        IF(RLX * ABS(DXT / (X2 - X1)) .GT. 0.05) RLX = 0.05 * ABS((X2 - X1) / DXT)
-        IF(RLX * ABS(DA2)         .GT. 1.0) RLX = 1.0 * ABS(1.0 / DA2)
+        IF(RLX * ABS(DXT / (X2 - X1)) > 0.05) RLX = 0.05 * ABS((X2 - X1) / DXT)
+        IF(RLX * ABS(DA2) > 1.0) RLX = 1.0 * ABS(1.0 / DA2)
         !
         !---- check if converged
-        IF(ABS(DA2) .LT. DAEPS) GO TO 101
+        IF(ABS(DA2) < DAEPS) GO TO 101
         !
-        IF((AMPL2.GT.AMCRIT .AND. AMPL2 + RLX * DA2.LT.AMCRIT).OR.&
-                (AMPL2.LT.AMCRIT .AND. AMPL2 + RLX * DA2.GT.AMCRIT)) THEN
+        IF((AMPL2 > AMCRIT .AND. AMPL2 + RLX * DA2 < AMCRIT).OR.&
+                (AMPL2 < AMCRIT .AND. AMPL2 + RLX * DA2 > AMCRIT)) THEN
             !------ limited Newton step so AMPL2 doesn't step across AMCRIT either way
             AMPL2 = AMCRIT
         ELSE
@@ -427,8 +427,8 @@ SUBROUTINE TRCHEK2
     !
     !
     !---- test for free or forced transition
-    TRFREE = AMPL2 .GE. AMCRIT
-    TRFORC = XIFORC.GT.X1 .AND. XIFORC.LE.X2
+    TRFREE = AMPL2 >= AMCRIT
+    TRFORC = XIFORC > X1 .AND. XIFORC <= X2
     !
     !---- set transition interval flag
     TRAN = TRFORC .OR. TRFREE
@@ -437,8 +437,8 @@ SUBROUTINE TRCHEK2
     !
     !---- resolve if both forced and free transition
     IF(TRFREE .AND. TRFORC) THEN
-        TRFORC = XIFORC .LT. XT
-        TRFREE = XIFORC .GE. XT
+        TRFORC = XIFORC < XT
+        TRFREE = XIFORC >= XT
     ENDIF
     !
     IF(TRFORC) THEN
@@ -796,8 +796,8 @@ SUBROUTINE BLVAR(ITYP)
     IMPLICIT REAL(M)
     INCLUDE 'XBL.INC'
     !
-    IF(ITYP.EQ.3) HK2 = MAX(HK2, 1.00005)
-    IF(ITYP.NE.3) HK2 = MAX(HK2, 1.05000)
+    IF(ITYP == 3) HK2 = MAX(HK2, 1.00005)
+    IF(ITYP /= 3) HK2 = MAX(HK2, 1.05000)
     !
     !---- density thickness shape parameter     ( H** )
     CALL HCT(HK2, M2, HC2, HC2_HK2, HC2_M2)
@@ -807,7 +807,7 @@ SUBROUTINE BLVAR(ITYP)
     HC2_MS = HC2_HK2 * HK2_MS + HC2_M2 * M2_MS
     !
     !---- set KE thickness shape parameter from  H - H*  correlations
-    IF(ITYP.EQ.1) THEN
+    IF(ITYP == 1) THEN
         CALL HSL(HK2, RT2, M2, HS2, HS2_HK2, HS2_RT2, HS2_M2)
     ELSE
         CALL HST(HK2, RT2, M2, HS2, HS2_HK2, HS2_RT2, HS2_M2)
@@ -831,7 +831,7 @@ SUBROUTINE BLVAR(ITYP)
     US2_MS = US2_HS2 * HS2_MS + US2_HK2 * HK2_MS
     US2_RE = US2_HS2 * HS2_RE
     !
-    IF(ITYP.LE.2 .AND. US2.GT.0.95) THEN
+    IF(ITYP <= 2 .AND. US2 > 0.95) THEN
         !CC       WRITE(*,*) 'BLVAR: Us clamped:', US2
         US2 = 0.98
         US2_U2 = 0.
@@ -841,7 +841,7 @@ SUBROUTINE BLVAR(ITYP)
         US2_RE = 0.
     ENDIF
     !
-    IF(ITYP.EQ.3 .AND. US2.GT.0.99995) THEN
+    IF(ITYP == 3 .AND. US2 > 0.99995) THEN
         !CC       WRITE(*,*) 'BLVAR: Wake Us clamped:', US2
         US2 = 0.99995
         US2_U2 = 0.
@@ -857,12 +857,12 @@ SUBROUTINE BLVAR(ITYP)
     HKC = HK2 - 1.0
     HKC_HK2 = 1.0
     HKC_RT2 = 0.0
-    IF(ITYP.EQ.2) THEN
+    IF(ITYP == 2) THEN
         GCC = GCCON
         HKC = HK2 - 1.0 - GCC / RT2
         HKC_HK2 = 1.0
         HKC_RT2 = GCC / RT2**2
-        IF(HKC .LT. 0.01) THEN
+        IF(HKC < 0.01) THEN
             HKC = 0.01
             HKC_HK2 = 0.0
             HKC_RT2 = 0.0
@@ -897,20 +897,20 @@ SUBROUTINE BLVAR(ITYP)
     !
     !
     !---- set skin friction coefficient
-    IF(ITYP.EQ.3) THEN
+    IF(ITYP == 3) THEN
         !----- wake
         CF2 = 0.
         CF2_HK2 = 0.
         CF2_RT2 = 0.
         CF2_M2 = 0.
-    ELSE IF(ITYP.EQ.1) THEN
+    ELSE IF(ITYP == 1) THEN
         !----- laminar
         CALL CFL(HK2, RT2, M2, CF2, CF2_HK2, CF2_RT2, CF2_M2)
     ELSE
         !----- turbulent
         CALL CFT(HK2, RT2, M2, CF2, CF2_HK2, CF2_RT2, CF2_M2)
         CALL CFL(HK2, RT2, M2, CF2L, CF2L_HK2, CF2L_RT2, CF2L_M2)
-        IF(CF2L.GT.CF2) THEN
+        IF(CF2L > CF2) THEN
             !------- laminar Cf is greater than turbulent Cf -- use laminar
             !-       (this will only occur for unreasonably small Rtheta)
             !cc      write(*,*) 'Cft Cfl Rt Hk:', CF2, CF2L, RT2, HK2, X2
@@ -928,7 +928,7 @@ SUBROUTINE BLVAR(ITYP)
     CF2_RE = CF2_RT2 * RT2_RE
     !
     !---- dissipation function    2 CD / H*
-    IF(ITYP.EQ.1) THEN
+    IF(ITYP == 1) THEN
         !
         !----- laminar
         CALL DIL(HK2, RT2, DI2, DI2_HK2, DI2_RT2)
@@ -940,7 +940,7 @@ SUBROUTINE BLVAR(ITYP)
         DI2_MS = DI2_HK2 * HK2_MS + DI2_RT2 * RT2_MS
         DI2_RE = DI2_RT2 * RT2_RE
         !
-    ELSE IF(ITYP.EQ.2) THEN
+    ELSE IF(ITYP == 2) THEN
         !
         !CC       CALL DIT(     HS2,     US2,     CF2,     S2, DI2,
         !CC     &           DI2_HS2, DI2_US2, DI2_CF2, DI2_S2      )
@@ -1006,7 +1006,7 @@ SUBROUTINE BLVAR(ITYP)
     !
     !
     !---- Add on turbulent outer layer contribution
-    IF(ITYP.NE.1) THEN
+    IF(ITYP /= 1) THEN
         !
         DD = S2**2 * (0.995 - US2) * 2.0 / HS2
         DD_HS2 = -S2**2 * (0.995 - US2) * 2.0 / HS2**2
@@ -1038,10 +1038,10 @@ SUBROUTINE BLVAR(ITYP)
     ENDIF
     !
     !
-    IF(ITYP.EQ.2) THEN
+    IF(ITYP == 2) THEN
         CALL DIL(HK2, RT2, DI2L, DI2L_HK2, DI2L_RT2)
         !
-        IF(DI2L.GT.DI2) THEN
+        IF(DI2L > DI2) THEN
             !------- laminar CD is greater than turbulent CD -- use laminar
             !-       (this will only occur for unreasonably small Rtheta)
             !cc       write(*,*) 'CDt CDl Rt Hk:', DI2, DI2L, RT2, HK2
@@ -1056,7 +1056,7 @@ SUBROUTINE BLVAR(ITYP)
     ENDIF
     !
     !C----- add on CD contribution of inner shear layer
-    !       IF(ITYP.EQ.3 .AND. DW2.GT.0.0) THEN
+    !       IF(ITYP == 3 .AND. DW2 > 0.0) THEN
     !        DKON = 0.03*0.75**3
     !        DDI = DKON*US2**3
     !        DDI_US2 = 3.0*DKON*US2**2
@@ -1068,10 +1068,10 @@ SUBROUTINE BLVAR(ITYP)
     !        DI2_RE = DI2_RE + DDI_US2*US2_RE * DW2/DWTE
     !       ENDIF
     !
-    IF(ITYP.EQ.3) THEN
+    IF(ITYP == 3) THEN
         !------ laminar wake CD
         CALL DILW(HK2, RT2, DI2L, DI2L_HK2, DI2L_RT2)
-        IF(DI2L .GT. DI2) THEN
+        IF(DI2L > DI2) THEN
             !c        IF(.true.) THEN
             !------- laminar wake CD is greater than turbulent CD -- use laminar
             !-       (this will only occur for unreasonably small Rtheta)
@@ -1087,7 +1087,7 @@ SUBROUTINE BLVAR(ITYP)
     ENDIF
     !
     !
-    IF(ITYP.EQ.3) THEN
+    IF(ITYP == 3) THEN
         !----- double dissipation for the wake (two wake halves)
         DI2 = DI2 * 2.0
         DI2_S2 = DI2_S2 * 2.0
@@ -1109,8 +1109,8 @@ SUBROUTINE BLVAR(ITYP)
     !
     !cc      HDMAX = 15.0
     HDMAX = 12.0
-    IF(DE2 .GT. HDMAX * T2) THEN
-        !ccc      IF(DE2 .GT. HDMAX*T2 .AND. (HK2 .GT. 4.0 .OR. ITYP.EQ.3)) THEN
+    IF(DE2 > HDMAX * T2) THEN
+        !ccc      IF(DE2 > HDMAX*T2 .AND. (HK2 > 4.0 .OR. ITYP == 3)) THEN
         DE2 = HDMAX * T2
         DE2_U2 = 0.0
         DE2_T2 = HDMAX
@@ -1156,18 +1156,18 @@ SUBROUTINE BLMID(ITYP)
     MA = 0.5 * (M1 + M2)
     !
     !---- midpoint skin friction coefficient  (zero in wake)
-    IF(ITYP.EQ.3) THEN
+    IF(ITYP == 3) THEN
         CFM = 0.
         CFM_HKA = 0.
         CFM_RTA = 0.
         CFM_MA = 0.
         CFM_MS = 0.
-    ELSE IF(ITYP.EQ.1) THEN
+    ELSE IF(ITYP == 1) THEN
         CALL CFL(HKA, RTA, MA, CFM, CFM_HKA, CFM_RTA, CFM_MA)
     ELSE
         CALL CFT(HKA, RTA, MA, CFM, CFM_HKA, CFM_RTA, CFM_MA)
         CALL CFL(HKA, RTA, MA, CFML, CFML_HKA, CFML_RTA, CFML_MA)
-        IF(CFML.GT.CFM) THEN
+        IF(CFML > CFM) THEN
             !cc      write(*,*) 'Cft Cfl Rt Hk:', CFM, CFML, RTA, HKA, 0.5*(X1+X2)
             CFM = CFML
             CFM_HKA = CFML_HKA
@@ -1566,7 +1566,7 @@ SUBROUTINE BLDIF(ITYP)
     IMPLICIT REAL(M)
     INCLUDE 'XBL.INC'
     !
-    IF(ITYP.EQ.0) THEN
+    IF(ITYP == 0) THEN
         !----- similarity logarithmic differences  (prescribed)
         XLOG = 1.0
         ULOG = BULE
@@ -1609,7 +1609,7 @@ SUBROUTINE BLDIF(ITYP)
     HD_HK2 = -HDCON * 2.0 / HK2
     !
     !---- use less upwinding in the wake
-    IF(ITYP.EQ.3) THEN
+    IF(ITYP == 3) THEN
         HDCON = HUPWT / HK2**2
         HD_HK1 = 0.0
         HD_HK2 = -HDCON * 2.0 / HK2
@@ -1646,14 +1646,14 @@ SUBROUTINE BLDIF(ITYP)
             + UPW_HK2 * HK2_MS
     !
     !
-    IF(ITYP.EQ.0) THEN
+    IF(ITYP == 0) THEN
         !
         !***** LE point -->  set zero amplification factor
         VS2(1, 1) = 1.0
         VSR(1) = 0.
         VSREZ(1) = -AMPL2
         !
-    ELSE IF(ITYP.EQ.1) THEN
+    ELSE IF(ITYP == 1) THEN
         !
         !***** laminar part -->  set amplification equation
         !
@@ -1698,7 +1698,7 @@ SUBROUTINE BLDIF(ITYP)
         DA = 0.5 * (D1 + D2)
         !
         !
-        IF(ITYP.EQ.3) THEN
+        IF(ITYP == 3) THEN
             !------ increased dissipation length in wake (decrease its reciprocal)
             ALD = DLCON
         ELSE
@@ -1706,12 +1706,12 @@ SUBROUTINE BLDIF(ITYP)
         ENDIF
         !
         !----- set and linearize  equilibrium 1/Ue dUe/dx   ...  NEW  12 Oct 94
-        IF(ITYP.EQ.2) THEN
+        IF(ITYP == 2) THEN
             GCC = GCCON
             HKC = HKA - 1.0 - GCC / RTA
             HKC_HKA = 1.0
             HKC_RTA = GCC / RTA**2
-            IF(HKC .LT. 0.01) THEN
+            IF(HKC < 0.01) THEN
                 HKC = 0.01
                 HKC_HKA = 0.0
                 HKC_RTA = 0.0
@@ -1771,9 +1771,9 @@ SUBROUTINE BLDIF(ITYP)
                 + DEA * 2.0 * (UQ * DXI - ULOG) * DUXCON
         !
 
-        !        if(  ! (rt2.gt.1.0e3 .and. rt1.le.1.0e3) .or.
-        !     &     (rt2.gt.1.0e4 .and. rt1.le.1.0e4) .or.
-        !     &     (rt2.gt.1.0e5 .and. rt1.le.1.0e5)        ) then
+        !        if(  ! (rt2 > 1.0e3 .and. rt1 <= 1.0e3) .or.
+        !     &     (rt2 > 1.0e4 .and. rt1 <= 1.0e4) .or.
+        !     &     (rt2 > 1.0e5 .and. rt1 <= 1.0e5)        ) then
         !           gga = (HKA-1.0-GCC/RTA)/HKA / sqrt(0.5*CFA)
         !           write(*,4455) rta, hka, gga, cfa, cqa, sa, uq, ulog/dxi
         ! 4455      format(1x,f7.0, 2f9.4,f10.6,2f8.5,2f10.5)
@@ -2038,7 +2038,7 @@ SUBROUTINE DAMPL(HK, TH, RT, AX, AX_HK, AX_TH, AX_RT)
     GR = LOG10(RT)
     GR_RT = 1.0 / (2.3025851 * RT)
     !
-    IF(GR .LT. GRCRIT - DGR) THEN
+    IF(GR < GRCRIT - DGR) THEN
         !
         !----- no amplification for Rtheta < Rcrit
         AX = 0.
@@ -2056,7 +2056,7 @@ SUBROUTINE DAMPL(HK, TH, RT, AX, AX_HK, AX_TH, AX_RT)
         RN_HK = -  GRC_HK / (2.0 * DGR)
         RN_RT = GR_RT / (2.0 * DGR)
         !
-        IF(RNORM .GE. 1.0) THEN
+        IF(RNORM >= 1.0) THEN
             RFAC = 1.0
             RFAC_HK = 0.
             RFAC_RT = 0.
@@ -2157,7 +2157,7 @@ SUBROUTINE DAMPL2(HK, TH, RT, AX, AX_HK, AX_TH, AX_RT)
     GR = LOG10(RT)
     GR_RT = 1.0 / (2.3025851 * RT)
     !
-    IF(GR .LT. GRC - DGR) THEN
+    IF(GR < GRC - DGR) THEN
         !
         !----- no amplification for Rtheta < Rcrit
         AX = 0.
@@ -2175,7 +2175,7 @@ SUBROUTINE DAMPL2(HK, TH, RT, AX, AX_HK, AX_TH, AX_RT)
         RN_HK = -  GRC_HK / (2.0 * DGR)
         RN_RT = GR_RT / (2.0 * DGR)
         !
-        IF(RNORM .GE. 1.0) THEN
+        IF(RNORM >= 1.0) THEN
             RFAC = 1.0
             RFAC_HK = 0.
             RFAC_RT = 0.
@@ -2221,7 +2221,7 @@ SUBROUTINE DAMPL2(HK, TH, RT, AX, AX_HK, AX_TH, AX_RT)
         !
     ENDIF
     !
-    IF(HK .LT. HK1) RETURN
+    IF(HK < HK1) RETURN
     !
     !---- non-envelope max-amplification correction for separated profiles
     !
@@ -2229,7 +2229,7 @@ SUBROUTINE DAMPL2(HK, TH, RT, AX, AX_HK, AX_TH, AX_RT)
     HN_HK = 1.0 / (HK2 - HK1)
     !
     !---- set blending fraction HFAC = 0..1 over HK1 < HK < HK2
-    IF(HNORM .GE. 1.0) THEN
+    IF(HNORM >= 1.0) THEN
         HFAC = 1.0
         HF_HK = 0.
     ELSE
@@ -2256,7 +2256,7 @@ SUBROUTINE DAMPL2(HK, TH, RT, AX, AX_HK, AX_TH, AX_RT)
     AX2_RT = (0.086 * TNR_RT) / TH
     AX2_TH = -AX2 / TH
     !
-    IF(AX2 .LT. 0.0) THEN
+    IF(AX2 < 0.0) THEN
         AX2 = 0.0
         AX2_HK = 0.
         AX2_RT = 0.
@@ -2291,7 +2291,7 @@ END
 SUBROUTINE DIL(HK, RT, DI, DI_HK, DI_RT)
     !
     !---- Laminar dissipation function  ( 2 CD/H* )     (from Falkner-Skan)
-    IF(HK.LT.4.0) THEN
+    IF(HK < 4.0) THEN
         DI = (0.00205 * (4.0 - HK)**5.5 + 0.207) / RT
         DI_HK = (-.00205 * 5.5 * (4.0 - HK)**4.5) / RT
     ELSE
@@ -2329,7 +2329,7 @@ SUBROUTINE HSL(HK, RT, MSQ, HS, HS_HK, HS_RT, HS_MSQ)
     REAL MSQ
     !
     !---- Laminar HS correlation
-    IF(HK.LT.4.35) THEN
+    IF(HK < 4.35) THEN
         TMP = HK - 4.35
         HS = 0.0111 * TMP**2 / (HK + 1.0)&
                 - 0.0278 * TMP**3 / (HK + 1.0) + 1.528&
@@ -2356,7 +2356,7 @@ SUBROUTINE CFL(HK, RT, MSQ, CF, CF_HK, CF_RT, CF_MSQ)
     REAL MSQ
     !
     !---- Laminar skin friction function  ( Cf )    ( from Falkner-Skan )
-    IF(HK.LT.5.5) THEN
+    IF(HK < 5.5) THEN
         TMP = (5.5 - HK)**3 / (HK + 1.0)
         CF = (0.0727 * TMP - 0.07) / RT
         CF_HK = (-.0727 * TMP * 3.0 / (5.5 - HK) - 0.0727 * TMP / (HK + 1.0)) / RT
@@ -2396,7 +2396,7 @@ SUBROUTINE HST(HK, RT, MSQ, HS, HS_HK, HS_RT, HS_MSQ)
     !---- limited Rtheta dependence for Rtheta < 200
     !
     !
-    IF(RT.GT.400.0) THEN
+    IF(RT > 400.0) THEN
         HO = 3.0 + 400.0 / RT
         HO_RT = - 400.0 / RT**2
     ELSE
@@ -2404,7 +2404,7 @@ SUBROUTINE HST(HK, RT, MSQ, HS, HS_HK, HS_RT, HS_MSQ)
         HO_RT = 0.
     ENDIF
     !
-    IF(RT.GT.200.0) THEN
+    IF(RT > 200.0) THEN
         RTZ = RT
         RTZ_RT = 1.
     ELSE
@@ -2412,7 +2412,7 @@ SUBROUTINE HST(HK, RT, MSQ, HS, HS_HK, HS_RT, HS_MSQ)
         RTZ_RT = 0.
     ENDIF
     !
-    IF(HK.LT.HO) THEN
+    IF(HK < HO) THEN
         !----- attached branch
         !=======================================================
         !----- old correlation

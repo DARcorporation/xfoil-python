@@ -34,7 +34,7 @@ SUBROUTINE SPLINE(X, XS, S, N)
     !     N        number of points           (input)       |
     !                                                       |
     !-------------------------------------------------------
-    IF(N.GT.NMAX) STOP 'SPLINE: array overflow, increase NMAX'
+    IF(N > NMAX) STOP 'SPLINE: array overflow, increase NMAX'
     !
     DO 1 I = 2, N - 1
         DSM = S(I) - S(I - 1)
@@ -83,7 +83,7 @@ SUBROUTINE SPLIND(X, XS, S, N, XS1, XS2)
     !              derivative end condition(s) are used     |
     !                                                       |
     !-------------------------------------------------------
-    IF(N.GT.NMAX) STOP 'SPLIND: array overflow, increase NMAX'
+    IF(N > NMAX) STOP 'SPLIND: array overflow, increase NMAX'
     !
     DO 1 I = 2, N - 1
         DSM = S(I) - S(I - 1)
@@ -94,12 +94,12 @@ SUBROUTINE SPLIND(X, XS, S, N, XS1, XS2)
         XS(I) = 3.0 * ((X(I + 1) - X(I)) * DSM / DSP + (X(I) - X(I - 1)) * DSP / DSM)
     1 CONTINUE
     !
-    IF(XS1.EQ.999.0) THEN
+    IF(XS1 == 999.0) THEN
         !----- set zero second derivative end condition
         A(1) = 2.0
         C(1) = 1.0
         XS(1) = 3.0 * (X(2) - X(1)) / (S(2) - S(1))
-    ELSE IF(XS1.EQ.-999.0) THEN
+    ELSE IF(XS1 == -999.0) THEN
         !----- set zero third derivative end condition
         A(1) = 1.0
         C(1) = 1.0
@@ -111,11 +111,11 @@ SUBROUTINE SPLIND(X, XS, S, N, XS1, XS2)
         XS(1) = XS1
     ENDIF
     !
-    IF(XS2.EQ.999.0) THEN
+    IF(XS2 == 999.0) THEN
         B(N) = 1.0
         A(N) = 2.0
         XS(N) = 3.0 * (X(N) - X(N - 1)) / (S(N) - S(N - 1))
-    ELSE IF(XS2.EQ.-999.0) THEN
+    ELSE IF(XS2 == -999.0) THEN
         B(N) = 1.0
         A(N) = 1.0
         XS(N) = 2.0 * (X(N) - X(N - 1)) / (S(N) - S(N - 1))
@@ -125,7 +125,7 @@ SUBROUTINE SPLIND(X, XS, S, N, XS1, XS2)
         XS(N) = XS2
     ENDIF
     !
-    IF(N.EQ.2 .AND. XS1.EQ.-999.0 .AND. XS2.EQ.-999.0) THEN
+    IF(N == 2 .AND. XS1 == -999.0 .AND. XS2 == -999.0) THEN
         B(N) = 1.0
         A(N) = 2.0
         XS(N) = 3.0 * (X(N) - X(N - 1)) / (S(N) - S(N - 1))
@@ -162,7 +162,7 @@ SUBROUTINE SPLINA(X, XS, S, N)
     LEND = .TRUE.
     DO 1 I = 1, N - 1
         DS = S(I + 1) - S(I)
-        IF (DS.EQ.0.) THEN
+        IF (DS == 0.) THEN
             XS(I) = XS1
             LEND = .TRUE.
         ELSE
@@ -228,10 +228,10 @@ FUNCTION SEVAL(SS, X, XS, S, N)
     ILOW = 1
     I = N
     !
-    10 IF(I - ILOW .LE. 1) GO TO 11
+    10 IF(I - ILOW <= 1) GO TO 11
     !
     IMID = (I + ILOW) / 2
-    IF(SS .LT. S(IMID)) THEN
+    IF(SS < S(IMID)) THEN
         I = IMID
     ELSE
         ILOW = IMID
@@ -256,10 +256,10 @@ FUNCTION DEVAL(SS, X, XS, S, N)
     ILOW = 1
     I = N
     !
-    10 IF(I - ILOW .LE. 1) GO TO 11
+    10 IF(I - ILOW <= 1) GO TO 11
     !
     IMID = (I + ILOW) / 2
-    IF(SS .LT. S(IMID)) THEN
+    IF(SS < S(IMID)) THEN
         I = IMID
     ELSE
         ILOW = IMID
@@ -285,10 +285,10 @@ FUNCTION D2VAL(SS, X, XS, S, N)
     ILOW = 1
     I = N
     !
-    10 IF(I - ILOW .LE. 1) GO TO 11
+    10 IF(I - ILOW <= 1) GO TO 11
     !
     IMID = (I + ILOW) / 2
-    IF(SS .LT. S(IMID)) THEN
+    IF(SS < S(IMID)) THEN
         I = IMID
     ELSE
         ILOW = IMID
@@ -321,10 +321,10 @@ FUNCTION CURV(SS, X, XS, Y, YS, S, N)
     ILOW = 1
     I = N
     !
-    10 IF(I - ILOW .LE. 1) GO TO 11
+    10 IF(I - ILOW <= 1) GO TO 11
     !
     IMID = (I + ILOW) / 2
-    IF(SS .LT. S(IMID)) THEN
+    IF(SS < S(IMID)) THEN
         I = IMID
     ELSE
         ILOW = IMID
@@ -369,10 +369,10 @@ FUNCTION CURVS(SS, X, XS, Y, YS, S, N)
     ILOW = 1
     I = N
     !
-    10 IF(I - ILOW .LE. 1) GO TO 11
+    10 IF(I - ILOW <= 1) GO TO 11
     !
     IMID = (I + ILOW) / 2
-    IF(SS .LT. S(IMID)) THEN
+    IF(SS < S(IMID)) THEN
         I = IMID
     ELSE
         ILOW = IMID
@@ -432,7 +432,7 @@ SUBROUTINE SINVRT(SI, XI, X, XS, S, N)
         RESP = DEVAL(SI, X, XS, S, N)
         DS = -RES / RESP
         SI = SI + DS
-        IF(ABS(DS / (S(N) - S(1))) .LT. 1.0E-5) RETURN
+        IF(ABS(DS / (S(N) - S(1))) < 1.0E-5) RETURN
     10 CONTINUE
     WRITE(*, *)&
             'SINVRT: spline inversion failed. Input value returned.'
@@ -518,9 +518,9 @@ SUBROUTINE SPLNXY(X, XS, Y, YS, S, N)
             !
             SINT = (4.0 * SINT1 - SINT2) / 3.0
             !
-            IF(ABS(SINT - DS) .GT. ABS(SERR))  SERR = SINT - DS
+            IF(ABS(SINT - DS) > ABS(SERR))  SERR = SINT - DS
             !
-            IF(I.LT.N) DS = S(I + 1) - S(I)
+            IF(I < N) DS = S(I + 1) - S(I)
             !
             S(I) = S(I - 1) + SQRT(SINT)
         ENDDO
@@ -532,7 +532,7 @@ SUBROUTINE SPLNXY(X, XS, Y, YS, S, N)
         CALL SEGSPL(X, XS, S, N)
         CALL SEGSPL(Y, YS, S, N)
         !
-        IF(ABS(SERR) .LT. 1.0E-7) RETURN
+        IF(ABS(SERR) < 1.0E-7) RETURN
         !
     100  CONTINUE
     !
@@ -551,12 +551,12 @@ SUBROUTINE SEGSPL(X, XS, S, N)
     !-----------------------------------------------
     DIMENSION X(N), XS(N), S(N)
     !
-    IF(S(1).EQ.S(2)) STOP 'SEGSPL:  First input point duplicated'
-    IF(S(N).EQ.S(N - 1)) STOP 'SEGSPL:  Last  input point duplicated'
+    IF(S(1) == S(2)) STOP 'SEGSPL:  First input point duplicated'
+    IF(S(N) == S(N - 1)) STOP 'SEGSPL:  Last  input point duplicated'
     !
     ISEG0 = 1
     DO 10 ISEG = 2, N - 2
-        IF(S(ISEG).EQ.S(ISEG + 1)) THEN
+        IF(S(ISEG) == S(ISEG + 1)) THEN
             NSEG = ISEG - ISEG0 + 1
             CALL SPLIND(X(ISEG0), XS(ISEG0), S(ISEG0), NSEG, -999.0, -999.0)
             ISEG0 = ISEG + 1
@@ -581,12 +581,12 @@ SUBROUTINE SEGSPLD(X, XS, S, N, XS1, XS2)
     !-----------------------------------------------
     DIMENSION X(N), XS(N), S(N)
     !
-    IF(S(1).EQ.S(2)) STOP 'SEGSPL:  First input point duplicated'
-    IF(S(N).EQ.S(N - 1)) STOP 'SEGSPL:  Last  input point duplicated'
+    IF(S(1) == S(2)) STOP 'SEGSPL:  First input point duplicated'
+    IF(S(N) == S(N - 1)) STOP 'SEGSPL:  Last  input point duplicated'
     !
     ISEG0 = 1
     DO 10 ISEG = 2, N - 2
-        IF(S(ISEG).EQ.S(ISEG + 1)) THEN
+        IF(S(ISEG) == S(ISEG + 1)) THEN
             NSEG = ISEG - ISEG0 + 1
             CALL SPLIND(X(ISEG0), XS(ISEG0), S(ISEG0), NSEG, XS1, XS2)
             ISEG0 = ISEG + 1
