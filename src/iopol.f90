@@ -668,7 +668,6 @@ SUBROUTINE POLWRIT(LU, FNPOL, ERROR, LHEAD, &
     end do
     !
     !
-    80   CONTINUE
     !---- if file was opened here, then close it
     IF(LOPEN) CLOSE(LU)
     RETURN
@@ -695,7 +694,6 @@ SUBROUTINE POLWRIT(LU, FNPOL, ERROR, LHEAD, &
             'Mach = ', F7.3, 5X, 'Re = ', F9.3, ' e 6', 5X, 'Ncrit = ', 20F7.3)
     9017 FORMAT(1X, &
             'pi_p = ', F7.4, 5X, 'eta_p = ', F9.4)
-    9100 FORMAT(1X, F7.3, F9.4, 2F10.5, F9.4, 2F8.4, F9.5)
     !CC      3.453   1.3750   0.00921     0.500  -0.1450  0.9231  0.5382 -0.00942
     !CC      3.453   1.3750   0.00921     0.500  -0.1450  0.9231  0.5382
 END

@@ -1327,7 +1327,7 @@ SUBROUTINE MSAVE(FNAME1)
     20   CONTINUE
     !
     !---- read in existing airfoil coordinates
-    40 DO IEL = 1, NEX
+    DO IEL = 1, NEX
         DO I = 1, 2 * IQX + 1
             READ(LU, *, END = 56) XTMP(I, IEL), YTMP(I, IEL)
             IF(XTMP(I, IEL) == 999.0) THEN

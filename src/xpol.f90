@@ -374,10 +374,6 @@ SUBROUTINE PLRINI(LU, IP)
     RETURN
     !
     !..........................................
-    1000 FORMAT(A)
-    1010 FORMAT(22X, A32)
-    1020 FORMAT(8X, F7.3, 10X, F9.3)
-    1030 FORMAT(8X, F7.3, 10X, F9.3, 17X, F7.3)
 END
 ! PLRINI
 
@@ -524,8 +520,6 @@ SUBROUTINE PLXINI(LU, IP)
     WRITE(LU) MATYP, RETYP
     WRITE(LU) 0, 0, 0, N
     WRITE(LU) (X(I), Y(I), I = 1, N)
-    !
-    70 CONTINUE
     !
     CLOSE(LU)
     PFNAMX(IP) = FNAME

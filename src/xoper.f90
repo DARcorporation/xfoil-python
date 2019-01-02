@@ -760,7 +760,6 @@ SUBROUTINE OPER
         !cc     ICOLR(IR) = NCOLOR - IR + 1
         ICOLR(IR) = 2 + IR
         ISYMR(IR) = MOD(IR, 10)
-        25   CONTINUE
         GO TO 500
         !
         27   CONTINUE
@@ -800,7 +799,6 @@ SUBROUTINE OPER
             DO JR = IR + 1, NPOLREF
                 CALL PRFCOP(JR, JR - 1)
                 WRITE(*, 1310) JR, JR - 1
-                1410      FORMAT(' Ref.polar', I3, '  moved into ref.polar', I3)
             ENDDO
             NPOLREF = NPOLREF - 1
         ENDIF
@@ -2678,9 +2676,6 @@ SUBROUTINE VISCAL(NITER1)
     (1X, 3X, '   a =', F7.3, '      CL =', F8.4  /&
             1X, 3X,'  Cm =', F8.4, '     CD =', F9.5,&
             '   =>   CDf =', F9.5, '    CDp =', F9.5)
-    2025   FORMAT&
-    (1X, 3X, 6X, 8X, ' Int CD =', F9.5, &
-            '   =>   CDf =', F9.5,'    CDp =', F9.5)
 END
 ! VISCAL
 
