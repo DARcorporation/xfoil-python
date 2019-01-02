@@ -35,7 +35,7 @@ SUBROUTINE SETEXP(S, DS1, SMAX, NN)
     IF(RATIO == 1.0) GO TO 11
     !
     !---- Newton iteration for actual geometric ratio
-    DO 1 ITER = 1, 100
+    DO ITER = 1, 100
         SIGMAN = (RATIO**NEX - 1.0) / (RATIO - 1.0)
         RES = SIGMAN**RNI - SIGMA**RNI
         DRESDR = RNI * SIGMAN**RNI&
@@ -46,16 +46,16 @@ SUBROUTINE SETEXP(S, DS1, SMAX, NN)
         !
         IF(ABS(DRATIO) < 1.0E-5) GO TO 11
         !
-    1 CONTINUE
+    end do
     WRITE(*, *) 'SETEXP: Convergence failed.  Continuing anyway ...'
     !
     !---- set up stretched array using converged geometric ratio
     11 S(1) = 0.0
     DS = DS1
-    DO 2 N = 2, NN
+    DO N = 2, NN
         S(N) = S(N - 1) + DS
         DS = DS * RATIO
-    2 CONTINUE
+    end do
     !
     RETURN
 END

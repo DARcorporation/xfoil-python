@@ -295,9 +295,9 @@ SUBROUTINE SMOOQ(KQ1, KQ2, KQSP)
     !cc      ELSE
     !
     !------ mixed inverse: use arc length coordinate
-    DO 15 I = 1, NSP
+    DO I = 1, NSP
         W8(I) = SSPEC(I)
-    15   CONTINUE
+    end do
     !
     !cc      ENDIF
     !
@@ -313,7 +313,7 @@ SUBROUTINE SMOOQ(KQ1, KQ2, KQSP)
     !
     !---- set up tri-diagonal system for smoothed Qspec
     SMOOSQ = SMOOL**2
-    DO 20 I = KQ1 + 1, KQ2 - 1
+    DO I = KQ1 + 1, KQ2 - 1
         DSM = W8(I) - W8(I - 1)
         DSP = W8(I + 1) - W8(I)
         DSO = 0.5 * (W8(I + 1) - W8(I - 1))
@@ -321,7 +321,7 @@ SUBROUTINE SMOOQ(KQ1, KQ2, KQSP)
         W1(I) = SMOOSQ * (- 1.0 / DSM) / DSO
         W2(I) = SMOOSQ * (1.0 / DSP + 1.0 / DSM) / DSO + 1.0
         W3(I) = SMOOSQ * (-1.0 / DSP) / DSO
-    20 CONTINUE
+    end do
     !
     !---- set fixed-Qspec end conditions
     W2(KQ1) = 1.0
@@ -402,9 +402,9 @@ SUBROUTINE GAMQSP(KQSP)
     CLQSP(KQSP) = CLGAM
     CMQSP(KQSP) = CMGAM
     !
-    DO 10 I = 1, NSP
+    DO I = 1, NSP
         QSPEC(I, KQSP) = QGAMM(I)
-    10   CONTINUE
+    end do
     !
     !---- zero out Qspec DOFs
     QDOF0 = 0.0

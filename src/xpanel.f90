@@ -23,7 +23,7 @@ SUBROUTINE APCALC
     INCLUDE 'XFOIL.INC'
     !
     !---- set angles of airfoil panels
-    DO 10 I = 1, N - 1
+    DO I = 1, N - 1
         SX = X(I + 1) - X(I)
         SY = Y(I + 1) - Y(I)
         IF(SX == 0.0 .AND. SY == 0.0) THEN
@@ -31,7 +31,7 @@ SUBROUTINE APCALC
         ELSE
             APANEL(I) = ATAN2(SX, -SY)
         ENDIF
-    10 CONTINUE
+    end do
     !
     !---- TE panel
     I = N
@@ -59,7 +59,7 @@ SUBROUTINE NCALC(X, Y, S, N, XN, YN)
     !
     CALL SEGSPL(X, XN, S, N)
     CALL SEGSPL(Y, YN, S, N)
-    DO 10 I = 1, N
+    DO I = 1, N
         SX = YN(I)
         SY = -XN(I)
         SMOD = SQRT(SX * SX + SY * SY)
@@ -70,10 +70,10 @@ SUBROUTINE NCALC(X, Y, S, N, XN, YN)
             XN(I) = SX / SMOD
             YN(I) = SY / SMOD
         ENDIF
-    10 CONTINUE
+    end do
     !
     !---- average normal vectors at corner points
-    DO 20 I = 1, N - 1
+    DO I = 1, N - 1
         IF(S(I) == S(I + 1)) THEN
             SX = 0.5 * (XN(I) + XN(I + 1))
             SY = 0.5 * (YN(I) + YN(I + 1))
@@ -90,7 +90,7 @@ SUBROUTINE NCALC(X, Y, S, N, XN, YN)
                 YN(I + 1) = SY / SMOD
             ENDIF
         ENDIF
-    20   CONTINUE
+    end do
     !
     RETURN
 END
@@ -126,16 +126,16 @@ SUBROUTINE PSILIN(I, XI, YI, NXI, NYI, PSI, PSI_NI, GEOLIN, SIGLIN)
     COSA = COS(ALFA)
     SINA = SIN(ALFA)
     !
-    DO 3 JO = 1, N
+    DO JO = 1, N
         DZDG(JO) = 0.0
         DZDN(JO) = 0.0
         DQDG(JO) = 0.0
-    3 CONTINUE
+    end do
     !
-    DO 4 JO = 1, N
+    DO JO = 1, N
         DZDM(JO) = 0.0
         DQDM(JO) = 0.0
-    4 CONTINUE
+    end do
     !
     Z_QINF = 0.
     Z_ALFA = 0.
@@ -159,7 +159,7 @@ SUBROUTINE PSILIN(I, XI, YI, NXI, NYI, PSI, PSI_NI, GEOLIN, SIGLIN)
         SDS = ASTE / DSTE
     ENDIF
     !
-    DO 10 JO = 1, N
+    DO JO = 1, N
         JP = JO + 1
         !
         JM = JO - 1
@@ -403,6 +403,7 @@ SUBROUTINE PSILIN(I, XI, YI, NXI, NYI, PSI, PSI_NI, GEOLIN, SIGLIN)
         !
         !
     10 CONTINUE
+    end do
     !
     11 CONTINUE
     PSIG = 0.5 * YY * (G1 - G2) + X2 * (T2 - APAN) - X1 * (T1 - APAN)
@@ -489,7 +490,7 @@ SUBROUTINE PSILIN(I, XI, YI, NXI, NYI, PSI, PSI_NI, GEOLIN, SIGLIN)
     !
     !
     !
-    DO 20 JO = 1, N
+    DO JO = 1, N
         JP = JO + 1
         !
         JM = JO - 1
@@ -729,6 +730,7 @@ SUBROUTINE PSILIN(I, XI, YI, NXI, NYI, PSI, PSI_NI, GEOLIN, SIGLIN)
         !
         !
     20 CONTINUE
+    end do
     !
     21 CONTINUE
     PSIG = 0.5 * YY * (G1 - G2) + X2 * (T2 - APAN) - X1 * (T1 - APAN)
@@ -818,15 +820,15 @@ SUBROUTINE PSWLIN(I, XI, YI, NXI, NYI, PSI, PSI_NI)
     COSA = COS(ALFA)
     SINA = SIN(ALFA)
     !
-    DO 4 JO = N + 1, N + NW
+    DO JO = N + 1, N + NW
         DZDM(JO) = 0.0
         DQDM(JO) = 0.0
-    4 CONTINUE
+    end do
     !
     PSI = 0.
     PSI_NI = 0.
     !
-    DO 20 JO = N + 1, N + NW - 1
+    DO JO = N + 1, N + NW - 1
         !
         JP = JO + 1
         !
@@ -977,7 +979,7 @@ SUBROUTINE PSWLIN(I, XI, YI, NXI, NYI, PSI, PSI_NI)
         DQDM(JP) = DQDM(JP) + QOPI * (PSNI * DSIO - PDNI * DSIO)
         DQDM(JQ) = DQDM(JQ) + QOPI * (PSNI * DSIP + PDNI * DSIP)
         !
-    20 CONTINUE
+    end do
     !
     RETURN
 END
@@ -997,16 +999,16 @@ SUBROUTINE GGCALC
     !
     WRITE(*, *) 'Calculating unit vorticity distributions ...'
     !
-    DO 10 I = 1, N
+    DO I = 1, N
         GAM(I) = 0.
         GAMU(I, 1) = 0.
         GAMU(I, 2) = 0.
-    10 CONTINUE
+    end do
     PSIO = 0.
     !
     !---- Set up matrix system for  Psi = Psio  on airfoil surface.
     !-    The unknowns are (dGamma)i and dPsio.
-    DO 20 I = 1, N
+    DO I = 1, N
         !
         !------ calculate Psi and dPsi/dGamma array for current node
         CALL PSILIN(I, X(I), Y(I), NX(I), NY(I), PSI, PSI_N, .FALSE., .TRUE.)
@@ -1019,13 +1021,13 @@ SUBROUTINE GGCALC
         RES2 = -QINF * X(I)
         !
         !------ dRes/dGamma
-        DO 201 J = 1, N
+        DO J = 1, N
             AIJ(I, J) = DZDG(J)
-        201   CONTINUE
+        end do
         !
-        DO 202 J = 1, N
+        DO J = 1, N
             BIJ(I, J) = -DZDM(J)
-        202   CONTINUE
+        end do
         !
         !------ dRes/dPsio
         AIJ(I, N + 1) = -1.0
@@ -1033,15 +1035,15 @@ SUBROUTINE GGCALC
         GAMU(I, 1) = -RES1
         GAMU(I, 2) = -RES2
         !
-    20 CONTINUE
+    end do
     !
     !---- set Kutta condition
     !-    RES = GAM(1) + GAM(N)
     RES = 0.
     !
-    DO 30 J = 1, N + 1
+    DO J = 1, N + 1
         AIJ(N + 1, J) = 0.0
-    30 CONTINUE
+    end do
     !
     AIJ(N + 1, 1) = 1.0
     AIJ(N + 1, N) = 1.0
@@ -1050,9 +1052,9 @@ SUBROUTINE GGCALC
     GAMU(N + 1, 2) = -RES
     !
     !---- set up Kutta condition (no direct source influence)
-    DO 32 J = 1, N
+    DO J = 1, N
         BIJ(N + 1, J) = 0.
-    32 CONTINUE
+    end do
     !
     IF(SHARP) THEN
         !----- set zero internal velocity in TE corner 
@@ -1110,10 +1112,10 @@ SUBROUTINE GGCALC
     CALL BAKSUB(IQX, N + 1, AIJ, AIJPIV, GAMU(1, 2))
     !
     !---- set inviscid alpha=0,90 surface speeds for this geometry
-    DO 50 I = 1, N
+    DO I = 1, N
         QINVU(I, 1) = GAMU(I, 1)
         QINVU(I, 2) = GAMU(I, 2)
-    50 CONTINUE
+    end do
     !
     LGAMU = .TRUE.
     !
@@ -1133,11 +1135,11 @@ SUBROUTINE QWCALC
     QINVU(N + 1, 2) = QINVU(N, 2)
     !
     !---- rest of wake
-    DO 10 I = N + 2, N + NW
+    DO I = N + 2, N + NW
         CALL PSILIN(I, X(I), Y(I), NX(I), NY(I), PSI, PSI_NI, .FALSE., .FALSE.)
         QINVU(I, 1) = QTAN1
         QINVU(I, 2) = QTAN2
-    10 CONTINUE
+    end do
     !
     RETURN
 END
@@ -1155,108 +1157,108 @@ SUBROUTINE QDCALC
     IF(.NOT.LADIJ) THEN
         !
         !----- calculate source influence matrix for airfoil surface if it doesn't exist
-        DO 10 J = 1, N
+        DO J = 1, N
             !
             !------- multiply each dPsi/Sig vector by inverse of factored dPsi/dGam matrix
             CALL BAKSUB(IQX, N + 1, AIJ, AIJPIV, BIJ(1, J))
             !
             !------- store resulting dGam/dSig = dQtan/dSig vector
-            DO 105 I = 1, N
+            DO I = 1, N
                 DIJ(I, J) = BIJ(I, J)
-            105    CONTINUE
+            end do
             !
-        10  CONTINUE
+        end do
         LADIJ = .TRUE.
         !
     ENDIF
     !
     !---- set up coefficient matrix of dPsi/dm on airfoil surface
-    DO 20 I = 1, N
+    DO I = 1, N
         CALL PSWLIN(I, X(I), Y(I), NX(I), NY(I), PSI, PSI_N)
-        DO 202 J = N + 1, N + NW
+        DO J = N + 1, N + NW
             BIJ(I, J) = -DZDM(J)
-        202   CONTINUE
-    20 CONTINUE
+        end do
+    end do
     !
     !---- set up Kutta condition (no direct source influence)
-    DO 32 J = N + 1, N + NW
+    DO J = N + 1, N + NW
         BIJ(N + 1, J) = 0.
-    32 CONTINUE
+    end do
     !
     !---- sharp TE gamma extrapolation also has no source influence
     IF(SHARP) THEN
-        DO 34 J = N + 1, N + NW
+        DO J = N + 1, N + NW
             BIJ(N, J) = 0.
-        34  CONTINUE
+        end do
     ENDIF
     !
     !---- multiply by inverse of factored dPsi/dGam matrix
-    DO 40 J = N + 1, N + NW
+    DO J = N + 1, N + NW
         CALL BAKSUB(IQX, N + 1, AIJ, AIJPIV, BIJ(1, J))
-    40 CONTINUE
+    end do
     !
     !---- set the source influence matrix for the wake sources
-    DO 50 I = 1, N
-        DO 510 J = N + 1, N + NW
+    DO I = 1, N
+        DO J = N + 1, N + NW
             DIJ(I, J) = BIJ(I, J)
-        510   CONTINUE
-    50 CONTINUE
+        end do
+    end do
     !
     !**** Now we need to calculate the influence of sources on the wake velocities
     !
     !---- calculcate dQtan/dGam and dQtan/dSig at the wake points
-    DO 70 I = N + 1, N + NW
+    DO I = N + 1, N + NW
         !
         IW = I - N
         !
         !------ airfoil contribution at wake panel node
         CALL PSILIN(I, X(I), Y(I), NX(I), NY(I), PSI, PSI_N, .FALSE., .TRUE.)
         !
-        DO 710 J = 1, N
+        DO J = 1, N
             CIJ(IW, J) = DQDG(J)
-        710   CONTINUE
+        end do
         !  
-        DO 720 J = 1, N
+        DO J = 1, N
             DIJ(I, J) = DQDM(J)
-        720   CONTINUE
+        end do
         !
         !------ wake contribution
         CALL PSWLIN(I, X(I), Y(I), NX(I), NY(I), PSI, PSI_N)
         !
-        DO 730 J = N + 1, N + NW
+        DO J = N + 1, N + NW
             DIJ(I, J) = DQDM(J)
-        730   CONTINUE
+        end do
         !
-    70 CONTINUE
+    end do
     !
     !---- add on effect of all sources on airfoil vorticity which effects wake Qtan
-    DO 80 I = N + 1, N + NW
+    DO I = N + 1, N + NW
         IW = I - N
         !
         !------ airfoil surface source contribution first
-        DO 810 J = 1, N
+        DO J = 1, N
             SUM = 0.
-            DO 8100 K = 1, N
+            DO K = 1, N
                 SUM = SUM + CIJ(IW, K) * DIJ(K, J)
-            8100     CONTINUE
+            end do
             DIJ(I, J) = DIJ(I, J) + SUM
-        810   CONTINUE
+        end do
         !
         !------ wake source contribution next
-        DO 820 J = N + 1, N + NW
+        DO J = N + 1, N + NW
             SUM = 0.
-            DO 8200 K = 1, N
+            DO K = 1, N
                 SUM = SUM + CIJ(IW, K) * BIJ(K, J)
-            8200     CONTINUE
+            end do
             DIJ(I, J) = DIJ(I, J) + SUM
-        820   CONTINUE
+        end do
         !
-    80 CONTINUE
+    end do
     !
     !---- make sure first wake point has same velocity as trailing edge
-    DO 90 J = 1, N + NW
+    DO J = 1, N + NW
         DIJ(N + 1, J) = DIJ(N, J)
-    90 CONTINUE
+    end do
     !
     LWDIJ = .TRUE.
     !
@@ -1317,7 +1319,7 @@ SUBROUTINE XYWAKE
     APANEL(I) = ATAN2(PSI_Y, PSI_X)
     !
     !---- set rest of wake points
-    DO 10 I = N + 2, N + NW
+    DO I = N + 2, N + NW
         DS = SNEW(I) - SNEW(I - 1)
         !
         !------ set new point DS downstream of last point
@@ -1338,6 +1340,7 @@ SUBROUTINE XYWAKE
         APANEL(I) = ATAN2(PSI_Y, PSI_X)
         !
     10 CONTINUE
+    end do
     !
     !---- set wake presence flag and corresponding alpha
     LWAKE = .TRUE.
@@ -1357,9 +1360,9 @@ SUBROUTINE STFIND
     !-----------------------------------------
     INCLUDE 'XFOIL.INC'
     !
-    DO 10 I = 1, N - 1
+    DO I = 1, N - 1
         IF(GAM(I) >= 0.0 .AND. GAM(I + 1) < 0.0) GO TO 11
-    10 CONTINUE
+    end do
     !
     WRITE(*, *) 'STFIND: Stagnation point not found. Continuing ...'
     I = N / 2
@@ -1398,11 +1401,11 @@ SUBROUTINE IBLPAN
     IS = 1
     !
     IBL = 1
-    DO 10 I = IST, 1, -1
+    DO I = IST, 1, -1
         IBL = IBL + 1
         IPAN(IBL, IS) = I
         VTI(IBL, IS) = 1.0
-    10 CONTINUE
+    end do
     !
     IBLTE(IS) = IBL
     NBL(IS) = IBL
@@ -1411,29 +1414,29 @@ SUBROUTINE IBLPAN
     IS = 2
     !
     IBL = 1
-    DO 20 I = IST + 1, N
+    DO I = IST + 1, N
         IBL = IBL + 1
         IPAN(IBL, IS) = I
         VTI(IBL, IS) = -1.0
-    20 CONTINUE
+    end do
     !
     !---- wake
     IBLTE(IS) = IBL
     !
-    DO 25 IW = 1, NW
+    DO IW = 1, NW
         I = N + IW
         IBL = IBLTE(IS) + IW
         IPAN(IBL, IS) = I
         VTI(IBL, IS) = -1.0
-    25 CONTINUE
+    end do
     !
     NBL(IS) = IBLTE(IS) + NW
     !
     !---- upper wake pointers (for plotting only)
-    DO 35 IW = 1, NW
+    DO IW = 1, NW
         IPAN(IBLTE(1) + IW, 1) = IPAN(IBLTE(2) + IW, 2)
         VTI(IBLTE(1) + IW, 1) = 1.0
-    35 CONTINUE
+    end do
     !
     !
     IBLMAX = MAX(IBLTE(1), IBLTE(2)) + NW
@@ -1462,20 +1465,20 @@ SUBROUTINE XICALC
     !
     XSSI(1, IS) = 0.
     !
-    DO 10 IBL = 2, IBLTE(IS)
+    DO IBL = 2, IBLTE(IS)
         I = IPAN(IBL, IS)
         XSSI(IBL, IS) = MAX(SST - S(I), XEPS)
-    10 CONTINUE
+    end do
     !
     !
     IS = 2
     !
     XSSI(1, IS) = 0.
     !
-    DO 20 IBL = 2, IBLTE(IS)
+    DO IBL = 2, IBLTE(IS)
         I = IPAN(IBL, IS)
         XSSI(IBL, IS) = MAX(S(I) - SST, XEPS)
-    20 CONTINUE
+    end do
     !
     !
     IS1 = 1
@@ -1487,7 +1490,7 @@ SUBROUTINE XICALC
     IBL2 = IBLTE(IS2) + 1
     XSSI(IBL2, IS2) = XSSI(IBL2 - 1, IS2)
     !
-    DO 25 IBL = IBLTE(IS) + 2, NBL(IS)
+    DO IBL = IBLTE(IS) + 2, NBL(IS)
         I = IPAN(IBL, IS)
         DXSSI = SQRT((X(I) - X(I - 1))**2 + (Y(I) - Y(I - 1))**2)
         !
@@ -1495,7 +1498,7 @@ SUBROUTINE XICALC
         IBL2 = IBLTE(IS2) + IBL - IBLTE(IS)
         XSSI(IBL1, IS1) = XSSI(IBL1 - 1, IS1) + DXSSI
         XSSI(IBL2, IS2) = XSSI(IBL2 - 1, IS2) + DXSSI
-    25 CONTINUE
+    end do
     !
     !---- trailing edge flap length to TE gap ratio
     TELRAT = 2.50
@@ -1517,18 +1520,18 @@ SUBROUTINE XICALC
     BB = -2.0 - TELRAT * DWDXTE
     !
     IF(SHARP) THEN
-        DO 30 IW = 1, NW
+        DO IW = 1, NW
             WGAP(IW) = 0.
-        30  CONTINUE
+        end do
     ELSE
         !----- set TE flap (wake gap) array
         IS = 2
-        DO 35 IW = 1, NW
+        DO IW = 1, NW
             IBL = IBLTE(IS) + IW
             ZN = 1.0 - (XSSI(IBL, IS) - XSSI(IBLTE(IS), IS)) / (TELRAT * ANTE)
             WGAP(IW) = 0.
             IF(ZN >= 0.0) WGAP(IW) = ANTE * (AA + BB * ZN) * ZN**2
-        35  CONTINUE
+        end do
     ENDIF
     !
     RETURN
@@ -1541,15 +1544,15 @@ SUBROUTINE UICALC
     !--------------------------------------------------------------
     INCLUDE 'XFOIL.INC'
     !
-    DO 10 IS = 1, 2
+    DO IS = 1, 2
         UINV  (1, IS) = 0.
         UINV_A(1, IS) = 0.
-        DO 110 IBL = 2, NBL(IS)
+        DO IBL = 2, NBL(IS)
             I = IPAN(IBL, IS)
             UINV  (IBL, IS) = VTI(IBL, IS) * QINV  (I)
             UINV_A(IBL, IS) = VTI(IBL, IS) * QINV_A(I)
-        110   CONTINUE
-    10 CONTINUE
+        end do
+    end do
     !
     RETURN
 END
@@ -1561,13 +1564,13 @@ SUBROUTINE UECALC
     !--------------------------------------------------------------
     INCLUDE 'XFOIL.INC'
     !
-    DO 10 IS = 1, 2
+    DO IS = 1, 2
         UEDG(1, IS) = 0.
-        DO 110 IBL = 2, NBL(IS)
+        DO IBL = 2, NBL(IS)
             I = IPAN(IBL, IS)
             UEDG(IBL, IS) = VTI(IBL, IS) * QVIS(I)
-        110   CONTINUE
-    10 CONTINUE
+        end do
+    end do
     !
     RETURN
 END
@@ -1579,12 +1582,12 @@ SUBROUTINE QVFUE
     !--------------------------------------------------------------
     INCLUDE 'XFOIL.INC'
     !
-    DO 1 IS = 1, 2
-        DO 10 IBL = 2, NBL(IS)
+    DO IS = 1, 2
+        DO IBL = 2, NBL(IS)
             I = IPAN(IBL, IS)
             QVIS(I) = VTI(IBL, IS) * UEDG(IBL, IS)
-        10   CONTINUE
-    1 CONTINUE
+        end do
+    end do
     !
     RETURN
 END
@@ -1600,10 +1603,10 @@ SUBROUTINE QISET
     COSA = COS(ALFA)
     SINA = SIN(ALFA)
     !
-    DO 5 I = 1, N + NW
+    DO I = 1, N + NW
         QINV  (I) = COSA * QINVU(I, 1) + SINA * QINVU(I, 2)
         QINV_A(I) = -SINA * QINVU(I, 1) + COSA * QINVU(I, 2)
-    5 CONTINUE
+    end do
     !
     RETURN
 END
@@ -1612,10 +1615,10 @@ END
 SUBROUTINE GAMQV
     INCLUDE 'XFOIL.INC'
     !
-    DO 10 I = 1, N
+    DO I = 1, N
         GAM(I) = QVIS(I)
         GAM_A(I) = QINV_A(I)
-    10 CONTINUE
+    end do
     !
     RETURN
 END
@@ -1660,29 +1663,29 @@ SUBROUTINE STMOVE
             ITRAN(2) = ITRAN(2) - IDIF
             !
             !------ move top side BL variables downstream
-            DO 110 IBL = NBL(1), IDIF + 2, -1
+            DO IBL = NBL(1), IDIF + 2, -1
                 CTAU(IBL, 1) = CTAU(IBL - IDIF, 1)
                 THET(IBL, 1) = THET(IBL - IDIF, 1)
                 DSTR(IBL, 1) = DSTR(IBL - IDIF, 1)
                 UEDG(IBL, 1) = UEDG(IBL - IDIF, 1)
-            110   CONTINUE
+            end do
             !
             !------ set BL variables between old and new stagnation point
             DUDX = UEDG(IDIF + 2, 1) / XSSI(IDIF + 2, 1)
-            DO 115 IBL = IDIF + 1, 2, -1
+            DO IBL = IDIF + 1, 2, -1
                 CTAU(IBL, 1) = CTAU(IDIF + 2, 1)
                 THET(IBL, 1) = THET(IDIF + 2, 1)
                 DSTR(IBL, 1) = DSTR(IDIF + 2, 1)
                 UEDG(IBL, 1) = DUDX * XSSI(IBL, 1)
-            115   CONTINUE
+            end do
             !
             !------ move bottom side BL variables upstream
-            DO 120 IBL = 2, NBL(2)
+            DO IBL = 2, NBL(2)
                 CTAU(IBL, 2) = CTAU(IBL + IDIF, 2)
                 THET(IBL, 2) = THET(IBL + IDIF, 2)
                 DSTR(IBL, 2) = DSTR(IBL + IDIF, 2)
                 UEDG(IBL, 2) = UEDG(IBL + IDIF, 2)
-            120   CONTINUE
+            end do
             !
         ELSE
             !------ increase in number of points on bottom side (IS=2)
@@ -1692,12 +1695,12 @@ SUBROUTINE STMOVE
             ITRAN(2) = ITRAN(2) + IDIF
             !
             !------ move bottom side BL variables downstream
-            DO 210 IBL = NBL(2), IDIF + 2, -1
+            DO IBL = NBL(2), IDIF + 2, -1
                 CTAU(IBL, 2) = CTAU(IBL - IDIF, 2)
                 THET(IBL, 2) = THET(IBL - IDIF, 2)
                 DSTR(IBL, 2) = DSTR(IBL - IDIF, 2)
                 UEDG(IBL, 2) = UEDG(IBL - IDIF, 2)
-            210   CONTINUE
+            end do
             !
             !------ set BL variables between old and new stagnation point
             DUDX = UEDG(IDIF + 2, 2) / XSSI(IDIF + 2, 2)
@@ -1706,23 +1709,23 @@ SUBROUTINE STMOVE
             !        write(*,*) 'idif Ue xi dudx', 
             !     &    idif, UEDG(idif+2,2), xssi(idif+2,2), dudx
 
-            DO 215 IBL = IDIF + 1, 2, -1
+            DO IBL = IDIF + 1, 2, -1
                 CTAU(IBL, 2) = CTAU(IDIF + 2, 2)
                 THET(IBL, 2) = THET(IDIF + 2, 2)
                 DSTR(IBL, 2) = DSTR(IDIF + 2, 2)
                 UEDG(IBL, 2) = DUDX * XSSI(IBL, 2)
-            215   CONTINUE
+            end do
 
             !        write(*,*) 'Uenew xinew', idif+1, uedg(idif+1,2), xssi(idif+1,2)
 
             !
             !------ move top side BL variables upstream
-            DO 220 IBL = 2, NBL(1)
+            DO IBL = 2, NBL(1)
                 CTAU(IBL, 1) = CTAU(IBL + IDIF, 1)
                 THET(IBL, 1) = THET(IBL + IDIF, 1)
                 DSTR(IBL, 1) = DSTR(IBL + IDIF, 1)
                 UEDG(IBL, 1) = UEDG(IBL + IDIF, 1)
-            220   CONTINUE
+            end do
         ENDIF
         !
         !----- tweak Ue so it's not zero, in case stag. point is right on node
@@ -1741,11 +1744,11 @@ SUBROUTINE STMOVE
     ENDIF
     !
     !---- set new mass array since Ue has been tweaked
-    DO 50 IS = 1, 2
-        DO 510 IBL = 2, NBL(IS)
+    DO IS = 1, 2
+        DO IBL = 2, NBL(IS)
             MASS(IBL, IS) = DSTR(IBL, IS) * UEDG(IBL, IS)
-        510   CONTINUE
-    50 CONTINUE
+        end do
+    end do
     !
     RETURN
 END
@@ -1757,23 +1760,23 @@ SUBROUTINE UESET
     !---------------------------------------------------------
     INCLUDE 'XFOIL.INC'
     !
-    DO 1 IS = 1, 2
-        DO 10 IBL = 2, NBL(IS)
+    DO IS = 1, 2
+        DO IBL = 2, NBL(IS)
             I = IPAN(IBL, IS)
             !
             DUI = 0.
-            DO 100 JS = 1, 2
-                DO 1000 JBL = 2, NBL(JS)
+            DO JS = 1, 2
+                DO JBL = 2, NBL(JS)
                     J = IPAN(JBL, JS)
                     UE_M = -VTI(IBL, IS) * VTI(JBL, JS) * DIJ(I, J)
                     DUI = DUI + UE_M * MASS(JBL, JS)
-                1000       CONTINUE
-            100     CONTINUE
+                end do
+            end do
             !
             UEDG(IBL, IS) = UINV(IBL, IS) + DUI
             !
-        10   CONTINUE
-    1 CONTINUE
+        end do
+    end do
     !
     RETURN
 END
@@ -1782,11 +1785,11 @@ END
 SUBROUTINE DSSET
     INCLUDE 'XFOIL.INC'
     !
-    DO 1 IS = 1, 2
-        DO 10 IBL = 2, NBL(IS)
+    DO IS = 1, 2
+        DO IBL = 2, NBL(IS)
             DSTR(IBL, IS) = MASS(IBL, IS) / UEDG(IBL, IS)
-        10   CONTINUE
-    1 CONTINUE
+        end do
+    end do
     !
     RETURN
 END

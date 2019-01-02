@@ -39,14 +39,14 @@ SUBROUTINE LEFIND(SLE, X, XP, Y, YP, S, N)
     YTE = 0.5 * (Y(1) + Y(N))
     !
     !---- get first guess for SLE
-    DO 10 I = 3, N - 2
+    DO I = 3, N - 2
         DXTE = X(I) - XTE
         DYTE = Y(I) - YTE
         DX = X(I + 1) - X(I)
         DY = Y(I + 1) - Y(I)
         DOTP = DXTE * DX + DYTE * DY
         IF(DOTP < 0.0) GO TO 11
-    10 CONTINUE
+    end do
     !
     11 SLE = S(I)
     !
@@ -57,7 +57,7 @@ SUBROUTINE LEFIND(SLE, X, XP, Y, YP, S, N)
     ENDIF
     !
     !---- Newton iteration to get exact SLE value
-    DO 20 ITER = 1, 50
+    DO ITER = 1, 50
         XLE = SEVAL(SLE, X, XP, S, N)
         YLE = SEVAL(SLE, Y, YP, S, N)
         DXDS = DEVAL(SLE, X, XP, S, N)
@@ -80,7 +80,7 @@ SUBROUTINE LEFIND(SLE, X, XP, Y, YP, S, N)
         DSLE = MIN(DSLE, 0.02 * ABS(XCHORD + YCHORD))
         SLE = SLE + DSLE
         IF(ABS(DSLE) < DSEPS) RETURN
-    20 CONTINUE
+    end do
     WRITE(*, *) 'LEFIND:  LE point not found.  Continuing...'
     SLE = S(I)
     RETURN
@@ -130,7 +130,7 @@ SUBROUTINE SOPPS(SOPP, SI, X, XP, Y, YP, S, N, SLE)
     XBAR = (XI - XLE) * DXC + (YI - YLE) * DYC
     !
     !---- converge on exact opposite point with same XBAR value
-    DO 300 ITER = 1, 12
+    DO ITER = 1, 12
         XOPP = SEVAL(SOPP, X, XP, S, N)
         YOPP = SEVAL(SOPP, Y, YP, S, N)
         XOPPD = DEVAL(SOPP, X, XP, S, N)
@@ -146,7 +146,7 @@ SUBROUTINE SOPPS(SOPP, SI, X, XP, Y, YP, S, N, SLE)
         SOPP = SOPP + DSOPP
         !
         IF(ABS(DSOPP) / SLEN < 1.0E-5) GO TO 305
-    300  CONTINUE
+    end do
     303  WRITE(*, *)&
             'SOPPS: Opposite-point location failed. Continuing...'
     SOPP = SLE + SFRAC * (S(INOPP) - SLE)
@@ -175,11 +175,11 @@ SUBROUTINE NORM(X, XP, Y, YP, S, N)
     YMIN = SEVAL(SLE, Y, YP, S, N)
     !
     FUDGE = 1.0 / (XMAX - XMIN)
-    DO 40 I = 1, N
+    DO I = 1, N
         X(I) = (X(I) - XMIN) * FUDGE
         Y(I) = (Y(I) - YMIN) * FUDGE
         S(I) = S(I) * FUDGE
-    40 CONTINUE
+    end do
     !
     RETURN
 END
@@ -279,7 +279,7 @@ SUBROUTINE AECALC(N, X, Y, T, ITYPE, &
     XYINT = 0.0
     YYINT = 0.0
     !
-    DO 10 IO = 1, N
+    DO IO = 1, N
         IF(IO == N) THEN
             IP = 1
         ELSE
@@ -315,7 +315,7 @@ SUBROUTINE AECALC(N, X, Y, T, ITYPE, &
             YYINT = YYINT + YA * YA * DA
         ENDIF
         !
-    10   CONTINUE
+    end do
     !
     AREA = AINT
     !
@@ -419,7 +419,7 @@ SUBROUTINE TCCALC(X, XP, Y, YP, S, N, &
     XCAMBR = 0.
     !
     !---- go over each point, finding the y-thickness and camber
-    DO 30 I = 1, N
+    DO I = 1, N
         XBAR = (X(I) - XLE) * DXC + (Y(I) - YLE) * DYC
         YBAR = (Y(I) - YLE) * DXC - (X(I) - XLE) * DYC
         !
@@ -441,7 +441,7 @@ SUBROUTINE TCCALC(X, XP, Y, YP, S, N, &
             THICK = YT
             XTHICK = XOPP
         ENDIF
-    30 CONTINUE
+    end do
     !
     RETURN
 END
@@ -463,7 +463,7 @@ SUBROUTINE CANG(X, Y, N, IPRINT, IMAX, AMAX)
     !
     !---- go over each point, calculating corner angle
     IF(IPRINT == 2) WRITE(*, 1050)
-    DO 30 I = 2, N - 1
+    DO I = 2, N - 1
         DX1 = X(I) - X(I - 1)
         DY1 = Y(I) - Y(I - 1)
         DX2 = X(I) - X(I + 1)
@@ -487,7 +487,7 @@ SUBROUTINE CANG(X, Y, N, IPRINT, IMAX, AMAX)
             AMAX = ANGL
             IMAX = I
         ENDIF
-    30 CONTINUE
+    end do
     !
     IF(IPRINT >= 1) WRITE(*, 1200) AMAX, IMAX, X(IMAX), Y(IMAX)
     !
@@ -538,7 +538,7 @@ SUBROUTINE INTER(X0, XP0, Y0, YP0, S0, N0, SLE0, &
     BOTS0 = S0(N0) - SLE0
     BOTS1 = S1(N1) - SLE1
     !
-    DO 50 I = 1, N
+    DO I = 1, N
         !
         !------ normalized spline parameter is taken from airfoil 0 value
         IF(S0(I) < SLE0) SN = (S0(I) - SLE0) / TOPS0    ! top side
@@ -559,7 +559,7 @@ SUBROUTINE INTER(X0, XP0, Y0, YP0, S0, N0, SLE0, &
         X(I) = F0 * XT0 + F1 * XT1
         Y(I) = F0 * YT0 + F1 * YT1
         !
-    50 CONTINUE
+    end do
     !
     RETURN
 END
@@ -597,7 +597,7 @@ SUBROUTINE INTERX(X0, XP0, Y0, YP0, S0, N0, SLE0, &
     XLE0 = SEVAL(SLE0, X0, XP0, S0, N0)
     XLE1 = SEVAL(SLE1, X1, XP1, S1, N1)
     !
-    DO 50 I = 1, N
+    DO I = 1, N
         !
         !------ normalized x parameter is taken from airfoil 0 value
         IF(S0(I) < SLE0) XN = (X0(I) - XLE0) / (X0(1) - XLE0)
@@ -627,7 +627,7 @@ SUBROUTINE INTERX(X0, XP0, Y0, YP0, S0, N0, SLE0, &
         X(I) = F0 * XT0 + F1 * XT1
         Y(I) = F0 * YT0 + F1 * YT1
         !
-    50 CONTINUE
+    end do
     !
     RETURN
 END
@@ -831,7 +831,7 @@ SUBROUTINE IJSECT(N, X, Y, PEX, &
     !
     C_DS = DS
     !
-    DO 10 I = 2, N
+    DO I = 2, N
         DX = X(I) - X(I - 1)
         DY = Y(I) - Y(I - 1)
         DS = SQRT(DX * DX + DY * DY)
@@ -856,7 +856,7 @@ SUBROUTINE IJSECT(N, X, Y, PEX, &
         XMAX = MAX(XMAX, X(I))
         YMIN = MIN(YMIN, Y(I))
         YMAX = MAX(YMAX, Y(I))
-    10   CONTINUE
+    end do
     !
     AREA = -Y_DX
     SLEN = C_DS
@@ -878,7 +878,7 @@ SUBROUTINE IJSECT(N, X, Y, PEX, &
     XINT = 0.
     YINT = 0.
     !
-    DO 20 I = 2, N
+    DO I = 2, N
         DX = X(I) - X(I - 1)
         DY = Y(I) - Y(I - 1)
         DS = SQRT(DX * DX + DY * DY)
@@ -888,7 +888,7 @@ SUBROUTINE IJSECT(N, X, Y, PEX, &
         SINT = SINT + DS
         !c        XINT = XINT + DS * ABS(XAVG)**PEX
         !c        YINT = YINT + DS * ABS(YAVG)**PEX
-    20   CONTINUE
+    end do
     !
     DO I = 1, N - 1
         IF(X(I + 1) >= X(I)) GO TO 30
@@ -942,7 +942,7 @@ SUBROUTINE HALF(X, Y, S, N)
     !
     K = 1
     INEXT = 3
-    DO 20 I = 2, N - 1
+    DO I = 2, N - 1
         !------ if corner is found, preserve it.
         IF(S(I) == S(I + 1)) THEN
             K = K + 1
@@ -961,7 +961,7 @@ SUBROUTINE HALF(X, Y, S, N)
             INEXT = I + 2
         ENDIF
         !
-    20 CONTINUE
+    end do
     K = K + 1
     X(K) = X(N)
     Y(K) = Y(N)

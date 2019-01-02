@@ -96,7 +96,7 @@ SUBROUTINE AREAD(LU, FNAME, NMAX, X, Y, N, NAME, ISPARS, ITYPE, INFO)
     !
     !---- read each element until 999.0 or end of file is encountered
     50 NEL = NEL + 1
-    DO 55 I = 1, NMAX
+    DO I = 1, NMAX
         51     READ(LU, 1000, END = 60) LINE
         !
         !------ skip comment line
@@ -125,7 +125,7 @@ SUBROUTINE AREAD(LU, FNAME, NMAX, X, Y, N, NAME, ISPARS, ITYPE, INFO)
             IF(IEL == NEL) GO TO 60
             GO TO 50
         ENDIF
-    55 CONTINUE
+    end do
     WRITE(*, 5030) NMAX
     WRITE(*, 5900)
     IF(LOPEN) CLOSE(LU)

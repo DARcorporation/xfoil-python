@@ -568,7 +568,7 @@ SUBROUTINE POLWRIT(LU, FNPOL, ERROR, LHEAD, &
         KL = 1
         KD = 1
         !
-        DO 30 KP = 1, NIPOL
+        DO KP = 1, NIPOL
             IP = IPOL(KP)
             IF(IP == 0) GO TO 30
             !
@@ -585,8 +585,9 @@ SUBROUTINE POLWRIT(LU, FNPOL, ERROR, LHEAD, &
             LINED(KD + 2:KD + NFORM) = '--------------------------------'
             KD = KD + NFORM
         30    CONTINUE
+        end do
         !
-        DO 32 KP = 1, NJPOL
+        DO KP = 1, NJPOL
             JP = JPOL(KP)
             IF(JP == 0) GO TO 32
             !
@@ -613,6 +614,7 @@ SUBROUTINE POLWRIT(LU, FNPOL, ERROR, LHEAD, &
                 KD = KD + NFORM
             ENDDO
         32    CONTINUE
+        end do
         !
         !
         !
@@ -659,11 +661,11 @@ SUBROUTINE POLWRIT(LU, FNPOL, ERROR, LHEAD, &
     KF = KF + 1
     !
     !
-    DO 40 IA = IA1, IA2
+    DO IA = IA1, IA2
         WRITE(LU, LINEF)&
                 (CPOL(IA, IPOL(KP)), KP = 1, NIPOL), &
                 ((CPOLSD(IA, IS, JPOL(KP)), IS = 1, 2 * NBL), KP = 1, NJPOL)
-    40 CONTINUE
+    end do
     !
     !
     80   CONTINUE
@@ -741,13 +743,13 @@ SUBROUTINE POLREF(LU, FNREF, ERROR, &
         REWIND(LU)
     ENDIF
     !
-    DO 100 K = 1, 4
-        DO 10 I = 1, NFX
+    DO K = 1, 4
+        DO I = 1, NFX
             READ(LU, *, END = 11, ERR = 900) XYREF(I, 1, K), XYREF(I, 2, K)
             IF(XYREF(I, 1, K) == 999.0) GO TO 11
-        10   CONTINUE
+        end do
         11   NF(K) = I - 1
-    100 CONTINUE
+    end do
     IF(LOPEN) CLOSE(LU)
     RETURN
     !

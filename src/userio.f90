@@ -196,10 +196,10 @@ SUBROUTINE LC2UC(INPUT)
     !
     N = LEN(INPUT)
     !
-    DO 10 I = 1, N
+    DO I = 1, N
         K = INDEX(LCASE, INPUT(I:I))
         IF(K > 0) INPUT(I:I) = UCASE(K:K)
-    10   CONTINUE
+    end do
     !
     RETURN
 END
@@ -220,18 +220,18 @@ SUBROUTINE READI(N, IVAR, ERROR)
     READ(*, 1000) LINE
     1000 FORMAT(A80)
     !
-    DO 10 I = 1, N
+    DO I = 1, N
         IVTMP(I) = IVAR(I)
-    10   CONTINUE
+    end do
     !
     NTMP = 40
     CALL GETINT(LINE, IVTMP, NTMP, ERROR)
     !
     IF(ERROR) RETURN
     !
-    DO 20 I = 1, N
+    DO I = 1, N
         IVAR(I) = IVTMP(I)
-    20   CONTINUE
+    end do
     !
     RETURN
 END
@@ -252,18 +252,18 @@ SUBROUTINE READR(N, VAR, ERROR)
     READ(*, 1000) LINE
     1000 FORMAT(A80)
     !
-    DO 10 I = 1, N
+    DO I = 1, N
         VTMP(I) = VAR(I)
-    10   CONTINUE
+    end do
     !
     NTMP = 40
     CALL GETFLT(LINE, VTMP, NTMP, ERROR)
     !
     IF(ERROR) RETURN
     !
-    DO 20 I = 1, N
+    DO I = 1, N
         VAR(I) = VTMP(I)
-    20   CONTINUE
+    end do
     !
     RETURN
 END
@@ -314,7 +314,7 @@ SUBROUTINE GETINT(INPUT, A, N, ERROR)
     !---- count up how many numbers are to be extracted
     N = 0
     K = 1
-    DO 10 IPASS = 1, ILEN
+    DO IPASS = 1, ILEN
         !------ search for next space or comma starting with current index K
         KSPACE = INDEX(REC(K:ILENP), ' ') + K - 1
         KCOMMA = INDEX(REC(K:ILENP), ',') + K - 1
@@ -338,7 +338,7 @@ SUBROUTINE GETINT(INPUT, A, N, ERROR)
         K = MIN(KSPACE, KCOMMA) + 1
         !
         9     IF(K >= ILEN) GO TO 11
-    10   CONTINUE
+    end do
     !
     !---- decide on how many numbers to read, and go ahead and read them
     11   IF(NINP > 0) N = MIN(N, NINP)
@@ -398,7 +398,7 @@ SUBROUTINE GETFLT(INPUT, A, N, ERROR)
     !---- count up how many numbers are to be extracted
     N = 0
     K = 1
-    DO 10 IPASS = 1, ILEN
+    DO IPASS = 1, ILEN
         !------ search for next space or comma starting with current index K
         KSPACE = INDEX(REC(K:ILENP), ' ') + K - 1
         KCOMMA = INDEX(REC(K:ILENP), ',') + K - 1
@@ -422,7 +422,7 @@ SUBROUTINE GETFLT(INPUT, A, N, ERROR)
         K = MIN(KSPACE, KCOMMA) + 1
         !
         9     IF(K >= ILEN) GO TO 11
-    10   CONTINUE
+    end do
     !
     !---- decide on how many numbers to read, and go ahead and read them
     11   IF(NINP > 0) N = MIN(N, NINP)

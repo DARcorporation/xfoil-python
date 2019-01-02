@@ -376,12 +376,12 @@ SUBROUTINE INIT
     COSA = 1.0
     SINA = 0.0
     !
-    DO 10 I = 1, IQX
+    DO I = 1, IQX
         GAMU(I, 1) = 0.
         GAMU(I, 2) = 0.
         GAM(I) = 0.
         GAM_A(I) = 0.
-    10 CONTINUE
+    end do
     PSIO = 0.
     !
     CL = 0.
@@ -393,19 +393,19 @@ SUBROUTINE INIT
     SIGTE_A = 0.
     GAMTE_A = 0.
     !
-    DO 20 I = 1, IZX
+    DO I = 1, IZX
         SIG(I) = 0.
-    20 CONTINUE
+    end do
     !
     NQSP = 0
-    DO 30 K = 1, IPX
+    DO K = 1, IPX
         ALQSP(K) = 0.
         CLQSP(K) = 0.
         CMQSP(K) = 0.
-        DO 302 I = 1, IBX
+        DO I = 1, IBX
             QSPEC(I, K) = 0.
-        302    CONTINUE
-    30   CONTINUE
+        end do
+    end do
     !
     AWAKE = 0.0
     AVISC = 0.0
@@ -923,12 +923,12 @@ SUBROUTINE CPCALC(N, Q, QINF, MINF, CP)
     !
     DENNEG = .FALSE.
     !
-    DO 20 I = 1, N
+    DO I = 1, N
         CPINC = 1.0 - (Q(I) / QINF)**2
         DEN = BETA + BFAC * CPINC
         CP(I) = CPINC / DEN
         IF(DEN <= 0.0) DENNEG = .TRUE.
-    20  CONTINUE
+    end do
     !
     IF(DENNEG) THEN
         WRITE(*, *)
@@ -983,7 +983,7 @@ SUBROUTINE CLCALC(N, X, Y, GAM, GAM_A, ALFA, MINF, QINF, &
     CPC_CPI = (1.0 - BFAC * CPG1) / (BETA + BFAC * CGINC)
     CPG1_ALF = CPC_CPI * CPI_GAM * GAM_A(I)
     !
-    DO 10 I = 1, N
+    DO I = 1, N
         IP = I + 1
         IF(I == N) IP = 1
         !
@@ -1018,7 +1018,7 @@ SUBROUTINE CLCALC(N, X, Y, GAM, GAM_A, ALFA, MINF, QINF, &
         CPG1 = CPG2
         CPG1_ALF = CPG2_ALF
         CPG1_MSQ = CPG2_MSQ
-    10 CONTINUE
+    end do
     !
     RETURN
 END
@@ -1052,14 +1052,14 @@ SUBROUTINE CDCALC
     !
     !---- calculate friction drag coefficient
     CDF = 0.0
-    DO 20 IS = 1, 2
-        DO 205 IBL = 3, IBLTE(IS)
+    DO IS = 1, 2
+        DO IBL = 3, IBLTE(IS)
             I = IPAN(IBL, IS)
             IM = IPAN(IBL - 1, IS)
             DX = (X(I) - X(IM)) * CA + (Y(I) - Y(IM)) * SA
             CDF = CDF + 0.5 * (TAU(IBL, IS) + TAU(IBL - 1, IS)) * DX * 2.0 / QINF**2
-        205    CONTINUE
-    20   CONTINUE
+        end do
+    end do
     !
     RETURN
 END
@@ -1096,11 +1096,11 @@ SUBROUTINE LOAD(FILNAM, ITYPE)
     !
     !---- calculate airfoil area assuming counterclockwise ordering
     AREA = 0.0
-    DO 50 I = 1, NB
+    DO I = 1, NB
         IP = I + 1
         IF(I == NB) IP = 1
         AREA = AREA + 0.5 * (YB(I) + YB(IP)) * (XB(I) - XB(IP))
-    50 CONTINUE
+    end do
     !
     IF(AREA >= 0.0) THEN
         LCLOCK = .FALSE.
@@ -1109,14 +1109,14 @@ SUBROUTINE LOAD(FILNAM, ITYPE)
         !----- if area is negative (clockwise order), reverse coordinate order
         LCLOCK = .TRUE.
         WRITE(*, 1011) NB
-        DO 55 I = 1, NB / 2
+        DO I = 1, NB / 2
             XTMP = XB(NB - I + 1)
             YTMP = YB(NB - I + 1)
             XB(NB - I + 1) = XB(I)
             YB(NB - I + 1) = YB(I)
             XB(I) = XTMP
             YB(I) = YTMP
-        55  CONTINUE
+        end do
     ENDIF
     !
     IF(LNORM) THEN
@@ -1327,16 +1327,17 @@ SUBROUTINE MSAVE(FNAME1)
     20   CONTINUE
     !
     !---- read in existing airfoil coordinates
-    40 DO 55 IEL = 1, NEX
-        DO 50 I = 1, 2 * IQX + 1
+    40 DO IEL = 1, NEX
+        DO I = 1, 2 * IQX + 1
             READ(LU, *, END = 56) XTMP(I, IEL), YTMP(I, IEL)
             IF(XTMP(I, IEL) == 999.0) THEN
                 NTMP(IEL) = I - 1
                 GO TO 55
             ENDIF
-        50   CONTINUE
+        end do
         STOP 'LOAD: Array overflow'
     55 CONTINUE
+    end do
     NEL = NEX
     !
     56 IF(I == 1) THEN
@@ -1362,7 +1363,7 @@ SUBROUTINE MSAVE(FNAME1)
     !
     !
     NTMP(IEL) = N
-    DO 70 I = 1, NTMP(IEL)
+    DO I = 1, NTMP(IEL)
         IF(LCLOCK) THEN
             !------- write out in clockwise order (reversed from internal XFOIL order)
             IDIR = NTMP(IEL) - I + 1
@@ -1372,7 +1373,7 @@ SUBROUTINE MSAVE(FNAME1)
         ENDIF
         XTMP(I, IEL) = X(IDIR)
         YTMP(I, IEL) = Y(IDIR)
-    70   CONTINUE
+    end do
     !
     !
     REWIND(LU)
@@ -1381,12 +1382,12 @@ SUBROUTINE MSAVE(FNAME1)
     WRITE(LU, 1000) NAME1(1:NN1)
     WRITE(LU, 1000) ISPARS1(1:NI1)
     !
-    DO 80 IEL = 1, NEL
-        DO 805 I = 1, NTMP(IEL)
+    DO IEL = 1, NEL
+        DO I = 1, NTMP(IEL)
             WRITE(LU, 1100) XTMP(I, IEL), YTMP(I, IEL)
-        805   CONTINUE
+        end do
         IF(IEL < NEL) WRITE(LU, *) ' 999.0  999.0'
-    80 CONTINUE
+    end do
     !
     CLOSE(LU)
     RETURN
@@ -1415,12 +1416,12 @@ SUBROUTINE ROTATE(X, Y, N, ALFA)
     !CC      YOFF = 0.25*SA
     XOFF = 0.
     YOFF = 0.
-    DO 8 I = 1, N
+    DO I = 1, N
         XT = X(I)
         YT = Y(I)
         X(I) = CA * XT + SA * YT + XOFF
         Y(I) = CA * YT - SA * XT + YOFF
-    8 CONTINUE
+    end do
     !
     RETURN
 END
@@ -1732,7 +1733,7 @@ SUBROUTINE PANGEN(SHOPAR)
     ENDIF
     !
     !---- Newton iteration loop for new node positions
-    DO 10 ITER = 1, 20
+    DO ITER = 1, 20
         !
         !------ set up tri-diagonal system for node position deltas
         CV1 = SEVAL(SNEW(1), W5, W6, SB, NB)
@@ -1749,7 +1750,7 @@ SUBROUTINE PANGEN(SHOPAR)
             CAVM_S2 = CVS2 * CV2 / CAVM
         ENDIF
         !
-        DO 110 I = 2, NN - 1
+        DO I = 2, NN - 1
             DSM = SNEW(I) - SNEW(I - 1)
             DSP = SNEW(I) - SNEW(I + 1)
             CV3 = SEVAL(SNEW(I + 1), W5, W6, SB, NB)
@@ -1785,7 +1786,7 @@ SUBROUTINE PANGEN(SHOPAR)
             CAVM = CAVP
             CAVM_S1 = CAVP_S2
             CAVM_S2 = CAVP_S3
-        110   CONTINUE
+        end do
         !
         !------ fix endpoints (at TE)
         W2(1) = 1.0
@@ -1844,7 +1845,7 @@ SUBROUTINE PANGEN(SHOPAR)
         !CC        IF(RLX == 1.0) WRITE(*,*) DMAX
         !CC        IF(RLX /= 1.0) WRITE(*,*) DMAX,'    RLX =',RLX
         IF(ABS(DMAX) < 1.E-3) GO TO 11
-    10 CONTINUE
+    end do
     WRITE(*, *) 'Paneling convergence failed.  Continuing anyway...'
     !
     11 CONTINUE
@@ -1860,7 +1861,7 @@ SUBROUTINE PANGEN(SHOPAR)
     !
     !---- go over buffer airfoil again, checking for corners (double points)
     NCORN = 0
-    DO 25 IB = 1, NB - 1
+    DO IB = 1, NB - 1
         IF(SB(IB) == SB(IB + 1)) THEN
             !------- found one !
             !
@@ -1870,17 +1871,17 @@ SUBROUTINE PANGEN(SHOPAR)
             SBCORN = SB(IB)
             !
             !------- find current-airfoil panel which contains corner
-            DO 252 I = 1, N
+            DO I = 1, N
                 !
                 !--------- keep stepping until first node past corner
                 IF(S(I) <= SBCORN) GO TO 252
                 !
                 !---------- move remainder of panel nodes to make room for additional node
-                DO 2522 J = N, I, -1
+                DO J = N, I, -1
                     X(J + 1) = X(J)
                     Y(J + 1) = Y(J)
                     S(J + 1) = S(J)
-                2522       CONTINUE
+                end do
                 N = N + 1
                 !
                 IF(N > IQX - 1)&
@@ -1907,8 +1908,10 @@ SUBROUTINE PANGEN(SHOPAR)
                 GO TO 25
                 !
             252    CONTINUE
+            end do
         ENDIF
     25 CONTINUE
+    end do
     !
     CALL SCALC(X, Y, S, N)
     CALL SEGSPL(X, XP, S, N)
@@ -1924,12 +1927,13 @@ SUBROUTINE PANGEN(SHOPAR)
     !---- calculate panel size ratios (user info)
     DSMIN = 1000.0
     DSMAX = -1000.0
-    DO 40 I = 1, N - 1
+    DO I = 1, N - 1
         DS = S(I + 1) - S(I)
         IF(DS == 0.0) GO TO 40
         DSMIN = MIN(DSMIN, DS)
         DSMAX = MAX(DSMAX, DS)
     40 CONTINUE
+    end do
     !
     DSMIN = DSMIN * FLOAT(N - 1) / S(N)
     DSMAX = DSMAX * FLOAT(N - 1) / S(N)
@@ -2207,7 +2211,7 @@ SUBROUTINE INTE
     !
     2100 FORMAT(/'  Select source of airfoil "', I1, A, $)
     !
-    DO 40 K = 1, 2
+    DO K = 1, 2
         IAIR = K - 1
         20     WRITE(*, 2100) IAIR, PROMPTN(1:NPR)
         READ(*, 1000) CAIR
@@ -2255,7 +2259,7 @@ SUBROUTINE INTE
         CALL LEFIND(SLEINT(K), &
                 XINT(1, K), XPINT(1, K), &
                 YINT(1, K), YPINT(1, K), SINT(1, K), NINT(K))
-    40   CONTINUE
+    end do
     !
     WRITE(*, *)
     WRITE(*, *) 'airfoil "0":  ', NAMEINT(1)
@@ -2340,7 +2344,7 @@ SUBROUTINE INTX
     !
     2100 FORMAT(/'  Select source of airfoil "', I1, A, $)
     !
-    DO 40 K = 1, 2
+    DO K = 1, 2
         IAIR = K - 1
         20     WRITE(*, 2100) IAIR, PROMPTN(1:NPR)
         READ(*, 1000, ERR = 90, END = 90) CAIR
@@ -2391,7 +2395,7 @@ SUBROUTINE INTX
         CALL LEFIND(SLEINT(K), &
                 XINT(1, K), XPINT(1, K), &
                 YINT(1, K), YPINT(1, K), SINT(1, K), NINT(K))
-    40   CONTINUE
+    end do
     !
     WRITE(*, *)
     WRITE(*, *) 'airfoil "0":  ', NAMEINT(1)

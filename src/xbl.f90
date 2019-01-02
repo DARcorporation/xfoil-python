@@ -92,21 +92,21 @@ SUBROUTINE SETBL
     !---- march BL with current Ue and Ds to establish transition
     CALL MRCHDU
     !
-    DO 5 IS = 1, 2
-        DO 6 IBL = 2, NBL(IS)
+    DO IS = 1, 2
+        DO IBL = 2, NBL(IS)
             USAV(IBL, IS) = UEDG(IBL, IS)
-        6   CONTINUE
-    5 CONTINUE
+        end do
+    end do
     !
     CALL UESET
     !
-    DO 7 IS = 1, 2
-        DO 8 IBL = 2, NBL(IS)
+    DO IS = 1, 2
+        DO IBL = 2, NBL(IS)
             TEMP = USAV(IBL, IS)
             USAV(IBL, IS) = UEDG(IBL, IS)
             UEDG(IBL, IS) = TEMP
-        8   CONTINUE
-    7 CONTINUE
+        end do
+    end do
     !
     ILE1 = IPAN(2, 1)
     ILE2 = IPAN(2, 2)
@@ -120,16 +120,16 @@ SUBROUTINE SETBL
     DULE2 = UEDG(2, 2) - USAV(2, 2)
     !
     !---- set LE and TE Ue sensitivities wrt all m values
-    DO 10 JS = 1, 2
-        DO 110 JBL = 2, NBL(JS)
+    DO JS = 1, 2
+        DO JBL = 2, NBL(JS)
             J = IPAN(JBL, JS)
             JV = ISYS(JBL, JS)
             ULE1_M(JV) = -VTI(2, 1) * VTI(JBL, JS) * DIJ(ILE1, J)
             ULE2_M(JV) = -VTI(2, 2) * VTI(JBL, JS) * DIJ(ILE2, J)
             UTE1_M(JV) = -VTI(IBLTE(1), 1) * VTI(JBL, JS) * DIJ(ITE1, J)
             UTE2_M(JV) = -VTI(IBLTE(2), 2) * VTI(JBL, JS) * DIJ(ITE2, J)
-        110   CONTINUE
-    10 CONTINUE
+        end do
+    end do
     !
     ULE1_A = UINV_A(2, 1)
     ULE2_A = UINV_A(2, 2)
@@ -138,16 +138,16 @@ SUBROUTINE SETBL
     TINDEX(2) = 0.0
     !
     !**** Go over each boundary layer/wake
-    DO 2000 IS = 1, 2
+    DO IS = 1, 2
         !
         !---- there is no station "1" at similarity, so zero everything out
-        DO 20 JS = 1, 2
-            DO 210 JBL = 2, NBL(JS)
+        DO JS = 1, 2
+            DO JBL = 2, NBL(JS)
                 JV = ISYS(JBL, JS)
                 U1_M(JV) = 0.
                 D1_M(JV) = 0.
-            210   CONTINUE
-        20 CONTINUE
+            end do
+        end do
         U1_A = 0.
         D1_A = 0.
         !
@@ -167,7 +167,7 @@ SUBROUTINE SETBL
         TURB = .FALSE.
         !
         !**** Sweep downstream setting up BL equation linearizations
-        DO 1000 IBL = 2, NBL(IS)
+        DO IBL = 2, NBL(IS)
             !
             IV = ISYS(IBL, IS)
             !
@@ -199,14 +199,14 @@ SUBROUTINE SETBL
             D2_M2 = 1.0 / UEI
             D2_U2 = -DSI / UEI
             !
-            DO 30 JS = 1, 2
-                DO 310 JBL = 2, NBL(JS)
+            DO JS = 1, 2
+                DO JBL = 2, NBL(JS)
                     J = IPAN(JBL, JS)
                     JV = ISYS(JBL, JS)
                     U2_M(JV) = -VTI(IBL, IS) * VTI(JBL, JS) * DIJ(I, J)
                     D2_M(JV) = D2_U2 * U2_M(JV)
-                310   CONTINUE
-            30 CONTINUE
+                end do
+            end do
             D2_M(IV) = D2_M(IV) + D2_M2
             !
             U2_A = UINV_A(IBL, IS)
@@ -252,13 +252,13 @@ SUBROUTINE SETBL
                 CTE_TTE2 = (CTAU(IBLTE(2), 2) - CTE) / TTE
                 !
                 !----- re-define D1 sensitivities wrt m since D1 depends on both TE Ds values
-                DO 35 JS = 1, 2
-                    DO 350 JBL = 2, NBL(JS)
+                DO JS = 1, 2
+                    DO JBL = 2, NBL(JS)
                         J = IPAN(JBL, JS)
                         JV = ISYS(JBL, JS)
                         D1_M(JV) = DTE_UTE1 * UTE1_M(JV) + DTE_UTE2 * UTE2_M(JV)
-                    350    CONTINUE
-                35  CONTINUE
+                    end do
+                end do
                 D1_M(JVTE1) = D1_M(JVTE1) + DTE_MTE1
                 D1_M(JVTE2) = D1_M(JVTE2) + DTE_MTE2
                 !
@@ -325,12 +325,12 @@ SUBROUTINE SETBL
             !
             !---- stuff BL system coefficients into main Jacobian matrix
             !
-            DO 40 JV = 1, NSYS
+            DO JV = 1, NSYS
                 VM(1, JV, IV) = VS1(1, 3) * D1_M(JV) + VS1(1, 4) * U1_M(JV)&
                         + VS2(1, 3) * D2_M(JV) + VS2(1, 4) * U2_M(JV)&
                         + (VS1(1, 5) + VS2(1, 5) + VSX(1))&
                                 * (XI_ULE1 * ULE1_M(JV) + XI_ULE2 * ULE2_M(JV))
-            40 CONTINUE
+            end do
             !
             VB(1, 1, IV) = VS1(1, 1)
             VB(1, 2, IV) = VS1(1, 2)
@@ -355,12 +355,12 @@ SUBROUTINE SETBL
                             * (XI_ULE1 * DULE1 + XI_ULE2 * DULE2)
             !
             !
-            DO 50 JV = 1, NSYS
+            DO JV = 1, NSYS
                 VM(2, JV, IV) = VS1(2, 3) * D1_M(JV) + VS1(2, 4) * U1_M(JV)&
                         + VS2(2, 3) * D2_M(JV) + VS2(2, 4) * U2_M(JV)&
                         + (VS1(2, 5) + VS2(2, 5) + VSX(2))&
                                 * (XI_ULE1 * ULE1_M(JV) + XI_ULE2 * ULE2_M(JV))
-            50 CONTINUE
+            end do
             !
             VB(2, 1, IV) = VS1(2, 1)
             VB(2, 2, IV) = VS1(2, 2)
@@ -385,12 +385,12 @@ SUBROUTINE SETBL
                             * (XI_ULE1 * DULE1 + XI_ULE2 * DULE2)
             !
             !
-            DO 60 JV = 1, NSYS
+            DO JV = 1, NSYS
                 VM(3, JV, IV) = VS1(3, 3) * D1_M(JV) + VS1(3, 4) * U1_M(JV)&
                         + VS2(3, 3) * D2_M(JV) + VS2(3, 4) * U2_M(JV)&
                         + (VS1(3, 5) + VS2(3, 5) + VSX(3))&
                                 * (XI_ULE1 * ULE1_M(JV) + XI_ULE2 * ULE2_M(JV))
-            60 CONTINUE
+            end do
             !
             VB(3, 1, IV) = VS1(3, 1)
             VB(3, 2, IV) = VS1(3, 2)
@@ -471,13 +471,13 @@ SUBROUTINE SETBL
                 CALL BLMID(3)
             ENDIF
             !
-            DO 80 JS = 1, 2
-                DO 810 JBL = 2, NBL(JS)
+            DO JS = 1, 2
+                DO JBL = 2, NBL(JS)
                     JV = ISYS(JBL, JS)
                     U1_M(JV) = U2_M(JV)
                     D1_M(JV) = D2_M(JV)
-                810   CONTINUE
-            80 CONTINUE
+                end do
+            end do
             !
             U1_A = U2_A
             D1_A = D2_A
@@ -494,12 +494,12 @@ SUBROUTINE SETBL
             ENDIF
             !
             !---- set BL variables for next station
-            DO 190 ICOM = 1, NCOM
+            DO ICOM = 1, NCOM
                 COM1(ICOM) = COM2(ICOM)
-            190 CONTINUE
+            end do
             !
             !---- next streamwise station
-        1000 CONTINUE
+        end do
         !
         IF(TFORCE(IS)) THEN
             WRITE(*, 9100) IS, XOCTR(IS), ITRAN(IS)
@@ -510,7 +510,7 @@ SUBROUTINE SETBL
         ENDIF
         !
         !---- next airfoil side
-    2000 CONTINUE
+    end do
     !
     RETURN
 END
@@ -524,12 +524,12 @@ SUBROUTINE IBLSYS
     INCLUDE 'XFOIL.INC'
     INCLUDE 'XBL.INC'
     IV = 0
-    DO 10 IS = 1, 2
-        DO 110 IBL = 2, NBL(IS)
+    DO IS = 1, 2
+        DO IBL = 2, NBL(IS)
             IV = IV + 1
             ISYS(IBL, IS) = IV
-        110   CONTINUE
-    10 CONTINUE
+        end do
+    end do
     !
     NSYS = IV
     IF(NSYS > 2 * IVX) STOP '*** IBLSYS: BL system array overflow. ***'
@@ -555,7 +555,7 @@ SUBROUTINE MRCHUE
     HLMAX = 3.8
     HTMAX = 2.5
     !
-    DO 2000 IS = 1, 2
+    DO IS = 1, 2
         !
         WRITE(*, *) '   side ', IS, ' ...'
         !
@@ -585,7 +585,7 @@ SUBROUTINE MRCHUE
         ITRAN(IS) = IBLTE(IS)
         !
         !---- march downstream
-        DO 1000 IBL = 2, NBL(IS)
+        DO IBL = 2, NBL(IS)
             IBM = IBL - 1
             !
             IW = IBL - IBLTE(IS)
@@ -607,7 +607,7 @@ SUBROUTINE MRCHUE
             DIRECT = .TRUE.
             !
             !------ Newton iteration loop for current station
-            DO 100 ITBL = 1, 25
+            DO ITBL = 1, 25
                 !
                 !-------- assemble 10x3 linearized system for dCtau, dTh, dDs, dUe, dXi
                 !         at the previous "1" station and the current "2" station
@@ -775,6 +775,7 @@ SUBROUTINE MRCHUE
                 IF(DMAX <= 1.0E-5) GO TO 110
                 !
             100   CONTINUE
+            end do
             WRITE(*, 1350) IBL, IS, DMAX
             1350   FORMAT(' MRCHUE: Convergence failed at', I4, '  side', I2, &
                     '    Res =', E12.4)
@@ -844,9 +845,9 @@ SUBROUTINE MRCHUE
             !------ set "1" variables to "2" variables for next streamwise station
             CALL BLPRV(XSI, AMI, CTI, THI, DSI, DSWAKI, UEI)
             CALL BLKIN
-            DO 310 ICOM = 1, NCOM
+            DO ICOM = 1, NCOM
                 COM1(ICOM) = COM2(ICOM)
-            310   CONTINUE
+            end do
             !
             !------ turbulent intervals will follow transition interval or TE
             IF(TRAN .OR. IBL == IBLTE(IS)) THEN
@@ -864,8 +865,8 @@ SUBROUTINE MRCHUE
                 DSI = DSTR(IBLTE(1), 1) + DSTR(IBLTE(2), 2) + ANTE
             ENDIF
             !
-        1000 CONTINUE
-    2000 CONTINUE
+        end do
+    end do
     !
     RETURN
 END
@@ -893,7 +894,7 @@ SUBROUTINE MRCHDU
     !-    from the specified value.
     SENSWT = 1000.0
     !
-    DO 2000 IS = 1, 2
+    DO IS = 1, 2
         !
         AMCRIT = ACRIT(IS)
         !
@@ -916,7 +917,7 @@ SUBROUTINE MRCHDU
         ITRAN(IS) = IBLTE(IS)
         !
         !---- march downstream
-        DO 1000 IBL = 2, NBL(IS)
+        DO IBL = 2, NBL(IS)
             IBM = IBL - 1
             !
             SIMI = IBL == 2
@@ -952,7 +953,7 @@ SUBROUTINE MRCHDU
             IF(IBL > IBLTE(IS)) DSI = MAX(DSI - DSWAKI, 1.00005 * THI) + DSWAKI
             !
             !------ Newton iteration loop for current station
-            DO 100 ITBL = 1, 25
+            DO ITBL = 1, 25
                 !
                 !-------- assemble 10x3 linearized system for dCtau, dTh, dDs, dUe, dXi
                 !         at the previous "1" station and the current "2" station
@@ -1023,12 +1024,12 @@ SUBROUTINE MRCHDU
                     !
                     !********* calculate Ue-Hk characteristic slope
                     !
-                    DO 20 K = 1, 4
+                    DO K = 1, 4
                         VZTMP(K) = VSREZ(K)
-                        DO 201 L = 1, 5
+                        DO L = 1, 5
                             VTMP(K, L) = VS2(K, L)
-                        201        CONTINUE
-                    20      CONTINUE
+                        end do
+                    end do
                     !
                     !--------- set unit dHk
                     VTMP(4, 1) = 0.
@@ -1096,7 +1097,7 @@ SUBROUTINE MRCHDU
                 !
                 IF(DMAX <= DEPS) GO TO 110
                 !
-            100   CONTINUE
+            end do
             !
             WRITE(*, 1350) IBL, IS, DMAX
             1350   FORMAT(' MRCHDU: Convergence failed at', I4, '  side', I2, &
@@ -1168,9 +1169,9 @@ SUBROUTINE MRCHDU
             !------ set "1" variables to "2" variables for next streamwise station
             CALL BLPRV(XSI, AMI, CTI, THI, DSI, DSWAKI, UEI)
             CALL BLKIN
-            DO 310 ICOM = 1, NCOM
+            DO ICOM = 1, NCOM
                 COM1(ICOM) = COM2(ICOM)
-            310   CONTINUE
+            end do
             !
             !
             !------ turbulent intervals will follow transition interval or TE
@@ -1184,9 +1185,9 @@ SUBROUTINE MRCHDU
             !
             TRAN = .FALSE.
             !
-        1000 CONTINUE
+        end do
         !
-    2000 CONTINUE
+    end do
     !
     RETURN
 END
@@ -1209,10 +1210,10 @@ SUBROUTINE XIFSET(IS)
     CHSQ = CHX**2 + CHY**2
     !
     !---- calculate chord-based x/c, y/c
-    DO 10 I = 1, N
+    DO I = 1, N
         W1(I) = ((X(I) - XLE) * CHX + (Y(I) - YLE) * CHY) / CHSQ
         W2(I) = ((Y(I) - YLE) * CHX - (X(I) - XLE) * CHY) / CHSQ
-    10   CONTINUE
+    end do
     !
     CALL SPLIND(W1, W3, S, N, -999.0, -999.0)
     CALL SPLIND(W2, W4, S, N, -999.0, -999.0)
@@ -1278,21 +1279,21 @@ SUBROUTINE UPDATE
     !
     !---- calculate new Ue distribution assuming no under-relaxation
     !-    also set the sensitivity of Ue wrt to alpha or Re
-    DO 1 IS = 1, 2
-        DO 10 IBL = 2, NBL(IS)
+    DO IS = 1, 2
+        DO IBL = 2, NBL(IS)
             I = IPAN(IBL, IS)
             !
             DUI = 0.
             DUI_AC = 0.
-            DO 100 JS = 1, 2
-                DO 1000 JBL = 2, NBL(JS)
+            DO JS = 1, 2
+                DO JBL = 2, NBL(JS)
                     J = IPAN(JBL, JS)
                     JV = ISYS(JBL, JS)
                     UE_M = -VTI(IBL, IS)*VTI(JBL, JS)*DIJ(I, J)
                     DUI = DUI    + UE_M*(MASS(JBL, JS)+VDEL(3, 1, JV))
                     DUI_AC = DUI_AC + UE_M*(-VDEL(3, 2, JV))
-                1000       CONTINUE
-            100     CONTINUE
+                end do
+            end do
             !
             !-------- UINV depends on "AC" only if "AC" is alpha
             IF(LALFA) THEN
@@ -1304,17 +1305,17 @@ SUBROUTINE UPDATE
             UNEW(IBL, IS) = UINV(IBL, IS) + DUI
             U_AC(IBL, IS) = UINV_AC      + DUI_AC
             !
-        10   CONTINUE
-    1 CONTINUE
+        end do
+    end do
     !
     !---- set new Qtan from new Ue with appropriate sign change
-    DO 2 IS = 1, 2
-        DO 20 IBL = 2, IBLTE(IS)
+    DO IS = 1, 2
+        DO IBL = 2, IBLTE(IS)
             I = IPAN(IBL, IS)
             QNEW(I) = VTI(IBL, IS)*UNEW(IBL, IS)
             Q_AC(I) = VTI(IBL, IS)*U_AC(IBL, IS)
-        20   CONTINUE
-    2 CONTINUE
+        end do
+    end do
     !
     !---- calculate new CL from this new Qtan
     SA = SIN(ALFA)
@@ -1341,7 +1342,7 @@ SUBROUTINE UPDATE
     CPC_CPI = (1.0 - BFAC*CPG1)/ (BETA + BFAC*CGINC)
     CPG1_AC = CPC_CPI*CPI_Q*Q_AC(I)
     !
-    DO 3 I = 1, N
+    DO I = 1, N
         IP = I+1
         IF(I == N) IP = 1
         !
@@ -1368,7 +1369,7 @@ SUBROUTINE UPDATE
         CPG1 = CPG2
         CPG1_MS = CPG2_MS
         CPG1_AC = CPG2_AC
-    3 CONTINUE
+    end do
     !
     !---- initialize under-relaxation factor
     RLX = 1.0
@@ -1402,8 +1403,8 @@ SUBROUTINE UPDATE
     DLO = -.5
     !
     !---- calculate changes in BL variables and under-relaxation if needed
-    DO 4 IS = 1, 2
-        DO 40 IBL = 2, NBL(IS)
+    DO IS = 1, 2
+        DO IBL = 2, NBL(IS)
             IV = ISYS(IBL, IS)
             !
 
@@ -1470,8 +1471,8 @@ SUBROUTINE UPDATE
             IF(RDN4 > DHI) RLX = DHI/DN4
             IF(RDN4 < DLO) RLX = DLO/DN4
             !
-        40   CONTINUE
-    4 CONTINUE
+        end do
+    end do
     !
     !---- set true rms change
     RMSBL = SQRT(RMSBL / (4.0*FLOAT(NBL(1)+NBL(2))))
@@ -1487,8 +1488,8 @@ SUBROUTINE UPDATE
     ENDIF
     !
     !---- update BL variables with underrelaxed changes
-    DO 5 IS = 1, 2
-        DO 50 IBL = 2, NBL(IS)
+    DO IS = 1, 2
+        DO IBL = 2, NBL(IS)
             IV = ISYS(IBL, IS)
             !
             DCTAU = VDEL(1, 1, IV) - DAC*VDEL(1, 2, IV)
@@ -1527,7 +1528,7 @@ SUBROUTINE UPDATE
             !-------- set new mass defect (nonlinear update)
             MASS(IBL, IS) = DSTR(IBL, IS) * UEDG(IBL, IS)
             !
-        50   CONTINUE
+        end do
         !
         !------ make sure there are no "islands" of negative Ue
         DO IBL = 3, IBLTE(IS)
@@ -1537,11 +1538,11 @@ SUBROUTINE UPDATE
                 MASS(IBL, IS) = DSTR(IBL, IS) * UEDG(IBL, IS)
             ENDIF
         ENDDO
-    5 CONTINUE
+    end do
     !
     !
     !---- equate upper wake arrays to lower wake arrays
-    DO 6 KBL = 1, NBL(2)-IBLTE(2)
+    DO KBL = 1, NBL(2)-IBLTE(2)
         CTAU(IBLTE(1)+KBL, 1) = CTAU(IBLTE(2)+KBL, 2)
         THET(IBLTE(1)+KBL, 1) = THET(IBLTE(2)+KBL, 2)
         DSTR(IBLTE(1)+KBL, 1) = DSTR(IBLTE(2)+KBL, 2)
@@ -1551,7 +1552,7 @@ SUBROUTINE UPDATE
         CTQ(IBLTE(1)+KBL, 1) = CTQ(IBLTE(2)+KBL, 2)
         DELT(IBLTE(1)+KBL, 1) = DELT(IBLTE(2)+KBL, 2)
         TSTR(IBLTE(1)+KBL, 1) = TSTR(IBLTE(2)+KBL, 2)
-    6 CONTINUE
+    end do
     !
     RETURN
 END

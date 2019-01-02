@@ -36,10 +36,10 @@ SUBROUTINE ABCOPY(LCONF)
     IF(N /= NB) LBLINI = .FALSE.
     !
     N = NB
-    DO 101 I = 1, N
+    DO I = 1, N
         X(I) = XB(I)
         Y(I) = YB(I)
-    101 CONTINUE
+    end do
     LGSAME = .TRUE.
     !
     IF(LBFLAP) THEN
@@ -53,10 +53,10 @@ SUBROUTINE ABCOPY(LCONF)
     102  CONTINUE
     I = I + 1
     IF(X(I - 1) == X(I) .AND. Y(I - 1) == Y(I)) THEN
-        DO 104 J = I, N - 1
+        DO J = I, N - 1
             X(J) = X(J + 1)
             Y(J) = Y(J + 1)
-        104    CONTINUE
+        end do
         N = N - 1
     ENDIF
     IF(I < N) GO TO 102

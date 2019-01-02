@@ -259,9 +259,9 @@ SUBROUTINE TRCHEK2
     !CC   DATA DAEPS / 1.0D-12 /
     !
     !---- save variables and sensitivities at IBL ("2") for future restoration
-    DO 5 ICOM = 1, NCOM
+    DO ICOM = 1, NCOM
         C2SAV(ICOM) = COM2(ICOM)
-    5 CONTINUE
+    end do
     !
     !---- calculate average amplification rate AX over X1..X2 interval
     CALL AXSET(HK1, T1, RT1, AMPL1, &
@@ -273,7 +273,7 @@ SUBROUTINE TRCHEK2
     AMPL2 = AMPL1 + AX * (X2 - X1)
     !
     !---- solve implicit system for amplification AMPL2
-    DO 100 ITAM = 1, 30
+    DO ITAM = 1, 30
         !
         !---- define weighting factors WF1,WF2 for defining "T" quantities from 1,2
         !
@@ -374,9 +374,9 @@ SUBROUTINE TRCHEK2
         !
         !---- restore clobbered "2" variables, except for AMPL2
         AMSAVE = AMPL2
-        DO 8 ICOM = 1, NCOM
+        DO ICOM = 1, NCOM
             COM2(ICOM) = C2SAV(ICOM)
-        8    CONTINUE
+        end do
         AMPL2 = AMSAVE
         !
         !---- calculate amplification rate AX over current X1-XT interval
@@ -418,7 +418,7 @@ SUBROUTINE TRCHEK2
             AMPL2 = AMPL2 + RLX * DA2
         ENDIF
         !
-    100  CONTINUE
+    end do
     WRITE(*, *) 'TRCHEK2: N2 convergence failed.'
     WRITE(*, 6700) X1, XT, X2, AMPL1, AMPLT, AMPL2, AX, DA2
     6700 FORMAT(1X, 'x:', 3F9.5, '  N:', 3F7.3, '  Nx:', F8.3, '   dN:', E10.3)
@@ -614,9 +614,9 @@ SUBROUTINE BLSYS
     !
     !---- for the similarity station, "1" and "2" variables are the same
     IF(SIMI) THEN
-        DO 3 ICOM = 1, NCOM
+        DO ICOM = 1, NCOM
             COM1(ICOM) = COM2(ICOM)
-        3  CONTINUE
+        end do
     ENDIF
     !
     !---- set up appropriate finite difference system for current interval
@@ -634,16 +634,16 @@ SUBROUTINE BLSYS
     !
     IF(SIMI) THEN
         !----- at similarity station, "1" variables are really "2" variables
-        DO 10 K = 1, 4
-            DO 101 L = 1, 5
+        DO K = 1, 4
+            DO L = 1, 5
                 VS2(K, L) = VS1(K, L) + VS2(K, L)
                 VS1(K, L) = 0.
-            101    CONTINUE
-        10  CONTINUE
+            end do
+        end do
     ENDIF
     !
     !---- change system over into incompressible Uei and Mach
-    DO 20 K = 1, 4
+    DO K = 1, 4
         !
         !------ residual derivatives wrt compressible Uec
         RES_U1 = VS1(K, 4)
@@ -654,7 +654,7 @@ SUBROUTINE BLSYS
         VS1(K, 4) = RES_U1 * U1_UEI
         VS2(K, 4) = RES_U2 * U2_UEI
         VSM(K) = RES_U1 * U1_MS + RES_U2 * U2_MS + RES_MS
-    20 CONTINUE
+    end do
     !
     RETURN
 END
@@ -668,16 +668,16 @@ SUBROUTINE TESYS(CTE, TTE, DTE)
     IMPLICIT REAL (M)
     INCLUDE 'XBL.INC'
     !
-    DO 55 K = 1, 4
+    DO K = 1, 4
         VSREZ(K) = 0.
         VSM(K) = 0.
         VSR(K) = 0.
         VSX(K) = 0.
-        DO 551 L = 1, 5
+        DO L = 1, 5
             VS1(K, L) = 0.
             VS2(K, L) = 0.
-        551   CONTINUE
-    55 CONTINUE
+        end do
+    end do
     !
     CALL BLVAR(3)
     !
@@ -1208,10 +1208,10 @@ SUBROUTINE TRDIF
             , BT1(4, 5), BT2(4, 5), BTREZ(4), BTM(4), BTR(4), BTX(4)
     !
     !---- save variables and sensitivities for future restoration
-    DO 5 ICOM = 1, NCOM
+    DO ICOM = 1, NCOM
         C1SAV(ICOM) = COM1(ICOM)
         C2SAV(ICOM) = COM2(ICOM)
-    5 CONTINUE
+    end do
     !
     !---- weighting factors for linear interpolation to transition point
     WF2 = (XT - X1) / (X2 - X1)
@@ -1317,7 +1317,7 @@ SUBROUTINE TRDIF
     !-    In other words, convert residual sensitivities wrt "T" variables
     !-    into sensitivities wrt "1" and "2" variables.  The amplification
     !-    equation is unnecessary here, so the K=1 row is left empty.
-    DO 10 K = 2, 3
+    DO K = 2, 3
         BLREZ(K) = VSREZ(K)
         BLM(K) = VSM(K)&
                 + VS2(K, 2) * TT_MS&
@@ -1379,7 +1379,7 @@ SUBROUTINE TRDIF
                 + VS2(K, 4) * UT_X2&
                 + VS2(K, 5) * XT_X2
         !
-    10 CONTINUE
+    end do
     !
     !
     !**** SECOND, set up turbulent part between XT and X2  ****
@@ -1429,10 +1429,10 @@ SUBROUTINE TRDIF
     !
     !---- set "1" variables to "T" variables and reset "2" variables
     !-    to their saved turbulent values
-    DO 30 ICOM = 1, NCOM
+    DO ICOM = 1, NCOM
         COM1(ICOM) = COM2(ICOM)
         COM2(ICOM) = C2SAV(ICOM)
-    30 CONTINUE
+    end do
     !
     !---- calculate XT-X2 midpoint CFM value
     CALL BLMID(2)
@@ -1442,7 +1442,7 @@ SUBROUTINE TRDIF
     !
     !---- convert sensitivities wrt "T" variables into sensitivities
     !-    wrt "1" and "2" variables as done before for the laminar part
-    DO 40 K = 1, 3
+    DO K = 1, 3
         BTREZ(K) = VSREZ(K)
         BTM(K) = VSM(K)&
                 + VS1(K, 1) * ST_MS&
@@ -1515,7 +1515,7 @@ SUBROUTINE TRDIF
                 + VS1(K, 4) * UT_X2&
                 + VS1(K, 5) * XT_X2
         !
-    40 CONTINUE
+    end do
     !
     !---- Add up laminar and turbulent parts to get final system
     !-    in terms of honest-to-God "1" and "2" variables.
@@ -1531,21 +1531,21 @@ SUBROUTINE TRDIF
     VSX(1) = BTX(1)
     VSX(2) = BLX(2) + BTX(2)
     VSX(3) = BLX(3) + BTX(3)
-    DO 60 L = 1, 5
+    DO L = 1, 5
         VS1(1, L) = BT1(1, L)
         VS2(1, L) = BT2(1, L)
         VS1(2, L) = BL1(2, L) + BT1(2, L)
         VS2(2, L) = BL2(2, L) + BT2(2, L)
         VS1(3, L) = BL1(3, L) + BT1(3, L)
         VS2(3, L) = BL2(3, L) + BT2(3, L)
-    60 CONTINUE
+    end do
     !
     !---- To be sanitary, restore "1" quantities which got clobbered
     !-    in all of the numerical gymnastics above.  The "2" variables
     !-    were already restored for the XT-X2 differencing part.
-    DO 70 ICOM = 1, NCOM
+    DO ICOM = 1, NCOM
         COM1(ICOM) = C1SAV(ICOM)
-    70 CONTINUE
+    end do
     !
     RETURN
 END
@@ -1586,16 +1586,16 @@ SUBROUTINE BLDIF(ITYP)
         DDLOG = 1.0
     ENDIF
     !
-    DO 55 K = 1, 4
+    DO K = 1, 4
         VSREZ(K) = 0.
         VSM(K) = 0.
         VSR(K) = 0.
         VSX(K) = 0.
-        DO 551 L = 1, 5
+        DO L = 1, 5
             VS1(K, L) = 0.
             VS2(K, L) = 0.
-        551   CONTINUE
-    55 CONTINUE
+        end do
+    end do
     !
     !---- set triggering constant for local upwinding
     HUPWT = 1.0

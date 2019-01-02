@@ -106,9 +106,9 @@ SUBROUTINE SORTDUP(KK, S, W)
     LOGICAL DONE
     !
     !---- sort arrays
-    DO 10 IPASS = 1, 1234
+    DO IPASS = 1, 1234
         DONE = .TRUE.
-        DO 101 N = 1, KK - 1
+        DO N = 1, KK - 1
             NP = N + 1
             IF(S(NP) >= S(N)) GO TO 101
             TEMP = S(NP)
@@ -119,8 +119,9 @@ SUBROUTINE SORTDUP(KK, S, W)
             W(N) = TEMP
             DONE = .FALSE.
         101   CONTINUE
+        end do
         IF(DONE) GO TO 11
-    10 CONTINUE
+    end do
     WRITE(*, *) 'Sort failed'
     !
     11 CONTINUE
@@ -184,9 +185,9 @@ SUBROUTINE SORT(KK, S, W)
     LOGICAL DONE
     !
     !---- sort arrays
-    DO 10 IPASS = 1, 1234
+    DO IPASS = 1, 1234
         DONE = .TRUE.
-        DO 101 N = 1, KK - 1
+        DO N = 1, KK - 1
             NP = N + 1
             IF(S(NP) >= S(N)) GO TO 101
             TEMP = S(NP)
@@ -197,22 +198,24 @@ SUBROUTINE SORT(KK, S, W)
             W(N) = TEMP
             DONE = .FALSE.
         101   CONTINUE
+        end do
         IF(DONE) GO TO 11
-    10 CONTINUE
+    end do
     WRITE(*, *) 'Sort failed'
     !
     !---- search for duplicate pairs and eliminate each one
     11 KKS = KK
-    DO 20 K = 1, KKS
+    DO K = 1, KKS
         IF(K >= KK) RETURN
         IF(S(K) /= S(K + 1)) GO TO 20
         !------- eliminate pair
         KK = KK - 2
-        DO 201 KT = K, KK
+        DO KT = K, KK
             S(KT) = S(KT + 2)
             W(KT) = W(KT + 2)
-        201    CONTINUE
+        end do
     20 CONTINUE
+    end do
     !
     RETURN
 END
@@ -248,7 +251,7 @@ SUBROUTINE SORTOL(TOL, KK, S, W)
     !
     10   KKS = KK
     DONE = .TRUE.
-    DO 20 K = 1, KKS
+    DO K = 1, KKS
         IF(K >= KK) GO TO 20
         DSQ = (S(K) - S(K + 1))**2 + (W(K) - W(K + 1))**2
         IF(DSQ >= TOL * TOL) GO TO 20
@@ -261,6 +264,7 @@ SUBROUTINE SORTOL(TOL, KK, S, W)
         END DO
         DONE = .FALSE.
     20 CONTINUE
+    end do
     IF(.NOT.DONE) GO TO 10
     !
     RETURN

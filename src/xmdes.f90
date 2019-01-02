@@ -455,14 +455,14 @@ SUBROUTINE MAPGAM(IAC, ALG, CLG, CMG)
     CHX = XTE - XLE
     CHY = YTE - YLE
     CHSQ = CHX**2 + CHY**2
-    DO 3 I = 1, NSP
+    DO I = 1, NSP
         QGAMM(I) = W6(I)
         SSPEC(I) = W5(I)
         XIC = SEVAL(S(N) * SSPEC(I), X, XP, S, N)
         YIC = SEVAL(S(N) * SSPEC(I), Y, YP, S, N)
         XSPOC(I) = ((XIC - XLE) * CHX + (YIC - YLE) * CHY) / CHSQ
         YSPOC(I) = ((YIC - YLE) * CHX - (XIC - XLE) * CHY) / CHSQ
-    3 CONTINUE
+    end do
     SSPLE = SLE / S(N)
     !
     RETURN
@@ -476,11 +476,11 @@ SUBROUTINE QSPCIR
     !----------------------------------------------------
     INCLUDE 'XFOIL.INC'
     !
-    DO 10 KQSP = 1, NQSP
+    DO KQSP = 1, NQSP
         CALL QCCALC(IACQSP, ALQSP(KQSP), CLQSP(KQSP), CMQSP(KQSP), &
                 MINF, QINF, NSP, W1, W2, W5, QSPEC(1, KQSP))
         CALL SPLQSP(KQSP)
-    10   CONTINUE
+    end do
     LQSPEC = .TRUE.
     !
     RETURN
@@ -524,7 +524,7 @@ SUBROUTINE MAPGEN(FFILT, N, X, Y)
     NCN = 1
     !
     !---- Newton iteration loop for modified Cn's
-    DO 100 ITERCN = 1, 10
+    DO ITERCN = 1, 10
         DO M = 1, NCN
             DO L = 1, NCN
                 QQ(M, L) = 0.
@@ -556,7 +556,7 @@ SUBROUTINE MAPGEN(FFILT, N, X, Y)
         !
         WRITE(*, *) ITERCN, DCNMAX
         IF(DCNMAX <= 5.0E-5) GO TO 101
-    100 CONTINUE
+    end do
     WRITE(*, *)
     WRITE(*, *) 'MAPGEN: Geometric constraints not fully converged'
     !
@@ -564,10 +564,10 @@ SUBROUTINE MAPGEN(FFILT, N, X, Y)
     !
     !---- return new airfoil coordinates
     N = NC
-    DO 120 I = 1, NC
+    DO I = 1, NC
         X(I) = REAL(ZC(I))
         Y(I) = IMAG(ZC(I))
-    120  CONTINUE
+    end do
     !
     RETURN
 END
@@ -627,24 +627,24 @@ SUBROUTINE SCINIT(N, X, XP, Y, YP, S, SLE)
     !
     !---- set initial top surface s(w)
     WWT = 1.0 - 2.0 * DSDWLE / TOPS
-    DO 10 IC = 1, (NC - 1) / 2 + 1
+    DO IC = 1, (NC - 1) / 2 + 1
         SC(IC) = TOPS * (1.0 - COS(WWT * WC(IC)))&
                 / (1.0 - COS(WWT * PI))
-    10 CONTINUE
+    end do
     !
     !---- set initial bottom surface s(w)
     WWT = 1.0 - 2.0 * DSDWLE / BOTS
-    DO 15 IC = (NC - 1) / 2 + 2, NC
+    DO IC = (NC - 1) / 2 + 2, NC
         SC(IC) = 1.0&
                 - BOTS * (1.0 - COS(WWT * (WC(NC) - WC(IC))))&
                         / (1.0 - COS(WWT * PI))
-    15 CONTINUE
+    end do
     !
     !---- iteration loop for s(w) array
-    DO 500 IPASS = 1, 30
+    DO IPASS = 1, 30
         !
         !---- calculate imaginary part of harmonic function  P(w) + iQ(w)
-        DO 20 IC = 1, NC
+        DO IC = 1, NC
             !
             SIC = S(1) + (S(N) - S(1)) * SC(IC)
             DXDS = DEVAL(SIC, X, XP, S, N)
@@ -657,7 +657,7 @@ SUBROUTINE SCINIT(N, X, XP, Y, YP, S, SLE)
             !
             PIQ(IC) = CMPLX(0.0, QIM)
             !
-        20 CONTINUE
+        end do
         !
         !---- Fourier-decompose Q(w)
         CALL FTP
@@ -669,12 +669,12 @@ SUBROUTINE SCINIT(N, X, XP, Y, YP, S, SLE)
         CALL PIQSUM
         !
         !---- save s(w) for monitoring of changes in s(w) by ZCCALC
-        DO 30 IC = 1, NC
+        DO IC = 1, NC
             SCOLD(IC) = SC(IC)
-        30 CONTINUE
+        end do
         !
         !---- correct n=1 complex coefficient Cn for proper TE gap
-        DO 40 ITGAP = 1, 5
+        DO ITGAP = 1, 5
             CALL ZCCALC(1)
             !
             !------ set current LE,TE locations
@@ -688,38 +688,38 @@ SUBROUTINE SCINIT(N, X, XP, Y, YP, S, SLE)
             !
             CALL PIQSUM
             IF(ABS(DCN) < CEPS) GO TO 41
-        40 CONTINUE
+        end do
         41 CONTINUE
         !
         DSCMAX = 0.
-        DO 50 IC = 1, NC
+        DO IC = 1, NC
             DSCMAX = MAX(DSCMAX, ABS(SC(IC) - SCOLD(IC)))
-        50 CONTINUE
+        end do
         !
         WRITE(*, *) IPASS, '     max(dw) =', DSCMAX
         IF(DSCMAX < SEPS) GO TO 505
         !
-    500 CONTINUE
+    end do
     505 CONTINUE
     !
     !---- normalize final geometry
     CALL ZCNORM(1)
     !
     !---- set final  s(w), x(w), y(w)  arrays for old airfoil
-    DO 510 IC = 1, NC
+    DO IC = 1, NC
         SCOLD(IC) = SC(IC)
         XCOLD(IC) = REAL(ZC(IC))
         YCOLD(IC) = IMAG(ZC(IC))
-    510 CONTINUE
+    end do
     !
-    DO 600 IC = 1, NC
+    DO IC = 1, NC
         SINW = 2.0 * SIN(0.5 * WC(IC))
         SINWE = 0.
         IF(SINW > 0.0) SINWE = SINW**(1.0 - AGTE)
         !
         HWC = 0.5 * (WC(IC) - PI) * (1.0 + AGTE) - 0.5 * PI
         ZCOLDW(IC) = SINWE * EXP(PIQ(IC) + CMPLX(0.0, HWC))
-    600 CONTINUE
+    end do
     !
     QIMOLD = IMAG(CN(0))
     !
@@ -798,9 +798,9 @@ SUBROUTINE CNCALC(QC, LSYMM)
     CALL SPLIND(QC, QCW, WC, NC, -999.0, -999.0)
     !
     !---- get approximate w value at stagnation point
-    DO 10 IC = 2, NC
+    DO IC = 2, NC
         IF(QC(IC) < 0.0) GO TO 11
-    10 CONTINUE
+    end do
     11 WCLE = WC(IC)
     !
     !---- set exact numerical w value at stagnation point from splined q(w)
@@ -810,7 +810,7 @@ SUBROUTINE CNCALC(QC, LSYMM)
     ALFCIR = 0.5 * (WCLE - PI)
     !
     !---- calculate real part of harmonic function  P(w) + iQ(w)
-    DO 120 IC = 2, NC - 1
+    DO IC = 2, NC - 1
         !
         COSW = 2.0 * COS(0.5 * WC(IC) - ALFCIR)
         SINW = 2.0 * SIN(0.5 * WC(IC))
@@ -836,25 +836,25 @@ SUBROUTINE CNCALC(QC, LSYMM)
         !
         PIQ(IC) = CMPLX(LOG(PFUN), 0.0)
         !
-    120 CONTINUE
+    end do
     !
     !---- extrapolate P(w) to TE
     PIQ(1) = 3.0 * PIQ(2) - 3.0 * PIQ(3) + PIQ(4)
     PIQ(NC) = 3.0 * PIQ(NC - 1) - 3.0 * PIQ(NC - 2) + PIQ(NC - 3)
     !
-    DO 50 M = 0, MC
+    DO M = 0, MC
         CNSAV(M) = CN(M)
-    50   CONTINUE
+    end do
     !
     !---- Fourier-transform P(w) to get new Cn coefficients
     CALL FTP
     CN(0) = CMPLX(0.0, QIMOLD)
     !
     IF(LSYMM) THEN
-        DO 60 M = 1, MC
+        DO M = 1, MC
             CNR = 2.0 * REAL(CN(M)) - REAL(CNSAV(M))
             CN(M) = CMPLX(CNR, 0.0)
-        60     CONTINUE
+        end do
     ENDIF
     !
     CALL PIQSUM
@@ -868,9 +868,9 @@ SUBROUTINE CNSYMM
     INCLUDE 'CIRCLE.INC'
     !
     !---- eliminate imaginary (camber) parts of mapping coefficients
-    DO 10 M = 1, MC
+    DO M = 1, MC
         CN(M) = CMPLX(REAL(CN(M)), 0.0)
-    10 CONTINUE
+    end do
     !
     CALL PIQSUM
     RETURN
@@ -886,13 +886,13 @@ SUBROUTINE PIQSUM
     INCLUDE 'CIRCLE.INC'
     COMPLEX ZSUM
     !
-    DO 300 IC = 1, NC
+    DO IC = 1, NC
         ZSUM = (0.0, 0.0)
-        DO 310 M = 0, MC
+        DO M = 0, MC
             ZSUM = ZSUM + CN(M) * CONJG(EIW(IC, M))
-        310   CONTINUE
+        end do
         PIQ(IC) = ZSUM
-    300 CONTINUE
+    end do
     !
     RETURN
 END
@@ -908,13 +908,13 @@ SUBROUTINE CNFILT(FFILT)
     !
     IF(FFILT == 0.0) RETURN
     !
-    DO 10 M = 0, MC
+    DO M = 0, MC
         FREQ = FLOAT(M) / FLOAT(MC)
         CWT = 0.5 * (1.0 + COS(PI * FREQ))
         CWTX = CWT
         IF(FFILT > 0.0) CWTX = CWT**FFILT
         CN(M) = CN(M) * CWTX
-    10 CONTINUE
+    end do
     !
     RETURN
 END
@@ -935,9 +935,9 @@ SUBROUTINE ZCCALC(MTEST)
     !---- integrate upper airfoil surface coordinates from x,y = 4,0
     IC = 1
     ZC(IC) = (4.0, 0.0)
-    DO 10 M = 1, MTEST
+    DO M = 1, MTEST
         ZC_CN(IC, M) = (0.0, 0.0)
-    10 CONTINUE
+    end do
     !
     SINW = 2.0 * SIN(0.5 * WC(IC))
     SINWE = 0.
@@ -945,7 +945,7 @@ SUBROUTINE ZCCALC(MTEST)
     !
     HWC = 0.5 * (WC(IC) - PI) * (1.0 + AGTE) - 0.5 * PI
     DZDW1 = SINWE * EXP(PIQ(IC) + CMPLX(0.0, HWC))
-    DO 20 IC = 2, NC
+    DO IC = 2, NC
         !
         SINW = 2.0 * SIN(0.5 * WC(IC))
         SINWE = 0.
@@ -958,25 +958,25 @@ SUBROUTINE ZCCALC(MTEST)
         DZ_PIQ1 = 0.5 * (DZDW1) * DWC
         DZ_PIQ2 = 0.5 * (DZDW2) * DWC
         !
-        DO 210 M = 1, MTEST
+        DO M = 1, MTEST
             ZC_CN(IC, M) = DZ_PIQ1 * CONJG(EIW(IC - 1, M))&
                     + DZ_PIQ2 * CONJG(EIW(IC, M))&
                     + ZC_CN(IC - 1, M)
-        210   CONTINUE
+        end do
         !
         DZDW1 = DZDW2
-    20 CONTINUE
+    end do
     !
     !---- set arc length array s(w)
     SC(1) = 0.
-    DO 50 IC = 2, NC
+    DO IC = 2, NC
         SC(IC) = SC(IC - 1) + ABS(ZC(IC) - ZC(IC - 1))
-    50 CONTINUE
+    end do
     !
     !---- normalize arc length
-    DO 60 IC = 1, NC
+    DO IC = 1, NC
         SC(IC) = SC(IC) / SC(NC)
-    60 CONTINUE
+    end do
     !
     RETURN
 END
@@ -997,35 +997,35 @@ SUBROUTINE ZCNORM(MTEST)
     CALL ZLEFIND(ZLE, ZC, WC, NC, PIQ, AGTE)
     !
     !---- place leading edge at origin
-    DO 60 IC = 1, NC
+    DO IC = 1, NC
         ZC(IC) = ZC(IC) - ZLE
-    60 CONTINUE
+    end do
     !
     !---- set normalizing quantities and sensitivities
     ZTE = 0.5 * (ZC(1) + ZC(NC))
-    DO 480 M = 1, MTEST
+    DO M = 1, MTEST
         ZTE_CN(M) = 0.5 * (ZC_CN(1, M) + ZC_CN(NC, M))
-    480 CONTINUE
+    end do
     !
     !---- normalize airfoil to proper chord, put LE at old position,
     !-    and set sensitivities dz/dCn for the rescaled coordinates
-    DO 500 IC = 1, NC
+    DO IC = 1, NC
         ZCNEW = CHORDZ * ZC(IC) / ZTE
         ZC_ZTE = -ZCNEW / ZTE
         ZC(IC) = ZCNEW
-        DO 510 M = 1, MTEST
+        DO M = 1, MTEST
             ZC_CN(IC, M) = CHORDZ * ZC_CN(IC, M) / ZTE + ZC_ZTE * ZTE_CN(M)
-        510   CONTINUE
-    500 CONTINUE
+        end do
+    end do
     !
     !---- add on rotation to mapping coefficient so QCCALC gets the right alpha
     QIMOFF = -IMAG(LOG(CHORDZ / ZTE))
     CN(0) = CN(0) - CMPLX(0.0, QIMOFF)
     !
     !---- shift airfoil to put LE at old location
-    DO 600 IC = 1, NC
+    DO IC = 1, NC
         ZC(IC) = ZC(IC) + ZLEOLD
-    600  CONTINUE
+    end do
     !
     RETURN
 END
@@ -1055,7 +1055,7 @@ SUBROUTINE QCCALC(ISPEC, ALFA, CL, CM, MINF, QINF, &
     NCIR = NC
     !
     !---- Newton iteration loop (executed only once if alpha specified)
-    DO 1 IPASS = 1, 10
+    DO IPASS = 1, 10
         !
         !------ set alpha in the circle plane
         ALFCIR = ALFA - IMAG(CN(0))
@@ -1065,7 +1065,7 @@ SUBROUTINE QCCALC(ISPEC, ALFA, CL, CM, MINF, QINF, &
         CFT_A = (0.0, 0.0)
         !
         !------ set surface speed for current circle plane alpha
-        DO 10 IC = 1, NC
+        DO IC = 1, NC
             PPP = REAL(PIQ(IC))
             EPPP = EXP(-PPP)
             SINW = 2.0 * SIN(0.5 * WC(IC))
@@ -1084,7 +1084,7 @@ SUBROUTINE QCCALC(ISPEC, ALFA, CL, CM, MINF, QINF, &
             XCIR(IC) = REAL(ZC(IC))
             YCIR(IC) = IMAG(ZC(IC))
             SCIR(IC) = SC(IC)
-        10   CONTINUE
+        end do
         !
         !------ integrate compressible  Cp dz  to get complex force  CL + iCD
         IC = 1
@@ -1093,7 +1093,7 @@ SUBROUTINE QCCALC(ISPEC, ALFA, CL, CM, MINF, QINF, &
         CPCOM1 = CPINC1 / (BETA + BFAC * CPINC1)
         CPC_Q1 = (1.0 - BFAC * CPCOM1) / (BETA + BFAC * CPINC1) * CPI_Q1
         CPC_A1 = CPC_Q1 * QC_A(IC)
-        DO 20 IC = 1, NC
+        DO IC = 1, NC
             ICP = IC + 1
             IF(IC == NC) ICP = 1
             !
@@ -1113,7 +1113,7 @@ SUBROUTINE QCCALC(ISPEC, ALFA, CL, CM, MINF, QINF, &
             !
             CPCOM1 = CPCOM2
             CPC_A1 = CPC_A2
-        20   CONTINUE
+        end do
         !
         !------ rotate force vector into freestream coordinates
         EIA = EXP(CMPLX(0.0, -ALFA))
@@ -1138,7 +1138,7 @@ SUBROUTINE QCCALC(ISPEC, ALFA, CL, CM, MINF, QINF, &
             IF(ABS(DALFA) < AEPS) RETURN
         ENDIF
         !
-    1 CONTINUE
+    end do
     WRITE(*, *) 'QCCALC: CL convergence failed.  dAlpha =', DALFA
     !
     RETURN
@@ -1169,7 +1169,7 @@ SUBROUTINE QSPINT(ALQSP, QSPEC, QINF, MINF, CLQSP, CMQSP)
     CQINC = 1.0 - (QSPEC(I) / QINF)**2
     CPQ1 = CQINC / (BETA + BFAC * CQINC)
     !
-    DO 10 I = 1, NC
+    DO I = 1, NC
         IP = I + 1
         IF(I == NC) IP = 1
         !
@@ -1189,7 +1189,7 @@ SUBROUTINE QSPINT(ALQSP, QSPEC, QINF, MINF, CLQSP, CMQSP)
                 - DY * (AQ * AY + DU * DY / 12.0)
         !
         CPQ1 = CPQ2
-    10 CONTINUE
+    end do
     !
     RETURN
 END
@@ -1203,14 +1203,14 @@ SUBROUTINE FTP
     INCLUDE 'CIRCLE.INC'
     COMPLEX ZSUM
     !
-    DO 200 M = 0, MC
+    DO M = 0, MC
         ZSUM = (0.0, 0.0)
-        DO 210 IC = 2, NC - 1
+        DO IC = 2, NC - 1
             ZSUM = ZSUM + PIQ(IC) * EIW(IC, M)
-        210   CONTINUE
+        end do
         CN(M) = (0.5 * (PIQ(1) * EIW(1, M) + PIQ(NC) * EIW(NC, M))&
                 + ZSUM) * DWC / PI
-    200 CONTINUE
+    end do
     CN(0) = 0.5 * CN(0)
     !
     RETURN
@@ -1238,28 +1238,28 @@ SUBROUTINE EIWSET(NC1)
     !
     DWC = 2.0 * PI / FLOAT(NC - 1)
     !
-    DO 10 IC = 1, NC
+    DO IC = 1, NC
         WC(IC) = DWC * FLOAT(IC - 1)
-    10 CONTINUE
+    end do
     !
     !---- set  m = 0  numbers
-    DO 20 IC = 1, NC
+    DO IC = 1, NC
         EIW(IC, 0) = (1.0, 0.0)
-    20 CONTINUE
+    end do
     !
     !---- set  m = 1  numbers
-    DO 30 IC = 1, NC
+    DO IC = 1, NC
         EIW(IC, 1) = EXP(CMPLX(0.0, WC(IC)))
-    30 CONTINUE
+    end do
     !
     !---- set  m > 1  numbers by indexing appropriately from  m = 1  numbers
-    DO 40 M = 2, MC
-        DO 410 IC = 1, NC
+    DO M = 2, MC
+        DO IC = 1, NC
             IC1 = M * (IC - 1)
             IC1 = MOD(IC1, (NC - 1)) + 1
             EIW(IC, M) = EIW(IC1, 1)
-        410   CONTINUE
-    40 CONTINUE
+        end do
+    end do
     !
     RETURN
 END
@@ -1326,7 +1326,7 @@ SUBROUTINE PERT(QSPEC)
     NCN = 1
 
     !---- Newton iteration loop for modified Cn's
-    DO 100 ITERCN = 1, 10
+    DO ITERCN = 1, 10
 
         !------ fix TE gap
         M = 1
@@ -1351,7 +1351,7 @@ SUBROUTINE PERT(QSPEC)
         !
         WRITE(*, *) ITERCN, DCNMAX
         IF(DCNMAX <= 5.0E-5) GO TO 101
-    100  CONTINUE
+    end do
     WRITE(*, *) 'TE gap,chord did not converge'
     101  CONTINUE
     RETURN
@@ -1366,15 +1366,15 @@ SUBROUTINE CNDUMP(LU)
     !--------------------------------------------------------
     INCLUDE 'CIRCLE.INC'
     !
-    do 700 m = 0, mc
+    do m = 0, mc
         write(LU, 7000) m, real(cn(m)), imag(cn(m))&
                 , real(piq(m + 1)), imag(piq(m + 1))
-    700 continue
+    end do
     !
-    do 710 m = mc + 1, nc - 1
+    do m = mc + 1, nc - 1
         write(LU, 7000) m, 0.0, 0.0&
                 , real(piq(m + 1)), imag(piq(m + 1))
-    710 continue
+    end do
     !
     7000 format(1x, i3, 4f11.6)
     !
@@ -1387,11 +1387,11 @@ SUBROUTINE GETVOV(KQSP)
     !LED ENTIRE ROUTINE
     !
     KK = 0
-    DO 5 I = 1, IQX
+    DO I = 1, IQX
         W1(I) = 0.
         W2(I) = 0.
         W3(I) = 0.
-    5 CONTINUE
+    end do
     !
     LU = 2
     !
@@ -1399,18 +1399,18 @@ SUBROUTINE GETVOV(KQSP)
     OPEN(LU, FILE = FNAME, STATUS = 'OLD', ERR = 98)
     !
     !---- read the Qspec file
-    DO 10 K = 1, IQX
+    DO K = 1, IQX
         READ(LU, *, END = 11, ERR = 99) W1(K), W2(K)
-    10 CONTINUE
+    end do
     11 KK = K - 1
     CLOSE(LU)
     !
     !---- nondimensionalize S distances
     SSPAN = W1(KK) - W1(1)
     SSTART = W1(1)
-    DO 15 K = 1, KK
+    DO K = 1, KK
         W1(K) = 1. - (W1(K) - SSTART) / SSPAN
-    15 CONTINUE
+    end do
     !
     !---- sort input points then, removing identical pairs
     CALL SORT(KK, W1, W2)
@@ -1419,7 +1419,7 @@ SUBROUTINE GETVOV(KQSP)
     CALL SPLIND(W2, W3, W1, KK, -999.0, -999.0)
     !
     !---- set Qspec array
-    DO 20 I = 1, NSP
+    DO I = 1, NSP
         SS = SSPEC(I)
         !
         !------ evaluate spline at SSPEC positions
@@ -1428,7 +1428,7 @@ SUBROUTINE GETVOV(KQSP)
         !------ set incompressible speed from new compressible speed
         QSPEC(I, KQSP) = QINCOM(QSNEW, QINF, TKLAM)
         !
-    20 CONTINUE
+    end do
     !
     !---- spline new Qspec array
     CALL SPLQSP(KQSP)
@@ -1462,14 +1462,14 @@ SUBROUTINE ZLEFIND(ZLE, ZC, WC, NC, PIQ, AGTE)
     !
     !---- find point farthest from TE
     DMAX = 0.0
-    DO 30 IC = 1, NC
+    DO IC = 1, NC
         DIST = ABS(ZC(IC) - ZTE)
         !
         IF(DIST > DMAX) THEN
             DMAX = DIST
             ICLE = IC
         ENDIF
-    30 CONTINUE
+    end do
     !
     !---- set restricted spline limits around leading edge
     IC1 = MAX(ICLE - (NTX - 1) / 2, 1)
@@ -1487,11 +1487,11 @@ SUBROUTINE ZLEFIND(ZLE, ZC, WC, NC, PIQ, AGTE)
     DZDW2 = SINWE * EXP(PIQ(IC2) + CMPLX(0.0, HWC))
     !
     !---- fill temporary x,y coordinate arrays
-    DO 40 IC = IC1, IC2
+    DO IC = IC1, IC2
         I = IC - IC1 + 1
         XC(I) = REAL(ZC(IC))
         YC(I) = IMAG(ZC(IC))
-    40 CONTINUE
+    end do
     !
     !---- calculate spline near leading edge with derivative end conditions
     NIC = IC2 - IC1 + 1
@@ -1505,7 +1505,7 @@ SUBROUTINE ZLEFIND(ZLE, ZC, WC, NC, PIQ, AGTE)
     WCLE = WC(ICLE)
     !
     !---- Newton loop for improved leading edge coordinate
-    DO 50 ITCLE = 1, 10
+    DO ITCLE = 1, 10
         XCLE = SEVAL(WCLE, XC, XCW, WC(IC1), NIC)
         YCLE = SEVAL(WCLE, YC, YCW, WC(IC1), NIC)
         DXDW = DEVAL(WCLE, XC, XCW, WC(IC1), NIC)
@@ -1525,7 +1525,7 @@ SUBROUTINE ZLEFIND(ZLE, ZC, WC, NC, PIQ, AGTE)
         WCLE = WCLE + DWCLE
         !
         IF(ABS(DWCLE) < 1.0E-5) GO TO 51
-    50 CONTINUE
+    end do
     WRITE(*, *) 'ZLEFIND: LE location failed.'
     WCLE = WC(ICLE)
     51 CONTINUE

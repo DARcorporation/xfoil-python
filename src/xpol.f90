@@ -455,9 +455,9 @@ SUBROUTINE PLXINI(LU, IP)
         NAMDIF = .TRUE.
     ELSE
         NAMDIF = .FALSE.
-        DO 50 K = 1, NNAME
+        DO K = 1, NNAME
             IF(NAME(K:K) /= NAMEX(K:K)) NAMDIF = .TRUE.
-        50   CONTINUE
+        end do
     ENDIF
     !
     !---- check if the polar save file is for the same airfoil and conditions
@@ -712,14 +712,14 @@ SUBROUTINE PLXADD(LU, IP)
     CTAU(IBL, 2) = CTAU(IBL, 1)
     !
     !---- set BL and wake quantities
-    DO 10 IS = 1, 2
+    DO IS = 1, 2
         DO IBL = 2, NSIDE(IS)
             I = IPAN(IBL, IS)
             XX(IBL, IS) = X(I)
             CP(IBL, IS) = CPV(I)
             CF(IBL, IS) = TAU(IBL, IS) / QUE
         ENDDO
-    10 CONTINUE
+    end do
     !
     DO IS = 1, 2
         WRITE(LU) (XX(IBL, IS), CP(IBL, IS), THET(IBL, IS), DSTR(IBL, IS), &

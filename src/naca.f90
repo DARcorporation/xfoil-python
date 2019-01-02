@@ -40,7 +40,7 @@ SUBROUTINE NACA4(IDES, XX, YT, YC, NSIDE, XB, YB, NB, NAME)
     T = FLOAT(N2 * 10 + N1) / 100.0
     !
     ANP = AN + 1.0
-    DO 10 I = 1, NSIDE
+    DO I = 1, NSIDE
         FRAC = FLOAT(I - 1) / FLOAT(NSIDE - 1)
         IF(I == NSIDE) THEN
             XX(I) = 1.0
@@ -57,19 +57,19 @@ SUBROUTINE NACA4(IDES, XX, YT, YC, NSIDE, XB, YB, NB, NAME)
         ELSE
             YC(I) = M / (1.0 - P)**2 * ((1.0 - 2.0 * P) + 2.0 * P * XX(I) - XX(I)**2)
         ENDIF
-    10 CONTINUE
+    end do
     !
     IB = 0
-    DO 20 I = NSIDE, 1, -1
+    DO I = NSIDE, 1, -1
         IB = IB + 1
         XB(IB) = XX(I)
         YB(IB) = YC(I) + YT(I)
-    20 CONTINUE
-    DO 30 I = 2, NSIDE
+    end do
+    DO I = 2, NSIDE
         IB = IB + 1
         XB(IB) = XX(I)
         YB(IB) = YC(I) - YT(I)
-    30 CONTINUE
+    end do
     NB = IB
     !
     NAME = 'NACA'
@@ -134,7 +134,7 @@ SUBROUTINE NACA5(IDES, XX, YT, YC, NSIDE, XB, YB, NB, NAME)
     T = FLOAT(N2 * 10 + N1) / 100.0
     !
     ANP = AN + 1.0
-    DO 10 I = 1, NSIDE
+    DO I = 1, NSIDE
         FRAC = FLOAT(I - 1) / FLOAT(NSIDE - 1)
         IF(I == NSIDE) THEN
             XX(I) = 1.0
@@ -153,19 +153,19 @@ SUBROUTINE NACA5(IDES, XX, YT, YC, NSIDE, XB, YB, NB, NAME)
         ELSE
             YC(I) = (C / 6.0) * M**3 * (1.0 - XX(I))
         ENDIF
-    10 CONTINUE
+    end do
     !
     IB = 0
-    DO 20 I = NSIDE, 1, -1
+    DO I = NSIDE, 1, -1
         IB = IB + 1
         XB(IB) = XX(I)
         YB(IB) = YC(I) + YT(I)
-    20 CONTINUE
-    DO 30 I = 2, NSIDE
+    end do
+    DO I = 2, NSIDE
         IB = IB + 1
         XB(IB) = XX(I)
         YB(IB) = YC(I) - YT(I)
-    30 CONTINUE
+    end do
     NB = IB
     !
     NAME = 'NACA'

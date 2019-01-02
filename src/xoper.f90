@@ -506,7 +506,7 @@ SUBROUTINE OPER
         CLAST = CL
         !
         !----- calculate each point, add Cp distribution to plot, and save to polar
-        DO 115 IPOINT = 1, NPOINT
+        DO IPOINT = 1, NPOINT
             !
             !------- set proper alpha for this point
             IF(LALFA) THEN
@@ -553,7 +553,7 @@ SUBROUTINE OPER
                 CLAST = CL
             ENDIF
             !
-        115  CONTINUE
+        end do
         116  CONTINUE
         !cc      CALL ASKC('hit <cr>^',DUMMY,COMARG)
         !
@@ -1071,7 +1071,7 @@ SUBROUTINE OPER
         ENDIF
         !
         !----- go over specified alphas to be removed
-        DO 55 IREM = 1, NREM
+        DO IREM = 1, NREM
             !------- check all alpha points in polar IP
             DO IA = 1, NAPOL(IP)
                 ADIF = CPOL(IA, IAL, IP) - RINPUT(IREM + 1)
@@ -1111,6 +1111,7 @@ SUBROUTINE OPER
                 ENDIF
             ENDDO
         55    CONTINUE
+        end do
         !
         !--------------------------------------------------------
     ELSEIF(COMAND == 'PNAM') THEN
@@ -1524,7 +1525,7 @@ SUBROUTINE BLDUMP(FNAME1)
     CALL COMSET
     HSTINV = GAMM1 * (MINF / QINF)**2 / (1.0 + 0.5 * GAMM1 * MINF**2)
     !
-    DO 10 I = 1, N
+    DO I = 1, N
         IS = 1
         IF(GAM(I) < 0.0) IS = 2
         !
@@ -1580,11 +1581,11 @@ SUBROUTINE BLDUMP(FNAME1)
             WRITE(LU, 1000) LINE(1:NLINE)
         ENDIF
         !
-    10  CONTINUE
+    end do
     !
     IF(LWAKE) THEN
         IS = 2
-        DO 20 I = N + 1, N + NW
+        DO I = N + 1, N + NW
             IBL = IBLTE(IS) + I - N
             DS = DSTR(IBL, IS)
             TH = THET(IBL, IS)
@@ -1611,7 +1612,7 @@ SUBROUTINE BLDUMP(FNAME1)
                 CALL BSTRIP(LINE, NLINE)
                 WRITE(LU, 1000) LINE(1:NLINE)
             ENDIF
-        20     CONTINUE
+        end do
     ENDIF
     !
     CLOSE(LU)
@@ -1686,7 +1687,7 @@ SUBROUTINE BLDUMP2(FNAME1)
     CALL COMSET
     HSTINV = GAMM1 * (MINF / QINF)**2 / (1.0 + 0.5 * GAMM1 * MINF**2)
     !
-    DO 10 IS = 1, 2
+    DO IS = 1, 2
         IBL = 1
         PTAU(IBL, IS) = 0.
         EDIS(IBL, IS) = 0.
@@ -1697,7 +1698,7 @@ SUBROUTINE BLDUMP2(FNAME1)
             PTAU(IBL, IS) = PTAU(IBL - 1, IS) + TAUA * DXSSI
             EDIS(IBL, IS) = EDIS(IBL - 1, IS) + DISA * DXSSI
         ENDDO
-    10   CONTINUE
+    end do
     IS = 2
     IBL = IBLTE(IS) + 1
     PTAU(IBL, IS) = PTAU(IBLTE(1), 1) + PTAU(IBLTE(2), 2)
@@ -1711,8 +1712,8 @@ SUBROUTINE BLDUMP2(FNAME1)
     ENDDO
     !
     !
-    DO 20 IS = 1, 2
-        DO 210 IBL = 2, NBL(IS)
+    DO IS = 1, 2
+        DO IBL = 2, NBL(IS)
             I = IPAN(IBL, IS)
 
             IF(IBL == 2) THEN
@@ -1820,12 +1821,12 @@ SUBROUTINE BLDUMP2(FNAME1)
             IF(IS == 2 .AND. IBL == IBLTE(2)) THEN
                 WRITE(LU, *)
             ENDIF
-        210  CONTINUE
+        end do
         IF(IS == 1) THEN
             WRITE(LU, *)
         ENDIF
 
-    20  CONTINUE
+    end do
     !
     CLOSE(LU)
     RETURN
@@ -1895,7 +1896,7 @@ SUBROUTINE CPDUMP(FNAME1)
     BETA = SQRT(1.0 - MINF**2)
     BFAC = 0.5 * MINF**2 / (1.0 + BETA)
     !
-    DO 10 I = 1, N
+    DO I = 1, N
         CPINC = 1.0 - (GAM(I) / QINF)**2
         DEN = BETA + BFAC * CPINC
         CPCOM = CPINC / DEN
@@ -1911,7 +1912,7 @@ SUBROUTINE CPDUMP(FNAME1)
             CALL BSTRIP(LINE, NLINE)
             WRITE(LU, 1000) LINE(1:NLINE)
         ENDIF
-    10  CONTINUE
+    end do
     !
     CLOSE(LU)
     RETURN
@@ -1953,7 +1954,7 @@ SUBROUTINE MHINGE
     HFY = 0.
     !
     !---- integrate pressures on top and bottom sides of flap
-    DO 20 I = 2, N
+    DO I = 2, N
         IF(S(I - 1) >= TOPS .AND. S(I) <= BOTS) GO TO 20
         !
         DX = X(I) - X(I - 1)
@@ -1969,6 +1970,7 @@ SUBROUTINE MHINGE
         HFX = HFX - PMID * DY
         HFY = HFY + PMID * DX
     20 CONTINUE
+    end do
     !
     !---- find S(I)..S(I-1) interval containing s=TOPS
     DO I = 2, N
@@ -2318,10 +2320,10 @@ SUBROUTINE SPECAL
     SINA = SIN(ALFA)
     !
     !---- superimpose suitably weighted  alpha = 0, 90  distributions
-    DO 50 I = 1, N
+    DO I = 1, N
         GAM(I) = COSA * GAMU(I, 1) + SINA * GAMU(I, 2)
         GAM_A(I) = -SINA * GAMU(I, 1) + COSA * GAMU(I, 2)
-    50 CONTINUE
+    end do
     PSIO = COSA * GAMU(N + 1, 1) + SINA * GAMU(N + 1, 2)
     !
     CALL TECALC
@@ -2339,7 +2341,7 @@ SUBROUTINE SPECAL
             CL, CM, CDP, CL_ALF, CL_MSQ)
     !
     !---- iterate on CLM
-    DO 100 ITCL = 1, 20
+    DO ITCL = 1, 20
         !
         MSQ_CLM = 2.0 * MINF * MINF_CLM
         DCLM = (CL - CLM) / (1.0 - CL_MSQ * MSQ_CLM)
@@ -2348,7 +2350,7 @@ SUBROUTINE SPECAL
         RLX = 1.0
         !
         !------ under-relaxation loop to avoid driving M(CL) above 1
-        DO 90 IRLX = 1, 12
+        DO IRLX = 1, 12
             !
             CLM = CLM1 + RLX * DCLM
             !
@@ -2359,7 +2361,7 @@ SUBROUTINE SPECAL
             IF(MATYP == 1 .OR. MINF == 0.0 .OR. MINF_CLM /= 0.0) GO TO 91
             !
             RLX = 0.5 * RLX
-        90   CONTINUE
+        end do
         91   CONTINUE
         !
         !------ set new CL(M)
@@ -2369,7 +2371,7 @@ SUBROUTINE SPECAL
         !
         IF(ABS(DCLM) <= 1.0E-6) GO TO 110
         !
-    100 CONTINUE
+    end do
     WRITE(*, *) 'SPECAL:  Minf convergence failed'
     110 CONTINUE
     !
@@ -2408,10 +2410,10 @@ SUBROUTINE SPECCL
     !---- current alpha is the initial guess for Newton variable ALFA
     COSA = COS(ALFA)
     SINA = SIN(ALFA)
-    DO 10 I = 1, N
+    DO I = 1, N
         GAM(I) = COSA * GAMU(I, 1) + SINA * GAMU(I, 2)
         GAM_A(I) = -SINA * GAMU(I, 1) + COSA * GAMU(I, 2)
-    10 CONTINUE
+    end do
     PSIO = COSA * GAMU(N + 1, 1) + SINA * GAMU(N + 1, 2)
     !
     !---- get corresponding CL, CL_alpha, CL_Mach
@@ -2419,7 +2421,7 @@ SUBROUTINE SPECCL
             CL, CM, CDP, CL_ALF, CL_MSQ)
     !
     !---- Newton loop for alpha to get specified inviscid CL
-    DO 100 ITAL = 1, 20
+    DO ITAL = 1, 20
         !
         DALFA = (CLSPEC - CL) / CL_ALF
         RLX = 1.0
@@ -2429,10 +2431,10 @@ SUBROUTINE SPECCL
         !------ set new surface speed distribution
         COSA = COS(ALFA)
         SINA = SIN(ALFA)
-        DO 40 I = 1, N
+        DO I = 1, N
             GAM(I) = COSA * GAMU(I, 1) + SINA * GAMU(I, 2)
             GAM_A(I) = -SINA * GAMU(I, 1) + COSA * GAMU(I, 2)
-        40   CONTINUE
+        end do
         PSIO = COSA * GAMU(N + 1, 1) + SINA * GAMU(N + 1, 2)
         !
         !------ set new CL(alpha)
@@ -2440,7 +2442,7 @@ SUBROUTINE SPECCL
                 CL, CM, CDP, CL_ALF, CL_MSQ)
         !
         IF(ABS(DALFA) <= 1.0E-6) GO TO 110
-    100 CONTINUE
+    end do
     WRITE(*, *) 'SPECCL:  CL convergence failed'
     110 CONTINUE
     !
@@ -2538,7 +2540,7 @@ SUBROUTINE VISCAL(NITER1)
     IF(NITER == 0) CALL ASKI('Enter number of iterations^', NITER)
     WRITE(*, *)
     WRITE(*, *) 'Solving BL system ...'
-    DO 1000 ITER = 1, NITER
+    DO ITER = 1, NITER
         !
         !------ fill Newton system for BL variables
         CALL SETBL
@@ -2590,7 +2592,7 @@ SUBROUTINE VISCAL(NITER1)
             GO TO 90
         ENDIF
         !
-    1000 CONTINUE
+    end do
     WRITE(*, *) 'VISCAL:  Convergence failed'
     !
     90 CONTINUE
