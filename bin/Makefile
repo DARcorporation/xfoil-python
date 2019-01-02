@@ -24,7 +24,7 @@ FTNLIB =
 
 ###================================================
 ###  Default compilers and flags
-###  FFLOPT used for xsolve.f
+###  FFLOPT used for xsolve.f90
 FC = f77
 FFLAGS  = -O 
 FFLOPT  = -O
@@ -123,43 +123,43 @@ xfoil: $(XFOILOBJ) $(XUTILOBJ) $(OSOBJ)
 	$(INSTALLCMD) xfoil $(BINDIR)
 
 
-xfoil.o: $(SRC)/xfoil.f  $(SRC)/XFOIL.INC $(SRC)/XBL.INC
-	$(FC) -c $(FFLAGS)  $(SRC)/xfoil.f
-xpanel.o: $(SRC)/xpanel.f  $(SRC)/XFOIL.INC
-	$(FC) -c $(FFLOPT)  $(SRC)/xpanel.f
-xoper.o: $(SRC)/xoper.f  $(SRC)/XFOIL.INC  $(SRC)/BLPAR.INC
-	$(FC) -c $(FFLAGS)  $(SRC)/xoper.f
-xsolve.o: $(SRC)/xsolve.f  $(SRC)/XFOIL.INC
-	$(FC) -c $(FFLOPT)  $(SRC)/xsolve.f
-xgdes.o: $(SRC)/xgdes.f  $(SRC)/XFOIL.INC $(SRC)/XDES.INC
-	$(FC) -c $(FFLAGS)  $(SRC)/xgdes.f
-xqdes.o: $(SRC)/xqdes.f  $(SRC)/XFOIL.INC $(SRC)/XDES.INC
-	$(FC) -c $(FFLAGS)  $(SRC)/xqdes.f
-xmdes.o: $(SRC)/xmdes.f  $(SRC)/XFOIL.INC $(SRC)/XDES.INC $(SRC)/CIRCLE.INC
-	$(FC) -c $(FFLAGS)  $(SRC)/xmdes.f
-xbl.o:   $(SRC)/xbl.f    $(SRC)/XFOIL.INC $(SRC)/XBL.INC $(SRC)/BLPAR.INC
-	$(FC) -c $(FFLAGS)  $(SRC)/xbl.f
-xblsys.o: $(SRC)/xblsys.f                  $(SRC)/XBL.INC $(SRC)/BLPAR.INC
-	$(FC) -c $(FFLAGS)  $(SRC)/xblsys.f
-xpol.o: $(SRC)/xpol.f     $(SRC)/XFOIL.INC $(SRC)/PINDEX.INC
-	$(FC) -c $(FFLAGS)  $(SRC)/xpol.f
-xgeom.o: $(SRC)/xgeom.f 
-	$(FC) -c $(FFLAGS)  $(SRC)/xgeom.f
-xutils.o: $(SRC)/xutils.f 
-	$(FC) -c $(FFLAGS)  $(SRC)/xutils.f
-aread.o: $(SRC)/aread.f 
-	$(FC) -c $(FFLAGS)  $(SRC)/aread.f
-naca.o: $(SRC)/naca.f 
-	$(FC) -c $(FFLAGS)  $(SRC)/naca.f
-plutil.o: $(SRC)/plutil.f 
-	$(FC) -c $(FFLAGS)  $(SRC)/plutil.f
-userio.o: $(SRC)/userio.f 
-	$(FC) -c $(FFLAGS)  $(SRC)/userio.f
-spline.o: $(SRC)/spline.f 
-	$(FC) -c $(FFLAGS)  $(SRC)/spline.f
-sort.o: $(SRC)/sort.f
-	$(FC) -c $(FFLAGS)  $(SRC)/sort.f
+xfoil.o: $(SRC)/xfoil.f90  $(SRC)/XFOIL.INC $(SRC)/XBL.INC
+	$(FC) -c $(FFLAGS)  $(SRC)/xfoil.f90
+xpanel.o: $(SRC)/xpanel.f90  $(SRC)/XFOIL.INC
+	$(FC) -c $(FFLOPT)  $(SRC)/xpanel.f90
+xoper.o: $(SRC)/xoper.f90  $(SRC)/XFOIL.INC  $(SRC)/BLPAR.INC
+	$(FC) -c $(FFLAGS)  $(SRC)/xoper.f90
+xsolve.o: $(SRC)/xsolve.f90  $(SRC)/XFOIL.INC
+	$(FC) -c $(FFLOPT)  $(SRC)/xsolve.f90
+xgdes.o: $(SRC)/xgdes.f90  $(SRC)/XFOIL.INC $(SRC)/XDES.INC
+	$(FC) -c $(FFLAGS)  $(SRC)/xgdes.f90
+xqdes.o: $(SRC)/xqdes.f90  $(SRC)/XFOIL.INC $(SRC)/XDES.INC
+	$(FC) -c $(FFLAGS)  $(SRC)/xqdes.f90
+xmdes.o: $(SRC)/xmdes.f90  $(SRC)/XFOIL.INC $(SRC)/XDES.INC $(SRC)/CIRCLE.INC
+	$(FC) -c $(FFLAGS)  $(SRC)/xmdes.f90
+xbl.o:   $(SRC)/xbl.f90    $(SRC)/XFOIL.INC $(SRC)/XBL.INC $(SRC)/BLPAR.INC
+	$(FC) -c $(FFLAGS)  $(SRC)/xbl.f90
+xblsys.o: $(SRC)/xblsys.f90                  $(SRC)/XBL.INC $(SRC)/BLPAR.INC
+	$(FC) -c $(FFLAGS)  $(SRC)/xblsys.f90
+xpol.o: $(SRC)/xpol.f90     $(SRC)/XFOIL.INC $(SRC)/PINDEX.INC
+	$(FC) -c $(FFLAGS)  $(SRC)/xpol.f90
+xgeom.o: $(SRC)/xgeom.f90 
+	$(FC) -c $(FFLAGS)  $(SRC)/xgeom.f90
+xutils.o: $(SRC)/xutils.f90 
+	$(FC) -c $(FFLAGS)  $(SRC)/xutils.f90
+aread.o: $(SRC)/aread.f90 
+	$(FC) -c $(FFLAGS)  $(SRC)/aread.f90
+naca.o: $(SRC)/naca.f90 
+	$(FC) -c $(FFLAGS)  $(SRC)/naca.f90
+plutil.o: $(SRC)/plutil.f90 
+	$(FC) -c $(FFLAGS)  $(SRC)/plutil.f90
+userio.o: $(SRC)/userio.f90 
+	$(FC) -c $(FFLAGS)  $(SRC)/userio.f90
+spline.o: $(SRC)/spline.f90 
+	$(FC) -c $(FFLAGS)  $(SRC)/spline.f90
+sort.o: $(SRC)/sort.f90
+	$(FC) -c $(FFLAGS)  $(SRC)/sort.f90
 
-iopol.o: $(SRC)/iopol.f $(SRC)/PINDEX.INC
-	$(FC) -c $(FFLAGS)  $(SRC)/iopol.f
+iopol.o: $(SRC)/iopol.f90 $(SRC)/PINDEX.INC
+	$(FC) -c $(FFLAGS)  $(SRC)/iopol.f90
 
