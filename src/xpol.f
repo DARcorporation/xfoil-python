@@ -74,8 +74,6 @@ C
        IF(IOPT.EQ.0) THEN
         IP = 0
         RETURN
-       ELSEIF(IOPT.EQ.1) THEN
-        CONTINUE
        ELSEIF(IOPT.EQ.2) THEN
         CALL APCOPY(IP)
        ENDIF
@@ -372,10 +370,6 @@ C---- READ error trap
       RETURN
 C
 C..........................................
- 1000 FORMAT(A)
- 1010 FORMAT(22X,A32)
- 1020 FORMAT( 8X,F7.3,10X,F9.3)
- 1030 FORMAT( 8X,F7.3,10X,F9.3,17X,F7.3)
       END ! PLRINI
 
 
@@ -522,7 +516,6 @@ C---- the polar dump file doesn't exist, so write new header
       WRITE(LU) 0, 0, 0, N
       WRITE(LU) (X(I), Y(I), I=1, N)
 C
-   70 CONTINUE
 C
       CLOSE(LU)
       PFNAMX(IP) = FNAME

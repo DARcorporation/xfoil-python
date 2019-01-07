@@ -1316,7 +1316,7 @@ C
  20   CONTINUE
 C
 C---- read in existing airfoil coordinates
-   40 DO 55 IEL=1, NEX
+      DO 55 IEL=1, NEX
         DO 50 I=1, 2*IQX+1
           READ(LU,*,END=56) XTMP(I,IEL), YTMP(I,IEL)
           IF(XTMP(I,IEL).EQ.999.0) THEN
