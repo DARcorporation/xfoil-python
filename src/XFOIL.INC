@@ -48,9 +48,9 @@ C
       CHARACTER*1 VMXBL
 C
 C---- dimension temporary work and storage arrays (EQUIVALENCED below)
-      REAL W1(6*IQX),W2(6*IQX),W3(6*IQX),W4(6*IQX),
+      COMMON W1(6*IQX),W2(6*IQX),W3(6*IQX),W4(6*IQX),
      &     W5(6*IQX),W6(6*IQX),W7(6*IQX),W8(6*IQX)
-      REAL BIJ(IQX,IZX), CIJ(IWX,IQX)
+      COMMON BIJ(IQX,IZX), CIJ(IWX,IQX)
 C
       COMMON/CR01/ VERSION
       COMMON/CC01/ FNAME,
@@ -183,13 +183,6 @@ C
       COMMON/VMAT/ VA(3,2,IZX),VB(3,2,IZX),VDEL(3,2,IZX),
      &             VM(3,IZX,IZX),VZ(3,2)
 C
-C
-C---- save storage space
-      EQUIVALENCE (Q(1,1 ),W1(1)), (Q(1,7 ),W2(1)),
-     &            (Q(1,13),W3(1)), (Q(1,19),W4(1)),
-     &            (Q(1,25),W5(1)), (Q(1,31),W6(1)),
-     &            (Q(1,37),W7(1)), (Q(1,43),W8(1))
-      EQUIVALENCE (VM(1,1,1),BIJ(1,1)), (VM(1,1,IZX/2),CIJ(1,1))
 C
 C
 C   VERSION     version number of this XFOIL implementation

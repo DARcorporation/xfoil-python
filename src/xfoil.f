@@ -83,7 +83,6 @@ C
      & //'   SAVE f  Write airfoil to labeled coordinate file'
      &  /'   PSAV f  Write airfoil to plain coordinate file'
      &  /'   ISAV f  Write airfoil to ISES coordinate file'
-     &  /'   MSAV f  Write airfoil to MSES coordinate file'
      &  /'   REVE    Reverse written-airfoil node ordering'
      &  /'   DELI i  Change written-airfoil file delimiters'
      & //'   LOAD f  Read buffer airfoil from coordinate file'
@@ -157,10 +156,6 @@ C
 C===============================================
       ELSEIF(COMAND.EQ.'ISAV') THEN
        CALL SAVE(2,COMARG)
-C
-C===============================================
-      ELSEIF(COMAND.EQ.'MSAV') THEN
-       CALL MSAVE(COMARG)
 C
 C===============================================
       ELSEIF(COMAND.EQ.'REVE') THEN
