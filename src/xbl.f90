@@ -18,6 +18,43 @@
 !    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 !***********************************************************************
 
+SUBROUTINE PREPTRS
+    INCLUDE 'XBL.INC'
+    X1      => COM1( 1); U1      => COM1( 2); T1      => COM1( 3); D1      => COM1( 4); S1      => COM1( 5)
+    AMPL1   => COM1( 6); U1_UEI  => COM1( 7); U1_MS   => COM1( 8); DW1     => COM1( 9); H1      => COM1(10)
+    H1_T1   => COM1(11); H1_D1   => COM1(12); M1      => COM1(13); M1_U1   => COM1(14); M1_MS   => COM1(15)
+    R1      => COM1(16); R1_U1   => COM1(17); R1_MS   => COM1(18); V1      => COM1(19); V1_U1   => COM1(20)
+    V1_MS   => COM1(21); V1_RE   => COM1(22); HK1     => COM1(23); HK1_U1  => COM1(24); HK1_T1  => COM1(25)
+    HK1_D1  => COM1(26); HK1_MS  => COM1(27); HS1     => COM1(28); HS1_U1  => COM1(29); HS1_T1  => COM1(30)
+    HS1_D1  => COM1(31); HS1_MS  => COM1(32); HS1_RE  => COM1(33); HC1     => COM1(34); HC1_U1  => COM1(35)
+    HC1_T1  => COM1(36); HC1_D1  => COM1(37); HC1_MS  => COM1(38); RT1     => COM1(39); RT1_U1  => COM1(40)
+    RT1_T1  => COM1(41); RT1_MS  => COM1(42); RT1_RE  => COM1(43); CF1     => COM1(44); CF1_U1  => COM1(45)
+    CF1_T1  => COM1(46); CF1_D1  => COM1(47); CF1_MS  => COM1(48); CF1_RE  => COM1(49); DI1     => COM1(50)
+    DI1_U1  => COM1(51); DI1_T1  => COM1(52); DI1_D1  => COM1(53); DI1_S1  => COM1(54); DI1_MS  => COM1(55)
+    DI1_RE  => COM1(56); US1     => COM1(57); US1_U1  => COM1(58); US1_T1  => COM1(59); US1_D1  => COM1(60)
+    US1_MS  => COM1(61); US1_RE  => COM1(62); CQ1     => COM1(63); CQ1_U1  => COM1(64); CQ1_T1  => COM1(65)
+    CQ1_D1  => COM1(66); CQ1_MS  => COM1(67); CQ1_RE  => COM1(68); DE1     => COM1(69); DE1_U1  => COM1(70)
+    DE1_T1  => COM1(71); DE1_D1  => COM1(72); DE1_MS  => COM1(73)
+
+    X2      => COM2( 1); U2      => COM2( 2); T2      => COM2( 3); D2      => COM2( 4); S2      => COM2( 5)
+    AMPL2   => COM2( 6); U2_UEI  => COM2( 7); U2_MS   => COM2( 8); DW2     => COM2( 9); H2      => COM2(10)
+    H2_T2   => COM2(11); H2_D2   => COM2(12); M2      => COM2(13); M2_U2   => COM2(14); M2_MS   => COM2(15)
+    R2      => COM2(16); R2_U2   => COM2(17); R2_MS   => COM2(18); V2      => COM2(19); V2_U2   => COM2(20)
+    V2_MS   => COM2(21); V2_RE   => COM2(22); HK2     => COM2(23); HK2_U2  => COM2(24); HK2_T2  => COM2(25)
+    HK2_D2  => COM2(26); HK2_MS  => COM2(27); HS2     => COM2(28); HS2_U2  => COM2(29); HS2_T2  => COM2(30)
+    HS2_D2  => COM2(31); HS2_MS  => COM2(32); HS2_RE  => COM2(33); HC2     => COM2(34); HC2_U2  => COM2(35)
+    HC2_T2  => COM2(36); HC2_D2  => COM2(37); HC2_MS  => COM2(38); RT2     => COM2(39); RT2_U2  => COM2(40)
+    RT2_T2  => COM2(41); RT2_MS  => COM2(42); RT2_RE  => COM2(43); CF2     => COM2(44); CF2_U2  => COM2(45)
+    CF2_T2  => COM2(46); CF2_D2  => COM2(47); CF2_MS  => COM2(48); CF2_RE  => COM2(49); DI2     => COM2(50)
+    DI2_U2  => COM2(51); DI2_T2  => COM2(52); DI2_D2  => COM2(53); DI2_S2  => COM2(54); DI2_MS  => COM2(55)
+    DI2_RE  => COM2(56); US2     => COM2(57); US2_U2  => COM2(58); US2_T2  => COM2(59); US2_D2  => COM2(60)
+    US2_MS  => COM2(61); US2_RE  => COM2(62); CQ2     => COM2(63); CQ2_U2  => COM2(64); CQ2_T2  => COM2(65)
+    CQ2_D2  => COM2(66); CQ2_MS  => COM2(67); CQ2_RE  => COM2(68); DE2     => COM2(69); DE2_U2  => COM2(70)
+    DE2_T2  => COM2(71); DE2_D2  => COM2(72); DE2_MS  => COM2(73)
+END
+
+
+
 SUBROUTINE SETBL
     !-------------------------------------------------
     !     Sets up the BL Newton system coefficients

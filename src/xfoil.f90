@@ -34,6 +34,9 @@ PROGRAM XFOIL
     !---- max panel angle threshold for warning
     DATA ANGTOL / 40.0 /
     !
+    !---- prepare BL pointers
+    CALL PREPTRS
+    !
     VERSION = 6.99
     WRITE(*, 1005) VERSION
     1005 FORMAT(&
