@@ -22,6 +22,7 @@
 module m_xbl
 contains
     subroutine preptrs
+        use m_xblsys
         use m_xsolve
         use m_spline
         use i_xbl
@@ -188,6 +189,7 @@ contains
 
 
     subroutine setbl
+        use m_xblsys
         use m_xsolve
         use m_spline
         use i_xfoil
@@ -686,6 +688,7 @@ contains
 
 
     subroutine iblsys
+        use m_xblsys
         use m_xsolve
         use m_spline
         use i_xfoil
@@ -728,6 +731,7 @@ contains
 
 
     subroutine mrchue
+        use m_xblsys
         use m_xsolve
         use m_spline
         use i_xfoil
@@ -1073,6 +1077,7 @@ contains
 
 
     subroutine mrchdu
+        use m_xblsys
         use m_xsolve
         use m_spline
         use i_xfoil
@@ -1412,6 +1417,7 @@ contains
 
 
     subroutine xifset(Is)
+        use m_xblsys
         use m_spline
         use i_xfoil
         use i_xbl
@@ -1495,6 +1501,7 @@ contains
 
 
     subroutine update
+        use m_xblsys
         use i_xfoil
         implicit none
         !
@@ -1827,6 +1834,7 @@ contains
 
 
     subroutine dslim(Dstr, Thet, Uedg, Msq, Hklim)
+        use m_xblsys
         implicit none
         !
         !*** Start of declarations rewritten by SPAG
