@@ -2,7 +2,7 @@ import regex as re
 import glob
 import os
 
-new_module = 'xgdes'
+new_module = 'xgeom'
 with open('{}.f90'.format(new_module), 'r') as f:
     lines = f.readlines()
 

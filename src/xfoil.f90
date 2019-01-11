@@ -22,6 +22,7 @@
 !***********************************************************************
 !
 program xfoil
+    use m_xgeom
     use m_xgdes
     use m_xbl
     use m_userio
@@ -361,6 +362,7 @@ end program xfoil
 
 
 subroutine init
+    use m_xgeom
     use m_xbl
     use m_userio
     use m_aread
@@ -667,6 +669,7 @@ end subroutine init
 
 
 subroutine mrcl(Cls, M_cls, R_cls)
+    use m_xgeom
     use m_userio
     use m_aread
     use m_spline
@@ -780,6 +783,7 @@ end subroutine mrcl
 
 
 subroutine getdef(Lu, Filnam, Lask)
+    use m_xgeom
     use m_userio
     use m_aread
     use m_spline
@@ -912,6 +916,7 @@ end subroutine getdef
 
 
 subroutine wrtdef(Lu)
+    use m_xgeom
     use m_userio
     use m_aread
     use m_spline
@@ -1000,6 +1005,7 @@ end subroutine wrtdef
 
 
 subroutine comset
+    use m_xgeom
     use m_userio
     use m_aread
     use m_spline
@@ -1046,6 +1052,7 @@ end subroutine comset
 
 
 subroutine cpcalc(N, Q, Qinf, Minf, Cp)
+    use m_xgeom
     use m_userio
     use m_aread
     use m_spline
@@ -1108,6 +1115,7 @@ end subroutine cpcalc
 
 
 subroutine clcalc(N, X, Y, Gam, Gam_a, Alfa, Minf, Qinf, Xref, Yref, Cl, Cm, Cdp, Cl_alf, Cl_msq)
+    use m_xgeom
     use m_userio
     use m_aread
     use m_spline
@@ -1221,6 +1229,7 @@ end subroutine clcalc
 
 
 subroutine cdcalc
+    use m_xgeom
     use m_userio
     use m_aread
     use m_spline
@@ -1284,6 +1293,7 @@ end subroutine cdcalc
 
 
 subroutine load(Filnam, Itype)
+    use m_xgeom
     use m_userio
     use m_aread
     use m_spline
@@ -1422,6 +1432,7 @@ end subroutine load
 
 
 subroutine save(Iftyp, Fname1)
+    use m_xgeom
     use m_userio
     use m_aread
     use m_spline
@@ -1554,6 +1565,7 @@ end subroutine save
 
 
 subroutine rotate(X, Y, N, Alfa)
+    use m_xgeom
     use m_userio
     use m_aread
     use m_spline
@@ -1606,6 +1618,7 @@ end subroutine rotate
 
 
 subroutine naca(Ides1)
+    use m_xgeom
     use m_userio
     use m_aread
     use m_naca
@@ -1689,6 +1702,7 @@ end subroutine naca
 
 
 subroutine pangen(Shopar)
+    use m_xgeom
     use m_userio
     use m_aread
     use m_spline
@@ -2219,6 +2233,7 @@ end subroutine pangen
 
 
 subroutine getpan
+    use m_xgeom
     use m_userio
     use m_aread
     use m_spline
@@ -2370,6 +2385,7 @@ end subroutine getpan
 
 
 subroutine tecalc
+    use m_xgeom
     use m_userio
     use m_aread
     use m_spline
@@ -2434,6 +2450,7 @@ end subroutine tecalc
 
 
 subroutine inte
+    use m_xgeom
     use m_userio
     use m_aread
     use m_spline
@@ -2576,6 +2593,7 @@ end subroutine inte
 
 
 subroutine intx
+    use m_xgeom
     use m_userio
     use m_aread
     use m_spline

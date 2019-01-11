@@ -22,6 +22,7 @@
 !***********************************************************************
 !
 subroutine mdes
+    use m_xgeom
     use m_userio
     use m_sort
     use m_xsolve

@@ -27,6 +27,7 @@
 module m_xgdes
 contains
     subroutine abcopy(Lconf)
+        use m_xgeom
         use m_userio
         use m_spline
         use i_xfoil
