@@ -23,6 +23,7 @@
 module m_xoper
 contains
     subroutine oper
+        use m_xpol
         use m_xpanel
         use m_xgdes
         use m_xblsys
