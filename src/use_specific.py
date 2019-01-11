@@ -39,8 +39,13 @@ for key in list(functions.keys()):
     if not len(functions[key]):
         del functions[key]
 
-# Find out which modules are ACTUALLY used by functions
-actually_using = dict()
+# Remove functions without using
+for key in list(declared_using.keys()):
+    if not len(declared_using[key]):
+        del declared_using[key]
+
+# Find out which module functions specifically are used by functions
+only_using = dict()
 for file in files:
     with open(file, 'r') as f:
         lines = f.readlines()
@@ -56,7 +61,7 @@ for file in files:
         match = re.match(r'^ *(function|subroutine) +(\w+)', lines[i].lower())
         if match:
             current_function = match.group(2)
-            actually_using.update({current_function: set()})
+            only_using.update({current_function: dict()})
             continue
 
         if current_function is not None:
@@ -68,19 +73,16 @@ for file in files:
                 func = match.group(1)
                 for module, funcs in functions.items():
                     if func in funcs:
-                        actually_using[current_function].add(module)
+                        if module not in only_using[current_function]:
+                            only_using[current_function].update({module: set()})
+                        only_using[current_function][module].add(func)
 
-# Find out which functions declare to use which modules without actually using them
-not_using = dict()
-for function, using in declared_using.items():
-    for use in using:
-        if use not in actually_using[function]:
-            if function not in not_using:
-                not_using.update({function: set()})
-            not_using[function].add(use)
+# Remove functions without using
+for key in list(only_using.keys()):
+    if not len(only_using[key]):
+        del only_using[key]
 
-
-# Remove using declarations which are not actually used
+# Specify exactly which functions are used from modules
 for file in files:
     with open(file, 'r') as f:
         lines = f.readlines()
@@ -88,18 +90,16 @@ for file in files:
     with open(file, 'w') as f:
         current_function = None
         for i in range(len(lines)):
-            if current_function is not None and current_function in not_using:
-                match = re.match(r'^ *use (\w+)', lines[i].lower())
-                if match and match.group(1) in not_using[current_function]:
-                    continue
-
             match = re.match(r'^ *(function|subroutine) +(\w+)', lines[i].lower())
             if match:
                 current_function = match.group(2)
 
+            if current_function is not None and current_function in only_using:
+                match = re.match(r'^ *use (\w+)', lines[i].lower())
+                if match and match.group(1) in only_using[current_function]:
+                    lines[i] = lines[i][:-1] + \
+                               ', only: {}'.format(', '.join(only_using[current_function][match.group(1)])) + '\n'
+
             f.write(lines[i])
-
-
-
 
 exit(0)
