@@ -18,7 +18,7 @@
 ! NTX   number of points in thickness/camber arrays
 !
 !---- include polar variable indexing parameters
-INCLUDE 'PINDEX.INC'
+use i_pindex
 !
 PARAMETER (IQX = 370, IPX = 5, ISX = 2)
 PARAMETER (IWX = IQX / 8 + 2)

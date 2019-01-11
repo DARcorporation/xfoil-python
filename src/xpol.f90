@@ -917,7 +917,7 @@ SUBROUTINE POLAXI(CPOLPLF, XCDWID, XALWID, XOCWID)
     !-------------------------------------------
     !     Gets polar plot axis limits from user
     !-------------------------------------------
-    INCLUDE 'PINDEX.INC'
+    use i_pindex
     DIMENSION CPOLPLF(3, *)
     !
     LOGICAL ERROR

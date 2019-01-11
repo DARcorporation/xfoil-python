@@ -25,7 +25,7 @@ SUBROUTINE POLREAD(LU, FNPOL, ERROR, &
         NAME, IRETYP, IMATYP, &
         ISX, NBL, CPOLSD, &
         CODE, VERSION)
-    use i_iopol
+    use i_pindex
     CHARACTER*(*) FNPOL, NAME
     LOGICAL ERROR
     CHARACTER*(*) CODE
@@ -437,7 +437,7 @@ SUBROUTINE POLWRIT(LU, FNPOL, ERROR, LHEAD, &
         NAME, IRETYP, IMATYP, &
         ISX, NBL, CPOLSD, JPOL, NJPOL, &
         CODE, VERSION, LQUERY)
-    use i_iopol
+    use i_pindex
     CHARACTER*(*) FNPOL, NAME
     LOGICAL ERROR, LHEAD, LQUERY
     CHARACTER*(*) CODE
@@ -699,7 +699,7 @@ END
 
 SUBROUTINE POLREF(LU, FNREF, ERROR, &
         NFX, NF, XYREF, LABREF)
-    use i_iopol
+    use i_pindex
     CHARACTER*(*) FNREF, LABREF
     LOGICAL ERROR
     DIMENSION NF(4)

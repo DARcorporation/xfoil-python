@@ -719,13 +719,13 @@ END
 
 SUBROUTINE GETDEF(LU, FILNAM, LASK)
     use m_spline
+    INCLUDE 'XFOIL.INC'
     CHARACTER*(*) FILNAM
     LOGICAL LASK
     !-----------------------------------------------------
     !     Reads in default parameters from file xfoil.def
     !     If LASK=t, ask user if file is to be read.
     !-----------------------------------------------------
-    INCLUDE 'XFOIL.INC'
     LOGICAL LCOLOR
     CHARACTER*1 ANS
     !
