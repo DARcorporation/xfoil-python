@@ -22,6 +22,7 @@
 !***********************************************************************
 !
 subroutine mdes
+    use m_sort
     use m_xsolve
     use m_xqdes
     use m_spline
@@ -420,6 +421,7 @@ end subroutine mdes
 
 
 subroutine dztset(Rinput, Ninput)
+    use m_sort
     use m_xsolve
     use m_xqdes
     use m_spline
@@ -468,6 +470,7 @@ end subroutine dztset
 
 
 subroutine agtset(Rinput, Ninput)
+    use m_sort
     use m_xsolve
     use m_xqdes
     use m_spline
@@ -514,6 +517,7 @@ end subroutine agtset
 
 
 subroutine mapgam(Iac, Alg, Clg, Cmg)
+    use m_sort
     use m_xsolve
     use m_xqdes
     use m_spline
@@ -576,6 +580,7 @@ end subroutine mapgam
 
 
 subroutine qspcir
+    use m_sort
     use m_xsolve
     use m_xqdes
     use m_spline
@@ -613,6 +618,7 @@ end subroutine qspcir
 
 
 subroutine mapgen(Ffilt, N, X, Y)
+    use m_sort
     use m_xsolve
     use m_xqdes
     use m_spline
@@ -731,6 +737,7 @@ end subroutine mapgen
 
 
 subroutine scinit(N, X, Xp, Y, Yp, S, Sle)
+    use m_sort
     use m_xsolve
     use m_xqdes
     use m_spline
@@ -917,6 +924,7 @@ end subroutine scinit
 
 
 subroutine cncalc(Qc, Lsymm)
+    use m_sort
     use m_xsolve
     use m_xqdes
     use m_spline
@@ -1072,6 +1080,7 @@ end subroutine cncalc
 
 
 subroutine cnsymm
+    use m_sort
     use m_xsolve
     use m_xqdes
     use m_spline
@@ -1107,6 +1116,7 @@ end subroutine cnsymm
 
 
 subroutine piqsum
+    use m_sort
     use m_xsolve
     use m_xqdes
     use m_spline
@@ -1149,6 +1159,7 @@ end subroutine piqsum
 
 
 subroutine cnfilt(Ffilt)
+    use m_sort
     use m_xsolve
     use m_xqdes
     use m_spline
@@ -1201,6 +1212,7 @@ end subroutine cnfilt
 
 
 subroutine zccalc(Mtest)
+    use m_sort
     use m_xsolve
     use m_xqdes
     use m_spline
@@ -1291,6 +1303,7 @@ end subroutine zccalc
 
 
 subroutine zcnorm(Mtest)
+    use m_sort
     use m_xsolve
     use m_xqdes
     use m_spline
@@ -1370,6 +1383,7 @@ end subroutine zcnorm
 
 
 subroutine qccalc(Ispec, Alfa, Cl, Cm, Minf, Qinf, Ncir, Xcir, Ycir, Scir, Qcir)
+    use m_sort
     use m_xsolve
     use m_xqdes
     use m_spline
@@ -1517,6 +1531,7 @@ end subroutine qccalc
 
 
 subroutine qspint(Alqsp, Qspec, Qinf, Minf, Clqsp, Cmqsp)
+    use m_sort
     use m_xsolve
     use m_xqdes
     use m_spline
@@ -1595,6 +1610,7 @@ end subroutine qspint
 
 
 subroutine ftp
+    use m_sort
     use m_xsolve
     use m_xqdes
     use m_spline
@@ -1637,6 +1653,7 @@ end subroutine ftp
 
 
 subroutine eiwset(Nc1)
+    use m_sort
     use m_xsolve
     use m_xqdes
     use m_spline
@@ -1715,6 +1732,7 @@ end subroutine eiwset
 
 
 subroutine pert(Qspec)
+    use m_sort
     use m_xsolve
     use m_xqdes
     use m_spline
@@ -1838,6 +1856,7 @@ subroutine pert(Qspec)
 
 
 subroutine cndump(Lu)
+    use m_sort
     use m_xqdes
     use m_spline
     use i_circle
@@ -1886,6 +1905,7 @@ end subroutine cndump
 
 
 subroutine getvov(Kqsp)
+    use m_sort
     use m_xqdes
     use m_spline
     use i_xfoil

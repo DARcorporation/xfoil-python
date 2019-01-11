@@ -21,6 +21,7 @@
 
 
 subroutine plrset(Ip)
+    use m_sort
     use m_iopol
     use m_spline
     use i_xfoil
@@ -164,6 +165,7 @@ end subroutine plrset
 
 
 subroutine apcopy(Ip)
+    use m_sort
     use m_iopol
     use m_spline
     use i_xfoil
@@ -234,6 +236,7 @@ end subroutine apcopy
 
 
 subroutine plrini(Lu, Ip)
+    use m_sort
     use m_iopol
     use i_xfoil
     implicit none
@@ -439,6 +442,7 @@ subroutine plrini(Lu, Ip)
 
 
 subroutine plxini(Lu, Ip)
+    use m_sort
     use m_iopol
     use i_xfoil
     implicit none
@@ -616,6 +620,7 @@ end subroutine plxini
 
 
 subroutine plradd(Lu, Ip)
+    use m_sort
     use m_iopol
     use i_xfoil
     implicit none
@@ -743,6 +748,7 @@ end subroutine plradd
 
 
 subroutine plxadd(Lu, Ip)
+    use m_sort
     use m_spline
     use i_xfoil
     implicit none
@@ -853,6 +859,7 @@ end subroutine plxadd
 
 
 subroutine plrsrt(Ip, Idsort)
+    use m_sort
     use i_xfoil
     implicit none
     !
