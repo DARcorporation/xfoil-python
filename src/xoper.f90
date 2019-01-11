@@ -21,6 +21,7 @@
 !***********************************************************************
 !
 subroutine oper
+    use m_iopol
     use m_xsolve
     use m_spline
     use i_xfoil

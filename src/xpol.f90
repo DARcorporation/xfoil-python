@@ -21,6 +21,7 @@
 
 
 subroutine plrset(Ip)
+    use m_iopol
     use m_spline
     use i_xfoil
     implicit none
@@ -163,6 +164,7 @@ end subroutine plrset
 
 
 subroutine apcopy(Ip)
+    use m_iopol
     use m_spline
     use i_xfoil
     implicit none
@@ -232,6 +234,7 @@ end subroutine apcopy
 
 
 subroutine plrini(Lu, Ip)
+    use m_iopol
     use i_xfoil
     implicit none
     !
@@ -436,6 +439,7 @@ subroutine plrini(Lu, Ip)
 
 
 subroutine plxini(Lu, Ip)
+    use m_iopol
     use i_xfoil
     implicit none
     !
@@ -612,6 +616,7 @@ end subroutine plxini
 
 
 subroutine plradd(Lu, Ip)
+    use m_iopol
     use i_xfoil
     implicit none
     !
