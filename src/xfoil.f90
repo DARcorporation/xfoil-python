@@ -22,6 +22,7 @@
 !***********************************************************************
 !
 program xfoil
+    use m_userio
     use m_spline
     use m_xqdes
     use i_xfoil
@@ -358,6 +359,7 @@ end program xfoil
 
 
 subroutine init
+    use m_userio
     use m_aread
     use m_spline
     use i_xfoil
@@ -662,6 +664,7 @@ end subroutine init
 
 
 subroutine mrcl(Cls, M_cls, R_cls)
+    use m_userio
     use m_aread
     use m_spline
     use i_xfoil
@@ -774,6 +777,7 @@ end subroutine mrcl
 
 
 subroutine getdef(Lu, Filnam, Lask)
+    use m_userio
     use m_aread
     use m_spline
     use i_xfoil
@@ -905,6 +909,7 @@ end subroutine getdef
 
 
 subroutine wrtdef(Lu)
+    use m_userio
     use m_aread
     use m_spline
     use i_xfoil
@@ -992,6 +997,7 @@ end subroutine wrtdef
 
 
 subroutine comset
+    use m_userio
     use m_aread
     use m_spline
     use i_xfoil
@@ -1037,6 +1043,7 @@ end subroutine comset
 
 
 subroutine cpcalc(N, Q, Qinf, Minf, Cp)
+    use m_userio
     use m_aread
     use m_spline
     implicit none
@@ -1098,6 +1105,7 @@ end subroutine cpcalc
 
 
 subroutine clcalc(N, X, Y, Gam, Gam_a, Alfa, Minf, Qinf, Xref, Yref, Cl, Cm, Cdp, Cl_alf, Cl_msq)
+    use m_userio
     use m_aread
     use m_spline
     implicit none
@@ -1210,6 +1218,7 @@ end subroutine clcalc
 
 
 subroutine cdcalc
+    use m_userio
     use m_aread
     use m_spline
     use i_xfoil
@@ -1272,6 +1281,7 @@ end subroutine cdcalc
 
 
 subroutine load(Filnam, Itype)
+    use m_userio
     use m_aread
     use m_spline
     use i_xfoil
@@ -1409,6 +1419,7 @@ end subroutine load
 
 
 subroutine save(Iftyp, Fname1)
+    use m_userio
     use m_aread
     use m_spline
     use i_xfoil
@@ -1540,6 +1551,7 @@ end subroutine save
 
 
 subroutine rotate(X, Y, N, Alfa)
+    use m_userio
     use m_aread
     use m_spline
     implicit none
@@ -1591,6 +1603,7 @@ end subroutine rotate
 
 
 subroutine naca(Ides1)
+    use m_userio
     use m_aread
     use m_naca
     use m_spline
@@ -1673,6 +1686,7 @@ end subroutine naca
 
 
 subroutine pangen(Shopar)
+    use m_userio
     use m_aread
     use m_spline
     use i_xfoil
@@ -2202,6 +2216,7 @@ end subroutine pangen
 
 
 subroutine getpan
+    use m_userio
     use m_aread
     use m_spline
     use i_xfoil
@@ -2352,6 +2367,7 @@ end subroutine getpan
 
 
 subroutine tecalc
+    use m_userio
     use m_aread
     use m_spline
     use i_xfoil
@@ -2415,6 +2431,7 @@ end subroutine tecalc
 
 
 subroutine inte
+    use m_userio
     use m_aread
     use m_spline
     use i_xfoil
@@ -2556,6 +2573,7 @@ end subroutine inte
 
 
 subroutine intx
+    use m_userio
     use m_aread
     use m_spline
     use i_xfoil

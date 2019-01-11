@@ -28,6 +28,7 @@ contains
             Name, Iretyp, Imatyp, &
             Isx, Nbl, Cpolsd, &
             Code, Version)
+        use m_userio
         use i_pindex
         implicit none
         !
@@ -458,6 +459,7 @@ contains
             Name, Iretyp, Imatyp, &
             Isx, Nbl, Cpolsd, Jpol, Njpol, &
             Code, Version, Lquery)
+        use m_userio
         use i_pindex
         implicit none
         !

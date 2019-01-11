@@ -21,6 +21,7 @@
 
 
 subroutine plrset(Ip)
+    use m_userio
     use m_sort
     use m_iopol
     use m_spline
@@ -165,6 +166,7 @@ end subroutine plrset
 
 
 subroutine apcopy(Ip)
+    use m_userio
     use m_sort
     use m_iopol
     use m_spline
@@ -236,6 +238,7 @@ end subroutine apcopy
 
 
 subroutine plrini(Lu, Ip)
+    use m_userio
     use m_sort
     use m_iopol
     use i_xfoil
@@ -442,6 +445,7 @@ subroutine plrini(Lu, Ip)
 
 
 subroutine plxini(Lu, Ip)
+    use m_userio
     use m_sort
     use m_iopol
     use i_xfoil
@@ -620,6 +624,7 @@ end subroutine plxini
 
 
 subroutine plradd(Lu, Ip)
+    use m_userio
     use m_sort
     use m_iopol
     use i_xfoil
@@ -748,6 +753,7 @@ end subroutine plradd
 
 
 subroutine plxadd(Lu, Ip)
+    use m_userio
     use m_sort
     use m_spline
     use i_xfoil
@@ -859,6 +865,7 @@ end subroutine plxadd
 
 
 subroutine plrsrt(Ip, Idsort)
+    use m_userio
     use m_sort
     use i_xfoil
     implicit none
@@ -910,6 +917,7 @@ end subroutine plrsrt
 
 
 subroutine plrsum(Ip1, Ip2, Ipactt)
+    use m_userio
     use i_xfoil
     implicit none
     !
@@ -993,6 +1001,7 @@ end subroutine plrsum
 
 
 subroutine prfsum(Ir1, Ir2)
+    use m_userio
     use i_xfoil
     implicit none
     !
@@ -1042,6 +1051,7 @@ end subroutine prfsum
 
 
 subroutine plrcop(Ip1, Ip2)
+    use m_userio
     use i_xfoil
     implicit none
     !
@@ -1116,6 +1126,7 @@ end subroutine plrcop
 
 
 subroutine prfcop(Ir1, Ir2)
+    use m_userio
     use i_xfoil
     implicit none
     !
@@ -1167,6 +1178,7 @@ end subroutine prfcop
 
 
 subroutine polaxi(Cpolplf, Xcdwid, Xalwid, Xocwid)
+    use m_userio
     use i_pindex
     implicit none
     !

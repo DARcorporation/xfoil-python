@@ -2,6 +2,7 @@
 module m_aread
 contains
     subroutine aread(Lu, Fname, Nmax, X, Y, N, Name, Ispars, Itype, Info)
+        use m_userio
         implicit none
         !
         !*** Start of declarations rewritten by SPAG

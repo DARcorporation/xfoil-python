@@ -25,6 +25,7 @@
 !
 
 subroutine abcopy(Lconf)
+    use m_userio
     use m_spline
     use i_xfoil
     implicit none
@@ -131,6 +132,7 @@ end subroutine abcopy
 
 
 subroutine getxyf(X, Xp, Y, Yp, S, N, Tops, Bots, Xf, Yf)
+    use m_userio
     use m_spline
     implicit none
     !

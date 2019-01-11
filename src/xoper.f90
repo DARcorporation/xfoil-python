@@ -21,6 +21,7 @@
 !***********************************************************************
 !
 subroutine oper
+    use m_userio
     use m_iopol
     use m_xsolve
     use m_spline
@@ -1319,6 +1320,7 @@ end subroutine oper
 
 
 subroutine fcpmin
+    use m_userio
     use m_xsolve
     use m_spline
     use i_xfoil
@@ -1377,6 +1379,7 @@ end subroutine fcpmin
 
 
 subroutine mrshow(Lm, Lr)
+    use m_userio
     use m_xsolve
     use m_spline
     use i_xfoil
@@ -1425,6 +1428,7 @@ end subroutine mrshow
 
 
 subroutine nammod(Name, Kdel, Kmod0)
+    use m_userio
     use m_xsolve
     use m_spline
     implicit none
@@ -1515,6 +1519,7 @@ end subroutine nammod
 
 
 subroutine bldump(Fname1)
+    use m_userio
     use m_xsolve
     use m_spline
     use i_xfoil
@@ -1678,6 +1683,7 @@ end subroutine bldump
 
 
 subroutine bldump2(Fname1)
+    use m_userio
     use m_xsolve
     use m_spline
     use i_xfoil
@@ -1881,6 +1887,7 @@ end subroutine bldump2
 
 
 subroutine cpdump(Fname1)
+    use m_userio
     use m_xsolve
     use m_spline
     use i_xfoil
@@ -1988,6 +1995,7 @@ end subroutine cpdump
 
 
 subroutine mhinge
+    use m_userio
     use m_xsolve
     use m_spline
     use i_xfoil
@@ -2149,6 +2157,7 @@ end subroutine mhinge
 
 
 subroutine vpar
+    use m_userio
     use m_xsolve
     use m_spline
     use i_xfoil
@@ -2596,6 +2605,7 @@ end subroutine speccl
 subroutine viscal(Niter1)
     use m_xsolve
     use m_spline
+    use m_userio
     use i_xfoil
     implicit none
     !
