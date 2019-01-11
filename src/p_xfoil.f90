@@ -22,16 +22,15 @@
 !***********************************************************************
 !
 program xfoil
-    use m_xfoil
-    use m_xpanel
-    use m_xoper
-    use m_xmdes
-    use m_xgeom
-    use m_xgdes
-    use m_xbl
-    use m_userio
-    use m_spline
-    use m_xqdes
+    use m_xfoil, only: getpan, save, intx, pangen, load, init, naca, inte, getdef, wrtdef
+    use m_xoper, only: nammod, oper
+    use m_xmdes, only: mdes
+    use m_xgeom, only: bendump2, half, geopar, cang, bendump
+    use m_xgdes, only: abcopy
+    use m_xbl, only: preptrs
+    use m_userio, only: aski, askr, getflt, getint, strip, askc
+    use m_spline, only: scalc, segspl
+    use m_xqdes, only: qdes
     use i_xfoil
     implicit none
     !
