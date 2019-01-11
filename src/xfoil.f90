@@ -22,6 +22,7 @@
 !***********************************************************************
 !
 program xfoil
+    use m_xgdes
     use m_xbl
     use m_userio
     use m_spline

@@ -21,6 +21,7 @@
 !***********************************************************************
 !
 subroutine oper
+    use m_xgdes
     use m_xblsys
     use m_xbl
     use m_userio
@@ -1322,6 +1323,7 @@ end subroutine oper
 
 
 subroutine fcpmin
+    use m_xgdes
     use m_xblsys
     use m_xbl
     use m_userio
@@ -1383,6 +1385,7 @@ end subroutine fcpmin
 
 
 subroutine mrshow(Lm, Lr)
+    use m_xgdes
     use m_xblsys
     use m_xbl
     use m_userio
@@ -1434,6 +1437,7 @@ end subroutine mrshow
 
 
 subroutine nammod(Name, Kdel, Kmod0)
+    use m_xgdes
     use m_xblsys
     use m_xbl
     use m_userio
@@ -1527,6 +1531,7 @@ end subroutine nammod
 
 
 subroutine bldump(Fname1)
+    use m_xgdes
     use m_xblsys
     use m_xbl
     use m_userio
@@ -1693,6 +1698,7 @@ end subroutine bldump
 
 
 subroutine bldump2(Fname1)
+    use m_xgdes
     use m_xblsys
     use m_xbl
     use m_userio
@@ -1899,6 +1905,7 @@ end subroutine bldump2
 
 
 subroutine cpdump(Fname1)
+    use m_xgdes
     use m_xbl
     use m_userio
     use m_xsolve
@@ -2008,6 +2015,7 @@ end subroutine cpdump
 
 
 subroutine mhinge
+    use m_xgdes
     use m_xbl
     use m_userio
     use m_xsolve
