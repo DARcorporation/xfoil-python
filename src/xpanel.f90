@@ -1929,7 +1929,7 @@ contains
 
 
     subroutine stmove
-        use m_xbl, only: iblsys
+        use s_xbl, only: iblsys
         use i_xfoil
         implicit none
         !

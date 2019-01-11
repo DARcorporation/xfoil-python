@@ -2591,9 +2591,10 @@ contains
 
     subroutine viscal(Niter1)
         use m_xpanel, only: qiset, qvfue, iblpan, qwcalc, uicalc, xicalc, gamqv, stfind, stmove
-        use m_xbl, only: iblsys, update, setbl
+        use m_xbl, only: update, setbl
         use m_xsolve, only: blsolv
         use i_xfoil
+        use s_xbl, only: iblsys
         implicit none
         !
         !*** Start of declarations rewritten by SPAG
