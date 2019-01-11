@@ -21,6 +21,7 @@
 
 
 subroutine apcalc
+    use m_xbl
     use m_xsolve
     use m_xutils
     use m_spline
@@ -72,6 +73,7 @@ end subroutine apcalc
 
 
 subroutine ncalc(X, Y, S, N, Xn, Yn)
+    use m_xbl
     use m_xsolve
     use m_xutils
     use m_spline
@@ -150,6 +152,7 @@ end subroutine ncalc
 
 
 subroutine psilin(I, Xi, Yi, Nxi, Nyi, Psi, Psi_ni, Geolin, Siglin)
+    use m_xbl
     use m_xsolve
     use m_xutils
     use i_xfoil
@@ -864,6 +867,7 @@ subroutine psilin(I, Xi, Yi, Nxi, Nyi, Psi, Psi_ni, Geolin, Siglin)
 
 
 subroutine pswlin(I, Xi, Yi, Nxi, Nyi, Psi, Psi_ni)
+    use m_xbl
     use m_xsolve
     use m_xutils
     use i_xfoil
@@ -1073,6 +1077,7 @@ end subroutine pswlin
 
 
 subroutine ggcalc
+    use m_xbl
     use m_xsolve
     use m_xutils
     use i_xfoil
@@ -1233,6 +1238,7 @@ end subroutine ggcalc
 
 
 subroutine qwcalc
+    use m_xbl
     use m_xsolve
     use m_xutils
     use i_xfoil
@@ -1276,6 +1282,7 @@ end subroutine qwcalc
 
 
 subroutine qdcalc
+    use m_xbl
     use m_xsolve
     use m_xutils
     use i_xfoil
@@ -1418,6 +1425,7 @@ end subroutine qdcalc
 
 
 subroutine xywake
+    use m_xbl
     use m_xutils
     use i_xfoil
     implicit none
@@ -1524,6 +1532,7 @@ end subroutine xywake
 
 
 subroutine stfind
+    use m_xbl
     use i_xfoil
     implicit none
     !
@@ -1580,6 +1589,7 @@ end subroutine stfind
 
 
 subroutine iblpan
+    use m_xbl
     use i_xfoil
     implicit none
     !
@@ -1658,6 +1668,7 @@ end subroutine iblpan
 
 
 subroutine xicalc
+    use m_xbl
     use i_xfoil
     implicit none
     !
@@ -1763,6 +1774,7 @@ end subroutine xicalc
 
 
 subroutine uicalc
+    use m_xbl
     use i_xfoil
     implicit none
     !
@@ -1801,6 +1813,7 @@ end subroutine uicalc
 
 
 subroutine uecalc
+    use m_xbl
     use i_xfoil
     implicit none
     !
@@ -1837,6 +1850,7 @@ end subroutine uecalc
 
 
 subroutine qvfue
+    use m_xbl
     use i_xfoil
     implicit none
     !
@@ -1872,6 +1886,7 @@ end subroutine qvfue
 
 
 subroutine qiset
+    use m_xbl
     use i_xfoil
     implicit none
     !
@@ -1909,6 +1924,7 @@ end subroutine qiset
 
 
 subroutine gamqv
+    use m_xbl
     use i_xfoil
     implicit none
     !
@@ -1939,6 +1955,7 @@ end subroutine gamqv
 
 
 subroutine stmove
+    use m_xbl
     use i_xfoil
     implicit none
     !

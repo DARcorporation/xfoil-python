@@ -22,6 +22,7 @@
 !***********************************************************************
 !
 program xfoil
+    use m_xbl
     use m_userio
     use m_spline
     use m_xqdes
@@ -359,6 +360,7 @@ end program xfoil
 
 
 subroutine init
+    use m_xbl
     use m_userio
     use m_aread
     use m_spline
