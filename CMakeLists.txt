@@ -11,6 +11,9 @@ add_executable(xfoil
         ${SRC_DIR}/i_blpar.f90
         ${SRC_DIR}/i_circle.f90
         ${SRC_DIR}/i_xbl.f90
+        # Shared modules to avoid circular dependencies
+        ${SRC_DIR}/s_xbl.f90
+        ${SRC_DIR}/s_xoper.f90
         # Source
         ${SRC_DIR}/aread.f90
         ${SRC_DIR}/iopol.f90

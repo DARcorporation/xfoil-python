@@ -1265,7 +1265,7 @@ end subroutine cdcalc
 
 subroutine load(Filnam, Itype)
     use m_xgeom, only: geopar, norm
-    use m_userio, only: strip
+    use m_userio, only: strip, asks
     use m_aread, only: aread
     use m_spline, only: seval, segspl, scalc
     use i_xfoil
@@ -1585,6 +1585,7 @@ subroutine naca(Ides1)
     use m_xgeom, only: geopar
     use m_userio, only: aski, strip
     use m_spline, only: segspl, scalc
+    use m_naca, only: naca4, naca5
     use i_xfoil
     implicit none
     !
@@ -1666,7 +1667,7 @@ end subroutine naca
 subroutine pangen(Shopar)
     use m_xpanel, only: apcalc, ncalc
     use m_xgeom, only: lefind
-    use m_spline, only: seval, scalc, trisol, segspl, deval
+    use m_spline, only: curv, seval, scalc, trisol, segspl, deval
     use i_xfoil
     implicit none
     !
@@ -2195,6 +2196,7 @@ end subroutine pangen
 
 subroutine getpan
     use m_userio, only: getflt, askc, askr, aski, getint
+    use m_xgeom, only: cang
     use i_xfoil
     implicit none
     !

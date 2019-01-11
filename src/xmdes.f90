@@ -25,7 +25,7 @@ module m_xmdes
 contains
     subroutine mdes
         use m_xgeom, only: geopar
-        use m_userio, only: getflt, askc, getint
+        use m_userio, only: getflt, askc, asks, getint
         use m_xqdes, only: smooq
         use m_spline, only: splind, scalc
         use i_xfoil

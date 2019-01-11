@@ -685,7 +685,7 @@ contains
 
 
     subroutine mrchue
-        use m_xblsys, only: hkin, tesys, trchek, blprv, blkin, blsys
+        use m_xblsys, only: hkin, tesys, trchek, blprv, blkin, blsys, blvar, blmid
         use m_xsolve, only: gauss
         use i_xfoil
         use i_xbl
@@ -1030,7 +1030,7 @@ contains
 
 
     subroutine mrchdu
-        use m_xblsys, only: hkin, tesys, trchek, blprv, blkin, blsys
+        use m_xblsys, only: hkin, tesys, trchek, blprv, blkin, blsys, blvar, blmid
         use m_xsolve, only: gauss
         use i_xfoil
         use i_xbl

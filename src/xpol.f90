@@ -620,9 +620,9 @@ contains
 
 
     subroutine plradd(Lu, Ip)
-        use m_xoper, only: mhinge
         use m_iopol, only: polwrit
         use i_xfoil
+        use s_xoper, only: mhinge
         implicit none
         !
         !*** Start of declarations rewritten by SPAG
