@@ -23,6 +23,7 @@ SUBROUTINE MDES
     !     Full-Inverse design routine.
     !     Based on circle plane mapping.
     !------------------------------------
+        use m_spline
     INCLUDE 'XFOIL.INC'
     LOGICAL LCNPL, LRECALC
     !
@@ -403,6 +404,7 @@ END
 
 
 SUBROUTINE DZTSET(RINPUT, NINPUT)
+    use m_spline
     INCLUDE 'CIRCLE.INC'
     DIMENSION RINPUT(*)
     !
@@ -422,6 +424,7 @@ END
 
 
 SUBROUTINE AGTSET(RINPUT, NINPUT)
+    use m_spline
     INCLUDE 'CIRCLE.INC'
     DIMENSION RINPUT(*)
     !
@@ -446,6 +449,7 @@ SUBROUTINE MAPGAM(IAC, ALG, CLG, CMG)
     !       IAC=1: specified ALGAM
     !       IAC=2: specified CLGAM
     !--------------------------------------------
+    use m_spline
     INCLUDE 'XFOIL.INC'
     !
     !---- calculate q(w), set number of circle points NSP
@@ -474,6 +478,7 @@ SUBROUTINE QSPCIR
     !----------------------------------------------------
     !     Sets Qspec arrays for all design alphas or CLs
     !----------------------------------------------------
+    use m_spline
     INCLUDE 'XFOIL.INC'
     !
     DO 10 KQSP = 1, NQSP
@@ -493,6 +498,7 @@ SUBROUTINE MAPGEN(FFILT, N, X, Y)
     !     Fourier coefficients Cn, modifying them as needed
     !     to achieve specified constraints.
     !--------------------------------------------------------
+    use m_spline
     INCLUDE 'CIRCLE.INC'
     DIMENSION X(NC), Y(NC)
     !
@@ -581,6 +587,7 @@ SUBROUTINE SCINIT(N, X, XP, Y, YP, S, SLE)
     !     A by-product is the complex-mapping coefficients Cn.
     !     (see CNCALC header for more info).
     !----------------------------------------------------------
+    use m_spline
     DIMENSION X(N), XP(N), Y(N), YP(N), S(N)
     !
     INCLUDE 'CIRCLE.INC'
@@ -771,6 +778,7 @@ SUBROUTINE CNCALC(QC, LSYMM)
     !     If LSYMM=t, then the Real(Cn) change from current
     !     Cn values is doubled, and Imag(Cn) is zeroed out.
     !----------------------------------------------------------
+    use m_spline
     REAL QC(NC)
     LOGICAL LSYMM
     !
@@ -864,6 +872,7 @@ END
 
 
 SUBROUTINE CNSYMM
+    use m_spline
     INCLUDE 'CIRCLE.INC'
     !
     !---- eliminate imaginary (camber) parts of mapping coefficients
@@ -882,6 +891,7 @@ SUBROUTINE PIQSUM
     !     Inverse-transform to get back modified 
     !     speed function and its conjugate.
     !---------------------------------------------
+    use m_spline
     INCLUDE 'CIRCLE.INC'
     COMPLEX ZSUM
     !
@@ -903,6 +913,7 @@ SUBROUTINE CNFILT(FFILT)
     !     Filters out upper harmonics 
     !     with modified Hanning filter.
     !-------------------------------------
+    use m_spline
     INCLUDE 'CIRCLE.INC'
     !
     IF(FFILT.EQ.0.0) RETURN
@@ -928,6 +939,7 @@ SUBROUTINE ZCCALC(MTEST)
     !     the geometry sensitivities dz/dCn  (1 < n < MTEST)
     !     for each point.
     !--------------------------------------------------------
+    use m_spline
     INCLUDE 'CIRCLE.INC'
     COMPLEX DZDW1, DZDW2, DZ_PIQ1, DZ_PIQ2
     !
@@ -988,6 +1000,7 @@ SUBROUTINE ZCNORM(MTEST)
     !     the old chord and angle, and resets the
     !     influence coefficients  dz/dCn .
     !-----------------------------------------------
+    use m_spline
     INCLUDE 'CIRCLE.INC'
     COMPLEX DZDW1, DZDW2
     COMPLEX ZCNEW, ZLE, ZTE, ZC_ZTE, ZTE_CN(IMX / 4)
@@ -1040,6 +1053,7 @@ SUBROUTINE QCCALC(ISPEC, ALFA, CL, CM, MINF, QINF, &
     !     ISPEC=1 or 2.  The CL calculation uses the 
     !     transformed Karman-Tsien Cp.
     !---------------------------------------------------
+    use m_spline
     INCLUDE 'CIRCLE.INC'
     COMPLEX DZ, ZA, EIA, CMT, CFT, CFT_A
     DIMENSION XCIR(NC), YCIR(NC), SCIR(NC), QCIR(NC)
@@ -1151,6 +1165,7 @@ SUBROUTINE QSPINT(ALQSP, QSPEC, QINF, MINF, CLQSP, CMQSP)
     !     Integrates circle-plane array surface 
     !     pressures to get CL and CM
     !--------------------------------------------
+    use m_spline
     INCLUDE 'CIRCLE.INC'
     DIMENSION QSPEC(NC)
     REAL MINF
@@ -1199,6 +1214,7 @@ SUBROUTINE FTP
     !----------------------------------------------------------------
     !     Slow-Fourier-Transform P(w) using Trapezoidal integration.
     !----------------------------------------------------------------
+    use m_spline
     INCLUDE 'CIRCLE.INC'
     COMPLEX ZSUM
     !
@@ -1224,6 +1240,7 @@ SUBROUTINE EIWSET(NC1)
     !     corresponding complex unit numbers exp(inw)
     !     for Slow Fourier Transform operations.
     !----------------------------------------------------
+    use m_spline
     INCLUDE 'CIRCLE.INC'
     !
     PI = 4.0 * ATAN(1.0)
@@ -1271,6 +1288,7 @@ SUBROUTINE PERT(QSPEC)
     !     Calculates the perturbed geometry resulting from
     !     one Cn mapping coefficient being perturbed by user.
     !--------------------------------------------------------
+    use m_spline
     INCLUDE 'CIRCLE.INC'
     DIMENSION QSPEC(ICX)
     !
@@ -1363,6 +1381,7 @@ SUBROUTINE CNDUMP(LU)
     !--------------------------------------------------------
     !     Writes out the Fourier coefficients Cn
     !--------------------------------------------------------
+    use m_spline
     INCLUDE 'CIRCLE.INC'
     !
     do 700 m = 0, mc
@@ -1382,6 +1401,7 @@ END
 
 
 SUBROUTINE GETVOV(KQSP)
+    use m_spline
     INCLUDE 'XFOIL.INC'
     !LED ENTIRE ROUTINE
     !
@@ -1446,6 +1466,7 @@ END
 
 
 SUBROUTINE ZLEFIND(ZLE, ZC, WC, NC, PIQ, AGTE)
+    use m_spline
     COMPLEX ZLE, ZC(*), PIQ(*)
     DIMENSION WC(*)
     !

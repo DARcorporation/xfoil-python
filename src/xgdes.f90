@@ -20,6 +20,7 @@
 !
 
 SUBROUTINE ABCOPY(LCONF)
+    use m_spline
     INCLUDE 'XFOIL.INC'
     LOGICAL LCONF
     !
@@ -98,6 +99,7 @@ END
 
 
 SUBROUTINE GETXYF(X, XP, Y, YP, S, N, TOPS, BOTS, XF, YF)
+    use m_spline
     DIMENSION X(N), XP(N), Y(N), YP(N), S(N)
     !
     IF(XF .EQ. -999.0)&

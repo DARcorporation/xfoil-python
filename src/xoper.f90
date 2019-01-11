@@ -19,6 +19,7 @@
 !***********************************************************************
 !
 SUBROUTINE OPER
+        use m_spline
     INCLUDE 'XFOIL.INC'
     CHARACTER*1 ANS
     CHARACTER*4 COMAND, COMOLD
@@ -1336,6 +1337,7 @@ SUBROUTINE FCPMIN
     !------------------------------------------------
     !     Finds minimum Cp on dist for cavitation work
     !------------------------------------------------
+        use m_spline
     INCLUDE 'XFOIL.INC'
     !
     XCPMNI = X(1)
@@ -1371,6 +1373,7 @@ END
 
 
 SUBROUTINE MRSHOW(LM, LR)
+        use m_spline
     INCLUDE 'XFOIL.INC'
     LOGICAL LM, LR
     !
@@ -1398,6 +1401,7 @@ END
 
 
 SUBROUTINE NAMMOD(NAME, KDEL, KMOD0)
+        use m_spline
     CHARACTER*(*) NAME
     !-------------------------------------------
     !     Requests new modified NAME with 
@@ -1460,6 +1464,7 @@ END
 
 
 SUBROUTINE BLDUMP(FNAME1)
+        use m_spline
     INCLUDE 'XFOIL.INC'
     CHARACTER*(*) FNAME1
     !
@@ -1622,6 +1627,7 @@ END
 
 
 SUBROUTINE BLDUMP2(FNAME1)
+        use m_spline
     INCLUDE 'XFOIL.INC'
     CHARACTER*(*) FNAME1
     !
@@ -1835,6 +1841,7 @@ END
 
 
 SUBROUTINE CPDUMP(FNAME1)
+        use m_spline
     INCLUDE 'XFOIL.INC'
     CHARACTER*(*) FNAME1
     !
@@ -1925,6 +1932,7 @@ SUBROUTINE MHINGE
     !     Calculates the hinge moment of the flap about
     !     (XOF,YOF) by integrating surface pressures.
     !----------------------------------------------------
+        use m_spline
     INCLUDE 'XFOIL.INC'
     !
     IF(.NOT.LFLAP) THEN
@@ -2065,6 +2073,7 @@ SUBROUTINE VPAR
     !---------------------------------------------
     !     Viscous parameter change menu routine.
     !---------------------------------------------
+    use m_spline
     INCLUDE 'XFOIL.INC'
     INCLUDE 'BLPAR.INC'
     CHARACTER*4 COMAND
@@ -2308,6 +2317,7 @@ SUBROUTINE SPECAL
     !-----------------------------------
     !     Converges to specified alpha.
     !-----------------------------------
+    use m_spline
     INCLUDE 'XFOIL.INC'
     REAL MINF_CLM, MSQ_CLM
     !
@@ -2396,6 +2406,7 @@ SUBROUTINE SPECCL
     !-----------------------------------------
     !     Converges to specified inviscid CL.
     !-----------------------------------------
+    use m_spline
     INCLUDE 'XFOIL.INC'
     !
     !---- calculate surface vorticity distributions for alpha = 0, 90 degrees
@@ -2464,6 +2475,7 @@ SUBROUTINE VISCAL(NITER1)
     !----------------------------------------
     !     Converges viscous operating point
     !----------------------------------------
+    use m_spline
     INCLUDE 'XFOIL.INC'
     !
     !---- convergence tolerance
@@ -2681,6 +2693,7 @@ END
 
 
 subroutine dcpout
+    use m_spline
     INCLUDE 'XFOIL.INC'
     !
     !     Computes and writes upper and lower-surface 

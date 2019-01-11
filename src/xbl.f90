@@ -19,40 +19,40 @@
 !***********************************************************************
 
 SUBROUTINE PREPTRS
+    use m_spline
     INCLUDE 'XBL.INC'
-    X1      => COM1( 1); U1      => COM1( 2); T1      => COM1( 3); D1      => COM1( 4); S1      => COM1( 5)
-    AMPL1   => COM1( 6); U1_UEI  => COM1( 7); U1_MS   => COM1( 8); DW1     => COM1( 9); H1      => COM1(10)
-    H1_T1   => COM1(11); H1_D1   => COM1(12); M1      => COM1(13); M1_U1   => COM1(14); M1_MS   => COM1(15)
-    R1      => COM1(16); R1_U1   => COM1(17); R1_MS   => COM1(18); V1      => COM1(19); V1_U1   => COM1(20)
-    V1_MS   => COM1(21); V1_RE   => COM1(22); HK1     => COM1(23); HK1_U1  => COM1(24); HK1_T1  => COM1(25)
-    HK1_D1  => COM1(26); HK1_MS  => COM1(27); HS1     => COM1(28); HS1_U1  => COM1(29); HS1_T1  => COM1(30)
-    HS1_D1  => COM1(31); HS1_MS  => COM1(32); HS1_RE  => COM1(33); HC1     => COM1(34); HC1_U1  => COM1(35)
-    HC1_T1  => COM1(36); HC1_D1  => COM1(37); HC1_MS  => COM1(38); RT1     => COM1(39); RT1_U1  => COM1(40)
-    RT1_T1  => COM1(41); RT1_MS  => COM1(42); RT1_RE  => COM1(43); CF1     => COM1(44); CF1_U1  => COM1(45)
-    CF1_T1  => COM1(46); CF1_D1  => COM1(47); CF1_MS  => COM1(48); CF1_RE  => COM1(49); DI1     => COM1(50)
-    DI1_U1  => COM1(51); DI1_T1  => COM1(52); DI1_D1  => COM1(53); DI1_S1  => COM1(54); DI1_MS  => COM1(55)
-    DI1_RE  => COM1(56); US1     => COM1(57); US1_U1  => COM1(58); US1_T1  => COM1(59); US1_D1  => COM1(60)
-    US1_MS  => COM1(61); US1_RE  => COM1(62); CQ1     => COM1(63); CQ1_U1  => COM1(64); CQ1_T1  => COM1(65)
-    CQ1_D1  => COM1(66); CQ1_MS  => COM1(67); CQ1_RE  => COM1(68); DE1     => COM1(69); DE1_U1  => COM1(70)
-    DE1_T1  => COM1(71); DE1_D1  => COM1(72); DE1_MS  => COM1(73)
+    X1 => COM1(1); U1 => COM1(2); T1 => COM1(3); D1 => COM1(4); S1 => COM1(5)
+    AMPL1 => COM1(6); U1_UEI => COM1(7); U1_MS => COM1(8); DW1 => COM1(9); H1 => COM1(10)
+    H1_T1 => COM1(11); H1_D1 => COM1(12); M1 => COM1(13); M1_U1 => COM1(14); M1_MS => COM1(15)
+    R1 => COM1(16); R1_U1 => COM1(17); R1_MS => COM1(18); V1 => COM1(19); V1_U1 => COM1(20)
+    V1_MS => COM1(21); V1_RE => COM1(22); HK1 => COM1(23); HK1_U1 => COM1(24); HK1_T1 => COM1(25)
+    HK1_D1 => COM1(26); HK1_MS => COM1(27); HS1 => COM1(28); HS1_U1 => COM1(29); HS1_T1 => COM1(30)
+    HS1_D1 => COM1(31); HS1_MS => COM1(32); HS1_RE => COM1(33); HC1 => COM1(34); HC1_U1 => COM1(35)
+    HC1_T1 => COM1(36); HC1_D1 => COM1(37); HC1_MS => COM1(38); RT1 => COM1(39); RT1_U1 => COM1(40)
+    RT1_T1 => COM1(41); RT1_MS => COM1(42); RT1_RE => COM1(43); CF1 => COM1(44); CF1_U1 => COM1(45)
+    CF1_T1 => COM1(46); CF1_D1 => COM1(47); CF1_MS => COM1(48); CF1_RE => COM1(49); DI1 => COM1(50)
+    DI1_U1 => COM1(51); DI1_T1 => COM1(52); DI1_D1 => COM1(53); DI1_S1 => COM1(54); DI1_MS => COM1(55)
+    DI1_RE => COM1(56); US1 => COM1(57); US1_U1 => COM1(58); US1_T1 => COM1(59); US1_D1 => COM1(60)
+    US1_MS => COM1(61); US1_RE => COM1(62); CQ1 => COM1(63); CQ1_U1 => COM1(64); CQ1_T1 => COM1(65)
+    CQ1_D1 => COM1(66); CQ1_MS => COM1(67); CQ1_RE => COM1(68); DE1 => COM1(69); DE1_U1 => COM1(70)
+    DE1_T1 => COM1(71); DE1_D1 => COM1(72); DE1_MS => COM1(73)
 
-    X2      => COM2( 1); U2      => COM2( 2); T2      => COM2( 3); D2      => COM2( 4); S2      => COM2( 5)
-    AMPL2   => COM2( 6); U2_UEI  => COM2( 7); U2_MS   => COM2( 8); DW2     => COM2( 9); H2      => COM2(10)
-    H2_T2   => COM2(11); H2_D2   => COM2(12); M2      => COM2(13); M2_U2   => COM2(14); M2_MS   => COM2(15)
-    R2      => COM2(16); R2_U2   => COM2(17); R2_MS   => COM2(18); V2      => COM2(19); V2_U2   => COM2(20)
-    V2_MS   => COM2(21); V2_RE   => COM2(22); HK2     => COM2(23); HK2_U2  => COM2(24); HK2_T2  => COM2(25)
-    HK2_D2  => COM2(26); HK2_MS  => COM2(27); HS2     => COM2(28); HS2_U2  => COM2(29); HS2_T2  => COM2(30)
-    HS2_D2  => COM2(31); HS2_MS  => COM2(32); HS2_RE  => COM2(33); HC2     => COM2(34); HC2_U2  => COM2(35)
-    HC2_T2  => COM2(36); HC2_D2  => COM2(37); HC2_MS  => COM2(38); RT2     => COM2(39); RT2_U2  => COM2(40)
-    RT2_T2  => COM2(41); RT2_MS  => COM2(42); RT2_RE  => COM2(43); CF2     => COM2(44); CF2_U2  => COM2(45)
-    CF2_T2  => COM2(46); CF2_D2  => COM2(47); CF2_MS  => COM2(48); CF2_RE  => COM2(49); DI2     => COM2(50)
-    DI2_U2  => COM2(51); DI2_T2  => COM2(52); DI2_D2  => COM2(53); DI2_S2  => COM2(54); DI2_MS  => COM2(55)
-    DI2_RE  => COM2(56); US2     => COM2(57); US2_U2  => COM2(58); US2_T2  => COM2(59); US2_D2  => COM2(60)
-    US2_MS  => COM2(61); US2_RE  => COM2(62); CQ2     => COM2(63); CQ2_U2  => COM2(64); CQ2_T2  => COM2(65)
-    CQ2_D2  => COM2(66); CQ2_MS  => COM2(67); CQ2_RE  => COM2(68); DE2     => COM2(69); DE2_U2  => COM2(70)
-    DE2_T2  => COM2(71); DE2_D2  => COM2(72); DE2_MS  => COM2(73)
+    X2 => COM2(1); U2 => COM2(2); T2 => COM2(3); D2 => COM2(4); S2 => COM2(5)
+    AMPL2 => COM2(6); U2_UEI => COM2(7); U2_MS => COM2(8); DW2 => COM2(9); H2 => COM2(10)
+    H2_T2 => COM2(11); H2_D2 => COM2(12); M2 => COM2(13); M2_U2 => COM2(14); M2_MS => COM2(15)
+    R2 => COM2(16); R2_U2 => COM2(17); R2_MS => COM2(18); V2 => COM2(19); V2_U2 => COM2(20)
+    V2_MS => COM2(21); V2_RE => COM2(22); HK2 => COM2(23); HK2_U2 => COM2(24); HK2_T2 => COM2(25)
+    HK2_D2 => COM2(26); HK2_MS => COM2(27); HS2 => COM2(28); HS2_U2 => COM2(29); HS2_T2 => COM2(30)
+    HS2_D2 => COM2(31); HS2_MS => COM2(32); HS2_RE => COM2(33); HC2 => COM2(34); HC2_U2 => COM2(35)
+    HC2_T2 => COM2(36); HC2_D2 => COM2(37); HC2_MS => COM2(38); RT2 => COM2(39); RT2_U2 => COM2(40)
+    RT2_T2 => COM2(41); RT2_MS => COM2(42); RT2_RE => COM2(43); CF2 => COM2(44); CF2_U2 => COM2(45)
+    CF2_T2 => COM2(46); CF2_D2 => COM2(47); CF2_MS => COM2(48); CF2_RE => COM2(49); DI2 => COM2(50)
+    DI2_U2 => COM2(51); DI2_T2 => COM2(52); DI2_D2 => COM2(53); DI2_S2 => COM2(54); DI2_MS => COM2(55)
+    DI2_RE => COM2(56); US2 => COM2(57); US2_U2 => COM2(58); US2_T2 => COM2(59); US2_D2 => COM2(60)
+    US2_MS => COM2(61); US2_RE => COM2(62); CQ2 => COM2(63); CQ2_U2 => COM2(64); CQ2_T2 => COM2(65)
+    CQ2_D2 => COM2(66); CQ2_MS => COM2(67); CQ2_RE => COM2(68); DE2 => COM2(69); DE2_U2 => COM2(70)
+    DE2_T2 => COM2(71); DE2_D2 => COM2(72); DE2_MS => COM2(73)
 END
-
 
 
 SUBROUTINE SETBL
@@ -63,6 +63,7 @@ SUBROUTINE SETBL
     !     BL system coefficients are then
     !     incorporated into the global Newton system.
     !-------------------------------------------------
+    use m_spline
     INCLUDE 'XFOIL.INC'
     INCLUDE 'XBL.INC'
     REAL USAV(IVX, 2)
@@ -558,6 +559,7 @@ SUBROUTINE IBLSYS
     !     Sets the BL Newton system line number
     !     corresponding to each BL station.
     !---------------------------------------------
+    use m_spline
     INCLUDE 'XFOIL.INC'
     INCLUDE 'XBL.INC'
     IV = 0
@@ -583,6 +585,7 @@ SUBROUTINE MRCHUE
     !     upstream is prescribed instead.  Continuous
     !     checking of transition onset is performed.
     !----------------------------------------------------
+    use m_spline
     INCLUDE 'XFOIL.INC'
     INCLUDE 'XBL.INC'
     LOGICAL DIRECT
@@ -918,6 +921,7 @@ SUBROUTINE MRCHDU
     !     singularity is never encountered.  Continuous
     !     checking of transition onset is performed.
     !----------------------------------------------------
+    use m_spline
     INCLUDE 'XFOIL.INC'
     INCLUDE 'XBL.INC'
     REAL VTMP(4, 5), VZTMP(4)
@@ -1233,6 +1237,7 @@ SUBROUTINE XIFSET(IS)
     !-----------------------------------------------------
     !     Sets forced-transition BL coordinate locations.
     !-----------------------------------------------------
+    use m_spline
     INCLUDE 'XFOIL.INC'
     INCLUDE 'XBL.INC'
     !
@@ -1296,22 +1301,22 @@ SUBROUTINE UPDATE
     INCLUDE 'XFOIL.INC'
     REAL UNEW(IVX, 2), U_AC(IVX, 2)
     REAL QNEW(IQX), Q_AC(IQX)
-    EQUIVALENCE (VA(1, 1, 1), UNEW(1, 1)) ,&
+    EQUIVALENCE (VA(1, 1, 1), UNEW(1, 1)), &
             (VB(1, 1, 1), QNEW(1))
-    EQUIVALENCE (VA(1, 1, IVX), U_AC(1, 1)) ,&
+    EQUIVALENCE (VA(1, 1, IVX), U_AC(1, 1)), &
             (VB(1, 1, IVX), Q_AC(1))
     REAL MSQ
     !
     !---- max allowable alpha changes per iteration
-    DALMAX = 0.5*DTOR
-    DALMIN = -0.5*DTOR
+    DALMAX = 0.5 * DTOR
+    DALMIN = -0.5 * DTOR
     !
     !---- max allowable CL change per iteration
     DCLMAX = 0.5
     DCLMIN = -0.5
-    IF(MATYP.NE.1) DCLMIN = MAX(-0.5, -0.9*CL)
+    IF(MATYP.NE.1) DCLMIN = MAX(-0.5, -0.9 * CL)
     !
-    HSTINV = GAMM1*(MINF/QINF)**2 / (1.0 + 0.5*GAMM1*MINF**2)
+    HSTINV = GAMM1 * (MINF / QINF)**2 / (1.0 + 0.5 * GAMM1 * MINF**2)
     !
     !---- calculate new Ue distribution assuming no under-relaxation
     !-    also set the sensitivity of Ue wrt to alpha or Re
@@ -1325,9 +1330,9 @@ SUBROUTINE UPDATE
                 DO 1000 JBL = 2, NBL(JS)
                     J = IPAN(JBL, JS)
                     JV = ISYS(JBL, JS)
-                    UE_M = -VTI(IBL, IS)*VTI(JBL, JS)*DIJ(I, J)
-                    DUI = DUI    + UE_M*(MASS(JBL, JS)+VDEL(3, 1, JV))
-                    DUI_AC = DUI_AC + UE_M*(-VDEL(3, 2, JV))
+                    UE_M = -VTI(IBL, IS) * VTI(JBL, JS) * DIJ(I, J)
+                    DUI = DUI + UE_M * (MASS(JBL, JS) + VDEL(3, 1, JV))
+                    DUI_AC = DUI_AC + UE_M * (-VDEL(3, 2, JV))
                 1000       CONTINUE
             100     CONTINUE
             !
@@ -1339,7 +1344,7 @@ SUBROUTINE UPDATE
             ENDIF
             !
             UNEW(IBL, IS) = UINV(IBL, IS) + DUI
-            U_AC(IBL, IS) = UINV_AC      + DUI_AC
+            U_AC(IBL, IS) = UINV_AC + DUI_AC
             !
         10   CONTINUE
     1 CONTINUE
@@ -1348,8 +1353,8 @@ SUBROUTINE UPDATE
     DO 2 IS = 1, 2
         DO 20 IBL = 2, IBLTE(IS)
             I = IPAN(IBL, IS)
-            QNEW(I) = VTI(IBL, IS)*UNEW(IBL, IS)
-            Q_AC(I) = VTI(IBL, IS)*U_AC(IBL, IS)
+            QNEW(I) = VTI(IBL, IS) * UNEW(IBL, IS)
+            Q_AC(I) = VTI(IBL, IS) * U_AC(IBL, IS)
         20   CONTINUE
     2 CONTINUE
     !
@@ -1358,11 +1363,11 @@ SUBROUTINE UPDATE
     CA = COS(ALFA)
     !
     BETA = SQRT(1.0 - MINF**2)
-    BETA_MSQ = -0.5/BETA
+    BETA_MSQ = -0.5 / BETA
     !
-    BFAC     = 0.5*MINF**2 / (1.0 + BETA)
-    BFAC_MSQ = 0.5         / (1.0 + BETA)&
-            - BFAC        / (1.0 + BETA) * BETA_MSQ
+    BFAC = 0.5 * MINF**2 / (1.0 + BETA)
+    BFAC_MSQ = 0.5 / (1.0 + BETA)&
+            - BFAC / (1.0 + BETA) * BETA_MSQ
     !
     CLNEW = 0.
     CL_A = 0.
@@ -1370,37 +1375,37 @@ SUBROUTINE UPDATE
     CL_AC = 0.
     !
     I = 1
-    CGINC = 1.0 - (QNEW(I)/QINF)**2
-    CPG1 = CGINC / (BETA + BFAC*CGINC)
-    CPG1_MS = -CPG1/(BETA + BFAC*CGINC)*(BETA_MSQ + BFAC_MSQ*CGINC)
+    CGINC = 1.0 - (QNEW(I) / QINF)**2
+    CPG1 = CGINC / (BETA + BFAC * CGINC)
+    CPG1_MS = -CPG1 / (BETA + BFAC * CGINC) * (BETA_MSQ + BFAC_MSQ * CGINC)
     !
-    CPI_Q = -2.0*QNEW(I)/QINF**2
-    CPC_CPI = (1.0 - BFAC*CPG1)/ (BETA + BFAC*CGINC)
-    CPG1_AC = CPC_CPI*CPI_Q*Q_AC(I)
+    CPI_Q = -2.0 * QNEW(I) / QINF**2
+    CPC_CPI = (1.0 - BFAC * CPG1) / (BETA + BFAC * CGINC)
+    CPG1_AC = CPC_CPI * CPI_Q * Q_AC(I)
     !
     DO 3 I = 1, N
-        IP = I+1
+        IP = I + 1
         IF(I.EQ.N) IP = 1
         !
-        CGINC = 1.0 - (QNEW(IP)/QINF)**2
-        CPG2 = CGINC / (BETA + BFAC*CGINC)
-        CPG2_MS = -CPG2/(BETA + BFAC*CGINC)*(BETA_MSQ + BFAC_MSQ*CGINC)
+        CGINC = 1.0 - (QNEW(IP) / QINF)**2
+        CPG2 = CGINC / (BETA + BFAC * CGINC)
+        CPG2_MS = -CPG2 / (BETA + BFAC * CGINC) * (BETA_MSQ + BFAC_MSQ * CGINC)
         !
-        CPI_Q = -2.0*QNEW(IP)/QINF**2
-        CPC_CPI = (1.0 - BFAC*CPG2)/ (BETA + BFAC*CGINC)
-        CPG2_AC = CPC_CPI*CPI_Q*Q_AC(IP)
+        CPI_Q = -2.0 * QNEW(IP) / QINF**2
+        CPC_CPI = (1.0 - BFAC * CPG2) / (BETA + BFAC * CGINC)
+        CPG2_AC = CPC_CPI * CPI_Q * Q_AC(IP)
         !
-        DX =  (X(IP) - X(I))*CA + (Y(IP) - Y(I))*SA
-        DX_A = -(X(IP) - X(I))*SA + (Y(IP) - Y(I))*CA
+        DX = (X(IP) - X(I)) * CA + (Y(IP) - Y(I)) * SA
+        DX_A = -(X(IP) - X(I)) * SA + (Y(IP) - Y(I)) * CA
         !
-        AG = 0.5*(CPG2    + CPG1)
-        AG_MS = 0.5*(CPG2_MS + CPG1_MS)
-        AG_AC = 0.5*(CPG2_AC + CPG1_AC)
+        AG = 0.5 * (CPG2 + CPG1)
+        AG_MS = 0.5 * (CPG2_MS + CPG1_MS)
+        AG_AC = 0.5 * (CPG2_AC + CPG1_AC)
         !
-        CLNEW = CLNEW + DX  *AG
-        CL_A = CL_A  + DX_A*AG
-        CL_MS = CL_MS + DX  *AG_MS
-        CL_AC = CL_AC + DX  *AG_AC
+        CLNEW = CLNEW + DX * AG
+        CL_A = CL_A + DX_A * AG
+        CL_MS = CL_MS + DX * AG_MS
+        CL_AC = CL_AC + DX * AG_AC
         !
         CPG1 = CPG2
         CPG1_MS = CPG2_MS
@@ -1414,11 +1419,11 @@ SUBROUTINE UPDATE
         !===== alpha is prescribed: AC is CL
         !
         !----- set change in Re to account for CL changing, since Re = Re(CL)
-        DAC = (CLNEW - CL) / (1.0 - CL_AC - CL_MS*2.0*MINF*MINF_CL)
+        DAC = (CLNEW - CL) / (1.0 - CL_AC - CL_MS * 2.0 * MINF * MINF_CL)
         !
         !----- set under-relaxation factor if Re change is too large
-        IF(RLX*DAC .GT. DCLMAX) RLX = DCLMAX/DAC
-        IF(RLX*DAC .LT. DCLMIN) RLX = DCLMIN/DAC
+        IF(RLX * DAC .GT. DCLMAX) RLX = DCLMAX / DAC
+        IF(RLX * DAC .LT. DCLMIN) RLX = DCLMIN / DAC
         !
     ELSE
         !===== CL is prescribed: AC is alpha
@@ -1427,8 +1432,8 @@ SUBROUTINE UPDATE
         DAC = (CLNEW - CLSPEC) / (0.0 - CL_AC - CL_A)
         !
         !----- set under-relaxation factor if alpha change is too large
-        IF(RLX*DAC .GT. DALMAX) RLX = DALMAX/DAC
-        IF(RLX*DAC .LT. DALMIN) RLX = DALMIN/DAC
+        IF(RLX * DAC .GT. DALMAX) RLX = DALMAX / DAC
+        IF(RLX * DAC .LT. DALMIN) RLX = DALMIN / DAC
         !
     ENDIF
     !
@@ -1446,24 +1451,24 @@ SUBROUTINE UPDATE
 
 
             !-------- set changes without underrelaxation
-            DCTAU = VDEL(1, 1, IV) - DAC*VDEL(1, 2, IV)
-            DTHET = VDEL(2, 1, IV) - DAC*VDEL(2, 2, IV)
-            DMASS = VDEL(3, 1, IV) - DAC*VDEL(3, 2, IV)
-            DUEDG = UNEW(IBL, IS) + DAC*U_AC(IBL, IS)  -  UEDG(IBL, IS)
-            DDSTR = (DMASS - DSTR(IBL, IS)*DUEDG)/UEDG(IBL, IS)
+            DCTAU = VDEL(1, 1, IV) - DAC * VDEL(1, 2, IV)
+            DTHET = VDEL(2, 1, IV) - DAC * VDEL(2, 2, IV)
+            DMASS = VDEL(3, 1, IV) - DAC * VDEL(3, 2, IV)
+            DUEDG = UNEW(IBL, IS) + DAC * U_AC(IBL, IS) - UEDG(IBL, IS)
+            DDSTR = (DMASS - DSTR(IBL, IS) * DUEDG) / UEDG(IBL, IS)
             !
             !-------- normalize changes
             IF(IBL.LT.ITRAN(IS)) DN1 = DCTAU / 10.0
             IF(IBL.GE.ITRAN(IS)) DN1 = DCTAU / CTAU(IBL, IS)
             DN2 = DTHET / THET(IBL, IS)
             DN3 = DDSTR / DSTR(IBL, IS)
-            DN4 = ABS(DUEDG)/0.25
+            DN4 = ABS(DUEDG) / 0.25
             !
             !-------- accumulate for rms change
             RMSBL = RMSBL + DN1**2 + DN2**2 + DN3**2 + DN4**2
             !
             !-------- see if Ctau needs underrelaxation
-            RDN1 = RLX*DN1
+            RDN1 = RLX * DN1
             IF(ABS(DN1) .GT. ABS(RMXBL)) THEN
                 RMXBL = DN1
                 IF(IBL.LT.ITRAN(IS)) VMXBL = 'n'
@@ -1471,56 +1476,56 @@ SUBROUTINE UPDATE
                 IMXBL = IBL
                 ISMXBL = IS
             ENDIF
-            IF(RDN1 .GT. DHI) RLX = DHI/DN1
-            IF(RDN1 .LT. DLO) RLX = DLO/DN1
+            IF(RDN1 .GT. DHI) RLX = DHI / DN1
+            IF(RDN1 .LT. DLO) RLX = DLO / DN1
             !
             !-------- see if Theta needs underrelaxation
-            RDN2 = RLX*DN2
+            RDN2 = RLX * DN2
             IF(ABS(DN2) .GT. ABS(RMXBL)) THEN
                 RMXBL = DN2
                 VMXBL = 'T'
                 IMXBL = IBL
                 ISMXBL = IS
             ENDIF
-            IF(RDN2 .GT. DHI) RLX = DHI/DN2
-            IF(RDN2 .LT. DLO) RLX = DLO/DN2
+            IF(RDN2 .GT. DHI) RLX = DHI / DN2
+            IF(RDN2 .LT. DLO) RLX = DLO / DN2
             !
             !-------- see if Dstar needs underrelaxation
-            RDN3 = RLX*DN3
+            RDN3 = RLX * DN3
             IF(ABS(DN3) .GT. ABS(RMXBL)) THEN
                 RMXBL = DN3
                 VMXBL = 'D'
                 IMXBL = IBL
                 ISMXBL = IS
             ENDIF
-            IF(RDN3 .GT. DHI) RLX = DHI/DN3
-            IF(RDN3 .LT. DLO) RLX = DLO/DN3
+            IF(RDN3 .GT. DHI) RLX = DHI / DN3
+            IF(RDN3 .LT. DLO) RLX = DLO / DN3
             !
             !-------- see if Ue needs underrelaxation
-            RDN4 = RLX*DN4
+            RDN4 = RLX * DN4
             IF(ABS(DN4) .GT. ABS(RMXBL)) THEN
                 RMXBL = DUEDG
                 VMXBL = 'U'
                 IMXBL = IBL
                 ISMXBL = IS
             ENDIF
-            IF(RDN4 .GT. DHI) RLX = DHI/DN4
-            IF(RDN4 .LT. DLO) RLX = DLO/DN4
+            IF(RDN4 .GT. DHI) RLX = DHI / DN4
+            IF(RDN4 .LT. DLO) RLX = DLO / DN4
             !
         40   CONTINUE
     4 CONTINUE
     !
     !---- set true rms change
-    RMSBL = SQRT(RMSBL / (4.0*FLOAT(NBL(1)+NBL(2))))
+    RMSBL = SQRT(RMSBL / (4.0 * FLOAT(NBL(1) + NBL(2))))
     !
     !
     IF(LALFA) THEN
         !----- set underrelaxed change in Reynolds number from change in lift
-        CL = CL + RLX*DAC
+        CL = CL + RLX * DAC
     ELSE
         !----- set underrelaxed change in alpha
-        ALFA = ALFA + RLX*DAC
-        ADEG = ALFA/DTOR
+        ALFA = ALFA + RLX * DAC
+        ADEG = ALFA / DTOR
     ENDIF
     !
     !---- update BL variables with underrelaxed changes
@@ -1528,16 +1533,16 @@ SUBROUTINE UPDATE
         DO 50 IBL = 2, NBL(IS)
             IV = ISYS(IBL, IS)
             !
-            DCTAU = VDEL(1, 1, IV) - DAC*VDEL(1, 2, IV)
-            DTHET = VDEL(2, 1, IV) - DAC*VDEL(2, 2, IV)
-            DMASS = VDEL(3, 1, IV) - DAC*VDEL(3, 2, IV)
-            DUEDG = UNEW(IBL, IS) + DAC*U_AC(IBL, IS)  -  UEDG(IBL, IS)
-            DDSTR = (DMASS - DSTR(IBL, IS)*DUEDG)/UEDG(IBL, IS)
+            DCTAU = VDEL(1, 1, IV) - DAC * VDEL(1, 2, IV)
+            DTHET = VDEL(2, 1, IV) - DAC * VDEL(2, 2, IV)
+            DMASS = VDEL(3, 1, IV) - DAC * VDEL(3, 2, IV)
+            DUEDG = UNEW(IBL, IS) + DAC * U_AC(IBL, IS) - UEDG(IBL, IS)
+            DDSTR = (DMASS - DSTR(IBL, IS) * DUEDG) / UEDG(IBL, IS)
             !
-            CTAU(IBL, IS) = CTAU(IBL, IS) + RLX*DCTAU
-            THET(IBL, IS) = THET(IBL, IS) + RLX*DTHET
-            DSTR(IBL, IS) = DSTR(IBL, IS) + RLX*DDSTR
-            UEDG(IBL, IS) = UEDG(IBL, IS) + RLX*DUEDG
+            CTAU(IBL, IS) = CTAU(IBL, IS) + RLX * DCTAU
+            THET(IBL, IS) = THET(IBL, IS) + RLX * DTHET
+            DSTR(IBL, IS) = DSTR(IBL, IS) + RLX * DDSTR
+            UEDG(IBL, IS) = UEDG(IBL, IS) + RLX * DUEDG
             !
             IF(IBL.GT.IBLTE(IS)) THEN
                 IW = IBL - IBLTE(IS)
@@ -1548,15 +1553,15 @@ SUBROUTINE UPDATE
             !
             !-------- eliminate absurd transients
             IF(IBL.GE.ITRAN(IS))&
-                    CTAU(IBL, IS) = MIN(CTAU(IBL, IS) , 0.25)
+                    CTAU(IBL, IS) = MIN(CTAU(IBL, IS), 0.25)
             !
             IF(IBL.LE.IBLTE(IS)) THEN
                 HKLIM = 1.02
             ELSE
                 HKLIM = 1.00005
             ENDIF
-            MSQ = UEDG(IBL, IS)**2*HSTINV&
-                    / (GAMM1*(1.0 - 0.5*UEDG(IBL, IS)**2*HSTINV))
+            MSQ = UEDG(IBL, IS)**2 * HSTINV&
+                    / (GAMM1 * (1.0 - 0.5 * UEDG(IBL, IS)**2 * HSTINV))
             DSW = DSTR(IBL, IS) - DSWAKI
             CALL DSLIM(DSW, THET(IBL, IS), UEDG(IBL, IS), MSQ, HKLIM)
             DSTR(IBL, IS) = DSW + DSWAKI
@@ -1568,9 +1573,9 @@ SUBROUTINE UPDATE
         !
         !------ make sure there are no "islands" of negative Ue
         DO IBL = 3, IBLTE(IS)
-            IF(UEDG(IBL-1, IS) .GT. 0.0 .AND.&
+            IF(UEDG(IBL - 1, IS) .GT. 0.0 .AND.&
                     UEDG(IBL, IS) .LE. 0.0) THEN
-                UEDG(IBL, IS) = UEDG(IBL-1, IS)
+                UEDG(IBL, IS) = UEDG(IBL - 1, IS)
                 MASS(IBL, IS) = DSTR(IBL, IS) * UEDG(IBL, IS)
             ENDIF
         ENDDO
@@ -1578,35 +1583,33 @@ SUBROUTINE UPDATE
     !
     !
     !---- equate upper wake arrays to lower wake arrays
-    DO 6 KBL = 1, NBL(2)-IBLTE(2)
-        CTAU(IBLTE(1)+KBL, 1) = CTAU(IBLTE(2)+KBL, 2)
-        THET(IBLTE(1)+KBL, 1) = THET(IBLTE(2)+KBL, 2)
-        DSTR(IBLTE(1)+KBL, 1) = DSTR(IBLTE(2)+KBL, 2)
-        UEDG(IBLTE(1)+KBL, 1) = UEDG(IBLTE(2)+KBL, 2)
-        TAU(IBLTE(1)+KBL, 1) = TAU(IBLTE(2)+KBL, 2)
-        DIS(IBLTE(1)+KBL, 1) = DIS(IBLTE(2)+KBL, 2)
-        CTQ(IBLTE(1)+KBL, 1) = CTQ(IBLTE(2)+KBL, 2)
-        DELT(IBLTE(1)+KBL, 1) = DELT(IBLTE(2)+KBL, 2)
-        TSTR(IBLTE(1)+KBL, 1) = TSTR(IBLTE(2)+KBL, 2)
+    DO 6 KBL = 1, NBL(2) - IBLTE(2)
+        CTAU(IBLTE(1) + KBL, 1) = CTAU(IBLTE(2) + KBL, 2)
+        THET(IBLTE(1) + KBL, 1) = THET(IBLTE(2) + KBL, 2)
+        DSTR(IBLTE(1) + KBL, 1) = DSTR(IBLTE(2) + KBL, 2)
+        UEDG(IBLTE(1) + KBL, 1) = UEDG(IBLTE(2) + KBL, 2)
+        TAU(IBLTE(1) + KBL, 1) = TAU(IBLTE(2) + KBL, 2)
+        DIS(IBLTE(1) + KBL, 1) = DIS(IBLTE(2) + KBL, 2)
+        CTQ(IBLTE(1) + KBL, 1) = CTQ(IBLTE(2) + KBL, 2)
+        DELT(IBLTE(1) + KBL, 1) = DELT(IBLTE(2) + KBL, 2)
+        TSTR(IBLTE(1) + KBL, 1) = TSTR(IBLTE(2) + KBL, 2)
     6 CONTINUE
     !
     RETURN
 END
 
 
-
 SUBROUTINE DSLIM(DSTR, THET, UEDG, MSQ, HKLIM)
     IMPLICIT REAL (A-H, M, O-Z)
     !
-    H = DSTR/THET
+    H = DSTR / THET
     CALL HKIN(H, MSQ, HK, HK_H, HK_M)
     !
-    DH = MAX(0.0, HKLIM-HK) / HK_H
-    DSTR = DSTR + DH*THET
+    DH = MAX(0.0, HKLIM - HK) / HK_H
+    DSTR = DSTR + DH * THET
     !
     RETURN
 END
-
 
 
 SUBROUTINE BLPINI
@@ -1623,7 +1626,7 @@ SUBROUTINE BLPINI
     !
     DUXCON = 1.0
     !
-    CTCON = 0.5/(GACON**2 * GBCON)
+    CTCON = 0.5 / (GACON**2 * GBCON)
     !
     CFFAC = 1.0
     !

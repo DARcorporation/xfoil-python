@@ -19,6 +19,7 @@
 !***********************************************************************
 
 SUBROUTINE LEFIND(SLE, X, XP, Y, YP, S, N)
+    use m_spline
     DIMENSION X(*), XP(*), Y(*), YP(*), S(*)
     !------------------------------------------------------
     !     Locates leading edge spline-parameter value SLE
@@ -88,6 +89,7 @@ END
 
 
 SUBROUTINE SOPPS(SOPP, SI, X, XP, Y, YP, S, N, SLE)
+    use m_spline
     DIMENSION X(*), XP(*), Y(*), YP(*), S(*)
     !--------------------------------------------------
     !     Calculates arc length SOPP of point
@@ -159,6 +161,7 @@ END
 
 
 SUBROUTINE NORM(X, XP, Y, YP, S, N)
+    use m_spline
     DIMENSION X(*), XP(*), Y(*), YP(*), S(*)
     !-----------------------------------------------
     !     Scales coordinates to get unit chord
@@ -190,6 +193,7 @@ SUBROUTINE GEOPAR(X, XP, Y, YP, S, N, T, &
         EI11A, EI22A, APX1A, APX2A, &
         EI11T, EI22T, APX1T, APX2T, &
         THICK, CAMBR)
+        use m_spline
     DIMENSION X(*), XP(*), Y(*), YP(*), S(*), T(*)
     !
     PARAMETER (IBX = 600)
@@ -252,6 +256,7 @@ END
 
 SUBROUTINE AECALC(N, X, Y, T, ITYPE, &
         AREA, XCEN, YCEN, EI11, EI22, APX1, APX2)
+        use m_spline
     DIMENSION X(*), Y(*), T(*)
     !---------------------------------------------------------------
     !     Calculates geometric properties of shape X,Y
@@ -386,6 +391,7 @@ END
 
 SUBROUTINE TCCALC(X, XP, Y, YP, S, N, &
         THICK, XTHICK, CAMBR, XCAMBR)
+        use m_spline
     DIMENSION X(*), XP(*), Y(*), YP(*), S(*)
     !---------------------------------------------------------------
     !     Calculates max thickness and camber at airfoil points
@@ -451,6 +457,7 @@ END
 
 
 SUBROUTINE CANG(X, Y, N, IPRINT, IMAX, AMAX)
+        use m_spline
     DIMENSION X(*), Y(*)
     !-------------------------------------------------------------------
     !     IPRINT=2:   Displays all panel node corner angles
@@ -519,6 +526,7 @@ SUBROUTINE INTER(X0, XP0, Y0, YP0, S0, N0, SLE0, &
     !        each surface.
     !     .....................................................................
     !
+        use m_spline
     REAL X0(N0), Y0(N0), XP0(N0), YP0(N0), S0(N0)
     REAL X1(N1), Y1(N1), XP1(N1), YP1(N1), S1(N1)
     REAL X(*), Y(*)
@@ -583,6 +591,7 @@ SUBROUTINE INTERX(X0, XP0, Y0, YP0, S0, N0, SLE0, &
     !        each surface.
     !     .....................................................................
     !
+        use m_spline
     REAL X0(N0), Y0(N0), XP0(N0), YP0(N0), S0(N0)
     REAL X1(N1), Y1(N1), XP1(N1), YP1(N1), S1(N1)
     REAL X(N), Y(N)

@@ -22,6 +22,7 @@ PROGRAM XFOIL
     !--- Uncomment for Win32/Compaq Visual Fortran compiler (needed for GETARG)
     !cc      USE DFLIB
     !
+    use m_spline
     INCLUDE 'XFOIL.INC'
     CHARACTER*4 COMAND
     CHARACTER*128 COMARG, PROMPT
@@ -352,6 +353,7 @@ SUBROUTINE INIT
     !     Variable initialization/default routine.
     !     See file XFOIL.INC for variable description.
     !---------------------------------------------------
+    use m_spline
     INCLUDE 'XFOIL.INC'
     !
     PI = 4.0 * ATAN(1.0)
@@ -636,6 +638,7 @@ SUBROUTINE MRCL(CLS, M_CLS, R_CLS)
     !     from unit-CL values and specified CLS
     !     depending on MATYP,RETYP flags.
     !-------------------------------------------
+    use m_spline
     INCLUDE 'XFOIL.INC'
     REAL M_CLS
     !
@@ -715,6 +718,7 @@ END
 
 
 SUBROUTINE GETDEF(LU, FILNAM, LASK)
+    use m_spline
     CHARACTER*(*) FILNAM
     LOGICAL LASK
     !-----------------------------------------------------
@@ -823,6 +827,7 @@ SUBROUTINE WRTDEF(LU)
     !------------------------------------------
     !     Writes default parameters to unit LU
     !------------------------------------------
+    use m_spline
     INCLUDE 'XFOIL.INC'
     LOGICAL LCOLOR
     !
@@ -879,6 +884,7 @@ END
 
 
 SUBROUTINE COMSET
+    use m_spline
     INCLUDE 'XFOIL.INC'
     !
     !---- set Karman-Tsien parameter TKLAM
@@ -911,6 +917,7 @@ SUBROUTINE CPCALC(N, Q, QINF, MINF, CP)
     !---------------------------------------------
     !     Sets compressible Cp from speed.
     !---------------------------------------------
+    use m_spline
     DIMENSION Q(N), CP(N)
     REAL MINF
     !
@@ -947,6 +954,7 @@ SUBROUTINE CLCALC(N, X, Y, GAM, GAM_A, ALFA, MINF, QINF, &
     !     Integrates skin friction to get CDF.
     !     Calculates dCL/dAlpha for prescribed-CL routines.
     !-----------------------------------------------------------
+    use m_spline
     DIMENSION X(N), Y(N), GAM(N), GAM_A(N)
     REAL MINF
     !
@@ -1025,6 +1033,7 @@ END
 
 
 SUBROUTINE CDCALC
+    use m_spline
     INCLUDE 'XFOIL.INC'
     !
     SA = SIN(ALFA)
@@ -1070,6 +1079,7 @@ SUBROUTINE LOAD(FILNAM, ITYPE)
     !     Reads airfoil file into buffer airfoil
     !     and does various initial processesing on it.
     !------------------------------------------------------
+    use m_spline
     INCLUDE 'XFOIL.INC'
     CHARACTER*(*) FILNAM
     !
@@ -1183,6 +1193,7 @@ SUBROUTINE SAVE(IFTYP, FNAME1)
     !--------------------------------
     !     Writes out current airfoil 
     !--------------------------------
+    use m_spline
     INCLUDE 'XFOIL.INC'
     CHARACTER*(*) FNAME1
     !
@@ -1286,6 +1297,7 @@ END
 
 
 SUBROUTINE ROTATE(X, Y, N, ALFA)
+    use m_spline
     DIMENSION X(N), Y(N)
     !
     SA = SIN(ALFA)
@@ -1306,6 +1318,7 @@ END
 
 
 SUBROUTINE NACA(IDES1)
+    use m_spline
     INCLUDE 'XFOIL.INC'
     !
     !---- number of points per side
@@ -1370,6 +1383,7 @@ SUBROUTINE PANGEN(SHOPAR)
     !     by setting a fictitious local curvature of
     !     CTRRAT*(LE curvature) there.
     !---------------------------------------------------
+    use m_spline
     INCLUDE 'XFOIL.INC'
     LOGICAL SHOPAR
     !
@@ -1868,6 +1882,7 @@ END
 
 
 SUBROUTINE GETPAN
+        use m_spline
     INCLUDE 'XFOIL.INC'
     LOGICAL LCHANGE
     CHARACTER*4 VAR
@@ -2002,6 +2017,7 @@ SUBROUTINE TECALC
     !     Calculates total and projected TE gap 
     !     areas and TE panel strengths.
     !-------------------------------------------
+        use m_spline
     INCLUDE 'XFOIL.INC'
     !
     !---- set TE base vector and TE bisector components
@@ -2045,6 +2061,7 @@ SUBROUTINE INTE
     !     Interpolates two airfoils into an intermediate shape.
     !     Extrapolation is also possible to a reasonable extent.
     !-----------------------------------------------------------
+        use m_spline
     INCLUDE 'XFOIL.INC'
     CHARACTER*2 CAIR
     INTEGER NINT(2)
@@ -2178,6 +2195,7 @@ SUBROUTINE INTX
     !     Interpolates two airfoils into an intermediate shape.
     !     Extrapolation is also possible to a reasonable extent.
     !-----------------------------------------------------------
+        use m_spline
     INCLUDE 'XFOIL.INC'
     CHARACTER*2 CAIR
     INTEGER NINT(2)

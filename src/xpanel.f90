@@ -20,6 +20,7 @@
 
 
 SUBROUTINE APCALC
+    use m_spline
     INCLUDE 'XFOIL.INC'
     !
     !---- set angles of airfoil panels
@@ -53,6 +54,7 @@ SUBROUTINE NCALC(X, Y, S, N, XN, YN)
     !     Calculates normal unit vector
     !     components at airfoil panel nodes
     !---------------------------------------
+    use m_spline
     DIMENSION X(N), Y(N), S(N), XN(N), YN(N)
     !
     IF(N.LE.1) RETURN

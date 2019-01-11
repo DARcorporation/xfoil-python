@@ -24,6 +24,7 @@ SUBROUTINE PLRSET(IP)
     !     Selects slot IP for saving polar.
     !     Resets all parameters if necessary.
     !--------------------------------------------------------------
+    use m_spline
     INCLUDE 'XFOIL.INC'
     LOGICAL ERROR
     !
@@ -136,6 +137,7 @@ END
 
 
 SUBROUTINE APCOPY(IP)
+    use m_spline
     INCLUDE 'XFOIL.INC'
     !
     NOLD = N
@@ -648,6 +650,7 @@ END
 
 
 SUBROUTINE PLXADD(LU, IP)
+    use m_spline
     INCLUDE 'XFOIL.INC'
     INTEGER NSIDE(2)
     !

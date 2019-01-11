@@ -23,6 +23,7 @@ SUBROUTINE QDES
     !     Mixed-Inverse design routine. Based on the 
     !     same panel formulation as basic analysis method.
     !------------------------------------------------------
+        use m_spline
     INCLUDE 'XFOIL.INC'
     CHARACTER*4 COMAND, COMOLD
     LOGICAL LRECALC
@@ -241,6 +242,7 @@ SUBROUTINE SPLQSP(KQSP)
     !     specially to avoid Gibbs-type problems from 
     !     blindly splining to the stagnation point.
     !------------------------------------------------------
+    use m_spline
     INCLUDE 'XFOIL.INC'
     !
     !---- usual spline with natural end BCs
@@ -269,6 +271,7 @@ SUBROUTINE SMOOQ(KQ1, KQ2, KQSP)
     !--------------------------------------------
     !     Smooths Qspec(s) inside target segment
     !--------------------------------------------
+    use m_spline
     INCLUDE 'XFOIL.INC'
     !
     !C---- calculate smoothing coordinate
