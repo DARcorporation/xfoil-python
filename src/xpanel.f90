@@ -20,6 +20,7 @@
 
 
 SUBROUTINE APCALC
+    use m_xutils
     use m_spline
     use i_xfoil
     !
@@ -54,6 +55,7 @@ SUBROUTINE NCALC(X, Y, S, N, XN, YN)
     !     Calculates normal unit vector
     !     components at airfoil panel nodes
     !---------------------------------------
+    use m_xutils
     use m_spline
     DIMENSION X(N), Y(N), S(N), XN(N), YN(N)
     !
@@ -116,6 +118,7 @@ SUBROUTINE PSILIN(I, XI, YI, NXI, NYI, PSI, PSI_NI, GEOLIN, SIGLIN)
     !          Airfoil:  1   < I < N
     !          Wake:     N+1 < I < N+NW
     !-----------------------------------------------------------------------
+    use m_xutils
     use i_xfoil
     REAL NXO, NYO, NXP, NYP, NXI, NYI
     LOGICAL GEOLIN, SIGLIN
@@ -812,6 +815,7 @@ SUBROUTINE PSWLIN(I, XI, YI, NXI, NYI, PSI, PSI_NI)
     !          Airfoil:  1   < I < N
     !          Wake:     N+1 < I < N+NW
     !--------------------------------------------------------------------
+    use m_xutils
     use i_xfoil
     REAL NXI, NYI
     !
@@ -991,6 +995,7 @@ SUBROUTINE GGCALC
     !     for alpha = 0, 90  degrees.  These are superimposed
     !     in SPECAL or SPECCL for specified alpha or CL.
     !--------------------------------------------------------------
+    use m_xutils
     use i_xfoil
     !
     !---- distance of internal control point ahead of sharp TE
@@ -1128,6 +1133,7 @@ SUBROUTINE QWCALC
     !     Sets inviscid tangential velocity for alpha = 0, 90
     !     on wake due to freestream and airfoil surface vorticity.
     !---------------------------------------------------------------
+    use m_xutils
     use i_xfoil
     !
     !---- first wake point (same as TE)
@@ -1150,6 +1156,7 @@ SUBROUTINE QDCALC
     !     Calculates source panel influence coefficient
     !     matrix for current airfoil and wake geometry.
     !-----------------------------------------------------
+    use m_xutils
     use i_xfoil
     !
     WRITE(*, *) 'Calculating source influence matrix ...'
@@ -1271,6 +1278,7 @@ SUBROUTINE XYWAKE
     !     Sets wake coordinate array for current surface 
     !     vorticity and/or mass source distributions.
     !-----------------------------------------------------
+    use m_xutils
     use i_xfoil
     !
     WRITE(*, *) 'Calculating wake trajectory ...'

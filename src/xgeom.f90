@@ -193,7 +193,8 @@ SUBROUTINE GEOPAR(X, XP, Y, YP, S, N, T, &
         EI11A, EI22A, APX1A, APX2A, &
         EI11T, EI22T, APX1T, APX2T, &
         THICK, CAMBR)
-        use m_spline
+    use m_spline
+    use m_xutils
     DIMENSION X(*), XP(*), Y(*), YP(*), S(*), T(*)
     !
     PARAMETER (IBX = 600)
