@@ -15,25 +15,25 @@ add_executable(xfoil
         ${SRC_DIR}/s_xbl.f90
         ${SRC_DIR}/s_xoper.f90
         ${SRC_DIR}/s_xfoil.f90
-        # Source
-        ${SRC_DIR}/aread.f90
-        ${SRC_DIR}/iopol.f90
-        ${SRC_DIR}/naca.f90
-        ${SRC_DIR}/sort.f90
-        ${SRC_DIR}/spline.f90
-        ${SRC_DIR}/userio.f90
-        ${SRC_DIR}/xbl.f90
-        ${SRC_DIR}/xblsys.f90
-        ${SRC_DIR}/xfoil.f90
-        ${SRC_DIR}/xgdes.f90
-        ${SRC_DIR}/xgeom.f90
-        ${SRC_DIR}/xmdes.f90
-        ${SRC_DIR}/xoper.f90
-        ${SRC_DIR}/xpanel.f90
-        ${SRC_DIR}/xpol.f90
-        ${SRC_DIR}/xqdes.f90
-        ${SRC_DIR}/xsolve.f90
-        ${SRC_DIR}/xutils.f90
+        # Main modules
+        ${SRC_DIR}/m_aread.f90
+        ${SRC_DIR}/m_iopol.f90
+        ${SRC_DIR}/m_naca.f90
+        ${SRC_DIR}/m_sort.f90
+        ${SRC_DIR}/m_spline.f90
+        ${SRC_DIR}/m_userio.f90
+        ${SRC_DIR}/m_xbl.f90
+        ${SRC_DIR}/m_xblsys.f90
+        ${SRC_DIR}/m_xfoil.f90
+        ${SRC_DIR}/m_xgdes.f90
+        ${SRC_DIR}/m_xgeom.f90
+        ${SRC_DIR}/m_xmdes.f90
+        ${SRC_DIR}/m_xoper.f90
+        ${SRC_DIR}/m_xpanel.f90
+        ${SRC_DIR}/m_xpol.f90
+        ${SRC_DIR}/m_xqdes.f90
+        ${SRC_DIR}/m_xsolve.f90
+        ${SRC_DIR}/m_xutils.f90
         # Program
         ${SRC_DIR}/p_xfoil.f90
         )
