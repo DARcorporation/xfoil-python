@@ -25,7 +25,7 @@ SUBROUTINE PLRSET(IP)
     !     Resets all parameters if necessary.
     !--------------------------------------------------------------
     use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     LOGICAL ERROR
     !
     IF(IP.LE.0) THEN
@@ -138,7 +138,7 @@ END
 
 SUBROUTINE APCOPY(IP)
     use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     NOLD = N
 
@@ -190,7 +190,7 @@ SUBROUTINE PLRINI(LU, IP)
     !     If file PFNAME(IP) doesn't exist, a new one is set up by 
     !        writing a header to it, and polar saving is enabled.
     !--------------------------------------------------------------
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     CHARACTER*128 LINE, LINEL, PROMPT
     !
     LOGICAL NAMDIF, ERROR
@@ -390,7 +390,7 @@ SUBROUTINE PLXINI(LU, IP)
     !     If file PFNAMX(IP) doesn't exist, a new one is set up by 
     !        writing a header to it, and polar dumping is enabled.
     !--------------------------------------------------------------
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     CHARACTER*128 PROMPT
     !
     CHARACTER*32 NAMEX
@@ -547,7 +547,7 @@ END
 
 
 SUBROUTINE PLRADD(LU, IP)
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     LOGICAL ERROR
     !
     !c      WRITE(*,1000) CL, CD, CM
@@ -651,7 +651,7 @@ END
 
 SUBROUTINE PLXADD(LU, IP)
     use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     INTEGER NSIDE(2)
     !
     DIMENSION XX(IVX, 2), CP(IVX, 2), CF(IVX, 2)
@@ -733,7 +733,7 @@ END
 
 
 SUBROUTINE PLRSRT(IP, IDSORT)
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     DIMENSION INDX(NAX), ATMP(NAX)
     !
     !---- sort polar in increasing variable IDSORT
@@ -759,7 +759,7 @@ SUBROUTINE PLRSUM(IP1, IP2, IPACTT)
     !---------------------------------------------
     !     Prints summary of polars IP1..IP2
     !---------------------------------------------
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     CHARACTER*5 CLTYP(3)
     CHARACTER*1 CACC, CFIL
     !
@@ -821,7 +821,7 @@ SUBROUTINE PRFSUM(IR1, IR2)
     !---------------------------------------------
     !     Prints summary of reference polars IR1..IR2
     !---------------------------------------------
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     1100 FORMAT(1X, A, A)
     WRITE(*, *)
@@ -844,7 +844,7 @@ SUBROUTINE PLRCOP(IP1, IP2)
     !---------------------------------------------
     !     Copies polar in slot IP1 into slot IP2
     !---------------------------------------------
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     NAMEPOL(IP2) = NAMEPOL(IP1)
     CODEPOL(IP2) = CODEPOL(IP1)
@@ -892,7 +892,7 @@ SUBROUTINE PRFCOP(IR1, IR2)
     !---------------------------------------------
     !     Copies reference polar in slot IR1 into slot IR2
     !---------------------------------------------
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     NAMEREF(IR2) = NAMEREF(IR1)
     !

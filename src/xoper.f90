@@ -20,7 +20,7 @@
 !
 SUBROUTINE OPER
         use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     CHARACTER*1 ANS
     CHARACTER*4 COMAND, COMOLD
     LOGICAL LRECALC, LCPX
@@ -1338,7 +1338,7 @@ SUBROUTINE FCPMIN
     !     Finds minimum Cp on dist for cavitation work
     !------------------------------------------------
         use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     XCPMNI = X(1)
     XCPMNV = X(1)
@@ -1374,7 +1374,7 @@ END
 
 SUBROUTINE MRSHOW(LM, LR)
         use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     LOGICAL LM, LR
     !
     IF(LM .OR. LR) WRITE(*, *)
@@ -1465,7 +1465,7 @@ END
 
 SUBROUTINE BLDUMP(FNAME1)
         use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     CHARACTER*(*) FNAME1
     !
     CHARACTER*80 FILDEF
@@ -1628,7 +1628,7 @@ END
 
 SUBROUTINE BLDUMP2(FNAME1)
         use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     CHARACTER*(*) FNAME1
     !
     CHARACTER*80 FILDEF
@@ -1842,7 +1842,7 @@ END
 
 SUBROUTINE CPDUMP(FNAME1)
         use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     CHARACTER*(*) FNAME1
     !
     CHARACTER*80 FILDEF
@@ -1933,7 +1933,7 @@ SUBROUTINE MHINGE
     !     (XOF,YOF) by integrating surface pressures.
     !----------------------------------------------------
         use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     IF(.NOT.LFLAP) THEN
         !
@@ -2074,7 +2074,7 @@ SUBROUTINE VPAR
     !     Viscous parameter change menu routine.
     !---------------------------------------------
     use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     INCLUDE 'BLPAR.INC'
     CHARACTER*4 COMAND
     CHARACTER*128 COMARG
@@ -2318,7 +2318,7 @@ SUBROUTINE SPECAL
     !     Converges to specified alpha.
     !-----------------------------------
     use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     REAL MINF_CLM, MSQ_CLM
     !
     !---- calculate surface vorticity distributions for alpha = 0, 90 degrees
@@ -2407,7 +2407,7 @@ SUBROUTINE SPECCL
     !     Converges to specified inviscid CL.
     !-----------------------------------------
     use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     !---- calculate surface vorticity distributions for alpha = 0, 90 degrees
     IF(.NOT.LGAMU .OR. .NOT.LQAIJ) CALL GGCALC
@@ -2476,7 +2476,7 @@ SUBROUTINE VISCAL(NITER1)
     !     Converges viscous operating point
     !----------------------------------------
     use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     !---- convergence tolerance
     DATA EPS1 / 1.0E-4 /
@@ -2694,7 +2694,7 @@ END
 
 subroutine dcpout
     use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     !     Computes and writes upper and lower-surface 
     !     Cp values at two specified x locations

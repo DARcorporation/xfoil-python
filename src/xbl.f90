@@ -64,7 +64,7 @@ SUBROUTINE SETBL
     !     incorporated into the global Newton system.
     !-------------------------------------------------
     use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     INCLUDE 'XBL.INC'
     REAL USAV(IVX, 2)
     REAL U1_M(2 * IVX), U2_M(2 * IVX)
@@ -560,7 +560,7 @@ SUBROUTINE IBLSYS
     !     corresponding to each BL station.
     !---------------------------------------------
     use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     INCLUDE 'XBL.INC'
     IV = 0
     DO 10 IS = 1, 2
@@ -586,7 +586,7 @@ SUBROUTINE MRCHUE
     !     checking of transition onset is performed.
     !----------------------------------------------------
     use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     INCLUDE 'XBL.INC'
     LOGICAL DIRECT
     REAL MSQ
@@ -922,7 +922,7 @@ SUBROUTINE MRCHDU
     !     checking of transition onset is performed.
     !----------------------------------------------------
     use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     INCLUDE 'XBL.INC'
     REAL VTMP(4, 5), VZTMP(4)
     REAL MSQ
@@ -1238,7 +1238,7 @@ SUBROUTINE XIFSET(IS)
     !     Sets forced-transition BL coordinate locations.
     !-----------------------------------------------------
     use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     INCLUDE 'XBL.INC'
     !
     IF(XSTRIP(IS).GE.1.0) THEN
@@ -1298,7 +1298,7 @@ SUBROUTINE UPDATE
     !        If LALFA=.TRUE. , "AC" is CL
     !        If LALFA=.FALSE., "AC" is alpha
     !------------------------------------------------------------------
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     REAL, DIMENSION(3, 2, IZX) :: VA_COPY, VB_COPY
     REAL UNEW(IVX, 2), U_AC(IVX, 2)
     REAL QNEW(IQX), Q_AC(IQX)

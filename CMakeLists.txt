@@ -7,7 +7,7 @@ set(SRC_DIR "src")
 add_executable(xfoil
         # Modules
         ${SRC_DIR}/i_pindex.f90
-#        ${SRC_DIR}/i_xfoil.f90
+        ${SRC_DIR}/i_xfoil.f90
         # Source
         ${SRC_DIR}/aread.f90
         ${SRC_DIR}/iopol.f90

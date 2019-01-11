@@ -304,7 +304,7 @@ SUBROUTINE BLSOLV
     !       R        3x1  residual vectors
     !       S        3x1  Re influence vectors
     !-----------------------------------------------------------------
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     IVTE1 = ISYS(IBLTE(1), 1)
     !

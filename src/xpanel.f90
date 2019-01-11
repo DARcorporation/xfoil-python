@@ -21,7 +21,7 @@
 
 SUBROUTINE APCALC
     use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     !---- set angles of airfoil panels
     DO 10 I = 1, N - 1
@@ -116,7 +116,7 @@ SUBROUTINE PSILIN(I, XI, YI, NXI, NYI, PSI, PSI_NI, GEOLIN, SIGLIN)
     !          Airfoil:  1   < I < N
     !          Wake:     N+1 < I < N+NW
     !-----------------------------------------------------------------------
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     REAL NXO, NYO, NXP, NYP, NXI, NYI
     LOGICAL GEOLIN, SIGLIN
     !
@@ -812,7 +812,7 @@ SUBROUTINE PSWLIN(I, XI, YI, NXI, NYI, PSI, PSI_NI)
     !          Airfoil:  1   < I < N
     !          Wake:     N+1 < I < N+NW
     !--------------------------------------------------------------------
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     REAL NXI, NYI
     !
     IO = I
@@ -991,7 +991,7 @@ SUBROUTINE GGCALC
     !     for alpha = 0, 90  degrees.  These are superimposed
     !     in SPECAL or SPECCL for specified alpha or CL.
     !--------------------------------------------------------------
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     !---- distance of internal control point ahead of sharp TE
     !-    (fraction of smaller panel length adjacent to TE)
@@ -1128,7 +1128,7 @@ SUBROUTINE QWCALC
     !     Sets inviscid tangential velocity for alpha = 0, 90
     !     on wake due to freestream and airfoil surface vorticity.
     !---------------------------------------------------------------
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     !---- first wake point (same as TE)
     QINVU(N + 1, 1) = QINVU(N, 1)
@@ -1150,7 +1150,7 @@ SUBROUTINE QDCALC
     !     Calculates source panel influence coefficient
     !     matrix for current airfoil and wake geometry.
     !-----------------------------------------------------
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     WRITE(*, *) 'Calculating source influence matrix ...'
     !
@@ -1271,7 +1271,7 @@ SUBROUTINE XYWAKE
     !     Sets wake coordinate array for current surface 
     !     vorticity and/or mass source distributions.
     !-----------------------------------------------------
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     WRITE(*, *) 'Calculating wake trajectory ...'
     !
@@ -1357,7 +1357,7 @@ SUBROUTINE STFIND
     !     Locates stagnation point arc length 
     !     location SST and panel index IST.
     !-----------------------------------------
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     DO 10 I = 1, N - 1
         IF(GAM(I).GE.0.0 .AND. GAM(I + 1).LT.0.0) GO TO 11
@@ -1394,7 +1394,7 @@ SUBROUTINE IBLPAN
     !-------------------------------------------------------------
     !     Sets  BL location -> panel location  pointer array IPAN
     !-------------------------------------------------------------
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     !---- top surface first
     IS = 1
@@ -1454,7 +1454,7 @@ SUBROUTINE XICALC
     !-------------------------------------------------------------
     !     Sets BL arc length array on each airfoil side and wake
     !-------------------------------------------------------------
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     DATA XFEPS / 1.0E-7 /
     !
     !---- minimum xi node arc length near stagnation point
@@ -1541,7 +1541,7 @@ SUBROUTINE UICALC
     !--------------------------------------------------------------
     !     Sets inviscid Ue from panel inviscid tangential velocity
     !--------------------------------------------------------------
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     DO 10 IS = 1, 2
         UINV  (1, IS) = 0.
@@ -1561,7 +1561,7 @@ SUBROUTINE UECALC
     !--------------------------------------------------------------
     !     Sets viscous Ue from panel viscous tangential velocity
     !--------------------------------------------------------------
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     DO 10 IS = 1, 2
         UEDG(1, IS) = 0.
@@ -1579,7 +1579,7 @@ SUBROUTINE QVFUE
     !--------------------------------------------------------------
     !     Sets panel viscous tangential velocity from viscous Ue
     !--------------------------------------------------------------
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     DO 1 IS = 1, 2
         DO 10 IBL = 2, NBL(IS)
@@ -1597,7 +1597,7 @@ SUBROUTINE QISET
     !     Sets inviscid panel tangential velocity for
     !     current alpha.
     !-------------------------------------------------------
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     COSA = COS(ALFA)
     SINA = SIN(ALFA)
@@ -1612,7 +1612,7 @@ END
 
 
 SUBROUTINE GAMQV
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     DO 10 I = 1, N
         GAM(I) = QVIS(I)
@@ -1627,7 +1627,7 @@ SUBROUTINE STMOVE
     !---------------------------------------------------
     !     Moves stagnation point location to new panel.
     !---------------------------------------------------
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     !---- locate new stagnation point arc length SST from GAM distribution
     ISTOLD = IST
@@ -1757,7 +1757,7 @@ SUBROUTINE UESET
     !---------------------------------------------------------
     !     Sets Ue from inviscid Ue plus all source influence
     !---------------------------------------------------------
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     DO 1 IS = 1, 2
         DO 10 IBL = 2, NBL(IS)
@@ -1782,7 +1782,7 @@ END
 
 
 SUBROUTINE DSSET
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     DO 1 IS = 1, 2
         DO 10 IBL = 2, NBL(IS)

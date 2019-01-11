@@ -23,7 +23,7 @@ PROGRAM XFOIL
     !cc      USE DFLIB
     !
     use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     CHARACTER*4 COMAND
     CHARACTER*128 COMARG, PROMPT
     CHARACTER*1 ANS
@@ -354,7 +354,7 @@ SUBROUTINE INIT
     !     See file XFOIL.INC for variable description.
     !---------------------------------------------------
     use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     PI = 4.0 * ATAN(1.0)
     HOPI = 0.50 / PI
@@ -639,7 +639,7 @@ SUBROUTINE MRCL(CLS, M_CLS, R_CLS)
     !     depending on MATYP,RETYP flags.
     !-------------------------------------------
     use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     REAL M_CLS
     !
     CLA = MAX(CLS, 0.000001)
@@ -719,7 +719,7 @@ END
 
 SUBROUTINE GETDEF(LU, FILNAM, LASK)
     use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     CHARACTER*(*) FILNAM
     LOGICAL LASK
     !-----------------------------------------------------
@@ -828,7 +828,7 @@ SUBROUTINE WRTDEF(LU)
     !     Writes default parameters to unit LU
     !------------------------------------------
     use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     LOGICAL LCOLOR
     !
     LCOLOR = IDEVRP.EQ.4
@@ -885,7 +885,7 @@ END
 
 SUBROUTINE COMSET
     use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     !---- set Karman-Tsien parameter TKLAM
     BETA = SQRT(1.0 - MINF**2)
@@ -1034,7 +1034,7 @@ END
 
 SUBROUTINE CDCALC
     use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     SA = SIN(ALFA)
     CA = COS(ALFA)
@@ -1080,7 +1080,7 @@ SUBROUTINE LOAD(FILNAM, ITYPE)
     !     and does various initial processesing on it.
     !------------------------------------------------------
     use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     CHARACTER*(*) FILNAM
     !
     FNAME = FILNAM
@@ -1194,7 +1194,7 @@ SUBROUTINE SAVE(IFTYP, FNAME1)
     !     Writes out current airfoil 
     !--------------------------------
     use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     CHARACTER*(*) FNAME1
     !
     CHARACTER*1 ANS, DELIM
@@ -1319,7 +1319,7 @@ END
 
 SUBROUTINE NACA(IDES1)
     use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     !---- number of points per side
     NSIDE = IQX / 3
@@ -1384,7 +1384,7 @@ SUBROUTINE PANGEN(SHOPAR)
     !     CTRRAT*(LE curvature) there.
     !---------------------------------------------------
     use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     LOGICAL SHOPAR
     !
     IF(NB.LT.2) THEN
@@ -1883,7 +1883,7 @@ END
 
 SUBROUTINE GETPAN
         use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     LOGICAL LCHANGE
     CHARACTER*4 VAR
     CHARACTER*128 COMARG
@@ -2018,7 +2018,7 @@ SUBROUTINE TECALC
     !     areas and TE panel strengths.
     !-------------------------------------------
         use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     !---- set TE base vector and TE bisector components
     DXTE = X(1) - X(N)
@@ -2062,7 +2062,7 @@ SUBROUTINE INTE
     !     Extrapolation is also possible to a reasonable extent.
     !-----------------------------------------------------------
         use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     CHARACTER*2 CAIR
     INTEGER NINT(2)
     REAL SINT(IBX, 2), &
@@ -2196,7 +2196,7 @@ SUBROUTINE INTX
     !     Extrapolation is also possible to a reasonable extent.
     !-----------------------------------------------------------
         use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     CHARACTER*2 CAIR
     INTEGER NINT(2)
     REAL SINT(IBX, 2), &

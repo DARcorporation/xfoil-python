@@ -24,7 +24,7 @@ SUBROUTINE MDES
     !     Based on circle plane mapping.
     !------------------------------------
         use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     LOGICAL LCNPL, LRECALC
     !
     CHARACTER*4 COMAND, COMOLD
@@ -450,7 +450,7 @@ SUBROUTINE MAPGAM(IAC, ALG, CLG, CMG)
     !       IAC=2: specified CLGAM
     !--------------------------------------------
     use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     !---- calculate q(w), set number of circle points NSP
     CALL QCCALC(IAC, ALG, CLG, CMG, MINF, QINF, NSP, W1, W2, W5, W6)
@@ -479,7 +479,7 @@ SUBROUTINE QSPCIR
     !     Sets Qspec arrays for all design alphas or CLs
     !----------------------------------------------------
     use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     DO 10 KQSP = 1, NQSP
         CALL QCCALC(IACQSP, ALQSP(KQSP), CLQSP(KQSP), CMQSP(KQSP), &
@@ -1402,7 +1402,7 @@ END
 
 SUBROUTINE GETVOV(KQSP)
     use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !LED ENTIRE ROUTINE
     !
     KK = 0

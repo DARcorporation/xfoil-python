@@ -24,7 +24,7 @@ SUBROUTINE QDES
     !     same panel formulation as basic analysis method.
     !------------------------------------------------------
         use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     CHARACTER*4 COMAND, COMOLD
     LOGICAL LRECALC
     !
@@ -243,7 +243,7 @@ SUBROUTINE SPLQSP(KQSP)
     !     blindly splining to the stagnation point.
     !------------------------------------------------------
     use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     !---- usual spline with natural end BCs
     CALL SPLIND(QSPEC(2, KQSP), QSPECP(2, KQSP), SSPEC(2), NSP - 2, &
@@ -272,7 +272,7 @@ SUBROUTINE SMOOQ(KQ1, KQ2, KQSP)
     !     Smooths Qspec(s) inside target segment
     !--------------------------------------------
     use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     !C---- calculate smoothing coordinate
     !cc      IF(NSP.EQ.NC1) THEN
@@ -399,7 +399,7 @@ SUBROUTINE GAMQSP(KQSP)
     !------------------------------------------------
     !     Sets Qspec(s,k) from current speed Q(s).
     !------------------------------------------------
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     !
     ALQSP(KQSP) = ALGAM
     CLQSP(KQSP) = CLGAM

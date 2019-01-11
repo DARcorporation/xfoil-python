@@ -21,7 +21,7 @@
 
 SUBROUTINE ABCOPY(LCONF)
     use m_spline
-    INCLUDE 'XFOIL.INC'
+    use i_xfoil
     LOGICAL LCONF
     !
     IF(NB.LE.1) THEN
