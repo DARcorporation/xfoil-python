@@ -21,6 +21,7 @@
 !***********************************************************************
 
 subroutine preptrs
+    use m_xsolve
     use m_spline
     use i_xbl
     implicit none
@@ -186,6 +187,7 @@ end subroutine preptrs
 
 
 subroutine setbl
+    use m_xsolve
     use m_spline
     use i_xfoil
     use i_xbl
@@ -683,6 +685,7 @@ end subroutine setbl
 
 
 subroutine iblsys
+    use m_xsolve
     use m_spline
     use i_xfoil
     use i_xbl
@@ -724,6 +727,7 @@ end subroutine iblsys
 
 
 subroutine mrchue
+    use m_xsolve
     use m_spline
     use i_xfoil
     use i_xbl
@@ -1068,6 +1072,7 @@ end subroutine mrchue
 
 
 subroutine mrchdu
+    use m_xsolve
     use m_spline
     use i_xfoil
     use i_xbl

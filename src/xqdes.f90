@@ -190,7 +190,7 @@ contains
                     call smooq(IQ1, IQ2, kqsp)
                     call splqsp(kqsp)
                     !
-                    call clcalc(N, X, Y, QSPec(1, kqsp), W1, ALFa, MINf, QINf,&
+                    call clcalc(N, X, Y, QSPec(1, kqsp), W1, ALFa, MINf, QINf, &
                             XCMref, YCMref, CLQsp(kqsp), CMQsp(kqsp), cdpq, clq_alf, clq_msq)
                     write (*, 99004) CL, CM, CLQsp(kqsp), CMQsp(kqsp)
                     99004      format (/' Q    :   CL =', f11.6, '    CM =', f11.6/&

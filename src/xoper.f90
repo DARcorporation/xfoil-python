@@ -21,6 +21,7 @@
 !***********************************************************************
 !
 subroutine oper
+    use m_xsolve
     use m_spline
     use i_xfoil
     implicit none
@@ -556,7 +557,7 @@ subroutine oper
                     if (iseqex>=NSEqex) then
                         write (*, 99005) iseqex, alast, clast
                         99005 format (/' Sequence halted since previous', i3, ' points did not converge'/&
-                                ' Last-converged  alpha =',  f8.3, '    CL =', f10.5)
+                                ' Last-converged  alpha =', f8.3, '    CL =', f10.5)
                         exit
                     endif
                 else
@@ -643,7 +644,7 @@ subroutine oper
             lu = 17
             call polread(lu, FNAme, error, NAX, NAPol(ip), CPOl(1, 1, ip), &
                     REYnp1(ip), MAChp1(ip), ACRitp(1, ip), XSTripp(1, ip), &
-                    & PTRatp(ip), ETApp(ip), NAMepol(ip), IREtyp(ip), IMAtyp(ip),&
+                    & PTRatp(ip), ETApp(ip), NAMepol(ip), IREtyp(ip), IMAtyp(ip), &
                     ISX, nblp(ip), CPOlsd(1, 1, 1, ip), CODepol(ip), &
                     & VERspol(ip))
             if (error) then
@@ -655,7 +656,7 @@ subroutine oper
                 nel = 1
                 call polwrit(6, ' ', error, .true., NAX, 1, &
                         NAPol(ip), CPOl(1, 1, ip), IPOl, NIPol, REYnp1(ip), MAChp1(ip), ACRitp(1, ip), &
-                        & XSTripp(1, ip), PTRatp(ip), ETApp(ip), NAMepol(ip), IREtyp(ip),&
+                        & XSTripp(1, ip), PTRatp(ip), ETApp(ip), NAMepol(ip), IREtyp(ip), &
                         IMAtyp(ip), ISX, nel, CPOlsd(1, 1, 1, ip), &
                         & JPOl, NJPol, CODepol(ip), VERspol(ip), .false.)
                 PFName(ip) = FNAme
@@ -1317,6 +1318,7 @@ end subroutine oper
 
 
 subroutine fcpmin
+    use m_xsolve
     use m_spline
     use i_xfoil
     implicit none
@@ -1374,6 +1376,7 @@ end subroutine fcpmin
 
 
 subroutine mrshow(Lm, Lr)
+    use m_xsolve
     use m_spline
     use i_xfoil
     implicit none
@@ -1421,6 +1424,7 @@ end subroutine mrshow
 
 
 subroutine nammod(Name, Kdel, Kmod0)
+    use m_xsolve
     use m_spline
     implicit none
     !
@@ -1510,6 +1514,7 @@ end subroutine nammod
 
 
 subroutine bldump(Fname1)
+    use m_xsolve
     use m_spline
     use i_xfoil
     implicit none
@@ -1672,6 +1677,7 @@ end subroutine bldump
 
 
 subroutine bldump2(Fname1)
+    use m_xsolve
     use m_spline
     use i_xfoil
     implicit none
@@ -1874,6 +1880,7 @@ end subroutine bldump2
 
 
 subroutine cpdump(Fname1)
+    use m_xsolve
     use m_spline
     use i_xfoil
     implicit none
@@ -1980,6 +1987,7 @@ end subroutine cpdump
 
 
 subroutine mhinge
+    use m_xsolve
     use m_spline
     use i_xfoil
     implicit none
@@ -2140,6 +2148,7 @@ end subroutine mhinge
 
 
 subroutine vpar
+    use m_xsolve
     use m_spline
     use i_xfoil
     use i_blpar
@@ -2395,6 +2404,7 @@ end subroutine vpar
 
 
 subroutine specal
+    use m_xsolve
     use m_spline
     use i_xfoil
     implicit none
@@ -2497,6 +2507,7 @@ end subroutine specal
 
 
 subroutine speccl
+    use m_xsolve
     use m_spline
     use i_xfoil
     implicit none
@@ -2582,6 +2593,7 @@ end subroutine speccl
 
 
 subroutine viscal(Niter1)
+    use m_xsolve
     use m_spline
     use i_xfoil
     implicit none

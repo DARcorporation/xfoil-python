@@ -214,7 +214,7 @@ program xfoil
             call segspl(XB, XBP, SB, NB)
             call segspl(YB, YBP, SB, NB)
             !
-            call geopar(XB, XBP, YB, YBP, SB, NB, W1, SBLe, CHOrdb,&
+            call geopar(XB, XBP, YB, YBP, SB, NB, W1, SBLe, CHOrdb, &
                     AREab, RADble, ANGbte, EI11ba, EI22ba, APX1ba, APX2ba, EI11bt, EI22bt, &
                     & APX1bt, APX2bt, THIckb, CAMbrb)
             !
@@ -1356,7 +1356,7 @@ subroutine load(Filnam, Itype)
     call segspl(XB, XBP, SB, NB)
     call segspl(YB, YBP, SB, NB)
     !
-    call geopar(XB, XBP, YB, YBP, SB, NB, W1, SBLe, CHOrdb, AREab,&
+    call geopar(XB, XBP, YB, YBP, SB, NB, W1, SBLe, CHOrdb, AREab, &
             RADble, ANGbte, EI11ba, EI22ba, APX1ba, APX2ba, EI11bt, EI22bt, APX1bt, &
             & APX2bt, THIckb, CAMbrb)
     !
@@ -1644,7 +1644,7 @@ subroutine naca(Ides1)
     call segspl(XB, XBP, SB, NB)
     call segspl(YB, YBP, SB, NB)
     !
-    call geopar(XB, XBP, YB, YBP, SB, NB, W1, SBLe, CHOrdb, AREab,&
+    call geopar(XB, XBP, YB, YBP, SB, NB, W1, SBLe, CHOrdb, AREab, &
             RADble, ANGbte, EI11ba, EI22ba, APX1ba, APX2ba, EI11bt, EI22bt, APX1bt, &
             & APX2bt, THIckb, CAMbrb)
     !
@@ -2520,7 +2520,7 @@ subroutine inte
     call segspl(XB, XBP, SB, NB)
     call segspl(YB, YBP, SB, NB)
     !
-    call geopar(XB, XBP, YB, YBP, SB, NB, W1, SBLe, CHOrdb, AREab,&
+    call geopar(XB, XBP, YB, YBP, SB, NB, W1, SBLe, CHOrdb, AREab, &
             RADble, ANGbte, EI11ba, EI22ba, APX1ba, APX2ba, EI11bt, EI22bt, APX1bt, &
             & APX2bt, THIckb, CAMbrb)
     !
@@ -2654,7 +2654,7 @@ subroutine intx
     frac = 0.5
     call askr('Specify interpolating fraction  0...1^', frac)
     !
-    call interx(xint(1, 1), xpint(1, 1), yint(1, 1), ypint(1, 1),&
+    call interx(xint(1, 1), xpint(1, 1), yint(1, 1), ypint(1, 1), &
             sint(1, 1), nint(1), sleint(1), xint(1, 2), xpint(1, 2), yint(1, 2), &
             & ypint(1, 2), sint(1, 2), nint(2), sleint(2), XB, YB, NB, frac)
     !
@@ -2662,7 +2662,7 @@ subroutine intx
     call segspl(XB, XBP, SB, NB)
     call segspl(YB, YBP, SB, NB)
     !
-    call geopar(XB, XBP, YB, YBP, SB, NB, W1, SBLe, CHOrdb, AREab,&
+    call geopar(XB, XBP, YB, YBP, SB, NB, W1, SBLe, CHOrdb, AREab, &
             RADble, ANGbte, EI11ba, EI22ba, APX1ba, APX2ba, EI11bt, EI22bt, APX1bt, &
             & APX2bt, THIckb, CAMbrb)
     !

@@ -833,7 +833,7 @@ subroutine plxadd(Lu, Ip)
     enddo
     !
     do is = 1, 2
-        write (Lu) (xx(ibl, is), cp(ibl, is), THEt(ibl, is),&
+        write (Lu) (xx(ibl, is), cp(ibl, is), THEt(ibl, is), &
                 DSTr(ibl, is), cf(ibl, is), CTAu(ibl, is), ibl = 1, nside(is))
     enddo
     !

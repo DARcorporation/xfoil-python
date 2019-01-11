@@ -22,6 +22,7 @@
 !***********************************************************************
 !
 subroutine mdes
+    use m_xsolve
     use m_xqdes
     use m_spline
     use i_xfoil
@@ -419,6 +420,7 @@ end subroutine mdes
 
 
 subroutine dztset(Rinput, Ninput)
+    use m_xsolve
     use m_xqdes
     use m_spline
     use i_circle
@@ -466,6 +468,7 @@ end subroutine dztset
 
 
 subroutine agtset(Rinput, Ninput)
+    use m_xsolve
     use m_xqdes
     use m_spline
     use i_circle
@@ -511,6 +514,7 @@ end subroutine agtset
 
 
 subroutine mapgam(Iac, Alg, Clg, Cmg)
+    use m_xsolve
     use m_xqdes
     use m_spline
     use i_xfoil
@@ -572,6 +576,7 @@ end subroutine mapgam
 
 
 subroutine qspcir
+    use m_xsolve
     use m_xqdes
     use m_spline
     use i_xfoil
@@ -608,6 +613,7 @@ end subroutine qspcir
 
 
 subroutine mapgen(Ffilt, N, X, Y)
+    use m_xsolve
     use m_xqdes
     use m_spline
     use i_circle
@@ -725,6 +731,7 @@ end subroutine mapgen
 
 
 subroutine scinit(N, X, Xp, Y, Yp, S, Sle)
+    use m_xsolve
     use m_xqdes
     use m_spline
     use i_circle
@@ -910,6 +917,7 @@ end subroutine scinit
 
 
 subroutine cncalc(Qc, Lsymm)
+    use m_xsolve
     use m_xqdes
     use m_spline
     use i_circle
@@ -1064,6 +1072,7 @@ end subroutine cncalc
 
 
 subroutine cnsymm
+    use m_xsolve
     use m_xqdes
     use m_spline
     use i_circle
@@ -1098,6 +1107,7 @@ end subroutine cnsymm
 
 
 subroutine piqsum
+    use m_xsolve
     use m_xqdes
     use m_spline
     use i_circle
@@ -1139,6 +1149,7 @@ end subroutine piqsum
 
 
 subroutine cnfilt(Ffilt)
+    use m_xsolve
     use m_xqdes
     use m_spline
     use i_circle
@@ -1190,6 +1201,7 @@ end subroutine cnfilt
 
 
 subroutine zccalc(Mtest)
+    use m_xsolve
     use m_xqdes
     use m_spline
     use i_circle
@@ -1279,6 +1291,7 @@ end subroutine zccalc
 
 
 subroutine zcnorm(Mtest)
+    use m_xsolve
     use m_xqdes
     use m_spline
     use i_circle
@@ -1357,6 +1370,7 @@ end subroutine zcnorm
 
 
 subroutine qccalc(Ispec, Alfa, Cl, Cm, Minf, Qinf, Ncir, Xcir, Ycir, Scir, Qcir)
+    use m_xsolve
     use m_xqdes
     use m_spline
     use i_circle
@@ -1503,6 +1517,7 @@ end subroutine qccalc
 
 
 subroutine qspint(Alqsp, Qspec, Qinf, Minf, Clqsp, Cmqsp)
+    use m_xsolve
     use m_xqdes
     use m_spline
     use i_circle
@@ -1580,6 +1595,7 @@ end subroutine qspint
 
 
 subroutine ftp
+    use m_xsolve
     use m_xqdes
     use m_spline
     use i_circle
@@ -1621,6 +1637,7 @@ end subroutine ftp
 
 
 subroutine eiwset(Nc1)
+    use m_xsolve
     use m_xqdes
     use m_spline
     use i_circle
@@ -1698,6 +1715,7 @@ end subroutine eiwset
 
 
 subroutine pert(Qspec)
+    use m_xsolve
     use m_xqdes
     use m_spline
     use i_circle

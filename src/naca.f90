@@ -218,10 +218,10 @@ subroutine naca5(Ides, Xx, Yt, Yc, Nside, Xb, Yb, Nb, Name)
     Nb = ib
     !
     Name = 'NACA'
-    Name(6:10) = digits(n5 + 1:n5 + 1) //&
-            digits(n4 + 1:n4 + 1) //&
-            digits(n3 + 1:n3 + 1) //&
-            digits(n2 + 1:n2 + 1) //&
+    Name(6:10) = digits(n5 + 1:n5 + 1) // &
+            digits(n4 + 1:n4 + 1) // &
+            digits(n3 + 1:n3 + 1) // &
+            digits(n2 + 1:n2 + 1) // &
             digits(n1 + 1:n1 + 1)
     !
 end subroutine naca5

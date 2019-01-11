@@ -21,7 +21,7 @@
 
 subroutine polread(Lu, Fnpol, Error, &
         Nax, Na, Cpol, &
-        Reyn1, Mach1, Acrit, Xtrip,&
+        Reyn1, Mach1, Acrit, Xtrip, &
         Ptrat, Etap, &
         Name, Iretyp, Imatyp, &
         Isx, Nbl, Cpolsd, &
@@ -717,7 +717,7 @@ subroutine polwrit(Lu, Fnpol, Error, Lhead, &
     !
     !
     do ia = Ia1, Ia2
-        write (Lu, linef) (Cpol(ia, Ipol(kp)), kp = 1, Nipol),&
+        write (Lu, linef) (Cpol(ia, Ipol(kp)), kp = 1, Nipol), &
                 ((Cpolsd(ia, is, Jpol(kp)), is = 1, 2 * Nbl), kp = 1, Njpol)
     enddo
     !

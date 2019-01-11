@@ -21,6 +21,7 @@
 
 
 subroutine apcalc
+    use m_xsolve
     use m_xutils
     use m_spline
     use i_xfoil
@@ -71,6 +72,7 @@ end subroutine apcalc
 
 
 subroutine ncalc(X, Y, S, N, Xn, Yn)
+    use m_xsolve
     use m_xutils
     use m_spline
     implicit none
@@ -148,6 +150,7 @@ end subroutine ncalc
 
 
 subroutine psilin(I, Xi, Yi, Nxi, Nyi, Psi, Psi_ni, Geolin, Siglin)
+    use m_xsolve
     use m_xutils
     use i_xfoil
     implicit none
@@ -861,6 +864,7 @@ subroutine psilin(I, Xi, Yi, Nxi, Nyi, Psi, Psi_ni, Geolin, Siglin)
 
 
 subroutine pswlin(I, Xi, Yi, Nxi, Nyi, Psi, Psi_ni)
+    use m_xsolve
     use m_xutils
     use i_xfoil
     implicit none
@@ -1069,6 +1073,7 @@ end subroutine pswlin
 
 
 subroutine ggcalc
+    use m_xsolve
     use m_xutils
     use i_xfoil
     implicit none
@@ -1228,6 +1233,7 @@ end subroutine ggcalc
 
 
 subroutine qwcalc
+    use m_xsolve
     use m_xutils
     use i_xfoil
     implicit none
@@ -1270,6 +1276,7 @@ end subroutine qwcalc
 
 
 subroutine qdcalc
+    use m_xsolve
     use m_xutils
     use i_xfoil
     implicit none

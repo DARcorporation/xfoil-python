@@ -1797,7 +1797,7 @@ subroutine bldif(Ityp)
         !***** laminar part -->  set amplification equation
         !
         !----- set average amplification AX over interval X1..X2
-        call axset(HK1, T1, RT1, AMPl1, HK2, T2, RT2, AMPl2, AMCrit,&
+        call axset(HK1, T1, RT1, AMPl1, HK2, T2, RT2, AMPl2, AMCrit, &
                 IDAmpv, ax, ax_hk1, ax_t1, ax_rt1, ax_a1, ax_hk2, ax_t2, ax_rt2, ax_a2)
         !
         rezc = AMPl2 - AMPl1 - ax * (X2 - X1)
