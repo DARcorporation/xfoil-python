@@ -1,6 +1,48 @@
+!*==M_XUTILS.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 module m_xutils
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    !*** End of declarations rewritten by SPAG
+    !
 contains
-    SUBROUTINE SETEXP(S, DS1, SMAX, NN)
+    subroutine setexp(S, Ds1, Smax, Nn)
+        implicit none
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! Dummy arguments
+        !
+        real :: Ds1, Smax
+        integer :: Nn
+        real, dimension(Nn) :: S
+        intent (in) Ds1, Nn, Smax
+        intent (inout) S
+        !
+        ! Local variables
+        !
+        real :: aaa, bbb, ccc, disc, dratio, dresdr, ds, ratio, res, rnex, rni, sigma, sigman
+        integer :: iter, n, nex
+        !
+        !*** End of declarations rewritten by SPAG
+        !
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! Dummy arguments
+        !
+        !
+        ! Local variables
+        !
+        !
+        !*** End of declarations rewritten by SPAG
+        !
         !........................................................
         !     Sets geometrically stretched array S:
         !
@@ -11,60 +53,85 @@ contains
         !       SMAX  (input)   final S value:      S(NN)
         !       NN    (input)   number of points
         !........................................................
-        REAL S(NN)
         !
-        SIGMA = SMAX / DS1
-        NEX = NN - 1
-        RNEX = FLOAT(NEX)
-        RNI = 1.0 / RNEX
+        sigma = Smax / Ds1
+        nex = Nn - 1
+        rnex = float(nex)
+        rni = 1.0 / rnex
         !
         !---- solve quadratic for initial geometric ratio guess
-        AAA = RNEX * (RNEX - 1.0) * (RNEX - 2.0) / 6.0
-        BBB = RNEX * (RNEX - 1.0) / 2.0
-        CCC = RNEX - SIGMA
+        aaa = rnex * (rnex - 1.0) * (rnex - 2.0) / 6.0
+        bbb = rnex * (rnex - 1.0) / 2.0
+        ccc = rnex - sigma
         !
-        DISC = BBB**2 - 4.0 * AAA * CCC
-        DISC = MAX(0.0, DISC)
+        disc = bbb**2 - 4.0 * aaa * ccc
+        disc = max(0.0, disc)
         !
-        IF(NEX.LE.1) THEN
-            STOP 'SETEXP: Cannot fill array.  N too small.'
-        ELSE IF(NEX.EQ.2) THEN
-            RATIO = -CCC / BBB + 1.0
-        ELSE
-            RATIO = (-BBB + SQRT(DISC)) / (2.0 * AAA) + 1.0
-        ENDIF
+        if (nex<=1) then
+            stop 'SETEXP: Cannot fill array.  N too small.'
+        elseif (nex==2) then
+            ratio = -ccc / bbb + 1.0
+        else
+            ratio = (-bbb + sqrt(disc)) / (2.0 * aaa) + 1.0
+        endif
         !
-        IF(RATIO.EQ.1.0) GO TO 11
-        !
-        !---- Newton iteration for actual geometric ratio
-        DO 1 ITER = 1, 100
-            SIGMAN = (RATIO**NEX - 1.0) / (RATIO - 1.0)
-            RES = SIGMAN**RNI - SIGMA**RNI
-            DRESDR = RNI * SIGMAN**RNI&
-                    * (RNEX * RATIO**(NEX - 1) - SIGMAN) / (RATIO**NEX - 1.0)
+        if (ratio/=1.0) then
             !
-            DRATIO = -RES / DRESDR
-            RATIO = RATIO + DRATIO
-            !
-            IF(ABS(DRATIO) .LT. 1.0E-5) GO TO 11
-            !
-        1 CONTINUE
-        WRITE(*, *) 'SETEXP: Convergence failed.  Continuing anyway ...'
+            !---- Newton iteration for actual geometric ratio
+            do iter = 1, 100
+                sigman = (ratio**nex - 1.0) / (ratio - 1.0)
+                res = sigman**rni - sigma**rni
+                dresdr = rni * sigman**rni * (rnex * ratio**(nex - 1) - sigman) / (ratio**nex - 1.0)
+                !
+                dratio = -res / dresdr
+                ratio = ratio + dratio
+                !
+                if (abs(dratio)<1.0E-5) goto 100
+                !
+            enddo
+            write (*, *) 'SETEXP: Convergence failed.  Continuing anyway ...'
+        endif
         !
         !---- set up stretched array using converged geometric ratio
-        11 S(1) = 0.0
-        DS = DS1
-        DO 2 N = 2, NN
-            S(N) = S(N - 1) + DS
-            DS = DS * RATIO
-        2 CONTINUE
+        100  S(1) = 0.0
+        ds = Ds1
+        do n = 2, Nn
+            S(n) = S(n - 1) + ds
+            ds = ds * ratio
+        enddo
         !
-        RETURN
-    END
+    end subroutine setexp
 
 
-    FUNCTION ATANC(Y, X, THOLD)
-        IMPLICIT REAL (A-H, M, O-Z)
+    function atanc(Y, X, Thold)
+        implicit none
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! Dummy arguments
+        !
+        real :: Thold, X, Y
+        real :: atanc
+        intent (in) Thold, X, Y
+        !
+        ! Local variables
+        !
+        real :: dtcorr, dthet, thnew
+        real, save :: pi, tpi
+        !
+        !*** End of declarations rewritten by SPAG
+        !
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! Dummy arguments
+        !
+        !
+        ! Local variables
+        !
+        !
+        !*** End of declarations rewritten by SPAG
+        !
         !---------------------------------------------------------------
         !     ATAN2 function with branch cut checking.
         !
@@ -93,20 +160,19 @@ contains
         !     Output:
         !       ATANC   position angle of X,Y
         !---------------------------------------------------------------
-        DATA  PI /3.1415926535897932384/
-        DATA TPI /6.2831853071795864769/
+        data pi/3.1415926535897932384/
+        data tpi/6.2831853071795864769/
         !
         !---- set new position angle, ignoring branch cut in ATAN2 function for now
-        THNEW = ATAN2(Y, X)
-        DTHET = THNEW - THOLD
+        thnew = atan2(Y, X)
+        dthet = thnew - Thold
         !
         !---- angle change cannot exceed +/- pi, so get rid of any multiples of 2 pi
-        DTCORR = DTHET - TPI * INT((DTHET + SIGN(PI, DTHET)) / TPI)
+        dtcorr = dthet - tpi * int((dthet + sign(pi, dthet)) / tpi)
         !
         !---- set correct new angle
-        ATANC = THOLD + DTCORR
+        atanc = Thold + dtcorr
         !
-        RETURN
-    END
+    end function atanc
     ! ATANC
 end module m_xutils

@@ -1,8 +1,9 @@
+!*==APCALC.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 !***********************************************************************
 !    Module:  xpanel.f
-! 
-!    Copyright (C) 2000 Mark Drela 
-! 
+!
+!    Copyright (C) 2000 Mark Drela
+!
 !    This program is free software; you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
 !    the Free Software Foundation; either version 2 of the License, or
@@ -19,91 +20,175 @@
 !***********************************************************************
 
 
-SUBROUTINE APCALC
+subroutine apcalc
     use m_xutils
     use m_spline
     use i_xfoil
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    integer :: i, ip
+    real :: sx, sy
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !
     !---- set angles of airfoil panels
-    DO 10 I = 1, N - 1
-        SX = X(I + 1) - X(I)
-        SY = Y(I + 1) - Y(I)
-        IF(SX.EQ.0.0 .AND. SY.EQ.0.0) THEN
-            APANEL(I) = ATAN2(-NY(I), -NX(I))
-        ELSE
-            APANEL(I) = ATAN2(SX, -SY)
-        ENDIF
-    10 CONTINUE
+    do i = 1, N - 1
+        sx = X(i + 1) - X(i)
+        sy = Y(i + 1) - Y(i)
+        if (sx==0.0 .and. sy==0.0) then
+            APAnel(i) = atan2(-NY(i), -NX(i))
+        else
+            APAnel(i) = atan2(sx, -sy)
+        endif
+    enddo
     !
     !---- TE panel
-    I = N
-    IP = 1
-    IF(SHARP) THEN
-        APANEL(I) = PI
-    ELSE
-        SX = X(IP) - X(I)
-        SY = Y(IP) - Y(I)
-        APANEL(I) = ATAN2(-SX, SY) + PI
-    ENDIF
+    i = N
+    ip = 1
+    if (SHArp) then
+        APAnel(i) = PI
+    else
+        sx = X(ip) - X(i)
+        sy = Y(ip) - Y(i)
+        APAnel(i) = atan2(-sx, sy) + PI
+    endif
     !
-    RETURN
-END
+end subroutine apcalc
+!*==NCALC.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 
 
-SUBROUTINE NCALC(X, Y, S, N, XN, YN)
+subroutine ncalc(X, Y, S, N, Xn, Yn)
+    use m_xutils
+    use m_spline
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    integer :: N
+    real, dimension(N) :: S, X, Xn, Y, Yn
+    intent (inout) Xn, Yn
+    !
+    ! Local variables
+    !
+    integer :: i
+    real :: smod, sx, sy
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !---------------------------------------
     !     Calculates normal unit vector
     !     components at airfoil panel nodes
     !---------------------------------------
-    use m_xutils
-    use m_spline
-    DIMENSION X(N), Y(N), S(N), XN(N), YN(N)
     !
-    IF(N.LE.1) RETURN
+    if (N<=1) return
     !
-    CALL SEGSPL(X, XN, S, N)
-    CALL SEGSPL(Y, YN, S, N)
-    DO 10 I = 1, N
-        SX = YN(I)
-        SY = -XN(I)
-        SMOD = SQRT(SX * SX + SY * SY)
-        IF(SMOD .EQ. 0.0) THEN
-            XN(I) = -1.0
-            YN(I) = 0.0
-        ELSE
-            XN(I) = SX / SMOD
-            YN(I) = SY / SMOD
-        ENDIF
-    10 CONTINUE
+    call segspl(X, Xn, S, N)
+    call segspl(Y, Yn, S, N)
+    do i = 1, N
+        sx = Yn(i)
+        sy = -Xn(i)
+        smod = sqrt(sx * sx + sy * sy)
+        if (smod==0.0) then
+            Xn(i) = -1.0
+            Yn(i) = 0.0
+        else
+            Xn(i) = sx / smod
+            Yn(i) = sy / smod
+        endif
+    enddo
     !
     !---- average normal vectors at corner points
-    DO 20 I = 1, N - 1
-        IF(S(I) .EQ. S(I + 1)) THEN
-            SX = 0.5 * (XN(I) + XN(I + 1))
-            SY = 0.5 * (YN(I) + YN(I + 1))
-            SMOD = SQRT(SX * SX + SY * SY)
-            IF(SMOD .EQ. 0.0) THEN
-                XN(I) = -1.0
-                YN(I) = 0.0
-                XN(I + 1) = -1.0
-                YN(I + 1) = 0.0
-            ELSE
-                XN(I) = SX / SMOD
-                YN(I) = SY / SMOD
-                XN(I + 1) = SX / SMOD
-                YN(I + 1) = SY / SMOD
-            ENDIF
-        ENDIF
-    20   CONTINUE
+    do i = 1, N - 1
+        if (S(i)==S(i + 1)) then
+            sx = 0.5 * (Xn(i) + Xn(i + 1))
+            sy = 0.5 * (Yn(i) + Yn(i + 1))
+            smod = sqrt(sx * sx + sy * sy)
+            if (smod==0.0) then
+                Xn(i) = -1.0
+                Yn(i) = 0.0
+                Xn(i + 1) = -1.0
+                Yn(i + 1) = 0.0
+            else
+                Xn(i) = sx / smod
+                Yn(i) = sy / smod
+                Xn(i + 1) = sx / smod
+                Yn(i + 1) = sy / smod
+            endif
+        endif
+    enddo
     !
-    RETURN
-END
+end subroutine ncalc
+!*==PSILIN.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 
 
-SUBROUTINE PSILIN(I, XI, YI, NXI, NYI, PSI, PSI_NI, GEOLIN, SIGLIN)
+subroutine psilin(I, Xi, Yi, Nxi, Nyi, Psi, Psi_ni, Geolin, Siglin)
+    use m_xutils
+    use i_xfoil
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    logical :: Geolin, Siglin
+    integer :: I
+    real :: Nxi, Nyi, Psi, Psi_ni, Xi, Yi
+    intent (in) Geolin, I, Nxi, Nyi, Siglin, Xi, Yi
+    intent (inout) Psi, Psi_ni
+    !
+    ! Local variables
+    !
+    real :: apan, dsim, dsio, dsip, dsm, dso, dsp, dxinv, g0, g1, g2, gamte1, gamte2, gdif, gdif1, gdif2, &
+            & gsum, gsum1, gsum2, nxo, nxp, nyo, nyp, pdif, pdni, pdx0, pdx1, pdx2, pdyy, pgam, pgamni, &
+            & pgamx1, pgamx2, pgamyy, psid, psig, psigni, psigx1, psigx2, psigyy, psis, psni, psum, psx0, &
+            & psx1, psx2, psyy, qtanm, rs0, rs1, rs2, rx1, rx2, ry1, ry2, scs, sdif, sds, seps, sgn, &
+            & sigte1, sigte2, ssum, sx, sy, t0, t1, t2, x0, x1, x1i, x1o, x1p, x2, x2i, x2o, x2p, xjo, &
+            & xjp, yjo
+    integer :: io, jm, jo, jp, jq
+    real :: yjp, yy, yyi, yyo, yyp
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !-----------------------------------------------------------------------
     !     Calculates current streamfunction Psi at panel node or wake node
-    !     I due to freestream and all bound vorticity Gam on the airfoil. 
+    !     I due to freestream and all bound vorticity Gam on the airfoil.
     !     Sensitivities of Psi with respect to alpha (Z_ALFA) and inverse
     !     Qspec DOFs (Z_QDOF0,Z_QDOF1) which influence Gam in inverse cases.
     !     Also calculates the sensitivity vector dPsi/dGam (DZDG).
@@ -118,694 +203,697 @@ SUBROUTINE PSILIN(I, XI, YI, NXI, NYI, PSI, PSI_NI, GEOLIN, SIGLIN)
     !          Airfoil:  1   < I < N
     !          Wake:     N+1 < I < N+NW
     !-----------------------------------------------------------------------
-    use m_xutils
-    use i_xfoil
-    REAL NXO, NYO, NXP, NYP, NXI, NYI
-    LOGICAL GEOLIN, SIGLIN
     !
     !---- distance tolerance for determining if two points are the same
-    SEPS = (S(N) - S(1)) * 1.0E-5
+    seps = (S(N) - S(1)) * 1.0E-5
     !
-    IO = I
+    io = I
     !
-    COSA = COS(ALFA)
-    SINA = SIN(ALFA)
+    COSa = cos(ALFa)
+    SINa = sin(ALFa)
     !
-    DO 3 JO = 1, N
-        DZDG(JO) = 0.0
-        DZDN(JO) = 0.0
-        DQDG(JO) = 0.0
-    3 CONTINUE
+    do jo = 1, N
+        DZDg(jo) = 0.0
+        DZDn(jo) = 0.0
+        DQDg(jo) = 0.0
+    enddo
     !
-    DO 4 JO = 1, N
-        DZDM(JO) = 0.0
-        DQDM(JO) = 0.0
-    4 CONTINUE
+    do jo = 1, N
+        DZDm(jo) = 0.0
+        DQDm(jo) = 0.0
+    enddo
     !
-    Z_QINF = 0.
-    Z_ALFA = 0.
-    Z_QDOF0 = 0.
-    Z_QDOF1 = 0.
-    Z_QDOF2 = 0.
-    Z_QDOF3 = 0.
+    Z_Qinf = 0.
+    Z_Alfa = 0.
+    Z_Qdof0 = 0.
+    Z_Qdof1 = 0.
+    Z_Qdof2 = 0.
+    Z_Qdof3 = 0.
     !
-    PSI = 0.
-    PSI_NI = 0.
+    Psi = 0.
+    Psi_ni = 0.
     !
-    QTAN1 = 0.
-    QTAN2 = 0.
-    QTANM = 0.
+    QTAn1 = 0.
+    QTAn2 = 0.
+    qtanm = 0.
     !
-    IF(SHARP) THEN
-        SCS = 1.0
-        SDS = 0.0
-    ELSE
-        SCS = ANTE / DSTE
-        SDS = ASTE / DSTE
-    ENDIF
+    if (SHArp) then
+        scs = 1.0
+        sds = 0.0
+    else
+        scs = ANTe / DSTe
+        sds = ASTe / DSTe
+    endif
     !
-    DO 10 JO = 1, N
-        JP = JO + 1
+    do jo = 1, N
+        jp = jo + 1
         !
-        JM = JO - 1
-        JQ = JP + 1
+        jm = jo - 1
+        jq = jp + 1
         !
-        IF(JO.EQ.1) THEN
-            JM = JO
-        ELSE IF(JO.EQ.N - 1) THEN
-            JQ = JP
-        ELSE IF(JO.EQ.N) THEN
-            JP = 1
-            IF((X(JO) - X(JP))**2 + (Y(JO) - Y(JP))**2 .LT. SEPS**2) GO TO 12
-        ENDIF
+        if (jo==1) then
+            jm = jo
+        elseif (jo==N - 1) then
+            jq = jp
+        elseif (jo==N) then
+            jp = 1
+            if ((X(jo) - X(jp))**2 + (Y(jo) - Y(jp))**2<seps**2) goto 100
+        endif
         !
-        DSO = SQRT((X(JO) - X(JP))**2 + (Y(JO) - Y(JP))**2)
+        dso = sqrt((X(jo) - X(jp))**2 + (Y(jo) - Y(jp))**2)
         !
         !------ skip null panel
-        IF(DSO .EQ. 0.0) GO TO 10
-        !
-        DSIO = 1.0 / DSO
-        !
-        APAN = APANEL(JO)
-        !
-        RX1 = XI - X(JO)
-        RY1 = YI - Y(JO)
-        RX2 = XI - X(JP)
-        RY2 = YI - Y(JP)
-        !
-        SX = (X(JP) - X(JO)) * DSIO
-        SY = (Y(JP) - Y(JO)) * DSIO
-        !
-        X1 = SX * RX1 + SY * RY1
-        X2 = SX * RX2 + SY * RY2
-        YY = SX * RY1 - SY * RX1
-        !
-        RS1 = RX1 * RX1 + RY1 * RY1
-        RS2 = RX2 * RX2 + RY2 * RY2
-        !
-        !------ set reflection flag SGN to avoid branch problems with arctan
-        IF(IO.GE.1 .AND. IO.LE.N) THEN
-            !------- no problem on airfoil surface
-            SGN = 1.0
-        ELSE
-            !------- make sure arctan falls between  -/+  Pi/2
-            SGN = SIGN(1.0, YY)
-        ENDIF
-        !
-        !------ set log(r^2) and arctan(x/y), correcting for reflection if any
-        IF(IO.NE.JO .AND. RS1.GT.0.0) THEN
-            G1 = LOG(RS1)
-            T1 = ATAN2(SGN * X1, SGN * YY) + (0.5 - 0.5 * SGN) * PI
-        ELSE
-            G1 = 0.0
-            T1 = 0.0
-        ENDIF
-        !
-        IF(IO.NE.JP .AND. RS2.GT.0.0) THEN
-            G2 = LOG(RS2)
-            T2 = ATAN2(SGN * X2, SGN * YY) + (0.5 - 0.5 * SGN) * PI
-        ELSE
-            G2 = 0.0
-            T2 = 0.0
-        ENDIF
-        !
-        X1I = SX * NXI + SY * NYI
-        X2I = SX * NXI + SY * NYI
-        YYI = SX * NYI - SY * NXI
-        !
-        IF(GEOLIN) THEN
-            NXO = NX(JO)
-            NYO = NY(JO)
-            NXP = NX(JP)
-            NYP = NY(JP)
+        if (dso/=0.0) then
             !
-            X1O = -((RX1 - X1 * SX) * NXO + (RY1 - X1 * SY) * NYO) * DSIO - (SX * NXO + SY * NYO)
-            X1P = ((RX1 - X1 * SX) * NXP + (RY1 - X1 * SY) * NYP) * DSIO
-            X2O = -((RX2 - X2 * SX) * NXO + (RY2 - X2 * SY) * NYO) * DSIO
-            X2P = ((RX2 - X2 * SX) * NXP + (RY2 - X2 * SY) * NYP) * DSIO - (SX * NXP + SY * NYP)
-            YYO = ((RX1 + X1 * SY) * NYO - (RY1 - X1 * SX) * NXO) * DSIO - (SX * NYO - SY * NXO)
-            YYP = -((RX1 - X1 * SY) * NYP - (RY1 + X1 * SX) * NXP) * DSIO
-        ENDIF
-        !
-        IF(JO.EQ.N) GO TO 11
-        !
-        IF(SIGLIN) THEN
+            dsio = 1.0 / dso
             !
-            !------- set up midpoint quantities
-            X0 = 0.5 * (X1 + X2)
-            RS0 = X0 * X0 + YY * YY
-            G0 = LOG(RS0)
-            T0 = ATAN2(SGN * X0, SGN * YY) + (0.5 - 0.5 * SGN) * PI
+            apan = APAnel(jo)
             !
-            !------- calculate source contribution to Psi  for  1-0  half-panel
-            DXINV = 1.0 / (X1 - X0)
-            PSUM = X0 * (T0 - APAN) - X1 * (T1 - APAN) + 0.5 * YY * (G1 - G0)
-            PDIF = ((X1 + X0) * PSUM + RS1 * (T1 - APAN) - RS0 * (T0 - APAN)&
-                    + (X0 - X1) * YY) * DXINV
+            rx1 = Xi - X(jo)
+            ry1 = Yi - Y(jo)
+            rx2 = Xi - X(jp)
+            ry2 = Yi - Y(jp)
             !
-            PSX1 = -(T1 - APAN)
-            PSX0 = T0 - APAN
-            PSYY = 0.5 * (G1 - G0)
+            sx = (X(jp) - X(jo)) * dsio
+            sy = (Y(jp) - Y(jo)) * dsio
             !
-            PDX1 = ((X1 + X0) * PSX1 + PSUM + 2.0 * X1 * (T1 - APAN) - PDIF) * DXINV
-            PDX0 = ((X1 + X0) * PSX0 + PSUM - 2.0 * X0 * (T0 - APAN) + PDIF) * DXINV
-            PDYY = ((X1 + X0) * PSYY + 2.0 * (X0 - X1 + YY * (T1 - T0))) * DXINV
+            x1 = sx * rx1 + sy * ry1
+            x2 = sx * rx2 + sy * ry2
+            yy = sx * ry1 - sy * rx1
             !
-            DSM = SQRT((X(JP) - X(JM))**2 + (Y(JP) - Y(JM))**2)
-            DSIM = 1.0 / DSM
+            rs1 = rx1 * rx1 + ry1 * ry1
+            rs2 = rx2 * rx2 + ry2 * ry2
             !
-            !CC      SIG0 = (SIG(JP) - SIG(JO))*DSIO
-            !CC      SIG1 = (SIG(JP) - SIG(JM))*DSIM
-            !CC      SSUM = SIG0 + SIG1
-            !CC      SDIF = SIG0 - SIG1
+            !------ set reflection flag SGN to avoid branch problems with arctan
+            if (io>=1 .and. io<=N) then
+                !------- no problem on airfoil surface
+                sgn = 1.0
+            else
+                !------- make sure arctan falls between  -/+  Pi/2
+                sgn = sign(1.0, yy)
+            endif
             !
-            SSUM = (SIG(JP) - SIG(JO)) * DSIO + (SIG(JP) - SIG(JM)) * DSIM
-            SDIF = (SIG(JP) - SIG(JO)) * DSIO - (SIG(JP) - SIG(JM)) * DSIM
+            !------ set log(r^2) and arctan(x/y), correcting for reflection if any
+            if (io/=jo .and. rs1>0.0) then
+                g1 = log(rs1)
+                t1 = atan2(sgn * x1, sgn * yy) + (0.5 - 0.5 * sgn) * PI
+            else
+                g1 = 0.0
+                t1 = 0.0
+            endif
             !
-            PSI = PSI + QOPI * (PSUM * SSUM + PDIF * SDIF)
+            if (io/=jp .and. rs2>0.0) then
+                g2 = log(rs2)
+                t2 = atan2(sgn * x2, sgn * yy) + (0.5 - 0.5 * sgn) * PI
+            else
+                g2 = 0.0
+                t2 = 0.0
+            endif
             !
-            !------- dPsi/dm
-            DZDM(JM) = DZDM(JM) + QOPI * (-PSUM * DSIM + PDIF * DSIM)
-            DZDM(JO) = DZDM(JO) + QOPI * (-PSUM * DSIO - PDIF * DSIO)
-            DZDM(JP) = DZDM(JP) + QOPI * (PSUM * (DSIO + DSIM)&
-                    + PDIF * (DSIO - DSIM))
+            x1i = sx * Nxi + sy * Nyi
+            x2i = sx * Nxi + sy * Nyi
+            yyi = sx * Nyi - sy * Nxi
             !
-            !------- dPsi/dni
-            PSNI = PSX1 * X1I + PSX0 * (X1I + X2I) * 0.5 + PSYY * YYI
-            PDNI = PDX1 * X1I + PDX0 * (X1I + X2I) * 0.5 + PDYY * YYI
-            PSI_NI = PSI_NI + QOPI * (PSNI * SSUM + PDNI * SDIF)
+            if (Geolin) then
+                nxo = NX(jo)
+                nyo = NY(jo)
+                nxp = NX(jp)
+                nyp = NY(jp)
+                !
+                x1o = -((rx1 - x1 * sx) * nxo + (ry1 - x1 * sy) * nyo) * dsio - (sx * nxo + sy * nyo)
+                x1p = ((rx1 - x1 * sx) * nxp + (ry1 - x1 * sy) * nyp) * dsio
+                x2o = -((rx2 - x2 * sx) * nxo + (ry2 - x2 * sy) * nyo) * dsio
+                x2p = ((rx2 - x2 * sx) * nxp + (ry2 - x2 * sy) * nyp) * dsio - (sx * nxp + sy * nyp)
+                yyo = ((rx1 + x1 * sy) * nyo - (ry1 - x1 * sx) * nxo) * dsio - (sx * nyo - sy * nxo)
+                yyp = -((rx1 - x1 * sy) * nyp - (ry1 + x1 * sx) * nxp) * dsio
+            endif
             !
-            QTANM = QTANM + QOPI * (PSNI * SSUM + PDNI * SDIF)
+            if (jo==N) exit
             !
-            DQDM(JM) = DQDM(JM) + QOPI * (-PSNI * DSIM + PDNI * DSIM)
-            DQDM(JO) = DQDM(JO) + QOPI * (-PSNI * DSIO - PDNI * DSIO)
-            DQDM(JP) = DQDM(JP) + QOPI * (PSNI * (DSIO + DSIM)&
-                    + PDNI * (DSIO - DSIM))
+            if (Siglin) then
+                !
+                !------- set up midpoint quantities
+                x0 = 0.5 * (x1 + x2)
+                rs0 = x0 * x0 + yy * yy
+                g0 = log(rs0)
+                t0 = atan2(sgn * x0, sgn * yy) + (0.5 - 0.5 * sgn) * PI
+                !
+                !------- calculate source contribution to Psi  for  1-0  half-panel
+                dxinv = 1.0 / (x1 - x0)
+                psum = x0 * (t0 - apan) - x1 * (t1 - apan) + 0.5 * yy * (g1 - g0)
+                pdif = ((x1 + x0) * psum + rs1 * (t1 - apan) - rs0 * (t0 - apan) + (x0 - x1) * yy) * dxinv
+                !
+                psx1 = -(t1 - apan)
+                psx0 = t0 - apan
+                psyy = 0.5 * (g1 - g0)
+                !
+                pdx1 = ((x1 + x0) * psx1 + psum + 2.0 * x1 * (t1 - apan) - pdif) * dxinv
+                pdx0 = ((x1 + x0) * psx0 + psum - 2.0 * x0 * (t0 - apan) + pdif) * dxinv
+                pdyy = ((x1 + x0) * psyy + 2.0 * (x0 - x1 + yy * (t1 - t0))) * dxinv
+                !
+                dsm = sqrt((X(jp) - X(jm))**2 + (Y(jp) - Y(jm))**2)
+                dsim = 1.0 / dsm
+                !
+                !CC      SIG0 = (SIG(JP) - SIG(JO))*DSIO
+                !CC      SIG1 = (SIG(JP) - SIG(JM))*DSIM
+                !CC      SSUM = SIG0 + SIG1
+                !CC      SDIF = SIG0 - SIG1
+                !
+                ssum = (SIG(jp) - SIG(jo)) * dsio + (SIG(jp) - SIG(jm)) * dsim
+                sdif = (SIG(jp) - SIG(jo)) * dsio - (SIG(jp) - SIG(jm)) * dsim
+                !
+                Psi = Psi + QOPi * (psum * ssum + pdif * sdif)
+                !
+                !------- dPsi/dm
+                DZDm(jm) = DZDm(jm) + QOPi * (-psum * dsim + pdif * dsim)
+                DZDm(jo) = DZDm(jo) + QOPi * (-psum * dsio - pdif * dsio)
+                DZDm(jp) = DZDm(jp) + QOPi * (psum * (dsio + dsim) + pdif * (dsio - dsim))
+                !
+                !------- dPsi/dni
+                psni = psx1 * x1i + psx0 * (x1i + x2i) * 0.5 + psyy * yyi
+                pdni = pdx1 * x1i + pdx0 * (x1i + x2i) * 0.5 + pdyy * yyi
+                Psi_ni = Psi_ni + QOPi * (psni * ssum + pdni * sdif)
+                !
+                qtanm = qtanm + QOPi * (psni * ssum + pdni * sdif)
+                !
+                DQDm(jm) = DQDm(jm) + QOPi * (-psni * dsim + pdni * dsim)
+                DQDm(jo) = DQDm(jo) + QOPi * (-psni * dsio - pdni * dsio)
+                DQDm(jp) = DQDm(jp) + QOPi * (psni * (dsio + dsim) + pdni * (dsio - dsim))
+                !
+                !
+                !------- calculate source contribution to Psi  for  0-2  half-panel
+                dxinv = 1.0 / (x0 - x2)
+                psum = x2 * (t2 - apan) - x0 * (t0 - apan) + 0.5 * yy * (g0 - g2)
+                pdif = ((x0 + x2) * psum + rs0 * (t0 - apan) - rs2 * (t2 - apan) + (x2 - x0) * yy) * dxinv
+                !
+                psx0 = -(t0 - apan)
+                psx2 = t2 - apan
+                psyy = 0.5 * (g0 - g2)
+                !
+                pdx0 = ((x0 + x2) * psx0 + psum + 2.0 * x0 * (t0 - apan) - pdif) * dxinv
+                pdx2 = ((x0 + x2) * psx2 + psum - 2.0 * x2 * (t2 - apan) + pdif) * dxinv
+                pdyy = ((x0 + x2) * psyy + 2.0 * (x2 - x0 + yy * (t0 - t2))) * dxinv
+                !
+                dsp = sqrt((X(jq) - X(jo))**2 + (Y(jq) - Y(jo))**2)
+                dsip = 1.0 / dsp
+                !
+                !CC         SIG2 = (SIG(JQ) - SIG(JO))*DSIP
+                !CC         SIG0 = (SIG(JP) - SIG(JO))*DSIO
+                !CC         SSUM = SIG2 + SIG0
+                !CC         SDIF = SIG2 - SIG0
+                !
+                ssum = (SIG(jq) - SIG(jo)) * dsip + (SIG(jp) - SIG(jo)) * dsio
+                sdif = (SIG(jq) - SIG(jo)) * dsip - (SIG(jp) - SIG(jo)) * dsio
+                !
+                Psi = Psi + QOPi * (psum * ssum + pdif * sdif)
+                !
+                !------- dPsi/dm
+                DZDm(jo) = DZDm(jo) + QOPi * (-psum * (dsip + dsio) - pdif * (dsip - dsio))
+                DZDm(jp) = DZDm(jp) + QOPi * (psum * dsio - pdif * dsio)
+                DZDm(jq) = DZDm(jq) + QOPi * (psum * dsip + pdif * dsip)
+                !
+                !------- dPsi/dni
+                psni = psx0 * (x1i + x2i) * 0.5 + psx2 * x2i + psyy * yyi
+                pdni = pdx0 * (x1i + x2i) * 0.5 + pdx2 * x2i + pdyy * yyi
+                Psi_ni = Psi_ni + QOPi * (psni * ssum + pdni * sdif)
+                !
+                qtanm = qtanm + QOPi * (psni * ssum + pdni * sdif)
+                !
+                DQDm(jo) = DQDm(jo) + QOPi * (-psni * (dsip + dsio) - pdni * (dsip - dsio))
+                DQDm(jp) = DQDm(jp) + QOPi * (psni * dsio - pdni * dsio)
+                DQDm(jq) = DQDm(jq) + QOPi * (psni * dsip + pdni * dsip)
+                !
+            endif
             !
+            !------ calculate vortex panel contribution to Psi
+            dxinv = 1.0 / (x1 - x2)
+            psis = 0.5 * x1 * g1 - 0.5 * x2 * g2 + x2 - x1 + yy * (t1 - t2)
+            psid = ((x1 + x2) * psis + 0.5 * (rs2 * g2 - rs1 * g1 + x1 * x1 - x2 * x2)) * dxinv
             !
-            !------- calculate source contribution to Psi  for  0-2  half-panel
-            DXINV = 1.0 / (X0 - X2)
-            PSUM = X2 * (T2 - APAN) - X0 * (T0 - APAN) + 0.5 * YY * (G0 - G2)
-            PDIF = ((X0 + X2) * PSUM + RS0 * (T0 - APAN) - RS2 * (T2 - APAN)&
-                    + (X2 - X0) * YY) * DXINV
+            psx1 = 0.5 * g1
+            psx2 = -.5 * g2
+            psyy = t1 - t2
             !
-            PSX0 = -(T0 - APAN)
-            PSX2 = T2 - APAN
-            PSYY = 0.5 * (G0 - G2)
+            pdx1 = ((x1 + x2) * psx1 + psis - x1 * g1 - psid) * dxinv
+            pdx2 = ((x1 + x2) * psx2 + psis + x2 * g2 + psid) * dxinv
+            pdyy = ((x1 + x2) * psyy - yy * (g1 - g2)) * dxinv
             !
-            PDX0 = ((X0 + X2) * PSX0 + PSUM + 2.0 * X0 * (T0 - APAN) - PDIF) * DXINV
-            PDX2 = ((X0 + X2) * PSX2 + PSUM - 2.0 * X2 * (T2 - APAN) + PDIF) * DXINV
-            PDYY = ((X0 + X2) * PSYY + 2.0 * (X2 - X0 + YY * (T0 - T2))) * DXINV
+            gsum1 = GAMu(jp, 1) + GAMu(jo, 1)
+            gsum2 = GAMu(jp, 2) + GAMu(jo, 2)
+            gdif1 = GAMu(jp, 1) - GAMu(jo, 1)
+            gdif2 = GAMu(jp, 2) - GAMu(jo, 2)
             !
-            DSP = SQRT((X(JQ) - X(JO))**2 + (Y(JQ) - Y(JO))**2)
-            DSIP = 1.0 / DSP
+            gsum = GAM(jp) + GAM(jo)
+            gdif = GAM(jp) - GAM(jo)
             !
-            !CC         SIG2 = (SIG(JQ) - SIG(JO))*DSIP
-            !CC         SIG0 = (SIG(JP) - SIG(JO))*DSIO
-            !CC         SSUM = SIG2 + SIG0
-            !CC         SDIF = SIG2 - SIG0
+            Psi = Psi + QOPi * (psis * gsum + psid * gdif)
             !
-            SSUM = (SIG(JQ) - SIG(JO)) * DSIP + (SIG(JP) - SIG(JO)) * DSIO
-            SDIF = (SIG(JQ) - SIG(JO)) * DSIP - (SIG(JP) - SIG(JO)) * DSIO
+            !------ dPsi/dGam
+            DZDg(jo) = DZDg(jo) + QOPi * (psis - psid)
+            DZDg(jp) = DZDg(jp) + QOPi * (psis + psid)
             !
-            PSI = PSI + QOPI * (PSUM * SSUM + PDIF * SDIF)
+            !------ dPsi/dni
+            psni = psx1 * x1i + psx2 * x2i + psyy * yyi
+            pdni = pdx1 * x1i + pdx2 * x2i + pdyy * yyi
+            Psi_ni = Psi_ni + QOPi * (gsum * psni + gdif * pdni)
             !
-            !------- dPsi/dm
-            DZDM(JO) = DZDM(JO) + QOPI * (-PSUM * (DSIP + DSIO)&
-                    - PDIF * (DSIP - DSIO))
-            DZDM(JP) = DZDM(JP) + QOPI * (PSUM * DSIO - PDIF * DSIO)
-            DZDM(JQ) = DZDM(JQ) + QOPI * (PSUM * DSIP + PDIF * DSIP)
+            QTAn1 = QTAn1 + QOPi * (gsum1 * psni + gdif1 * pdni)
+            QTAn2 = QTAn2 + QOPi * (gsum2 * psni + gdif2 * pdni)
             !
-            !------- dPsi/dni
-            PSNI = PSX0 * (X1I + X2I) * 0.5 + PSX2 * X2I + PSYY * YYI
-            PDNI = PDX0 * (X1I + X2I) * 0.5 + PDX2 * X2I + PDYY * YYI
-            PSI_NI = PSI_NI + QOPI * (PSNI * SSUM + PDNI * SDIF)
+            DQDg(jo) = DQDg(jo) + QOPi * (psni - pdni)
+            DQDg(jp) = DQDg(jp) + QOPi * (psni + pdni)
             !
-            QTANM = QTANM + QOPI * (PSNI * SSUM + PDNI * SDIF)
-            !
-            DQDM(JO) = DQDM(JO) + QOPI * (-PSNI * (DSIP + DSIO)&
-                    - PDNI * (DSIP - DSIO))
-            DQDM(JP) = DQDM(JP) + QOPI * (PSNI * DSIO - PDNI * DSIO)
-            DQDM(JQ) = DQDM(JQ) + QOPI * (PSNI * DSIP + PDNI * DSIP)
-            !
-        ENDIF
-        !
-        !------ calculate vortex panel contribution to Psi
-        DXINV = 1.0 / (X1 - X2)
-        PSIS = 0.5 * X1 * G1 - 0.5 * X2 * G2 + X2 - X1 + YY * (T1 - T2)
-        PSID = ((X1 + X2) * PSIS + 0.5 * (RS2 * G2 - RS1 * G1 + X1 * X1 - X2 * X2)) * DXINV
-        !
-        PSX1 = 0.5 * G1
-        PSX2 = -.5 * G2
-        PSYY = T1 - T2
-        !
-        PDX1 = ((X1 + X2) * PSX1 + PSIS - X1 * G1 - PSID) * DXINV
-        PDX2 = ((X1 + X2) * PSX2 + PSIS + X2 * G2 + PSID) * DXINV
-        PDYY = ((X1 + X2) * PSYY - YY * (G1 - G2)) * DXINV
-        !
-        GSUM1 = GAMU(JP, 1) + GAMU(JO, 1)
-        GSUM2 = GAMU(JP, 2) + GAMU(JO, 2)
-        GDIF1 = GAMU(JP, 1) - GAMU(JO, 1)
-        GDIF2 = GAMU(JP, 2) - GAMU(JO, 2)
-        !
-        GSUM = GAM(JP) + GAM(JO)
-        GDIF = GAM(JP) - GAM(JO)
-        !
-        PSI = PSI + QOPI * (PSIS * GSUM + PSID * GDIF)
-        !
-        !------ dPsi/dGam
-        DZDG(JO) = DZDG(JO) + QOPI * (PSIS - PSID)
-        DZDG(JP) = DZDG(JP) + QOPI * (PSIS + PSID)
-        !
-        !------ dPsi/dni
-        PSNI = PSX1 * X1I + PSX2 * X2I + PSYY * YYI
-        PDNI = PDX1 * X1I + PDX2 * X2I + PDYY * YYI
-        PSI_NI = PSI_NI + QOPI * (GSUM * PSNI + GDIF * PDNI)
-        !
-        QTAN1 = QTAN1 + QOPI * (GSUM1 * PSNI + GDIF1 * PDNI)
-        QTAN2 = QTAN2 + QOPI * (GSUM2 * PSNI + GDIF2 * PDNI)
-        !
-        DQDG(JO) = DQDG(JO) + QOPI * (PSNI - PDNI)
-        DQDG(JP) = DQDG(JP) + QOPI * (PSNI + PDNI)
-        !
-        IF(GEOLIN) THEN
-            !
-            !------- dPsi/dn
-            DZDN(JO) = DZDN(JO) + QOPI * GSUM * (PSX1 * X1O + PSX2 * X2O + PSYY * YYO)&
-                    + QOPI * GDIF * (PDX1 * X1O + PDX2 * X2O + PDYY * YYO)
-            DZDN(JP) = DZDN(JP) + QOPI * GSUM * (PSX1 * X1P + PSX2 * X2P + PSYY * YYP)&
-                    + QOPI * GDIF * (PDX1 * X1P + PDX2 * X2P + PDYY * YYP)
-            !------- dPsi/dP
-            Z_QDOF0 = Z_QDOF0&
-                    + QOPI * ((PSIS - PSID) * QF0(JO) + (PSIS + PSID) * QF0(JP))
-            Z_QDOF1 = Z_QDOF1&
-                    + QOPI * ((PSIS - PSID) * QF1(JO) + (PSIS + PSID) * QF1(JP))
-            Z_QDOF2 = Z_QDOF2&
-                    + QOPI * ((PSIS - PSID) * QF2(JO) + (PSIS + PSID) * QF2(JP))
-            Z_QDOF3 = Z_QDOF3&
-                    + QOPI * ((PSIS - PSID) * QF3(JO) + (PSIS + PSID) * QF3(JP))
-        ENDIF
+            if (Geolin) then
+                !
+                !------- dPsi/dn
+                DZDn(jo) = DZDn(jo) + QOPi * gsum * (psx1 * x1o + psx2 * x2o + psyy * yyo) &
+                        + QOPi * gdif * (pdx1 * x1o + pdx2 * x2o + pdyy * yyo)
+                DZDn(jp) = DZDn(jp) + QOPi * gsum * (psx1 * x1p + psx2 * x2p + psyy * yyp) &
+                        + QOPi * gdif * (pdx1 * x1p + pdx2 * x2p + pdyy * yyp)
+                !------- dPsi/dP
+                Z_Qdof0 = Z_Qdof0 + QOPi * ((psis - psid) * QF0(jo) + (psis + psid) * QF0(jp))
+                Z_Qdof1 = Z_Qdof1 + QOPi * ((psis - psid) * QF1(jo) + (psis + psid) * QF1(jp))
+                Z_Qdof2 = Z_Qdof2 + QOPi * ((psis - psid) * QF2(jo) + (psis + psid) * QF2(jp))
+                Z_Qdof3 = Z_Qdof3 + QOPi * ((psis - psid) * QF3(jo) + (psis + psid) * QF3(jp))
+            endif
+        endif
         !
         !
-    10 CONTINUE
+    enddo
     !
-    11 CONTINUE
-    PSIG = 0.5 * YY * (G1 - G2) + X2 * (T2 - APAN) - X1 * (T1 - APAN)
-    PGAM = 0.5 * X1 * G1 - 0.5 * X2 * G2 + X2 - X1 + YY * (T1 - T2)
+    psig = 0.5 * yy * (g1 - g2) + x2 * (t2 - apan) - x1 * (t1 - apan)
+    pgam = 0.5 * x1 * g1 - 0.5 * x2 * g2 + x2 - x1 + yy * (t1 - t2)
     !
-    PSIGX1 = -(T1 - APAN)
-    PSIGX2 = T2 - APAN
-    PSIGYY = 0.5 * (G1 - G2)
-    PGAMX1 = 0.5 * G1
-    PGAMX2 = -.5 * G2
-    PGAMYY = T1 - T2
+    psigx1 = -(t1 - apan)
+    psigx2 = t2 - apan
+    psigyy = 0.5 * (g1 - g2)
+    pgamx1 = 0.5 * g1
+    pgamx2 = -.5 * g2
+    pgamyy = t1 - t2
     !
-    PSIGNI = PSIGX1 * X1I + PSIGX2 * X2I + PSIGYY * YYI
-    PGAMNI = PGAMX1 * X1I + PGAMX2 * X2I + PGAMYY * YYI
+    psigni = psigx1 * x1i + psigx2 * x2i + psigyy * yyi
+    pgamni = pgamx1 * x1i + pgamx2 * x2i + pgamyy * yyi
     !
     !---- TE panel source and vortex strengths
-    SIGTE1 = 0.5 * SCS * (GAMU(JP, 1) - GAMU(JO, 1))
-    SIGTE2 = 0.5 * SCS * (GAMU(JP, 2) - GAMU(JO, 2))
-    GAMTE1 = -.5 * SDS * (GAMU(JP, 1) - GAMU(JO, 1))
-    GAMTE2 = -.5 * SDS * (GAMU(JP, 2) - GAMU(JO, 2))
+    sigte1 = 0.5 * scs * (GAMu(jp, 1) - GAMu(jo, 1))
+    sigte2 = 0.5 * scs * (GAMu(jp, 2) - GAMu(jo, 2))
+    gamte1 = -.5 * sds * (GAMu(jp, 1) - GAMu(jo, 1))
+    gamte2 = -.5 * sds * (GAMu(jp, 2) - GAMu(jo, 2))
     !
-    SIGTE = 0.5 * SCS * (GAM(JP) - GAM(JO))
-    GAMTE = -.5 * SDS * (GAM(JP) - GAM(JO))
+    SIGte = 0.5 * scs * (GAM(jp) - GAM(jo))
+    GAMte = -.5 * sds * (GAM(jp) - GAM(jo))
     !
     !---- TE panel contribution to Psi
-    PSI = PSI + HOPI * (PSIG * SIGTE + PGAM * GAMTE)
+    Psi = Psi + HOPi * (psig * SIGte + pgam * GAMte)
     !
     !---- dPsi/dGam
-    DZDG(JO) = DZDG(JO) - HOPI * PSIG * SCS * 0.5
-    DZDG(JP) = DZDG(JP) + HOPI * PSIG * SCS * 0.5
+    DZDg(jo) = DZDg(jo) - HOPi * psig * scs * 0.5
+    DZDg(jp) = DZDg(jp) + HOPi * psig * scs * 0.5
     !
-    DZDG(JO) = DZDG(JO) + HOPI * PGAM * SDS * 0.5
-    DZDG(JP) = DZDG(JP) - HOPI * PGAM * SDS * 0.5
+    DZDg(jo) = DZDg(jo) + HOPi * pgam * sds * 0.5
+    DZDg(jp) = DZDg(jp) - HOPi * pgam * sds * 0.5
     !
     !---- dPsi/dni
-    PSI_NI = PSI_NI + HOPI * (PSIGNI * SIGTE + PGAMNI * GAMTE)
+    Psi_ni = Psi_ni + HOPi * (psigni * SIGte + pgamni * GAMte)
     !
-    QTAN1 = QTAN1 + HOPI * (PSIGNI * SIGTE1 + PGAMNI * GAMTE1)
-    QTAN2 = QTAN2 + HOPI * (PSIGNI * SIGTE2 + PGAMNI * GAMTE2)
+    QTAn1 = QTAn1 + HOPi * (psigni * sigte1 + pgamni * gamte1)
+    QTAn2 = QTAn2 + HOPi * (psigni * sigte2 + pgamni * gamte2)
     !
-    DQDG(JO) = DQDG(JO) - HOPI * (PSIGNI * 0.5 * SCS - PGAMNI * 0.5 * SDS)
-    DQDG(JP) = DQDG(JP) + HOPI * (PSIGNI * 0.5 * SCS - PGAMNI * 0.5 * SDS)
+    DQDg(jo) = DQDg(jo) - HOPi * (psigni * 0.5 * scs - pgamni * 0.5 * sds)
+    DQDg(jp) = DQDg(jp) + HOPi * (psigni * 0.5 * scs - pgamni * 0.5 * sds)
     !
-    IF(GEOLIN) THEN
+    if (Geolin) then
         !
         !----- dPsi/dn
-        DZDN(JO) = DZDN(JO)&
-                + HOPI * (PSIGX1 * X1O + PSIGX2 * X2O + PSIGYY * YYO) * SIGTE&
-                + HOPI * (PGAMX1 * X1O + PGAMX2 * X2O + PGAMYY * YYO) * GAMTE
-        DZDN(JP) = DZDN(JP)&
-                + HOPI * (PSIGX1 * X1P + PSIGX2 * X2P + PSIGYY * YYP) * SIGTE&
-                + HOPI * (PGAMX1 * X1P + PGAMX2 * X2P + PGAMYY * YYP) * GAMTE
+        DZDn(jo) = DZDn(jo) + HOPi * (psigx1 * x1o + psigx2 * x2o + psigyy * yyo) * SIGte &
+                + HOPi * (pgamx1 * x1o + pgamx2 * x2o + pgamyy * yyo) * GAMte
+        DZDn(jp) = DZDn(jp) + HOPi * (psigx1 * x1p + psigx2 * x2p + psigyy * yyp) * SIGte &
+                + HOPi * (pgamx1 * x1p + pgamx2 * x2p + pgamyy * yyp) * GAMte
         !
         !----- dPsi/dP
-        Z_QDOF0 = Z_QDOF0 + HOPI * PSIG * 0.5 * (QF0(JP) - QF0(JO)) * SCS&
-                - HOPI * PGAM * 0.5 * (QF0(JP) - QF0(JO)) * SDS
-        Z_QDOF1 = Z_QDOF1 + HOPI * PSIG * 0.5 * (QF1(JP) - QF1(JO)) * SCS&
-                - HOPI * PGAM * 0.5 * (QF1(JP) - QF1(JO)) * SDS
-        Z_QDOF2 = Z_QDOF2 + HOPI * PSIG * 0.5 * (QF2(JP) - QF2(JO)) * SCS&
-                - HOPI * PGAM * 0.5 * (QF2(JP) - QF2(JO)) * SDS
-        Z_QDOF3 = Z_QDOF3 + HOPI * PSIG * 0.5 * (QF3(JP) - QF3(JO)) * SCS&
-                - HOPI * PGAM * 0.5 * (QF3(JP) - QF3(JO)) * SDS
+        Z_Qdof0 = Z_Qdof0 &
+                + HOPi * psig * 0.5 * (QF0(jp) - QF0(jo)) * scs - HOPi * pgam * 0.5 * (QF0(jp) - QF0(jo)) * sds
+        Z_Qdof1 = Z_Qdof1 &
+                + HOPi * psig * 0.5 * (QF1(jp) - QF1(jo)) * scs - HOPi * pgam * 0.5 * (QF1(jp) - QF1(jo)) * sds
+        Z_Qdof2 = Z_Qdof2 &
+                + HOPi * psig * 0.5 * (QF2(jp) - QF2(jo)) * scs - HOPi * pgam * 0.5 * (QF2(jp) - QF2(jo)) * sds
+        Z_Qdof3 = Z_Qdof3 &
+                + HOPi * psig * 0.5 * (QF3(jp) - QF3(jo)) * scs - HOPi * pgam * 0.5 * (QF3(jp) - QF3(jo)) * sds
         !
-    ENDIF
+    endif
     !
-    12 CONTINUE
     !
     !**** Freestream terms
-    PSI = PSI + QINF * (COSA * YI - SINA * XI)
+    100  Psi = Psi + QINf * (COSa * Yi - SINa * Xi)
     !
     !---- dPsi/dn
-    PSI_NI = PSI_NI + QINF * (COSA * NYI - SINA * NXI)
+    Psi_ni = Psi_ni + QINf * (COSa * Nyi - SINa * Nxi)
     !
-    QTAN1 = QTAN1 + QINF * NYI
-    QTAN2 = QTAN2 - QINF * NXI
+    QTAn1 = QTAn1 + QINf * Nyi
+    QTAn2 = QTAn2 - QINf * Nxi
     !
     !---- dPsi/dQinf
-    Z_QINF = Z_QINF + (COSA * YI - SINA * XI)
+    Z_Qinf = Z_Qinf + (COSa * Yi - SINa * Xi)
     !
     !---- dPsi/dalfa
-    Z_ALFA = Z_ALFA - QINF * (SINA * YI + COSA * XI)
+    Z_Alfa = Z_Alfa - QINf * (SINa * Yi + COSa * Xi)
     !
-    IF(.NOT.LIMAGE) RETURN
+    if (.not.LIMage) return
     !
     !
     !
-    DO 20 JO = 1, N
-        JP = JO + 1
+    do jo = 1, N
+        jp = jo + 1
         !
-        JM = JO - 1
-        JQ = JP + 1
+        jm = jo - 1
+        jq = jp + 1
         !
-        IF(JO.EQ.1) THEN
-            JM = JO
-        ELSE IF(JO.EQ.N - 1) THEN
-            JQ = JP
-        ELSE IF(JO.EQ.N) THEN
-            JP = 1
-            IF((X(JO) - X(JP))**2 + (Y(JO) - Y(JP))**2 .LT. SEPS**2) GO TO 22
-        ENDIF
+        if (jo==1) then
+            jm = jo
+        elseif (jo==N - 1) then
+            jq = jp
+        elseif (jo==N) then
+            jp = 1
+            if ((X(jo) - X(jp))**2 + (Y(jo) - Y(jp))**2<seps**2) goto 99999
+        endif
         !
-        DSO = SQRT((X(JO) - X(JP))**2 + (Y(JO) - Y(JP))**2)
+        dso = sqrt((X(jo) - X(jp))**2 + (Y(jo) - Y(jp))**2)
         !
         !------ skip null panel
-        IF(DSO .EQ. 0.0) GO TO 20
-        !
-        DSIO = 1.0 / DSO
-        !
-        !cc     APAN = APANEL(JO)
-        APAN = PI - APANEL(JO) + 2.0 * ALFA
-        !
-        XJO = X(JO) + 2.0 * (YIMAGE + Y(JO)) * SINA
-        YJO = Y(JO) - 2.0 * (YIMAGE + Y(JO)) * COSA
-        XJP = X(JP) + 2.0 * (YIMAGE + Y(JP)) * SINA
-        YJP = Y(JP) - 2.0 * (YIMAGE + Y(JP)) * COSA
-        !
-        RX1 = XI - XJO
-        RY1 = YI - YJO
-        RX2 = XI - XJP
-        RY2 = YI - YJP
-        !
-        SX = (XJP - XJO) * DSIO
-        SY = (YJP - YJO) * DSIO
-        !
-        X1 = SX * RX1 + SY * RY1
-        X2 = SX * RX2 + SY * RY2
-        YY = SX * RY1 - SY * RX1
-        !
-        RS1 = RX1 * RX1 + RY1 * RY1
-        RS2 = RX2 * RX2 + RY2 * RY2
-        !
-        !------ set reflection flag SGN to avoid branch problems with arctan
-        IF(IO.GE.1 .AND. IO.LE.N) THEN
-            !------- no problem on airfoil surface
-            SGN = 1.0
-        ELSE
-            !------- make sure arctan falls between  -/+  Pi/2
-            SGN = SIGN(1.0, YY)
-        ENDIF
-        !
-        !------ set log(r^2) and arctan(x/y), correcting for reflection if any
-        G1 = LOG(RS1)
-        T1 = ATAN2(SGN * X1, SGN * YY) + (0.5 - 0.5 * SGN) * PI
-        !
-        G2 = LOG(RS2)
-        T2 = ATAN2(SGN * X2, SGN * YY) + (0.5 - 0.5 * SGN) * PI
-        !
-        X1I = SX * NXI + SY * NYI
-        X2I = SX * NXI + SY * NYI
-        YYI = SX * NYI - SY * NXI
-        !
-        IF(GEOLIN) THEN
-            NXO = NX(JO)
-            NYO = NY(JO)
-            NXP = NX(JP)
-            NYP = NY(JP)
+        if (dso/=0.0) then
             !
-            X1O = -((RX1 - X1 * SX) * NXO + (RY1 - X1 * SY) * NYO) * DSIO - (SX * NXO + SY * NYO)
-            X1P = ((RX1 - X1 * SX) * NXP + (RY1 - X1 * SY) * NYP) * DSIO
-            X2O = -((RX2 - X2 * SX) * NXO + (RY2 - X2 * SY) * NYO) * DSIO
-            X2P = ((RX2 - X2 * SX) * NXP + (RY2 - X2 * SY) * NYP) * DSIO - (SX * NXP + SY * NYP)
-            YYO = ((RX1 + X1 * SY) * NYO - (RY1 - X1 * SX) * NXO) * DSIO - (SX * NYO - SY * NXO)
-            YYP = -((RX1 - X1 * SY) * NYP - (RY1 + X1 * SX) * NXP) * DSIO
-        ENDIF
-        !
-        IF(JO.EQ.N) GO TO 21
-        !
-        IF(SIGLIN) THEN
+            dsio = 1.0 / dso
             !
-            !------- set up midpoint quantities
-            X0 = 0.5 * (X1 + X2)
-            RS0 = X0 * X0 + YY * YY
-            G0 = LOG(RS0)
-            T0 = ATAN2(SGN * X0, SGN * YY) + (0.5 - 0.5 * SGN) * PI
+            !cc     APAN = APANEL(JO)
+            apan = PI - APAnel(jo) + 2.0 * ALFa
             !
-            !------- calculate source contribution to Psi  for  1-0  half-panel
-            DXINV = 1.0 / (X1 - X0)
-            PSUM = X0 * (T0 - APAN) - X1 * (T1 - APAN) + 0.5 * YY * (G1 - G0)
-            PDIF = ((X1 + X0) * PSUM + RS1 * (T1 - APAN) - RS0 * (T0 - APAN)&
-                    + (X0 - X1) * YY) * DXINV
+            xjo = X(jo) + 2.0 * (YIMage + Y(jo)) * SINa
+            yjo = Y(jo) - 2.0 * (YIMage + Y(jo)) * COSa
+            xjp = X(jp) + 2.0 * (YIMage + Y(jp)) * SINa
+            yjp = Y(jp) - 2.0 * (YIMage + Y(jp)) * COSa
             !
-            PSX1 = -(T1 - APAN)
-            PSX0 = T0 - APAN
-            PSYY = 0.5 * (G1 - G0)
+            rx1 = Xi - xjo
+            ry1 = Yi - yjo
+            rx2 = Xi - xjp
+            ry2 = Yi - yjp
             !
-            PDX1 = ((X1 + X0) * PSX1 + PSUM + 2.0 * X1 * (T1 - APAN) - PDIF) * DXINV
-            PDX0 = ((X1 + X0) * PSX0 + PSUM - 2.0 * X0 * (T0 - APAN) + PDIF) * DXINV
-            PDYY = ((X1 + X0) * PSYY + 2.0 * (X0 - X1 + YY * (T1 - T0))) * DXINV
+            sx = (xjp - xjo) * dsio
+            sy = (yjp - yjo) * dsio
             !
-            DSM = SQRT((X(JP) - X(JM))**2 + (Y(JP) - Y(JM))**2)
-            DSIM = 1.0 / DSM
+            x1 = sx * rx1 + sy * ry1
+            x2 = sx * rx2 + sy * ry2
+            yy = sx * ry1 - sy * rx1
             !
-            !CC      SIG0 = (SIG(JP) - SIG(JO))*DSIO
-            !CC      SIG1 = (SIG(JP) - SIG(JM))*DSIM
-            !CC      SSUM = SIG0 + SIG1
-            !CC      SDIF = SIG0 - SIG1
+            rs1 = rx1 * rx1 + ry1 * ry1
+            rs2 = rx2 * rx2 + ry2 * ry2
             !
-            SSUM = (SIG(JP) - SIG(JO)) * DSIO + (SIG(JP) - SIG(JM)) * DSIM
-            SDIF = (SIG(JP) - SIG(JO)) * DSIO - (SIG(JP) - SIG(JM)) * DSIM
+            !------ set reflection flag SGN to avoid branch problems with arctan
+            if (io>=1 .and. io<=N) then
+                !------- no problem on airfoil surface
+                sgn = 1.0
+            else
+                !------- make sure arctan falls between  -/+  Pi/2
+                sgn = sign(1.0, yy)
+            endif
             !
-            PSI = PSI + QOPI * (PSUM * SSUM + PDIF * SDIF)
+            !------ set log(r^2) and arctan(x/y), correcting for reflection if any
+            g1 = log(rs1)
+            t1 = atan2(sgn * x1, sgn * yy) + (0.5 - 0.5 * sgn) * PI
             !
-            !------- dPsi/dm
-            DZDM(JM) = DZDM(JM) + QOPI * (-PSUM * DSIM + PDIF * DSIM)
-            DZDM(JO) = DZDM(JO) + QOPI * (-PSUM * DSIO - PDIF * DSIO)
-            DZDM(JP) = DZDM(JP) + QOPI * (PSUM * (DSIO + DSIM)&
-                    + PDIF * (DSIO - DSIM))
+            g2 = log(rs2)
+            t2 = atan2(sgn * x2, sgn * yy) + (0.5 - 0.5 * sgn) * PI
             !
-            !------- dPsi/dni
-            PSNI = PSX1 * X1I + PSX0 * (X1I + X2I) * 0.5 + PSYY * YYI
-            PDNI = PDX1 * X1I + PDX0 * (X1I + X2I) * 0.5 + PDYY * YYI
-            PSI_NI = PSI_NI + QOPI * (PSNI * SSUM + PDNI * SDIF)
+            x1i = sx * Nxi + sy * Nyi
+            x2i = sx * Nxi + sy * Nyi
+            yyi = sx * Nyi - sy * Nxi
             !
-            QTANM = QTANM + QOPI * (PSNI * SSUM + PDNI * SDIF)
+            if (Geolin) then
+                nxo = NX(jo)
+                nyo = NY(jo)
+                nxp = NX(jp)
+                nyp = NY(jp)
+                !
+                x1o = -((rx1 - x1 * sx) * nxo + (ry1 - x1 * sy) * nyo) * dsio - (sx * nxo + sy * nyo)
+                x1p = ((rx1 - x1 * sx) * nxp + (ry1 - x1 * sy) * nyp) * dsio
+                x2o = -((rx2 - x2 * sx) * nxo + (ry2 - x2 * sy) * nyo) * dsio
+                x2p = ((rx2 - x2 * sx) * nxp + (ry2 - x2 * sy) * nyp) * dsio - (sx * nxp + sy * nyp)
+                yyo = ((rx1 + x1 * sy) * nyo - (ry1 - x1 * sx) * nxo) * dsio - (sx * nyo - sy * nxo)
+                yyp = -((rx1 - x1 * sy) * nyp - (ry1 + x1 * sx) * nxp) * dsio
+            endif
             !
-            DQDM(JM) = DQDM(JM) + QOPI * (-PSNI * DSIM + PDNI * DSIM)
-            DQDM(JO) = DQDM(JO) + QOPI * (-PSNI * DSIO - PDNI * DSIO)
-            DQDM(JP) = DQDM(JP) + QOPI * (PSNI * (DSIO + DSIM)&
-                    + PDNI * (DSIO - DSIM))
+            if (jo==N) exit
             !
+            if (Siglin) then
+                !
+                !------- set up midpoint quantities
+                x0 = 0.5 * (x1 + x2)
+                rs0 = x0 * x0 + yy * yy
+                g0 = log(rs0)
+                t0 = atan2(sgn * x0, sgn * yy) + (0.5 - 0.5 * sgn) * PI
+                !
+                !------- calculate source contribution to Psi  for  1-0  half-panel
+                dxinv = 1.0 / (x1 - x0)
+                psum = x0 * (t0 - apan) - x1 * (t1 - apan) + 0.5 * yy * (g1 - g0)
+                pdif = ((x1 + x0) * psum + rs1 * (t1 - apan) - rs0 * (t0 - apan) + (x0 - x1) * yy) * dxinv
+                !
+                psx1 = -(t1 - apan)
+                psx0 = t0 - apan
+                psyy = 0.5 * (g1 - g0)
+                !
+                pdx1 = ((x1 + x0) * psx1 + psum + 2.0 * x1 * (t1 - apan) - pdif) * dxinv
+                pdx0 = ((x1 + x0) * psx0 + psum - 2.0 * x0 * (t0 - apan) + pdif) * dxinv
+                pdyy = ((x1 + x0) * psyy + 2.0 * (x0 - x1 + yy * (t1 - t0))) * dxinv
+                !
+                dsm = sqrt((X(jp) - X(jm))**2 + (Y(jp) - Y(jm))**2)
+                dsim = 1.0 / dsm
+                !
+                !CC      SIG0 = (SIG(JP) - SIG(JO))*DSIO
+                !CC      SIG1 = (SIG(JP) - SIG(JM))*DSIM
+                !CC      SSUM = SIG0 + SIG1
+                !CC      SDIF = SIG0 - SIG1
+                !
+                ssum = (SIG(jp) - SIG(jo)) * dsio + (SIG(jp) - SIG(jm)) * dsim
+                sdif = (SIG(jp) - SIG(jo)) * dsio - (SIG(jp) - SIG(jm)) * dsim
+                !
+                Psi = Psi + QOPi * (psum * ssum + pdif * sdif)
+                !
+                !------- dPsi/dm
+                DZDm(jm) = DZDm(jm) + QOPi * (-psum * dsim + pdif * dsim)
+                DZDm(jo) = DZDm(jo) + QOPi * (-psum * dsio - pdif * dsio)
+                DZDm(jp) = DZDm(jp) + QOPi * (psum * (dsio + dsim) + pdif * (dsio - dsim))
+                !
+                !------- dPsi/dni
+                psni = psx1 * x1i + psx0 * (x1i + x2i) * 0.5 + psyy * yyi
+                pdni = pdx1 * x1i + pdx0 * (x1i + x2i) * 0.5 + pdyy * yyi
+                Psi_ni = Psi_ni + QOPi * (psni * ssum + pdni * sdif)
+                !
+                qtanm = qtanm + QOPi * (psni * ssum + pdni * sdif)
+                !
+                DQDm(jm) = DQDm(jm) + QOPi * (-psni * dsim + pdni * dsim)
+                DQDm(jo) = DQDm(jo) + QOPi * (-psni * dsio - pdni * dsio)
+                DQDm(jp) = DQDm(jp) + QOPi * (psni * (dsio + dsim) + pdni * (dsio - dsim))
+                !
+                !
+                !------- calculate source contribution to Psi  for  0-2  half-panel
+                dxinv = 1.0 / (x0 - x2)
+                psum = x2 * (t2 - apan) - x0 * (t0 - apan) + 0.5 * yy * (g0 - g2)
+                pdif = ((x0 + x2) * psum + rs0 * (t0 - apan) - rs2 * (t2 - apan) + (x2 - x0) * yy) * dxinv
+                !
+                psx0 = -(t0 - apan)
+                psx2 = t2 - apan
+                psyy = 0.5 * (g0 - g2)
+                !
+                pdx0 = ((x0 + x2) * psx0 + psum + 2.0 * x0 * (t0 - apan) - pdif) * dxinv
+                pdx2 = ((x0 + x2) * psx2 + psum - 2.0 * x2 * (t2 - apan) + pdif) * dxinv
+                pdyy = ((x0 + x2) * psyy + 2.0 * (x2 - x0 + yy * (t0 - t2))) * dxinv
+                !
+                dsp = sqrt((X(jq) - X(jo))**2 + (Y(jq) - Y(jo))**2)
+                dsip = 1.0 / dsp
+                !
+                !CC         SIG2 = (SIG(JQ) - SIG(JO))*DSIP
+                !CC         SIG0 = (SIG(JP) - SIG(JO))*DSIO
+                !CC         SSUM = SIG2 + SIG0
+                !CC         SDIF = SIG2 - SIG0
+                !
+                ssum = (SIG(jq) - SIG(jo)) * dsip + (SIG(jp) - SIG(jo)) * dsio
+                sdif = (SIG(jq) - SIG(jo)) * dsip - (SIG(jp) - SIG(jo)) * dsio
+                !
+                Psi = Psi + QOPi * (psum * ssum + pdif * sdif)
+                !
+                !------- dPsi/dm
+                DZDm(jo) = DZDm(jo) + QOPi * (-psum * (dsip + dsio) - pdif * (dsip - dsio))
+                DZDm(jp) = DZDm(jp) + QOPi * (psum * dsio - pdif * dsio)
+                DZDm(jq) = DZDm(jq) + QOPi * (psum * dsip + pdif * dsip)
+                !
+                !------- dPsi/dni
+                psni = psx0 * (x1i + x2i) * 0.5 + psx2 * x2i + psyy * yyi
+                pdni = pdx0 * (x1i + x2i) * 0.5 + pdx2 * x2i + pdyy * yyi
+                Psi_ni = Psi_ni + QOPi * (psni * ssum + pdni * sdif)
+                !
+                qtanm = qtanm + QOPi * (psni * ssum + pdni * sdif)
+                !
+                DQDm(jo) = DQDm(jo) + QOPi * (-psni * (dsip + dsio) - pdni * (dsip - dsio))
+                DQDm(jp) = DQDm(jp) + QOPi * (psni * dsio - pdni * dsio)
+                DQDm(jq) = DQDm(jq) + QOPi * (psni * dsip + pdni * dsip)
+                !
+            endif
             !
-            !------- calculate source contribution to Psi  for  0-2  half-panel
-            DXINV = 1.0 / (X0 - X2)
-            PSUM = X2 * (T2 - APAN) - X0 * (T0 - APAN) + 0.5 * YY * (G0 - G2)
-            PDIF = ((X0 + X2) * PSUM + RS0 * (T0 - APAN) - RS2 * (T2 - APAN)&
-                    + (X2 - X0) * YY) * DXINV
+            !------ calculate vortex panel contribution to Psi
+            dxinv = 1.0 / (x1 - x2)
+            psis = 0.5 * x1 * g1 - 0.5 * x2 * g2 + x2 - x1 + yy * (t1 - t2)
+            psid = ((x1 + x2) * psis + 0.5 * (rs2 * g2 - rs1 * g1 + x1 * x1 - x2 * x2)) * dxinv
             !
-            PSX0 = -(T0 - APAN)
-            PSX2 = T2 - APAN
-            PSYY = 0.5 * (G0 - G2)
+            psx1 = 0.5 * g1
+            psx2 = -.5 * g2
+            psyy = t1 - t2
             !
-            PDX0 = ((X0 + X2) * PSX0 + PSUM + 2.0 * X0 * (T0 - APAN) - PDIF) * DXINV
-            PDX2 = ((X0 + X2) * PSX2 + PSUM - 2.0 * X2 * (T2 - APAN) + PDIF) * DXINV
-            PDYY = ((X0 + X2) * PSYY + 2.0 * (X2 - X0 + YY * (T0 - T2))) * DXINV
+            pdx1 = ((x1 + x2) * psx1 + psis - x1 * g1 - psid) * dxinv
+            pdx2 = ((x1 + x2) * psx2 + psis + x2 * g2 + psid) * dxinv
+            pdyy = ((x1 + x2) * psyy - yy * (g1 - g2)) * dxinv
             !
-            DSP = SQRT((X(JQ) - X(JO))**2 + (Y(JQ) - Y(JO))**2)
-            DSIP = 1.0 / DSP
+            gsum1 = GAMu(jp, 1) + GAMu(jo, 1)
+            gsum2 = GAMu(jp, 2) + GAMu(jo, 2)
+            gdif1 = GAMu(jp, 1) - GAMu(jo, 1)
+            gdif2 = GAMu(jp, 2) - GAMu(jo, 2)
             !
-            !CC         SIG2 = (SIG(JQ) - SIG(JO))*DSIP
-            !CC         SIG0 = (SIG(JP) - SIG(JO))*DSIO
-            !CC         SSUM = SIG2 + SIG0
-            !CC         SDIF = SIG2 - SIG0
+            gsum = GAM(jp) + GAM(jo)
+            gdif = GAM(jp) - GAM(jo)
             !
-            SSUM = (SIG(JQ) - SIG(JO)) * DSIP + (SIG(JP) - SIG(JO)) * DSIO
-            SDIF = (SIG(JQ) - SIG(JO)) * DSIP - (SIG(JP) - SIG(JO)) * DSIO
+            Psi = Psi - QOPi * (psis * gsum + psid * gdif)
             !
-            PSI = PSI + QOPI * (PSUM * SSUM + PDIF * SDIF)
+            !------ dPsi/dGam
+            DZDg(jo) = DZDg(jo) - QOPi * (psis - psid)
+            DZDg(jp) = DZDg(jp) - QOPi * (psis + psid)
             !
-            !------- dPsi/dm
-            DZDM(JO) = DZDM(JO) + QOPI * (-PSUM * (DSIP + DSIO)&
-                    - PDIF * (DSIP - DSIO))
-            DZDM(JP) = DZDM(JP) + QOPI * (PSUM * DSIO - PDIF * DSIO)
-            DZDM(JQ) = DZDM(JQ) + QOPI * (PSUM * DSIP + PDIF * DSIP)
+            !------ dPsi/dni
+            psni = psx1 * x1i + psx2 * x2i + psyy * yyi
+            pdni = pdx1 * x1i + pdx2 * x2i + pdyy * yyi
+            Psi_ni = Psi_ni - QOPi * (gsum * psni + gdif * pdni)
             !
-            !------- dPsi/dni
-            PSNI = PSX0 * (X1I + X2I) * 0.5 + PSX2 * X2I + PSYY * YYI
-            PDNI = PDX0 * (X1I + X2I) * 0.5 + PDX2 * X2I + PDYY * YYI
-            PSI_NI = PSI_NI + QOPI * (PSNI * SSUM + PDNI * SDIF)
+            QTAn1 = QTAn1 - QOPi * (gsum1 * psni + gdif1 * pdni)
+            QTAn2 = QTAn2 - QOPi * (gsum2 * psni + gdif2 * pdni)
             !
-            QTANM = QTANM + QOPI * (PSNI * SSUM + PDNI * SDIF)
+            DQDg(jo) = DQDg(jo) - QOPi * (psni - pdni)
+            DQDg(jp) = DQDg(jp) - QOPi * (psni + pdni)
             !
-            DQDM(JO) = DQDM(JO) + QOPI * (-PSNI * (DSIP + DSIO)&
-                    - PDNI * (DSIP - DSIO))
-            DQDM(JP) = DQDM(JP) + QOPI * (PSNI * DSIO - PDNI * DSIO)
-            DQDM(JQ) = DQDM(JQ) + QOPI * (PSNI * DSIP + PDNI * DSIP)
-            !
-        ENDIF
-        !
-        !------ calculate vortex panel contribution to Psi
-        DXINV = 1.0 / (X1 - X2)
-        PSIS = 0.5 * X1 * G1 - 0.5 * X2 * G2 + X2 - X1 + YY * (T1 - T2)
-        PSID = ((X1 + X2) * PSIS + 0.5 * (RS2 * G2 - RS1 * G1 + X1 * X1 - X2 * X2)) * DXINV
-        !
-        PSX1 = 0.5 * G1
-        PSX2 = -.5 * G2
-        PSYY = T1 - T2
-        !
-        PDX1 = ((X1 + X2) * PSX1 + PSIS - X1 * G1 - PSID) * DXINV
-        PDX2 = ((X1 + X2) * PSX2 + PSIS + X2 * G2 + PSID) * DXINV
-        PDYY = ((X1 + X2) * PSYY - YY * (G1 - G2)) * DXINV
-        !
-        GSUM1 = GAMU(JP, 1) + GAMU(JO, 1)
-        GSUM2 = GAMU(JP, 2) + GAMU(JO, 2)
-        GDIF1 = GAMU(JP, 1) - GAMU(JO, 1)
-        GDIF2 = GAMU(JP, 2) - GAMU(JO, 2)
-        !
-        GSUM = GAM(JP) + GAM(JO)
-        GDIF = GAM(JP) - GAM(JO)
-        !
-        PSI = PSI - QOPI * (PSIS * GSUM + PSID * GDIF)
-        !
-        !------ dPsi/dGam
-        DZDG(JO) = DZDG(JO) - QOPI * (PSIS - PSID)
-        DZDG(JP) = DZDG(JP) - QOPI * (PSIS + PSID)
-        !
-        !------ dPsi/dni
-        PSNI = PSX1 * X1I + PSX2 * X2I + PSYY * YYI
-        PDNI = PDX1 * X1I + PDX2 * X2I + PDYY * YYI
-        PSI_NI = PSI_NI - QOPI * (GSUM * PSNI + GDIF * PDNI)
-        !
-        QTAN1 = QTAN1 - QOPI * (GSUM1 * PSNI + GDIF1 * PDNI)
-        QTAN2 = QTAN2 - QOPI * (GSUM2 * PSNI + GDIF2 * PDNI)
-        !
-        DQDG(JO) = DQDG(JO) - QOPI * (PSNI - PDNI)
-        DQDG(JP) = DQDG(JP) - QOPI * (PSNI + PDNI)
-        !
-        IF(GEOLIN) THEN
-            !
-            !------- dPsi/dn
-            DZDN(JO) = DZDN(JO) - QOPI * GSUM * (PSX1 * X1O + PSX2 * X2O + PSYY * YYO)&
-                    - QOPI * GDIF * (PDX1 * X1O + PDX2 * X2O + PDYY * YYO)
-            DZDN(JP) = DZDN(JP) - QOPI * GSUM * (PSX1 * X1P + PSX2 * X2P + PSYY * YYP)&
-                    - QOPI * GDIF * (PDX1 * X1P + PDX2 * X2P + PDYY * YYP)
-            !------- dPsi/dP
-            Z_QDOF0 = Z_QDOF0&
-                    - QOPI * ((PSIS - PSID) * QF0(JO) + (PSIS + PSID) * QF0(JP))
-            Z_QDOF1 = Z_QDOF1&
-                    - QOPI * ((PSIS - PSID) * QF1(JO) + (PSIS + PSID) * QF1(JP))
-            Z_QDOF2 = Z_QDOF2&
-                    - QOPI * ((PSIS - PSID) * QF2(JO) + (PSIS + PSID) * QF2(JP))
-            Z_QDOF3 = Z_QDOF3&
-                    - QOPI * ((PSIS - PSID) * QF3(JO) + (PSIS + PSID) * QF3(JP))
-        ENDIF
+            if (Geolin) then
+                !
+                !------- dPsi/dn
+                DZDn(jo) = DZDn(jo) - QOPi * gsum * (psx1 * x1o + psx2 * x2o + psyy * yyo) &
+                        - QOPi * gdif * (pdx1 * x1o + pdx2 * x2o + pdyy * yyo)
+                DZDn(jp) = DZDn(jp) - QOPi * gsum * (psx1 * x1p + psx2 * x2p + psyy * yyp) &
+                        - QOPi * gdif * (pdx1 * x1p + pdx2 * x2p + pdyy * yyp)
+                !------- dPsi/dP
+                Z_Qdof0 = Z_Qdof0 - QOPi * ((psis - psid) * QF0(jo) + (psis + psid) * QF0(jp))
+                Z_Qdof1 = Z_Qdof1 - QOPi * ((psis - psid) * QF1(jo) + (psis + psid) * QF1(jp))
+                Z_Qdof2 = Z_Qdof2 - QOPi * ((psis - psid) * QF2(jo) + (psis + psid) * QF2(jp))
+                Z_Qdof3 = Z_Qdof3 - QOPi * ((psis - psid) * QF3(jo) + (psis + psid) * QF3(jp))
+            endif
+        endif
         !
         !
-    20 CONTINUE
+    enddo
     !
-    21 CONTINUE
-    PSIG = 0.5 * YY * (G1 - G2) + X2 * (T2 - APAN) - X1 * (T1 - APAN)
-    PGAM = 0.5 * X1 * G1 - 0.5 * X2 * G2 + X2 - X1 + YY * (T1 - T2)
+    psig = 0.5 * yy * (g1 - g2) + x2 * (t2 - apan) - x1 * (t1 - apan)
+    pgam = 0.5 * x1 * g1 - 0.5 * x2 * g2 + x2 - x1 + yy * (t1 - t2)
     !
-    PSIGX1 = -(T1 - APAN)
-    PSIGX2 = T2 - APAN
-    PSIGYY = 0.5 * (G1 - G2)
-    PGAMX1 = 0.5 * G1
-    PGAMX2 = -.5 * G2
-    PGAMYY = T1 - T2
+    psigx1 = -(t1 - apan)
+    psigx2 = t2 - apan
+    psigyy = 0.5 * (g1 - g2)
+    pgamx1 = 0.5 * g1
+    pgamx2 = -.5 * g2
+    pgamyy = t1 - t2
     !
-    PSIGNI = PSIGX1 * X1I + PSIGX2 * X2I + PSIGYY * YYI
-    PGAMNI = PGAMX1 * X1I + PGAMX2 * X2I + PGAMYY * YYI
+    psigni = psigx1 * x1i + psigx2 * x2i + psigyy * yyi
+    pgamni = pgamx1 * x1i + pgamx2 * x2i + pgamyy * yyi
     !
     !---- TE panel source and vortex strengths
-    SIGTE1 = 0.5 * SCS * (GAMU(JP, 1) - GAMU(JO, 1))
-    SIGTE2 = 0.5 * SCS * (GAMU(JP, 2) - GAMU(JO, 2))
-    GAMTE1 = -.5 * SDS * (GAMU(JP, 1) - GAMU(JO, 1))
-    GAMTE2 = -.5 * SDS * (GAMU(JP, 2) - GAMU(JO, 2))
+    sigte1 = 0.5 * scs * (GAMu(jp, 1) - GAMu(jo, 1))
+    sigte2 = 0.5 * scs * (GAMu(jp, 2) - GAMu(jo, 2))
+    gamte1 = -.5 * sds * (GAMu(jp, 1) - GAMu(jo, 1))
+    gamte2 = -.5 * sds * (GAMu(jp, 2) - GAMu(jo, 2))
     !
-    SIGTE = 0.5 * SCS * (GAM(JP) - GAM(JO))
-    GAMTE = -.5 * SDS * (GAM(JP) - GAM(JO))
+    SIGte = 0.5 * scs * (GAM(jp) - GAM(jo))
+    GAMte = -.5 * sds * (GAM(jp) - GAM(jo))
     !
     !---- TE panel contribution to Psi
-    PSI = PSI + HOPI * (PSIG * SIGTE - PGAM * GAMTE)
+    Psi = Psi + HOPi * (psig * SIGte - pgam * GAMte)
     !
     !---- dPsi/dGam
-    DZDG(JO) = DZDG(JO) - HOPI * PSIG * SCS * 0.5
-    DZDG(JP) = DZDG(JP) + HOPI * PSIG * SCS * 0.5
+    DZDg(jo) = DZDg(jo) - HOPi * psig * scs * 0.5
+    DZDg(jp) = DZDg(jp) + HOPi * psig * scs * 0.5
     !
-    DZDG(JO) = DZDG(JO) - HOPI * PGAM * SDS * 0.5
-    DZDG(JP) = DZDG(JP) + HOPI * PGAM * SDS * 0.5
+    DZDg(jo) = DZDg(jo) - HOPi * pgam * sds * 0.5
+    DZDg(jp) = DZDg(jp) + HOPi * pgam * sds * 0.5
     !
     !---- dPsi/dni
-    PSI_NI = PSI_NI + HOPI * (PSIGNI * SIGTE - PGAMNI * GAMTE)
+    Psi_ni = Psi_ni + HOPi * (psigni * SIGte - pgamni * GAMte)
     !
-    QTAN1 = QTAN1 + HOPI * (PSIGNI * SIGTE1 - PGAMNI * GAMTE1)
-    QTAN2 = QTAN2 + HOPI * (PSIGNI * SIGTE2 - PGAMNI * GAMTE2)
+    QTAn1 = QTAn1 + HOPi * (psigni * sigte1 - pgamni * gamte1)
+    QTAn2 = QTAn2 + HOPi * (psigni * sigte2 - pgamni * gamte2)
     !
-    DQDG(JO) = DQDG(JO) - HOPI * (PSIGNI * 0.5 * SCS + PGAMNI * 0.5 * SDS)
-    DQDG(JP) = DQDG(JP) + HOPI * (PSIGNI * 0.5 * SCS + PGAMNI * 0.5 * SDS)
+    DQDg(jo) = DQDg(jo) - HOPi * (psigni * 0.5 * scs + pgamni * 0.5 * sds)
+    DQDg(jp) = DQDg(jp) + HOPi * (psigni * 0.5 * scs + pgamni * 0.5 * sds)
     !
-    IF(GEOLIN) THEN
+    if (Geolin) then
         !
         !----- dPsi/dn
-        DZDN(JO) = DZDN(JO)&
-                + HOPI * (PSIGX1 * X1O + PSIGX2 * X2O + PSIGYY * YYO) * SIGTE&
-                - HOPI * (PGAMX1 * X1O + PGAMX2 * X2O + PGAMYY * YYO) * GAMTE
-        DZDN(JP) = DZDN(JP)&
-                + HOPI * (PSIGX1 * X1P + PSIGX2 * X2P + PSIGYY * YYP) * SIGTE&
-                - HOPI * (PGAMX1 * X1P + PGAMX2 * X2P + PGAMYY * YYP) * GAMTE
+        DZDn(jo) = DZDn(jo) + HOPi * (psigx1 * x1o + psigx2 * x2o + psigyy * yyo) * SIGte &
+                - HOPi * (pgamx1 * x1o + pgamx2 * x2o + pgamyy * yyo) * GAMte
+        DZDn(jp) = DZDn(jp) + HOPi * (psigx1 * x1p + psigx2 * x2p + psigyy * yyp) * SIGte &
+                - HOPi * (pgamx1 * x1p + pgamx2 * x2p + pgamyy * yyp) * GAMte
         !
         !----- dPsi/dP
-        Z_QDOF0 = Z_QDOF0 + HOPI * PSIG * 0.5 * (QF0(JP) - QF0(JO)) * SCS&
-                + HOPI * PGAM * 0.5 * (QF0(JP) - QF0(JO)) * SDS
-        Z_QDOF1 = Z_QDOF1 + HOPI * PSIG * 0.5 * (QF1(JP) - QF1(JO)) * SCS&
-                + HOPI * PGAM * 0.5 * (QF1(JP) - QF1(JO)) * SDS
-        Z_QDOF2 = Z_QDOF2 + HOPI * PSIG * 0.5 * (QF2(JP) - QF2(JO)) * SCS&
-                + HOPI * PGAM * 0.5 * (QF2(JP) - QF2(JO)) * SDS
-        Z_QDOF3 = Z_QDOF3 + HOPI * PSIG * 0.5 * (QF3(JP) - QF3(JO)) * SCS&
-                + HOPI * PGAM * 0.5 * (QF3(JP) - QF3(JO)) * SDS
+        Z_Qdof0 = Z_Qdof0 &
+                + HOPi * psig * 0.5 * (QF0(jp) - QF0(jo)) * scs + HOPi * pgam * 0.5 * (QF0(jp) - QF0(jo)) * sds
+        Z_Qdof1 = Z_Qdof1 &
+                + HOPi * psig * 0.5 * (QF1(jp) - QF1(jo)) * scs + HOPi * pgam * 0.5 * (QF1(jp) - QF1(jo)) * sds
+        Z_Qdof2 = Z_Qdof2 &
+                + HOPi * psig * 0.5 * (QF2(jp) - QF2(jo)) * scs + HOPi * pgam * 0.5 * (QF2(jp) - QF2(jo)) * sds
+        Z_Qdof3 = Z_Qdof3 &
+                + HOPi * psig * 0.5 * (QF3(jp) - QF3(jo)) * scs + HOPi * pgam * 0.5 * (QF3(jp) - QF3(jo)) * sds
         !
-    ENDIF
+    endif
     !
-    22 CONTINUE
     !
-    RETURN
-END
+99999 end subroutine psilin
+!*==PSWLIN.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 
 
-SUBROUTINE PSWLIN(I, XI, YI, NXI, NYI, PSI, PSI_NI)
+subroutine pswlin(I, Xi, Yi, Nxi, Nyi, Psi, Psi_ni)
+    use m_xutils
+    use i_xfoil
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    integer :: I
+    real :: Nxi, Nyi, Psi, Psi_ni, Xi, Yi
+    intent (in) I, Nxi, Nyi, Xi, Yi
+    intent (inout) Psi, Psi_ni
+    !
+    ! Local variables
+    !
+    real :: apan, dsim, dsio, dsip, dsm, dso, dsp, dxinv, g0, g1, g2, pdif, pdni, pdx0, pdx1, pdx2, pdyy, &
+            & psni, psum, psx0, psx1, psx2, psyy, rs0, rs1, rs2, rx1, rx2, ry1, ry2, sdif, sgn, ssum, sx, &
+            & sy, t0, t1, t2, x0, x1, x1i, x2, x2i, yy, yyi
+    integer :: io, jm, jo, jp, jq
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !--------------------------------------------------------------------
     !     Calculates current streamfunction Psi and tangential velocity
     !     Qtan at panel node or wake node I due to freestream and wake
@@ -815,484 +903,551 @@ SUBROUTINE PSWLIN(I, XI, YI, NXI, NYI, PSI, PSI_NI)
     !          Airfoil:  1   < I < N
     !          Wake:     N+1 < I < N+NW
     !--------------------------------------------------------------------
-    use m_xutils
-    use i_xfoil
-    REAL NXI, NYI
     !
-    IO = I
+    io = I
     !
-    COSA = COS(ALFA)
-    SINA = SIN(ALFA)
+    COSa = cos(ALFa)
+    SINa = sin(ALFa)
     !
-    DO 4 JO = N + 1, N + NW
-        DZDM(JO) = 0.0
-        DQDM(JO) = 0.0
-    4 CONTINUE
+    do jo = N + 1, N + NW
+        DZDm(jo) = 0.0
+        DQDm(jo) = 0.0
+    enddo
     !
-    PSI = 0.
-    PSI_NI = 0.
+    Psi = 0.
+    Psi_ni = 0.
     !
-    DO 20 JO = N + 1, N + NW - 1
+    do jo = N + 1, N + NW - 1
         !
-        JP = JO + 1
+        jp = jo + 1
         !
-        JM = JO - 1
-        JQ = JP + 1
-        IF(JO.EQ.N + 1) THEN
-            JM = JO
-        ELSE IF(JO.EQ.N + NW - 1) THEN
-            JQ = JP
-        ENDIF
+        jm = jo - 1
+        jq = jp + 1
+        if (jo==N + 1) then
+            jm = jo
+        elseif (jo==N + NW - 1) then
+            jq = jp
+        endif
         !
-        DSO = SQRT((X(JO) - X(JP))**2 + (Y(JO) - Y(JP))**2)
-        DSIO = 1.0 / DSO
+        dso = sqrt((X(jo) - X(jp))**2 + (Y(jo) - Y(jp))**2)
+        dsio = 1.0 / dso
         !
-        APAN = APANEL(JO)
+        apan = APAnel(jo)
         !
-        RX1 = XI - X(JO)
-        RY1 = YI - Y(JO)
-        RX2 = XI - X(JP)
-        RY2 = YI - Y(JP)
+        rx1 = Xi - X(jo)
+        ry1 = Yi - Y(jo)
+        rx2 = Xi - X(jp)
+        ry2 = Yi - Y(jp)
         !
-        SX = (X(JP) - X(JO)) * DSIO
-        SY = (Y(JP) - Y(JO)) * DSIO
+        sx = (X(jp) - X(jo)) * dsio
+        sy = (Y(jp) - Y(jo)) * dsio
         !
-        X1 = SX * RX1 + SY * RY1
-        X2 = SX * RX2 + SY * RY2
-        YY = SX * RY1 - SY * RX1
+        x1 = sx * rx1 + sy * ry1
+        x2 = sx * rx2 + sy * ry2
+        yy = sx * ry1 - sy * rx1
         !
-        RS1 = RX1 * RX1 + RY1 * RY1
-        RS2 = RX2 * RX2 + RY2 * RY2
+        rs1 = rx1 * rx1 + ry1 * ry1
+        rs2 = rx2 * rx2 + ry2 * ry2
         !
-        IF(IO.GE.N + 1 .AND. IO.LE.N + NW) THEN
-            SGN = 1.0
-        ELSE
-            SGN = SIGN(1.0, YY)
-        ENDIF
+        if (io>=N + 1 .and. io<=N + NW) then
+            sgn = 1.0
+        else
+            sgn = sign(1.0, yy)
+        endif
         !
-        IF(IO.NE.JO .AND. RS1.GT.0.0) THEN
-            G1 = LOG(RS1)
-            T1 = ATAN2(SGN * X1, SGN * YY) - (0.5 - 0.5 * SGN) * PI
-        ELSE
-            G1 = 0.0
-            T1 = 0.0
-        ENDIF
+        if (io/=jo .and. rs1>0.0) then
+            g1 = log(rs1)
+            t1 = atan2(sgn * x1, sgn * yy) - (0.5 - 0.5 * sgn) * PI
+        else
+            g1 = 0.0
+            t1 = 0.0
+        endif
         !
-        IF(IO.NE.JP .AND. RS2.GT.0.0) THEN
-            G2 = LOG(RS2)
-            T2 = ATAN2(SGN * X2, SGN * YY) - (0.5 - 0.5 * SGN) * PI
-        ELSE
-            G2 = 0.0
-            T2 = 0.0
-        ENDIF
+        if (io/=jp .and. rs2>0.0) then
+            g2 = log(rs2)
+            t2 = atan2(sgn * x2, sgn * yy) - (0.5 - 0.5 * sgn) * PI
+        else
+            g2 = 0.0
+            t2 = 0.0
+        endif
         !
-        X1I = SX * NXI + SY * NYI
-        X2I = SX * NXI + SY * NYI
-        YYI = SX * NYI - SY * NXI
+        x1i = sx * Nxi + sy * Nyi
+        x2i = sx * Nxi + sy * Nyi
+        yyi = sx * Nyi - sy * Nxi
         !
         !------- set up midpoint quantities
-        X0 = 0.5 * (X1 + X2)
-        RS0 = X0 * X0 + YY * YY
-        G0 = LOG(RS0)
-        T0 = ATAN2(SGN * X0, SGN * YY) - (0.5 - 0.5 * SGN) * PI
+        x0 = 0.5 * (x1 + x2)
+        rs0 = x0 * x0 + yy * yy
+        g0 = log(rs0)
+        t0 = atan2(sgn * x0, sgn * yy) - (0.5 - 0.5 * sgn) * PI
         !
         !------- calculate source contribution to Psi  for  1-0  half-panel
-        DXINV = 1.0 / (X1 - X0)
-        PSUM = X0 * (T0 - APAN) - X1 * (T1 - APAN) + 0.5 * YY * (G1 - G0)
-        PDIF = ((X1 + X0) * PSUM + RS1 * (T1 - APAN) - RS0 * (T0 - APAN)&
-                + (X0 - X1) * YY) * DXINV
+        dxinv = 1.0 / (x1 - x0)
+        psum = x0 * (t0 - apan) - x1 * (t1 - apan) + 0.5 * yy * (g1 - g0)
+        pdif = ((x1 + x0) * psum + rs1 * (t1 - apan) - rs0 * (t0 - apan) + (x0 - x1) * yy) * dxinv
         !
-        PSX1 = -(T1 - APAN)
-        PSX0 = T0 - APAN
-        PSYY = 0.5 * (G1 - G0)
+        psx1 = -(t1 - apan)
+        psx0 = t0 - apan
+        psyy = 0.5 * (g1 - g0)
         !
-        PDX1 = ((X1 + X0) * PSX1 + PSUM + 2.0 * X1 * (T1 - APAN) - PDIF) * DXINV
-        PDX0 = ((X1 + X0) * PSX0 + PSUM - 2.0 * X0 * (T0 - APAN) + PDIF) * DXINV
-        PDYY = ((X1 + X0) * PSYY + 2.0 * (X0 - X1 + YY * (T1 - T0))) * DXINV
+        pdx1 = ((x1 + x0) * psx1 + psum + 2.0 * x1 * (t1 - apan) - pdif) * dxinv
+        pdx0 = ((x1 + x0) * psx0 + psum - 2.0 * x0 * (t0 - apan) + pdif) * dxinv
+        pdyy = ((x1 + x0) * psyy + 2.0 * (x0 - x1 + yy * (t1 - t0))) * dxinv
         !
-        DSM = SQRT((X(JP) - X(JM))**2 + (Y(JP) - Y(JM))**2)
-        DSIM = 1.0 / DSM
+        dsm = sqrt((X(jp) - X(jm))**2 + (Y(jp) - Y(jm))**2)
+        dsim = 1.0 / dsm
         !
         !CC         SIG0 = (SIG(JP) - SIG(JO))*DSIO
         !CC         SIG1 = (SIG(JP) - SIG(JM))*DSIM
         !CC         SSUM = SIG0 + SIG1
         !CC         SDIF = SIG0 - SIG1
         !
-        SSUM = (SIG(JP) - SIG(JO)) * DSIO + (SIG(JP) - SIG(JM)) * DSIM
-        SDIF = (SIG(JP) - SIG(JO)) * DSIO - (SIG(JP) - SIG(JM)) * DSIM
+        ssum = (SIG(jp) - SIG(jo)) * dsio + (SIG(jp) - SIG(jm)) * dsim
+        sdif = (SIG(jp) - SIG(jo)) * dsio - (SIG(jp) - SIG(jm)) * dsim
         !
-        PSI = PSI + QOPI * (PSUM * SSUM + PDIF * SDIF)
+        Psi = Psi + QOPi * (psum * ssum + pdif * sdif)
         !
         !------- dPsi/dm
-        DZDM(JM) = DZDM(JM) + QOPI * (-PSUM * DSIM + PDIF * DSIM)
-        DZDM(JO) = DZDM(JO) + QOPI * (-PSUM * DSIO - PDIF * DSIO)
-        DZDM(JP) = DZDM(JP) + QOPI * (PSUM * (DSIO + DSIM)&
-                + PDIF * (DSIO - DSIM))
+        DZDm(jm) = DZDm(jm) + QOPi * (-psum * dsim + pdif * dsim)
+        DZDm(jo) = DZDm(jo) + QOPi * (-psum * dsio - pdif * dsio)
+        DZDm(jp) = DZDm(jp) + QOPi * (psum * (dsio + dsim) + pdif * (dsio - dsim))
         !
         !------- dPsi/dni
-        PSNI = PSX1 * X1I + PSX0 * (X1I + X2I) * 0.5 + PSYY * YYI
-        PDNI = PDX1 * X1I + PDX0 * (X1I + X2I) * 0.5 + PDYY * YYI
-        PSI_NI = PSI_NI + QOPI * (PSNI * SSUM + PDNI * SDIF)
+        psni = psx1 * x1i + psx0 * (x1i + x2i) * 0.5 + psyy * yyi
+        pdni = pdx1 * x1i + pdx0 * (x1i + x2i) * 0.5 + pdyy * yyi
+        Psi_ni = Psi_ni + QOPi * (psni * ssum + pdni * sdif)
         !
-        DQDM(JM) = DQDM(JM) + QOPI * (-PSNI * DSIM + PDNI * DSIM)
-        DQDM(JO) = DQDM(JO) + QOPI * (-PSNI * DSIO - PDNI * DSIO)
-        DQDM(JP) = DQDM(JP) + QOPI * (PSNI * (DSIO + DSIM)&
-                + PDNI * (DSIO - DSIM))
+        DQDm(jm) = DQDm(jm) + QOPi * (-psni * dsim + pdni * dsim)
+        DQDm(jo) = DQDm(jo) + QOPi * (-psni * dsio - pdni * dsio)
+        DQDm(jp) = DQDm(jp) + QOPi * (psni * (dsio + dsim) + pdni * (dsio - dsim))
         !
         !
         !------- calculate source contribution to Psi  for  0-2  half-panel
-        DXINV = 1.0 / (X0 - X2)
-        PSUM = X2 * (T2 - APAN) - X0 * (T0 - APAN) + 0.5 * YY * (G0 - G2)
-        PDIF = ((X0 + X2) * PSUM + RS0 * (T0 - APAN) - RS2 * (T2 - APAN)&
-                + (X2 - X0) * YY) * DXINV
+        dxinv = 1.0 / (x0 - x2)
+        psum = x2 * (t2 - apan) - x0 * (t0 - apan) + 0.5 * yy * (g0 - g2)
+        pdif = ((x0 + x2) * psum + rs0 * (t0 - apan) - rs2 * (t2 - apan) + (x2 - x0) * yy) * dxinv
         !
-        PSX0 = -(T0 - APAN)
-        PSX2 = T2 - APAN
-        PSYY = 0.5 * (G0 - G2)
+        psx0 = -(t0 - apan)
+        psx2 = t2 - apan
+        psyy = 0.5 * (g0 - g2)
         !
-        PDX0 = ((X0 + X2) * PSX0 + PSUM + 2.0 * X0 * (T0 - APAN) - PDIF) * DXINV
-        PDX2 = ((X0 + X2) * PSX2 + PSUM - 2.0 * X2 * (T2 - APAN) + PDIF) * DXINV
-        PDYY = ((X0 + X2) * PSYY + 2.0 * (X2 - X0 + YY * (T0 - T2))) * DXINV
+        pdx0 = ((x0 + x2) * psx0 + psum + 2.0 * x0 * (t0 - apan) - pdif) * dxinv
+        pdx2 = ((x0 + x2) * psx2 + psum - 2.0 * x2 * (t2 - apan) + pdif) * dxinv
+        pdyy = ((x0 + x2) * psyy + 2.0 * (x2 - x0 + yy * (t0 - t2))) * dxinv
         !
-        DSP = SQRT((X(JQ) - X(JO))**2 + (Y(JQ) - Y(JO))**2)
-        DSIP = 1.0 / DSP
+        dsp = sqrt((X(jq) - X(jo))**2 + (Y(jq) - Y(jo))**2)
+        dsip = 1.0 / dsp
         !
         !CC         SIG2 = (SIG(JQ) - SIG(JO))*DSIP
         !CC         SIG0 = (SIG(JP) - SIG(JO))*DSIO
         !CC         SSUM = SIG2 + SIG0
         !CC         SDIF = SIG2 - SIG0
         !
-        SSUM = (SIG(JQ) - SIG(JO)) * DSIP + (SIG(JP) - SIG(JO)) * DSIO
-        SDIF = (SIG(JQ) - SIG(JO)) * DSIP - (SIG(JP) - SIG(JO)) * DSIO
+        ssum = (SIG(jq) - SIG(jo)) * dsip + (SIG(jp) - SIG(jo)) * dsio
+        sdif = (SIG(jq) - SIG(jo)) * dsip - (SIG(jp) - SIG(jo)) * dsio
         !
-        PSI = PSI + QOPI * (PSUM * SSUM + PDIF * SDIF)
+        Psi = Psi + QOPi * (psum * ssum + pdif * sdif)
         !
         !------- dPsi/dm
-        DZDM(JO) = DZDM(JO) + QOPI * (-PSUM * (DSIP + DSIO)&
-                - PDIF * (DSIP - DSIO))
-        DZDM(JP) = DZDM(JP) + QOPI * (PSUM * DSIO - PDIF * DSIO)
-        DZDM(JQ) = DZDM(JQ) + QOPI * (PSUM * DSIP + PDIF * DSIP)
+        DZDm(jo) = DZDm(jo) + QOPi * (-psum * (dsip + dsio) - pdif * (dsip - dsio))
+        DZDm(jp) = DZDm(jp) + QOPi * (psum * dsio - pdif * dsio)
+        DZDm(jq) = DZDm(jq) + QOPi * (psum * dsip + pdif * dsip)
         !
         !------- dPsi/dni
-        PSNI = PSX0 * (X1I + X2I) * 0.5 + PSX2 * X2I + PSYY * YYI
-        PDNI = PDX0 * (X1I + X2I) * 0.5 + PDX2 * X2I + PDYY * YYI
-        PSI_NI = PSI_NI + QOPI * (PSNI * SSUM + PDNI * SDIF)
+        psni = psx0 * (x1i + x2i) * 0.5 + psx2 * x2i + psyy * yyi
+        pdni = pdx0 * (x1i + x2i) * 0.5 + pdx2 * x2i + pdyy * yyi
+        Psi_ni = Psi_ni + QOPi * (psni * ssum + pdni * sdif)
         !
-        DQDM(JO) = DQDM(JO) + QOPI * (-PSNI * (DSIP + DSIO)&
-                - PDNI * (DSIP - DSIO))
-        DQDM(JP) = DQDM(JP) + QOPI * (PSNI * DSIO - PDNI * DSIO)
-        DQDM(JQ) = DQDM(JQ) + QOPI * (PSNI * DSIP + PDNI * DSIP)
+        DQDm(jo) = DQDm(jo) + QOPi * (-psni * (dsip + dsio) - pdni * (dsip - dsio))
+        DQDm(jp) = DQDm(jp) + QOPi * (psni * dsio - pdni * dsio)
+        DQDm(jq) = DQDm(jq) + QOPi * (psni * dsip + pdni * dsip)
         !
-    20 CONTINUE
+    enddo
     !
-    RETURN
-END
+end subroutine pswlin
+!*==GGCALC.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 
 
-SUBROUTINE GGCALC
+subroutine ggcalc
+    use m_xutils
+    use i_xfoil
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    real :: abis, ag1, ag2, bwt, cbis, ds1, ds2, dsmin, psi, psiinf, psi_n, qbis, res, res1, res2, sbis, &
+            & xbis, ybis
+    integer :: i, j
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !--------------------------------------------------------------
     !     Calculates two surface vorticity (gamma) distributions
     !     for alpha = 0, 90  degrees.  These are superimposed
     !     in SPECAL or SPECCL for specified alpha or CL.
     !--------------------------------------------------------------
-    use m_xutils
-    use i_xfoil
     !
     !---- distance of internal control point ahead of sharp TE
     !-    (fraction of smaller panel length adjacent to TE)
-    BWT = 0.1
+    bwt = 0.1
     !
-    WRITE(*, *) 'Calculating unit vorticity distributions ...'
+    write (*, *) 'Calculating unit vorticity distributions ...'
     !
-    DO 10 I = 1, N
-        GAM(I) = 0.
-        GAMU(I, 1) = 0.
-        GAMU(I, 2) = 0.
-    10 CONTINUE
-    PSIO = 0.
+    do i = 1, N
+        GAM(i) = 0.
+        GAMu(i, 1) = 0.
+        GAMu(i, 2) = 0.
+    enddo
+    PSIo = 0.
     !
     !---- Set up matrix system for  Psi = Psio  on airfoil surface.
     !-    The unknowns are (dGamma)i and dPsio.
-    DO 20 I = 1, N
+    do i = 1, N
         !
         !------ calculate Psi and dPsi/dGamma array for current node
-        CALL PSILIN(I, X(I), Y(I), NX(I), NY(I), PSI, PSI_N, .FALSE., .TRUE.)
+        call psilin(i, X(i), Y(i), NX(i), NY(i), psi, psi_n, .false., .true.)
         !
-        PSIINF = QINF * (COS(ALFA) * Y(I) - SIN(ALFA) * X(I))
+        psiinf = QINf * (cos(ALFa) * Y(i) - sin(ALFa) * X(i))
         !
         !------ RES1 = PSI( 0) - PSIO
         !------ RES2 = PSI(90) - PSIO
-        RES1 = QINF * Y(I)
-        RES2 = -QINF * X(I)
+        res1 = QINf * Y(i)
+        res2 = -QINf * X(i)
         !
         !------ dRes/dGamma
-        DO 201 J = 1, N
-            AIJ(I, J) = DZDG(J)
-        201   CONTINUE
+        do j = 1, N
+            AIJ(i, j) = DZDg(j)
+        enddo
         !
-        DO 202 J = 1, N
-            BIJ(I, J) = -DZDM(J)
-        202   CONTINUE
+        do j = 1, N
+            BIJ(i, j) = -DZDm(j)
+        enddo
         !
         !------ dRes/dPsio
-        AIJ(I, N + 1) = -1.0
+        AIJ(i, N + 1) = -1.0
         !
-        GAMU(I, 1) = -RES1
-        GAMU(I, 2) = -RES2
+        GAMu(i, 1) = -res1
+        GAMu(i, 2) = -res2
         !
-    20 CONTINUE
+    enddo
     !
     !---- set Kutta condition
     !-    RES = GAM(1) + GAM(N)
-    RES = 0.
+    res = 0.
     !
-    DO 30 J = 1, N + 1
-        AIJ(N + 1, J) = 0.0
-    30 CONTINUE
+    do j = 1, N + 1
+        AIJ(N + 1, j) = 0.0
+    enddo
     !
     AIJ(N + 1, 1) = 1.0
     AIJ(N + 1, N) = 1.0
     !
-    GAMU(N + 1, 1) = -RES
-    GAMU(N + 1, 2) = -RES
+    GAMu(N + 1, 1) = -res
+    GAMu(N + 1, 2) = -res
     !
     !---- set up Kutta condition (no direct source influence)
-    DO 32 J = 1, N
-        BIJ(N + 1, J) = 0.
-    32 CONTINUE
+    do j = 1, N
+        BIJ(N + 1, j) = 0.
+    enddo
     !
-    IF(SHARP) THEN
-        !----- set zero internal velocity in TE corner 
+    if (SHArp) then
+        !----- set zero internal velocity in TE corner
         !
         !----- set TE bisector angle
-        AG1 = ATAN2(-YP(1), -XP(1))
-        AG2 = ATANC(YP(N), XP(N), AG1)
-        ABIS = 0.5 * (AG1 + AG2)
-        CBIS = COS(ABIS)
-        SBIS = SIN(ABIS)
+        ag1 = atan2(-YP(1), -XP(1))
+        ag2 = atanc(YP(N), XP(N), ag1)
+        abis = 0.5 * (ag1 + ag2)
+        cbis = cos(abis)
+        sbis = sin(abis)
         !
         !----- minimum panel length adjacent to TE
-        DS1 = SQRT((X(1) - X(2))**2 + (Y(1) - Y(2))**2)
-        DS2 = SQRT((X(N) - X(N - 1))**2 + (Y(N) - Y(N - 1))**2)
-        DSMIN = MIN(DS1, DS2)
+        ds1 = sqrt((X(1) - X(2))**2 + (Y(1) - Y(2))**2)
+        ds2 = sqrt((X(N) - X(N - 1))**2 + (Y(N) - Y(N - 1))**2)
+        dsmin = min(ds1, ds2)
         !
         !----- control point on bisector just ahead of TE point
-        XBIS = XTE - BWT * DSMIN * CBIS
-        YBIS = YTE - BWT * DSMIN * SBIS
+        xbis = XTE - bwt * dsmin * cbis
+        ybis = YTE - bwt * dsmin * sbis
         !cc       write(*,*) xbis, ybis
         !
         !----- set velocity component along bisector line
-        CALL PSILIN(0, XBIS, YBIS, -SBIS, CBIS, PSI, QBIS, .FALSE., .TRUE.)
+        call psilin(0, xbis, ybis, -sbis, cbis, psi, qbis, .false., .true.)
         !
         !CC--- RES = DQDGj*Gammaj + DQDMj*Massj + QINF*(COSA*CBIS + SINA*SBIS)
-        RES = QBIS
+        res = qbis
         !
         !----- dRes/dGamma
-        DO J = 1, N
-            AIJ(N, J) = DQDG(J)
-        ENDDO
+        do j = 1, N
+            AIJ(N, j) = DQDg(j)
+        enddo
         !
         !----- -dRes/dMass
-        DO J = 1, N
-            BIJ(N, J) = -DQDM(J)
-        ENDDO
+        do j = 1, N
+            BIJ(N, j) = -DQDm(j)
+        enddo
         !
         !----- dRes/dPsio
         AIJ(N, N + 1) = 0.
         !
         !----- -dRes/dUinf
-        GAMU(N, 1) = -CBIS
+        GAMu(N, 1) = -cbis
         !
         !----- -dRes/dVinf
-        GAMU(N, 2) = -SBIS
+        GAMu(N, 2) = -sbis
         !
-    ENDIF
+    endif
     !
     !---- LU-factor coefficient matrix AIJ
-    CALL LUDCMP(IQX, N + 1, AIJ, AIJPIV)
-    LQAIJ = .TRUE.
+    call ludcmp(IQX, N + 1, AIJ, AIJpiv)
+    LQAij = .true.
     !
     !---- solve system for the two vorticity distributions
-    CALL BAKSUB(IQX, N + 1, AIJ, AIJPIV, GAMU(1, 1))
-    CALL BAKSUB(IQX, N + 1, AIJ, AIJPIV, GAMU(1, 2))
+    call baksub(IQX, N + 1, AIJ, AIJpiv, GAMu(1, 1))
+    call baksub(IQX, N + 1, AIJ, AIJpiv, GAMu(1, 2))
     !
     !---- set inviscid alpha=0,90 surface speeds for this geometry
-    DO 50 I = 1, N
-        QINVU(I, 1) = GAMU(I, 1)
-        QINVU(I, 2) = GAMU(I, 2)
-    50 CONTINUE
+    do i = 1, N
+        QINvu(i, 1) = GAMu(i, 1)
+        QINvu(i, 2) = GAMu(i, 2)
+    enddo
     !
-    LGAMU = .TRUE.
+    LGAmu = .true.
     !
-    RETURN
-END
+end subroutine ggcalc
+!*==QWCALC.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 
 
-SUBROUTINE QWCALC
+subroutine qwcalc
+    use m_xutils
+    use i_xfoil
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    integer :: i
+    real :: psi, psi_ni
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !---------------------------------------------------------------
     !     Sets inviscid tangential velocity for alpha = 0, 90
     !     on wake due to freestream and airfoil surface vorticity.
     !---------------------------------------------------------------
-    use m_xutils
-    use i_xfoil
     !
     !---- first wake point (same as TE)
-    QINVU(N + 1, 1) = QINVU(N, 1)
-    QINVU(N + 1, 2) = QINVU(N, 2)
+    QINvu(N + 1, 1) = QINvu(N, 1)
+    QINvu(N + 1, 2) = QINvu(N, 2)
     !
     !---- rest of wake
-    DO 10 I = N + 2, N + NW
-        CALL PSILIN(I, X(I), Y(I), NX(I), NY(I), PSI, PSI_NI, .FALSE., .FALSE.)
-        QINVU(I, 1) = QTAN1
-        QINVU(I, 2) = QTAN2
-    10 CONTINUE
+    do i = N + 2, N + NW
+        call psilin(i, X(i), Y(i), NX(i), NY(i), psi, psi_ni, .false., .false.)
+        QINvu(i, 1) = QTAn1
+        QINvu(i, 2) = QTAn2
+    enddo
     !
-    RETURN
-END
+end subroutine qwcalc
+!*==QDCALC.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 
 
-SUBROUTINE QDCALC
+subroutine qdcalc
+    use m_xutils
+    use i_xfoil
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    integer :: i, iw, j, k
+    real :: psi, psi_n, sum
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !-----------------------------------------------------
     !     Calculates source panel influence coefficient
     !     matrix for current airfoil and wake geometry.
     !-----------------------------------------------------
-    use m_xutils
-    use i_xfoil
     !
-    WRITE(*, *) 'Calculating source influence matrix ...'
+    write (*, *) 'Calculating source influence matrix ...'
     !
-    IF(.NOT.LADIJ) THEN
+    if (.not.LADij) then
         !
         !----- calculate source influence matrix for airfoil surface if it doesn't exist
-        DO 10 J = 1, N
+        do j = 1, N
             !
             !------- multiply each dPsi/Sig vector by inverse of factored dPsi/dGam matrix
-            CALL BAKSUB(IQX, N + 1, AIJ, AIJPIV, BIJ(1, J))
+            call baksub(IQX, N + 1, AIJ, AIJpiv, BIJ(1, j))
             !
             !------- store resulting dGam/dSig = dQtan/dSig vector
-            DO 105 I = 1, N
-                DIJ(I, J) = BIJ(I, J)
-            105    CONTINUE
+            do i = 1, N
+                DIJ(i, j) = BIJ(i, j)
+            enddo
             !
-        10  CONTINUE
-        LADIJ = .TRUE.
+        enddo
+        LADij = .true.
         !
-    ENDIF
+    endif
     !
     !---- set up coefficient matrix of dPsi/dm on airfoil surface
-    DO 20 I = 1, N
-        CALL PSWLIN(I, X(I), Y(I), NX(I), NY(I), PSI, PSI_N)
-        DO 202 J = N + 1, N + NW
-            BIJ(I, J) = -DZDM(J)
-        202   CONTINUE
-    20 CONTINUE
+    do i = 1, N
+        call pswlin(i, X(i), Y(i), NX(i), NY(i), psi, psi_n)
+        do j = N + 1, N + NW
+            BIJ(i, j) = -DZDm(j)
+        enddo
+    enddo
     !
     !---- set up Kutta condition (no direct source influence)
-    DO 32 J = N + 1, N + NW
-        BIJ(N + 1, J) = 0.
-    32 CONTINUE
+    do j = N + 1, N + NW
+        BIJ(N + 1, j) = 0.
+    enddo
     !
     !---- sharp TE gamma extrapolation also has no source influence
-    IF(SHARP) THEN
-        DO 34 J = N + 1, N + NW
-            BIJ(N, J) = 0.
-        34  CONTINUE
-    ENDIF
+    if (SHArp) then
+        do j = N + 1, N + NW
+            BIJ(N, j) = 0.
+        enddo
+    endif
     !
     !---- multiply by inverse of factored dPsi/dGam matrix
-    DO 40 J = N + 1, N + NW
-        CALL BAKSUB(IQX, N + 1, AIJ, AIJPIV, BIJ(1, J))
-    40 CONTINUE
+    do j = N + 1, N + NW
+        call baksub(IQX, N + 1, AIJ, AIJpiv, BIJ(1, j))
+    enddo
     !
     !---- set the source influence matrix for the wake sources
-    DO 50 I = 1, N
-        DO 510 J = N + 1, N + NW
-            DIJ(I, J) = BIJ(I, J)
-        510   CONTINUE
-    50 CONTINUE
+    do i = 1, N
+        do j = N + 1, N + NW
+            DIJ(i, j) = BIJ(i, j)
+        enddo
+    enddo
     !
     !**** Now we need to calculate the influence of sources on the wake velocities
     !
     !---- calculcate dQtan/dGam and dQtan/dSig at the wake points
-    DO 70 I = N + 1, N + NW
+    do i = N + 1, N + NW
         !
-        IW = I - N
+        iw = i - N
         !
         !------ airfoil contribution at wake panel node
-        CALL PSILIN(I, X(I), Y(I), NX(I), NY(I), PSI, PSI_N, .FALSE., .TRUE.)
+        call psilin(i, X(i), Y(i), NX(i), NY(i), psi, psi_n, .false., .true.)
         !
-        DO 710 J = 1, N
-            CIJ(IW, J) = DQDG(J)
-        710   CONTINUE
-        !  
-        DO 720 J = 1, N
-            DIJ(I, J) = DQDM(J)
-        720   CONTINUE
+        do j = 1, N
+            CIJ(iw, j) = DQDg(j)
+        enddo
+        !
+        do j = 1, N
+            DIJ(i, j) = DQDm(j)
+        enddo
         !
         !------ wake contribution
-        CALL PSWLIN(I, X(I), Y(I), NX(I), NY(I), PSI, PSI_N)
+        call pswlin(i, X(i), Y(i), NX(i), NY(i), psi, psi_n)
         !
-        DO 730 J = N + 1, N + NW
-            DIJ(I, J) = DQDM(J)
-        730   CONTINUE
+        do j = N + 1, N + NW
+            DIJ(i, j) = DQDm(j)
+        enddo
         !
-    70 CONTINUE
+    enddo
     !
     !---- add on effect of all sources on airfoil vorticity which effects wake Qtan
-    DO 80 I = N + 1, N + NW
-        IW = I - N
+    do i = N + 1, N + NW
+        iw = i - N
         !
         !------ airfoil surface source contribution first
-        DO 810 J = 1, N
-            SUM = 0.
-            DO 8100 K = 1, N
-                SUM = SUM + CIJ(IW, K) * DIJ(K, J)
-            8100     CONTINUE
-            DIJ(I, J) = DIJ(I, J) + SUM
-        810   CONTINUE
+        do j = 1, N
+            sum = 0.
+            do k = 1, N
+                sum = sum + CIJ(iw, k) * DIJ(k, j)
+            enddo
+            DIJ(i, j) = DIJ(i, j) + sum
+        enddo
         !
         !------ wake source contribution next
-        DO 820 J = N + 1, N + NW
-            SUM = 0.
-            DO 8200 K = 1, N
-                SUM = SUM + CIJ(IW, K) * BIJ(K, J)
-            8200     CONTINUE
-            DIJ(I, J) = DIJ(I, J) + SUM
-        820   CONTINUE
+        do j = N + 1, N + NW
+            sum = 0.
+            do k = 1, N
+                sum = sum + CIJ(iw, k) * BIJ(k, j)
+            enddo
+            DIJ(i, j) = DIJ(i, j) + sum
+        enddo
         !
-    80 CONTINUE
+    enddo
     !
     !---- make sure first wake point has same velocity as trailing edge
-    DO 90 J = 1, N + NW
-        DIJ(N + 1, J) = DIJ(N, J)
-    90 CONTINUE
+    do j = 1, N + NW
+        DIJ(N + 1, j) = DIJ(N, j)
+    enddo
     !
-    LWDIJ = .TRUE.
+    LWDij = .true.
     !
-    RETURN
-END
+end subroutine qdcalc
+!*==XYWAKE.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 
 
-SUBROUTINE XYWAKE
-    !-----------------------------------------------------
-    !     Sets wake coordinate array for current surface 
-    !     vorticity and/or mass source distributions.
-    !-----------------------------------------------------
+subroutine xywake
     use m_xutils
     use i_xfoil
+    implicit none
     !
-    WRITE(*, *) 'Calculating wake trajectory ...'
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    real :: ds, ds1, psi, psi_x, psi_y, smod, sx, sy
+    integer :: i
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !-----------------------------------------------------
+    !     Sets wake coordinate array for current surface
+    !     vorticity and/or mass source distributions.
+    !-----------------------------------------------------
+    !
+    write (*, *) 'Calculating wake trajectory ...'
     !
     !---- number of wake points
-    NW = N / 12 + 10 * INT(WAKLEN)
-    IF(NW.GT.IWX) THEN
-        WRITE(*, *)&
-                'Array size (IWX) too small.  Last wake point index reduced.'
+    NW = N / 12 + 10 * int(WAKlen)
+    if (NW>IWX) then
+        write (*, *) 'Array size (IWX) too small.  Last wake point index reduced.'
         NW = IWX
-    ENDIF
+    endif
     !
-    DS1 = 0.5 * (S(2) - S(1) + S(N) - S(N - 1))
-    CALL SETEXP(SNEW(N + 1), DS1, WAKLEN * CHORD, NW)
+    ds1 = 0.5 * (S(2) - S(1) + S(N) - S(N - 1))
+    call setexp(SNEw(N + 1), ds1, WAKlen * CHOrd, NW)
     !
 
     !      write(*,*) waklen, chord, waklen*chord
@@ -1305,498 +1460,698 @@ SUBROUTINE XYWAKE
     YTE = 0.5 * (Y(1) + Y(N))
     !
     !---- set first wake point a tiny distance behind TE
-    I = N + 1
-    SX = 0.5 * (YP(N) - YP(1))
-    SY = 0.5 * (XP(1) - XP(N))
-    SMOD = SQRT(SX**2 + SY**2)
-    NX(I) = SX / SMOD
-    NY(I) = SY / SMOD
-    X(I) = XTE - 0.0001 * NY(I)
-    Y(I) = YTE + 0.0001 * NX(I)
-    S(I) = S(N)
+    i = N + 1
+    sx = 0.5 * (YP(N) - YP(1))
+    sy = 0.5 * (XP(1) - XP(N))
+    smod = sqrt(sx**2 + sy**2)
+    NX(i) = sx / smod
+    NY(i) = sy / smod
+    X(i) = XTE - 0.0001 * NY(i)
+    Y(i) = YTE + 0.0001 * NX(i)
+    S(i) = S(N)
     !
     !---- calculate streamfunction gradient components at first point
-    CALL PSILIN(I, X(I), Y(I), 1.0, 0.0, PSI, PSI_X, .FALSE., .FALSE.)
-    CALL PSILIN(I, X(I), Y(I), 0.0, 1.0, PSI, PSI_Y, .FALSE., .FALSE.)
+    call psilin(i, X(i), Y(i), 1.0, 0.0, psi, psi_x, .false., .false.)
+    call psilin(i, X(i), Y(i), 0.0, 1.0, psi, psi_y, .false., .false.)
     !
     !---- set unit vector normal to wake at first point
-    NX(I + 1) = -PSI_X / SQRT(PSI_X**2 + PSI_Y**2)
-    NY(I + 1) = -PSI_Y / SQRT(PSI_X**2 + PSI_Y**2)
+    NX(i + 1) = -psi_x / sqrt(psi_x**2 + psi_y**2)
+    NY(i + 1) = -psi_y / sqrt(psi_x**2 + psi_y**2)
     !
     !---- set angle of wake panel normal
-    APANEL(I) = ATAN2(PSI_Y, PSI_X)
+    APAnel(i) = atan2(psi_y, psi_x)
     !
     !---- set rest of wake points
-    DO 10 I = N + 2, N + NW
-        DS = SNEW(I) - SNEW(I - 1)
+    do i = N + 2, N + NW
+        ds = SNEw(i) - SNEw(i - 1)
         !
         !------ set new point DS downstream of last point
-        X(I) = X(I - 1) - DS * NY(I)
-        Y(I) = Y(I - 1) + DS * NX(I)
-        S(I) = S(I - 1) + DS
+        X(i) = X(i - 1) - ds * NY(i)
+        Y(i) = Y(i - 1) + ds * NX(i)
+        S(i) = S(i - 1) + ds
         !
-        IF(I.EQ.N + NW) GO TO 10
+        if (i/=N + NW) then
+            !
+            !------- calculate normal vector for next point
+            call psilin(i, X(i), Y(i), 1.0, 0.0, psi, psi_x, .false., .false.)
+            call psilin(i, X(i), Y(i), 0.0, 1.0, psi, psi_y, .false., .false.)
+            !
+            NX(i + 1) = -psi_x / sqrt(psi_x**2 + psi_y**2)
+            NY(i + 1) = -psi_y / sqrt(psi_x**2 + psi_y**2)
+            !
+            !------- set angle of wake panel normal
+            APAnel(i) = atan2(psi_y, psi_x)
+        endif
         !
-        !------- calculate normal vector for next point
-        CALL PSILIN(I, X(I), Y(I), 1.0, 0.0, PSI, PSI_X, .FALSE., .FALSE.)
-        CALL PSILIN(I, X(I), Y(I), 0.0, 1.0, PSI, PSI_Y, .FALSE., .FALSE.)
-        !
-        NX(I + 1) = -PSI_X / SQRT(PSI_X**2 + PSI_Y**2)
-        NY(I + 1) = -PSI_Y / SQRT(PSI_X**2 + PSI_Y**2)
-        !
-        !------- set angle of wake panel normal
-        APANEL(I) = ATAN2(PSI_Y, PSI_X)
-        !
-    10 CONTINUE
+    enddo
     !
     !---- set wake presence flag and corresponding alpha
-    LWAKE = .TRUE.
-    AWAKE = ALFA
+    LWAke = .true.
+    AWAke = ALFa
     !
     !---- old source influence matrix is invalid for the new wake geometry
-    LWDIJ = .FALSE.
+    LWDij = .false.
     !
-    RETURN
-END
+end subroutine xywake
+!*==STFIND.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 
 
-SUBROUTINE STFIND
+subroutine stfind
+    use i_xfoil
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    real :: dgam, ds
+    integer :: i
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !-----------------------------------------
-    !     Locates stagnation point arc length 
+    !     Locates stagnation point arc length
     !     location SST and panel index IST.
     !-----------------------------------------
-    use i_xfoil
     !
-    DO 10 I = 1, N - 1
-        IF(GAM(I).GE.0.0 .AND. GAM(I + 1).LT.0.0) GO TO 11
-    10 CONTINUE
+    do i = 1, N - 1
+        if (GAM(i)>=0.0 .and. GAM(i + 1)<0.0) goto 100
+    enddo
     !
-    WRITE(*, *) 'STFIND: Stagnation point not found. Continuing ...'
-    I = N / 2
+    write (*, *) 'STFIND: Stagnation point not found. Continuing ...'
+    i = N / 2
     !
-    11 CONTINUE
     !
-    IST = I
-    DGAM = GAM(I + 1) - GAM(I)
-    DS = S(I + 1) - S(I)
+    100  IST = i
+    dgam = GAM(i + 1) - GAM(i)
+    ds = S(i + 1) - S(i)
     !
     !---- evaluate so as to minimize roundoff for very small GAM(I) or GAM(I+1)
-    IF(GAM(I) .LT. -GAM(I + 1)) THEN
-        SST = S(I) - DS * (GAM(I) / DGAM)
-    ELSE
-        SST = S(I + 1) - DS * (GAM(I + 1) / DGAM)
-    ENDIF
+    if (GAM(i)<-GAM(i + 1)) then
+        SST = S(i) - ds * (GAM(i) / dgam)
+    else
+        SST = S(i + 1) - ds * (GAM(i + 1) / dgam)
+    endif
     !
     !---- tweak stagnation point if it falls right on a node (very unlikely)
-    IF(SST .LE. S(I)) SST = S(I) + 1.0E-7
-    IF(SST .GE. S(I + 1)) SST = S(I + 1) - 1.0E-7
+    if (SST<=S(i)) SST = S(i) + 1.0E-7
+    if (SST>=S(i + 1)) SST = S(i + 1) - 1.0E-7
     !
-    SST_GO = (SST - S(I + 1)) / DGAM
-    SST_GP = (S(I) - SST) / DGAM
+    SST_go = (SST - S(i + 1)) / dgam
+    SST_gp = (S(i) - SST) / dgam
     !
-    RETURN
-END
+end subroutine stfind
+!*==IBLPAN.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 
 
-SUBROUTINE IBLPAN
+subroutine iblpan
+    use i_xfoil
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    integer :: i, ibl, iblmax, is, iw
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !-------------------------------------------------------------
     !     Sets  BL location -> panel location  pointer array IPAN
     !-------------------------------------------------------------
-    use i_xfoil
     !
     !---- top surface first
-    IS = 1
+    is = 1
     !
-    IBL = 1
-    DO 10 I = IST, 1, -1
-        IBL = IBL + 1
-        IPAN(IBL, IS) = I
-        VTI(IBL, IS) = 1.0
-    10 CONTINUE
+    ibl = 1
+    do i = IST, 1, -1
+        ibl = ibl + 1
+        IPAn(ibl, is) = i
+        VTI(ibl, is) = 1.0
+    enddo
     !
-    IBLTE(IS) = IBL
-    NBL(IS) = IBL
+    IBLte(is) = ibl
+    NBL(is) = ibl
     !
     !---- bottom surface next
-    IS = 2
+    is = 2
     !
-    IBL = 1
-    DO 20 I = IST + 1, N
-        IBL = IBL + 1
-        IPAN(IBL, IS) = I
-        VTI(IBL, IS) = -1.0
-    20 CONTINUE
+    ibl = 1
+    do i = IST + 1, N
+        ibl = ibl + 1
+        IPAn(ibl, is) = i
+        VTI(ibl, is) = -1.0
+    enddo
     !
     !---- wake
-    IBLTE(IS) = IBL
+    IBLte(is) = ibl
     !
-    DO 25 IW = 1, NW
-        I = N + IW
-        IBL = IBLTE(IS) + IW
-        IPAN(IBL, IS) = I
-        VTI(IBL, IS) = -1.0
-    25 CONTINUE
+    do iw = 1, NW
+        i = N + iw
+        ibl = IBLte(is) + iw
+        IPAn(ibl, is) = i
+        VTI(ibl, is) = -1.0
+    enddo
     !
-    NBL(IS) = IBLTE(IS) + NW
+    NBL(is) = IBLte(is) + NW
     !
     !---- upper wake pointers (for plotting only)
-    DO 35 IW = 1, NW
-        IPAN(IBLTE(1) + IW, 1) = IPAN(IBLTE(2) + IW, 2)
-        VTI(IBLTE(1) + IW, 1) = 1.0
-    35 CONTINUE
+    do iw = 1, NW
+        IPAn(IBLte(1) + iw, 1) = IPAn(IBLte(2) + iw, 2)
+        VTI(IBLte(1) + iw, 1) = 1.0
+    enddo
     !
     !
-    IBLMAX = MAX(IBLTE(1), IBLTE(2)) + NW
-    IF(IBLMAX.GT.IVX) THEN
-        WRITE(*, *) ' ***  BL array overflow.'
-        WRITE(*, *) ' ***  Increase IVX to at least', IBLMAX
-        STOP
-    ENDIF
+    iblmax = max(IBLte(1), IBLte(2)) + NW
+    if (iblmax>IVX) then
+        write (*, *) ' ***  BL array overflow.'
+        write (*, *) ' ***  Increase IVX to at least', iblmax
+        stop
+    endif
     !
-    LIPAN = .TRUE.
-    RETURN
-END
+    LIPan = .true.
+end subroutine iblpan
+!*==XICALC.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 
 
-SUBROUTINE XICALC
+subroutine xicalc
+    use i_xfoil
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    real :: aa, bb, crosp, dwdxte, dxssi, telrat, xeps, zn
+    integer :: i, ibl, ibl1, ibl2, is, is1, is2, iw
+    real, save :: xfeps
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !-------------------------------------------------------------
     !     Sets BL arc length array on each airfoil side and wake
     !-------------------------------------------------------------
-    use i_xfoil
-    DATA XFEPS / 1.0E-7 /
+    data xfeps/1.0E-7/
     !
     !---- minimum xi node arc length near stagnation point
-    XEPS = XFEPS * (S(N) - S(1))
+    xeps = xfeps * (S(N) - S(1))
     !
-    IS = 1
+    is = 1
     !
-    XSSI(1, IS) = 0.
+    XSSi(1, is) = 0.
     !
-    DO 10 IBL = 2, IBLTE(IS)
-        I = IPAN(IBL, IS)
-        XSSI(IBL, IS) = MAX(SST - S(I), XEPS)
-    10 CONTINUE
-    !
-    !
-    IS = 2
-    !
-    XSSI(1, IS) = 0.
-    !
-    DO 20 IBL = 2, IBLTE(IS)
-        I = IPAN(IBL, IS)
-        XSSI(IBL, IS) = MAX(S(I) - SST, XEPS)
-    20 CONTINUE
+    do ibl = 2, IBLte(is)
+        i = IPAn(ibl, is)
+        XSSi(ibl, is) = max(SST - S(i), xeps)
+    enddo
     !
     !
-    IS1 = 1
-    IS2 = 2
+    is = 2
     !
-    IBL1 = IBLTE(IS1) + 1
-    XSSI(IBL1, IS1) = XSSI(IBL1 - 1, IS1)
+    XSSi(1, is) = 0.
     !
-    IBL2 = IBLTE(IS2) + 1
-    XSSI(IBL2, IS2) = XSSI(IBL2 - 1, IS2)
+    do ibl = 2, IBLte(is)
+        i = IPAn(ibl, is)
+        XSSi(ibl, is) = max(S(i) - SST, xeps)
+    enddo
     !
-    DO 25 IBL = IBLTE(IS) + 2, NBL(IS)
-        I = IPAN(IBL, IS)
-        DXSSI = SQRT((X(I) - X(I - 1))**2 + (Y(I) - Y(I - 1))**2)
+    !
+    is1 = 1
+    is2 = 2
+    !
+    ibl1 = IBLte(is1) + 1
+    XSSi(ibl1, is1) = XSSi(ibl1 - 1, is1)
+    !
+    ibl2 = IBLte(is2) + 1
+    XSSi(ibl2, is2) = XSSi(ibl2 - 1, is2)
+    !
+    do ibl = IBLte(is) + 2, NBL(is)
+        i = IPAn(ibl, is)
+        dxssi = sqrt((X(i) - X(i - 1))**2 + (Y(i) - Y(i - 1))**2)
         !
-        IBL1 = IBLTE(IS1) + IBL - IBLTE(IS)
-        IBL2 = IBLTE(IS2) + IBL - IBLTE(IS)
-        XSSI(IBL1, IS1) = XSSI(IBL1 - 1, IS1) + DXSSI
-        XSSI(IBL2, IS2) = XSSI(IBL2 - 1, IS2) + DXSSI
-    25 CONTINUE
+        ibl1 = IBLte(is1) + ibl - IBLte(is)
+        ibl2 = IBLte(is2) + ibl - IBLte(is)
+        XSSi(ibl1, is1) = XSSi(ibl1 - 1, is1) + dxssi
+        XSSi(ibl2, is2) = XSSi(ibl2 - 1, is2) + dxssi
+    enddo
     !
     !---- trailing edge flap length to TE gap ratio
-    TELRAT = 2.50
+    telrat = 2.50
     !
     !---- set up parameters for TE flap cubics
     !
     !cc   DWDXTE = YP(1)/XP(1) + YP(N)/XP(N)    !!! BUG  2/2/95
     !
-    CROSP = (XP(1) * YP(N) - YP(1) * XP(N))&
-            / SQRT((XP(1)**2 + YP(1)**2)&
-                    * (XP(N)**2 + YP(N)**2))
-    DWDXTE = CROSP / SQRT(1.0 - CROSP**2)
+    crosp = (XP(1) * YP(N) - YP(1) * XP(N)) / sqrt((XP(1)**2 + YP(1)**2) * (XP(N)**2 + YP(N)**2))
+    dwdxte = crosp / sqrt(1.0 - crosp**2)
     !
     !---- limit cubic to avoid absurd TE gap widths
-    DWDXTE = MAX(DWDXTE, -3.0 / TELRAT)
-    DWDXTE = MIN(DWDXTE, 3.0 / TELRAT)
+    dwdxte = max(dwdxte, -3.0 / telrat)
+    dwdxte = min(dwdxte, 3.0 / telrat)
     !
-    AA = 3.0 + TELRAT * DWDXTE
-    BB = -2.0 - TELRAT * DWDXTE
+    aa = 3.0 + telrat * dwdxte
+    bb = -2.0 - telrat * dwdxte
     !
-    IF(SHARP) THEN
-        DO 30 IW = 1, NW
-            WGAP(IW) = 0.
-        30  CONTINUE
-    ELSE
+    if (SHArp) then
+        do iw = 1, NW
+            WGAp(iw) = 0.
+        enddo
+    else
         !----- set TE flap (wake gap) array
-        IS = 2
-        DO 35 IW = 1, NW
-            IBL = IBLTE(IS) + IW
-            ZN = 1.0 - (XSSI(IBL, IS) - XSSI(IBLTE(IS), IS)) / (TELRAT * ANTE)
-            WGAP(IW) = 0.
-            IF(ZN.GE.0.0) WGAP(IW) = ANTE * (AA + BB * ZN) * ZN**2
-        35  CONTINUE
-    ENDIF
+        is = 2
+        do iw = 1, NW
+            ibl = IBLte(is) + iw
+            zn = 1.0 - (XSSi(ibl, is) - XSSi(IBLte(is), is)) / (telrat * ANTe)
+            WGAp(iw) = 0.
+            if (zn>=0.0) WGAp(iw) = ANTe * (aa + bb * zn) * zn**2
+        enddo
+    endif
     !
-    RETURN
-END
+end subroutine xicalc
+!*==UICALC.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 
 
-SUBROUTINE UICALC
+subroutine uicalc
+    use i_xfoil
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    integer :: i, ibl, is
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !--------------------------------------------------------------
     !     Sets inviscid Ue from panel inviscid tangential velocity
     !--------------------------------------------------------------
+    !
+    do is = 1, 2
+        UINv(1, is) = 0.
+        UINv_a(1, is) = 0.
+        do ibl = 2, NBL(is)
+            i = IPAn(ibl, is)
+            UINv(ibl, is) = VTI(ibl, is) * QINv(i)
+            UINv_a(ibl, is) = VTI(ibl, is) * QINv_a(i)
+        enddo
+    enddo
+    !
+end subroutine uicalc
+!*==UECALC.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
+
+
+subroutine uecalc
     use i_xfoil
+    implicit none
     !
-    DO 10 IS = 1, 2
-        UINV  (1, IS) = 0.
-        UINV_A(1, IS) = 0.
-        DO 110 IBL = 2, NBL(IS)
-            I = IPAN(IBL, IS)
-            UINV  (IBL, IS) = VTI(IBL, IS) * QINV  (I)
-            UINV_A(IBL, IS) = VTI(IBL, IS) * QINV_A(I)
-        110   CONTINUE
-    10 CONTINUE
+    !*** Start of declarations rewritten by SPAG
     !
-    RETURN
-END
-
-
-SUBROUTINE UECALC
+    ! Local variables
+    !
+    integer :: i, ibl, is
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !--------------------------------------------------------------
     !     Sets viscous Ue from panel viscous tangential velocity
     !--------------------------------------------------------------
+    !
+    do is = 1, 2
+        UEDg(1, is) = 0.
+        do ibl = 2, NBL(is)
+            i = IPAn(ibl, is)
+            UEDg(ibl, is) = VTI(ibl, is) * QVIs(i)
+        enddo
+    enddo
+    !
+end subroutine uecalc
+!*==QVFUE.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
+
+
+subroutine qvfue
     use i_xfoil
+    implicit none
     !
-    DO 10 IS = 1, 2
-        UEDG(1, IS) = 0.
-        DO 110 IBL = 2, NBL(IS)
-            I = IPAN(IBL, IS)
-            UEDG(IBL, IS) = VTI(IBL, IS) * QVIS(I)
-        110   CONTINUE
-    10 CONTINUE
+    !*** Start of declarations rewritten by SPAG
     !
-    RETURN
-END
-
-
-SUBROUTINE QVFUE
+    ! Local variables
+    !
+    integer :: i, ibl, is
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !--------------------------------------------------------------
     !     Sets panel viscous tangential velocity from viscous Ue
     !--------------------------------------------------------------
+    !
+    do is = 1, 2
+        do ibl = 2, NBL(is)
+            i = IPAn(ibl, is)
+            QVIs(i) = VTI(ibl, is) * UEDg(ibl, is)
+        enddo
+    enddo
+    !
+end subroutine qvfue
+!*==QISET.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
+
+
+subroutine qiset
     use i_xfoil
+    implicit none
     !
-    DO 1 IS = 1, 2
-        DO 10 IBL = 2, NBL(IS)
-            I = IPAN(IBL, IS)
-            QVIS(I) = VTI(IBL, IS) * UEDG(IBL, IS)
-        10   CONTINUE
-    1 CONTINUE
+    !*** Start of declarations rewritten by SPAG
     !
-    RETURN
-END
-
-
-SUBROUTINE QISET
+    ! Local variables
+    !
+    integer :: i
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !-------------------------------------------------------
     !     Sets inviscid panel tangential velocity for
     !     current alpha.
     !-------------------------------------------------------
+    !
+    COSa = cos(ALFa)
+    SINa = sin(ALFa)
+    !
+    do i = 1, N + NW
+        QINv(i) = COSa * QINvu(i, 1) + SINa * QINvu(i, 2)
+        QINv_a(i) = -SINa * QINvu(i, 1) + COSa * QINvu(i, 2)
+    enddo
+    !
+end subroutine qiset
+!*==GAMQV.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
+
+
+subroutine gamqv
     use i_xfoil
+    implicit none
     !
-    COSA = COS(ALFA)
-    SINA = SIN(ALFA)
+    !*** Start of declarations rewritten by SPAG
     !
-    DO 5 I = 1, N + NW
-        QINV  (I) = COSA * QINVU(I, 1) + SINA * QINVU(I, 2)
-        QINV_A(I) = -SINA * QINVU(I, 1) + COSA * QINVU(I, 2)
-    5 CONTINUE
+    ! Local variables
     !
-    RETURN
-END
+    integer :: i
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    do i = 1, N
+        GAM(i) = QVIs(i)
+        GAM_a(i) = QINv_a(i)
+    enddo
+    !
+end subroutine gamqv
+!*==STMOVE.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 
 
-SUBROUTINE GAMQV
+subroutine stmove
     use i_xfoil
+    implicit none
     !
-    DO 10 I = 1, N
-        GAM(I) = QVIS(I)
-        GAM_A(I) = QINV_A(I)
-    10 CONTINUE
+    !*** Start of declarations rewritten by SPAG
     !
-    RETURN
-END
-
-
-SUBROUTINE STMOVE
+    ! Local variables
+    !
+    real :: dudx, ueps
+    integer :: i, ibl, idif, is, istold
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !---------------------------------------------------
     !     Moves stagnation point location to new panel.
     !---------------------------------------------------
-    use i_xfoil
     !
     !---- locate new stagnation point arc length SST from GAM distribution
-    ISTOLD = IST
-    CALL STFIND
+    istold = IST
+    call stfind
     !
-    IF(ISTOLD.EQ.IST) THEN
+    if (istold==IST) then
         !
         !----- recalculate new arc length array
-        CALL XICALC
+        call xicalc
         !
-    ELSE
+    else
         !
         !CC       WRITE(*,*) 'STMOVE: Resetting stagnation point'
         !
         !----- set new BL position -> panel position  pointers
-        CALL IBLPAN
+        call iblpan
         !
         !----- set new inviscid BL edge velocity UINV from QINV
-        CALL UICALC
+        call uicalc
         !
         !----- recalculate new arc length array
-        CALL XICALC
+        call xicalc
         !
         !----- set  BL position -> system line  pointers
-        CALL IBLSYS
+        call iblsys
         !
-        IF(IST.GT.ISTOLD) THEN
+        if (IST>istold) then
             !------ increase in number of points on top side (IS=1)
-            IDIF = IST - ISTOLD
+            idif = IST - istold
             !
-            ITRAN(1) = ITRAN(1) + IDIF
-            ITRAN(2) = ITRAN(2) - IDIF
+            ITRan(1) = ITRan(1) + idif
+            ITRan(2) = ITRan(2) - idif
             !
             !------ move top side BL variables downstream
-            DO 110 IBL = NBL(1), IDIF + 2, -1
-                CTAU(IBL, 1) = CTAU(IBL - IDIF, 1)
-                THET(IBL, 1) = THET(IBL - IDIF, 1)
-                DSTR(IBL, 1) = DSTR(IBL - IDIF, 1)
-                UEDG(IBL, 1) = UEDG(IBL - IDIF, 1)
-            110   CONTINUE
+            do ibl = NBL(1), idif + 2, -1
+                CTAu(ibl, 1) = CTAu(ibl - idif, 1)
+                THEt(ibl, 1) = THEt(ibl - idif, 1)
+                DSTr(ibl, 1) = DSTr(ibl - idif, 1)
+                UEDg(ibl, 1) = UEDg(ibl - idif, 1)
+            enddo
             !
             !------ set BL variables between old and new stagnation point
-            DUDX = UEDG(IDIF + 2, 1) / XSSI(IDIF + 2, 1)
-            DO 115 IBL = IDIF + 1, 2, -1
-                CTAU(IBL, 1) = CTAU(IDIF + 2, 1)
-                THET(IBL, 1) = THET(IDIF + 2, 1)
-                DSTR(IBL, 1) = DSTR(IDIF + 2, 1)
-                UEDG(IBL, 1) = DUDX * XSSI(IBL, 1)
-            115   CONTINUE
+            dudx = UEDg(idif + 2, 1) / XSSi(idif + 2, 1)
+            do ibl = idif + 1, 2, -1
+                CTAu(ibl, 1) = CTAu(idif + 2, 1)
+                THEt(ibl, 1) = THEt(idif + 2, 1)
+                DSTr(ibl, 1) = DSTr(idif + 2, 1)
+                UEDg(ibl, 1) = dudx * XSSi(ibl, 1)
+            enddo
             !
             !------ move bottom side BL variables upstream
-            DO 120 IBL = 2, NBL(2)
-                CTAU(IBL, 2) = CTAU(IBL + IDIF, 2)
-                THET(IBL, 2) = THET(IBL + IDIF, 2)
-                DSTR(IBL, 2) = DSTR(IBL + IDIF, 2)
-                UEDG(IBL, 2) = UEDG(IBL + IDIF, 2)
-            120   CONTINUE
+            do ibl = 2, NBL(2)
+                CTAu(ibl, 2) = CTAu(ibl + idif, 2)
+                THEt(ibl, 2) = THEt(ibl + idif, 2)
+                DSTr(ibl, 2) = DSTr(ibl + idif, 2)
+                UEDg(ibl, 2) = UEDg(ibl + idif, 2)
+            enddo
             !
-        ELSE
+        else
             !------ increase in number of points on bottom side (IS=2)
-            IDIF = ISTOLD - IST
+            idif = istold - IST
             !
-            ITRAN(1) = ITRAN(1) - IDIF
-            ITRAN(2) = ITRAN(2) + IDIF
+            ITRan(1) = ITRan(1) - idif
+            ITRan(2) = ITRan(2) + idif
             !
             !------ move bottom side BL variables downstream
-            DO 210 IBL = NBL(2), IDIF + 2, -1
-                CTAU(IBL, 2) = CTAU(IBL - IDIF, 2)
-                THET(IBL, 2) = THET(IBL - IDIF, 2)
-                DSTR(IBL, 2) = DSTR(IBL - IDIF, 2)
-                UEDG(IBL, 2) = UEDG(IBL - IDIF, 2)
-            210   CONTINUE
+            do ibl = NBL(2), idif + 2, -1
+                CTAu(ibl, 2) = CTAu(ibl - idif, 2)
+                THEt(ibl, 2) = THEt(ibl - idif, 2)
+                DSTr(ibl, 2) = DSTr(ibl - idif, 2)
+                UEDg(ibl, 2) = UEDg(ibl - idif, 2)
+            enddo
             !
             !------ set BL variables between old and new stagnation point
-            DUDX = UEDG(IDIF + 2, 2) / XSSI(IDIF + 2, 2)
+            dudx = UEDg(idif + 2, 2) / XSSi(idif + 2, 2)
 
 
-            !        write(*,*) 'idif Ue xi dudx', 
+            !        write(*,*) 'idif Ue xi dudx',
             !     &    idif, UEDG(idif+2,2), xssi(idif+2,2), dudx
 
-            DO 215 IBL = IDIF + 1, 2, -1
-                CTAU(IBL, 2) = CTAU(IDIF + 2, 2)
-                THET(IBL, 2) = THET(IDIF + 2, 2)
-                DSTR(IBL, 2) = DSTR(IDIF + 2, 2)
-                UEDG(IBL, 2) = DUDX * XSSI(IBL, 2)
-            215   CONTINUE
+            do ibl = idif + 1, 2, -1
+                CTAu(ibl, 2) = CTAu(idif + 2, 2)
+                THEt(ibl, 2) = THEt(idif + 2, 2)
+                DSTr(ibl, 2) = DSTr(idif + 2, 2)
+                UEDg(ibl, 2) = dudx * XSSi(ibl, 2)
+            enddo
 
             !        write(*,*) 'Uenew xinew', idif+1, uedg(idif+1,2), xssi(idif+1,2)
 
             !
             !------ move top side BL variables upstream
-            DO 220 IBL = 2, NBL(1)
-                CTAU(IBL, 1) = CTAU(IBL + IDIF, 1)
-                THET(IBL, 1) = THET(IBL + IDIF, 1)
-                DSTR(IBL, 1) = DSTR(IBL + IDIF, 1)
-                UEDG(IBL, 1) = UEDG(IBL + IDIF, 1)
-            220   CONTINUE
-        ENDIF
+            do ibl = 2, NBL(1)
+                CTAu(ibl, 1) = CTAu(ibl + idif, 1)
+                THEt(ibl, 1) = THEt(ibl + idif, 1)
+                DSTr(ibl, 1) = DSTr(ibl + idif, 1)
+                UEDg(ibl, 1) = UEDg(ibl + idif, 1)
+            enddo
+        endif
         !
         !----- tweak Ue so it's not zero, in case stag. point is right on node
-        UEPS = 1.0E-7
-        DO IS = 1, 2
-            DO IBL = 2, NBL(IS)
-                I = IPAN(IBL, IS)
-                IF(UEDG(IBL, IS).LE.UEPS) THEN
-                    UEDG(IBL, IS) = UEPS
-                    QVIS(I) = VTI(IBL, IS) * UEPS
-                    GAM(I) = VTI(IBL, IS) * UEPS
-                ENDIF
-            ENDDO
-        ENDDO
+        ueps = 1.0E-7
+        do is = 1, 2
+            do ibl = 2, NBL(is)
+                i = IPAn(ibl, is)
+                if (UEDg(ibl, is)<=ueps) then
+                    UEDg(ibl, is) = ueps
+                    QVIs(i) = VTI(ibl, is) * ueps
+                    GAM(i) = VTI(ibl, is) * ueps
+                endif
+            enddo
+        enddo
         !
-    ENDIF
+    endif
     !
     !---- set new mass array since Ue has been tweaked
-    DO 50 IS = 1, 2
-        DO 510 IBL = 2, NBL(IS)
-            MASS(IBL, IS) = DSTR(IBL, IS) * UEDG(IBL, IS)
-        510   CONTINUE
-    50 CONTINUE
+    do is = 1, 2
+        do ibl = 2, NBL(is)
+            MASs(ibl, is) = DSTr(ibl, is) * UEDg(ibl, is)
+        enddo
+    enddo
     !
-    RETURN
-END
+end subroutine stmove
+!*==UESET.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 
 
-SUBROUTINE UESET
+subroutine ueset
+    use i_xfoil
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    real :: dui, ue_m
+    integer :: i, ibl, is, j, jbl, js
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !---------------------------------------------------------
     !     Sets Ue from inviscid Ue plus all source influence
     !---------------------------------------------------------
-    use i_xfoil
     !
-    DO 1 IS = 1, 2
-        DO 10 IBL = 2, NBL(IS)
-            I = IPAN(IBL, IS)
+    do is = 1, 2
+        do ibl = 2, NBL(is)
+            i = IPAn(ibl, is)
             !
-            DUI = 0.
-            DO 100 JS = 1, 2
-                DO 1000 JBL = 2, NBL(JS)
-                    J = IPAN(JBL, JS)
-                    UE_M = -VTI(IBL, IS) * VTI(JBL, JS) * DIJ(I, J)
-                    DUI = DUI + UE_M * MASS(JBL, JS)
-                1000       CONTINUE
-            100     CONTINUE
+            dui = 0.
+            do js = 1, 2
+                do jbl = 2, NBL(js)
+                    j = IPAn(jbl, js)
+                    ue_m = -VTI(ibl, is) * VTI(jbl, js) * DIJ(i, j)
+                    dui = dui + ue_m * MASs(jbl, js)
+                enddo
+            enddo
             !
-            UEDG(IBL, IS) = UINV(IBL, IS) + DUI
+            UEDg(ibl, is) = UINv(ibl, is) + dui
             !
-        10   CONTINUE
-    1 CONTINUE
+        enddo
+    enddo
     !
-    RETURN
-END
+end subroutine ueset
+!*==DSSET.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 
 
-SUBROUTINE DSSET
+subroutine dsset
     use i_xfoil
+    implicit none
     !
-    DO 1 IS = 1, 2
-        DO 10 IBL = 2, NBL(IS)
-            DSTR(IBL, IS) = MASS(IBL, IS) / UEDG(IBL, IS)
-        10   CONTINUE
-    1 CONTINUE
+    !*** Start of declarations rewritten by SPAG
     !
-    RETURN
-END
+    ! Local variables
+    !
+    integer :: ibl, is
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    do is = 1, 2
+        do ibl = 2, NBL(is)
+            DSTr(ibl, is) = MASs(ibl, is) / UEDg(ibl, is)
+        enddo
+    enddo
+    !
+end subroutine dsset

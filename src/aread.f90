@@ -1,8 +1,38 @@
-SUBROUTINE AREAD(LU, FNAME, NMAX, X, Y, N, NAME, ISPARS, ITYPE, INFO)
-    DIMENSION X(NMAX), Y(NMAX)
-    CHARACTER*(*) FNAME
-    CHARACTER*(*) NAME
-    CHARACTER*(*) ISPARS
+!*==AREAD.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
+subroutine aread(Lu, Fname, Nmax, X, Y, N, Name, Ispars, Itype, Info)
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    character(*) :: Fname, Ispars, Name
+    integer :: Info, Itype, Lu, N, Nmax
+    real, dimension(Nmax) :: X, Y
+    intent (in) Fname, Info, Lu, Nmax
+    intent (out) Ispars, Itype, N
+    intent (inout) Name, X, Y
+    !
+    ! Local variables
+    !
+    real, dimension(10) :: a
+    logical :: error, lopen
+    integer :: i, iel, na, nel, nfn
+    character(80) :: line, line1, line2
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !--------------------------------------------------------
     !     Reads in several types of airfoil coordinate file.
     !
@@ -25,136 +55,140 @@ SUBROUTINE AREAD(LU, FNAME, NMAX, X, Y, N, NAME, ISPARS, ITYPE, INFO)
     !           3  MSES single element.
     !           4  MSES multi-element.
     !--------------------------------------------------------
-    CHARACTER*80 LINE1, LINE2, LINE
-    LOGICAL LOPEN, ERROR
-    DIMENSION A(10)
     !
-    IEL = 0
-    NEL = 0
+    iel = 0
+    nel = 0
     !
     !---- assume read error will occur
-    ITYPE = 0
+    Itype = 0
     !
-    LOPEN = FNAME(1:1) .NE. ' '
-    IF(LOPEN) OPEN(LU, FILE = FNAME, STATUS = 'OLD', ERR = 98)
-    !
-    11   READ(LU, 1000, END = 99, ERR = 98) LINE1
-    IF(INDEX('#!', LINE1(1:1)) .NE. 0) GO TO 11
-    !
-    12   READ(LU, 1000, END = 99) LINE2
-    IF(INDEX('#!', LINE2(1:1)) .NE. 0) GO TO 12
-    !
-    I = 1
-    !
-    !---- try to read two numbers from first line
-    NA = 2
-    CALL GETFLT(LINE1, A, NA, ERROR)
-    IF(ERROR .OR. NA.LT.2) THEN
-        !------ must be a name string
-        NAME = LINE1
-    ELSE
-        !------ no name, just two valid numbers... must be plain airfoil file
-        NAME = ' '
-        IF(INFO.GT.0) THEN
-            WRITE(*, *)
-            WRITE(*, *) 'Plain airfoil file'
-        ENDIF
-        ITYPE = 1
-        REWIND(LU)
-        GO TO 50
-    ENDIF
-    !
-    !---- if we got here, there's a name line,
-    !-    so now try to read four MSES domain numbers from second line
-    NA = 4
-    CALL GETFLT(LINE2, A, NA, ERROR)
-    IF(ERROR .OR. NA.LT.2) THEN
-        !------ less than two valid numbers... not a valid format
-        GO TO 99
+    lopen = Fname(1:1)/=' '
+    if (lopen) open (Lu, file = Fname, status = 'OLD', err = 200)
+    do
         !
-    ELSEIF(NA.LT.4) THEN
-        !------ less than four numbers... usual .dat labeled file
-        NAME = LINE1
-        IF(INFO.GT.0) THEN
-            WRITE(*, *)
-            WRITE(*, *) 'Labeled airfoil file.  Name:  ', NAME
-        ENDIF
-        ITYPE = 2
-        REWIND(LU)
-        READ(LU, 1000, END = 99) LINE1
-        GO TO 50
-        !
-    ELSE
-        !------ four or more numbers... MSES or MISES file
-        IF(INFO.GT.0) THEN
-            WRITE(*, *)
-            WRITE(*, *) 'MSES airfoil file.  Name:  ', NAME
-        ENDIF
-        ITYPE = 3
-        ISPARS = LINE2
-    ENDIF
+        read (Lu, 99004, end = 300, err = 200) line1
+        if (index('#!', line1(1:1))==0) then
+            do
+                !
+                read (Lu, 99004, end = 300) line2
+                if (index('#!', line2(1:1))==0) then
+                    !
+                    i = 1
+                    !
+                    !---- try to read two numbers from first line
+                    na = 2
+                    call getflt(line1, a, na, error)
+                    if (error .or. na<2) then
+                        !------ must be a name string
+                        Name = line1
+                    else
+                        !------ no name, just two valid numbers... must be plain airfoil file
+                        Name = ' '
+                        if (Info>0) then
+                            write (*, *)
+                            write (*, *) 'Plain airfoil file'
+                        endif
+                        Itype = 1
+                        rewind (Lu)
+                        goto 5
+                    endif
+                    !
+                    !---- if we got here, there's a name line,
+                    !-    so now try to read four MSES domain numbers from second line
+                    na = 4
+                    call getflt(line2, a, na, error)
+                    !------ less than two valid numbers... not a valid format
+                    if (error .or. na<2) goto 300
+                    !
+                    if (na<4) then
+                        !------ less than four numbers... usual .dat labeled file
+                        Name = line1
+                        if (Info>0) then
+                            write (*, *)
+                            write (*, *) 'Labeled airfoil file.  Name:  ', Name
+                        endif
+                        Itype = 2
+                        rewind (Lu)
+                        read (Lu, 99004, end = 300) line1
+                        !
+                    else
+                        !------ four or more numbers... MSES or MISES file
+                        if (Info>0) then
+                            write (*, *)
+                            write (*, *) 'MSES airfoil file.  Name:  ', Name
+                        endif
+                        Itype = 3
+                        Ispars = line2
+                    endif
+                    5             do
+                        !
+                        !---- read each element until 999.0 or end of file is encountered
+                        nel = nel + 1
+                        do i = 1, Nmax
+                            do
+                                read (Lu, 99004, end = 100) line
+                                !
+                                !------ skip comment line
+                                if (index('#!', line(1:1))==0) then
+                                    !
+                                    na = 2
+                                    call getflt(line, a, na, error)
+                                    if (error) goto 300
+                                    !
+                                    !------ skip line without at least two numbers
+                                    if (na>=2) then
+                                        !
+                                        X(i) = a(1)
+                                        Y(i) = a(2)
+                                        !
+                                        if (X(i)==999.0 .and. Y(i)==999.0) then
+                                            !-------- if this is the element we want, just exit
+                                            if (iel==nel) goto 100
+                                            !
+                                            if (iel==0) then
+                                                call aski('Enter element number^', iel)
+                                                Itype = 4
+                                            endif
+                                            !
+                                            !-------- if this is the specified element, exit.
+                                            if (iel==nel) goto 100
+                                            goto 10
+                                        endif
+                                        exit
+                                    endif
+                                endif
+                            enddo
+                        enddo
+                        write (*, 99001) Nmax
+                        99001              format (/' Buffer array size exceeded'/' Maximum number of points: ', i4)
+                        write (*, 99005)
+                        if (lopen) close (Lu)
+                        Itype = 0
+                        return
+                    10            enddo
+                endif
+            enddo
+        endif
+    enddo
     !
-    !---- read each element until 999.0 or end of file is encountered
-    50 NEL = NEL + 1
-    DO 55 I = 1, NMAX
-        51     READ(LU, 1000, END = 60) LINE
-        !
-        !------ skip comment line
-        IF(INDEX('#!', LINE(1:1)) .NE. 0) GO TO 51
-        !
-        NA = 2
-        CALL GETFLT(LINE, A, NA, ERROR)
-        IF(ERROR) GO TO 99
-        !
-        !------ skip line without at least two numbers
-        IF(NA.LT.2) GO TO 51
-        !
-        X(I) = A(1)
-        Y(I) = A(2)
-        !
-        IF (X(I) .EQ. 999.0 .AND. Y(I) .EQ. 999.0) THEN
-            !-------- if this is the element we want, just exit
-            IF(IEL .EQ. NEL) GO TO 60
-            !
-            IF(IEL.EQ.0) THEN
-                CALL ASKI('Enter element number^', IEL)
-                ITYPE = 4
-            ENDIF
-            !
-            !-------- if this is the specified element, exit.
-            IF(IEL .EQ. NEL) GO TO 60
-            GO TO 50
-        ENDIF
-    55 CONTINUE
-    WRITE(*, 5030) NMAX
-    WRITE(*, 5900)
-    IF(LOPEN) CLOSE(LU)
-    ITYPE = 0
-    RETURN
+    100  N = i - 1
+    if (lopen) close (Lu)
+    return
     !
-    60 N = I - 1
-    IF(LOPEN) CLOSE(LU)
-    RETURN
+    200  nfn = index(Fname, ' ') + 1
+    write (*, 99002) Fname(1:nfn)
+    99002 format (/' File OPEN error.  Nonexistent file:  ', a)
+    write (*, 99005)
+    Itype = 0
+    return
     !
-    98 CONTINUE
-    NFN = INDEX(FNAME, ' ') + 1
-    WRITE(*, 5050) FNAME(1:NFN)
-    WRITE(*, 5900)
-    ITYPE = 0
-    RETURN
-    !
-    99 CONTINUE
-    IF(LOPEN) CLOSE(LU)
-    WRITE(*, 5100)
-    WRITE(*, 5900)
-    ITYPE = 0
-    RETURN
+    300  if (lopen) close (Lu)
+    write (*, 99003)
+    99003 format (/' File READ error.  Unrecognizable file format')
+    write (*, 99005)
+    Itype = 0
+    return
     !...............................................................
-    1000 FORMAT(A)
-    5030 FORMAT(/' Buffer array size exceeded'&
-            /' Maximum number of points: ', I4)
-    5050 FORMAT(/' File OPEN error.  Nonexistent file:  ', A)
-    5100 FORMAT(/' File READ error.  Unrecognizable file format')
-    5900 FORMAT(' *** LOAD NOT COMPLETED ***')
-END
-! AREAD
+    99004 format (a)
+    99005 format (' *** LOAD NOT COMPLETED ***')
+end subroutine aread

@@ -1,8 +1,9 @@
+!*==POLREAD.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 !***********************************************************************
 !    Module:  iopol.f
-! 
+!
 !    Copyright (C) 2000 Mark Drela, Harold Youngren
-! 
+!
 !    This program is free software; you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
 !    the Free Software Foundation; either version 2 of the License, or
@@ -18,19 +19,57 @@
 !    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 !***********************************************************************
 
-SUBROUTINE POLREAD(LU, FNPOL, ERROR, &
-        NAX, NA, CPOL, &
-        REYN1, MACH1, ACRIT, XTRIP, &
-        PTRAT, ETAP, &
-        NAME, IRETYP, IMATYP, &
-        ISX, NBL, CPOLSD, &
-        CODE, VERSION)
+subroutine polread(Lu, Fnpol, Error, &
+        Nax, Na, Cpol, &
+        Reyn1, Mach1, Acrit, Xtrip,&
+        Ptrat, Etap, &
+        Name, Iretyp, Imatyp, &
+        Isx, Nbl, Cpolsd, &
+        Code, Version)
     use i_pindex
-    CHARACTER*(*) FNPOL, NAME
-    LOGICAL ERROR
-    CHARACTER*(*) CODE
-    REAL CPOL(NAX, IPTOT), CPOLSD(NAX, ISX, JPTOT)
-    REAL MACH1, ACRIT(ISX), XTRIP(ISX)
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    character(*) :: Code, Fnpol, Name
+    logical :: Error
+    real :: Etap, Mach1, Ptrat, Reyn1, Version
+    integer :: Imatyp, Iretyp, Isx, Lu, Na, Nax, Nbl
+    real, dimension(Isx) :: Acrit, Xtrip
+    real, dimension(Nax, IPTOT) :: Cpol
+    real, dimension(Nax, Isx, JPTOT) :: Cpolsd
+    intent (in) Fnpol, Isx, Lu, Nax
+    intent (out) Code, Cpolsd, Etap, Name, Ptrat, Version
+    intent (inout) Acrit, Cpol, Error, Imatyp, Iretyp, Mach1, Na, Nbl, Reyn1, Xtrip
+    !
+    ! Local variables
+    !
+    real :: acl
+    character(20) :: cpname
+    integer :: ia, ip, ipass, ipt, is, is1, is2, itmpp1, jp, k, k1, k2, kb, ke, kend, kf, km, kp, kr, &
+            & ks, kt, n, ninp, nipol, nname
+    integer, dimension(IPTOT) :: ipol
+    integer, dimension(2, IPTOT) :: ispol
+    integer, dimension(IPTOT + 2 * JPTOT) :: itmp, itmp0
+    logical :: ldlab, lhead, lima, lire, ljnc, ljtp, lopen
+    character(128) :: line
+    real, dimension(0:IPTOT + 2 * JPTOT) :: rinp
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !--------------------------------------------------------
     !     Reads in polar save file
     !
@@ -60,390 +99,404 @@ SUBROUTINE POLREAD(LU, FNPOL, ERROR, &
     !     CODE    code used to compute polar
     !     VERSION code version
     !--------------------------------------------------------
-    CHARACTER*128 LINE
-    CHARACTER*1 DUMMY
-    REAL RINP(0:IPTOT + 2 * JPTOT)
-    !
-    INTEGER IPOL(IPTOT), ISPOL(2, IPTOT)
-    INTEGER ITMP(IPTOT + 2 * JPTOT), ITMP0(IPTOT + 2 * JPTOT)
-    LOGICAL LOPEN, LHEAD, LDLAB
-    LOGICAL LIRE, LIMA, LJNC, LJTP
-    CHARACTER*20 CPNAME
     !
     !
-    ERROR = .FALSE.
-    LHEAD = .TRUE.
     !
-    NA = 0
-    NBL = 1
+    Error = .false.
+    lhead = .true.
+    !
+    Na = 0
+    Nbl = 1
     !
     !      KCH = 0
     !      KMC = 0
     !
-    NIPOL = 0
-    DO IP = 1, IPTOT
-        IPOL(IP) = 0
-    ENDDO
-    DO JP = 1, JPTOT
-        ISPOL(1, JP) = 0
-        ISPOL(2, JP) = 0
-    ENDDO
+    nipol = 0
+    do ip = 1, IPTOT
+        ipol(ip) = 0
+    enddo
+    do jp = 1, JPTOT
+        ispol(1, jp) = 0
+        ispol(2, jp) = 0
+    enddo
     !
     !---- assume Re,Mach will not be given in header
-    IRETYP = 0
-    IMATYP = 0
+    Iretyp = 0
+    Imatyp = 0
     !
     !---- do we have to open the file?
-    LOPEN = FNPOL .NE. ' '
+    lopen = Fnpol/=' '
     !
-    IF(LOPEN) OPEN(LU, FILE = FNPOL, STATUS = 'OLD', ERR = 90)
-    !
-    !=============================================================
-    !---- start data reading loop
-    500  CONTINUE
-    READ(LU, 1000, END = 80) LINE
-    IF(LINE.EQ.' ') GO TO 500
-    !
-    IF(LHEAD) THEN
-        !----- parse to get header info
+    if (lopen) open (Lu, file = Fnpol, status = 'OLD', err = 300)
+    100  do
         !
-        !----- assume this will be the data-label line
-        LDLAB = .TRUE.
+        !=============================================================
+        !---- start data reading loop
+        read (Lu, 99001, end = 200) line
         !
-        !--------------------------------------------
-        K = INDEX(LINE, 'Version')
-        IF(K.NE.0) THEN
-            !------ code,version line
-            DO K1 = 1, 128
-                IF(LINE(K1:K1).NE.' ') GO TO 10
-            ENDDO
+        !..........................................
+        99001 format (a)
+        if (line/=' ') then
             !
-            10     CONTINUE
-            IF(K.GT.K1) THEN
-                CODE = LINE(K1:K - 1)
-                READ(LINE(K + 7:128), *, ERR = 11) VERSION
-            ENDIF
-            11     CONTINUE
-            LDLAB = .FALSE.
-        ENDIF
-        !
-        !--------------------------------------------
-        KF = INDEX(LINE, 'for:')
-        IF(KF.NE.0) THEN
-            !------ airfoil name line
-            NAME = LINE(KF + 5:128)
-            LDLAB = .FALSE.
-        ENDIF
-        !
-        !--------------------------------------------
-        KE = INDEX(LINE, 'elements')
-        IF(KE.GT.0) THEN
-            !------ element-number line
-            READ(LINE(KE - 4:KE - 1), *, ERR = 60) NBL
-            !------ truncate name line to eliminate elements #
-            NAME = LINE(KF + 5:KE - 4)
-            !
-            IF(2 * NBL .GT. ISX) THEN
-                NBL = ISX / 2
-                WRITE(*, *)&
-                        'POLREAD: Number of elements set to array limit', NBL
-            ENDIF
-            LDLAB = .FALSE.
-        ENDIF
-        !
-        !--------------------------------------------
-        KR = INDEX(LINE, 'Reynolds number')
-        KM = INDEX(LINE, 'Mach number')
-        !
-        IF(KR.NE.0) THEN
-            !------ Re-type line
-            IF(KM.GT.KR) THEN
-                KEND = KM - 1
-            ELSE
-                KEND = 128
-            ENDIF
-            IF    (INDEX(LINE(KR:KEND), 'fixed').NE.0) THEN
-                IRETYP = 1
-            ELSEIF(INDEX(LINE(KR:KEND), '1/sqrt(CL)').NE.0) THEN
-                IRETYP = 2
-            ELSEIF(INDEX(LINE(KR:KEND), '1/CL').NE.0) THEN
-                IRETYP = 3
-            ENDIF
-            LDLAB = .FALSE.
-        ENDIF
-        !
-        IF(KM.NE.0) THEN
-            !------ Ma-type line
-            IF(KR.GT.KM) THEN
-                KEND = KR - 1
-            ELSE
-                KEND = 128
-            ENDIF
-            IF    (INDEX(LINE(KM:KEND), 'fixed').NE.0) THEN
-                IMATYP = 1
-            ELSEIF(INDEX(LINE(KM:KEND), '1/sqrt(CL)').NE.0) THEN
-                IMATYP = 2
-            ELSEIF(INDEX(LINE(KM:KEND), '1/CL').NE.0) THEN
-                IMATYP = 3
-            ENDIF
-            LDLAB = .FALSE.
-        ENDIF
-        !
-        !--------------------------------------------
-        !---- find specified BL trip location
-        K = INDEX(LINE, 'xtrf')
-        IF(K.NE.0) THEN
-            !------ new style xtrip line
-            KT = INDEX(LINE, '(top)')
-            KB = INDEX(LINE, '(bottom)')
-            KE = INDEX(LINE, 'element ')
-            !--- check for old style trip line
-            KS = INDEX(LINE, '(suc')
-            KP = INDEX(LINE, '(pre')
-            !
-            IF(KE.NE.0) THEN
-                READ(LINE(KE + 7:KE + 12), *, ERR = 21) N
-            ELSE
-                N = 1
-            ENDIF
-            IF(N.LE.NBL) THEN
-                IS1 = 2 * N - 1
-                IS2 = 2 * N
-                XTRIP(IS1) = 1.0
-                XTRIP(IS2) = 1.0
-                IF(KT.GT.0)  READ(LINE(K + 6:KT - 1), *, ERR = 21) XTRIP(IS1)
-                IF(KB.GT.KT) READ(LINE(KT + 5:KB - 1), *, ERR = 21) XTRIP(IS2)
-                IF(KS.GT.0)  READ(LINE(K + 6:KS - 1), *, ERR = 21) XTRIP(IS1)
-                IF(KP.GT.KS) READ(LINE(KS + 5:KP - 1), *, ERR = 21) XTRIP(IS2)
-            ENDIF
-            21     CONTINUE
-            LDLAB = .FALSE.
-        ENDIF
-        !
-        !--------------------------------------------
-        K = INDEX(LINE, 'Mach =')
-        IF(K.NE.0) THEN
-            READ(LINE(K + 6:128), *, ERR = 31) MACH1
-            31     CONTINUE
-            LDLAB = .FALSE.
-        ENDIF
-        !
-        !--------------------------------------------
-        K = INDEX(LINE, 'Re =')
-        IF(K.NE.0) THEN
-            READ(LINE(K + 4:128), *, ERR = 32) REYN1
-            REYN1 = REYN1 * 1.0E6
-            32     CONTINUE
-            LDLAB = .FALSE.
-        ENDIF
-        !
-        !--------------------------------------------
-        K = INDEX(LINE, 'Ncrit =')
-        IF(K.NE.0) THEN
-            NINP = 2
-            CALL GETFLT(LINE(k + 7:128), RINP(1), NINP, ERROR)
-            IF(NINP.LE.0 .OR. ERROR) GO TO 33
-            !
-            IF(NINP.EQ.1) THEN
-                ACRIT(1) = RINP(1)
-                ACRIT(2) = RINP(1)
-            ELSE
-                ACRIT(1) = RINP(1)
-                ACRIT(2) = RINP(2)
-            ENDIF
-            33     CONTINUE
-            LDLAB = .FALSE.
-        ENDIF
-        !
-        !--------------------------------------------
-        K = INDEX(LINE, 'pi_p =')
-        IF(K.NE.0) THEN
-            READ(LINE(K + 6:128), *, ERR = 34) PTRAT
-            34     CONTINUE
-            LDLAB = .FALSE.
-        ENDIF
-        !
-        !--------------------------------------------
-        K = INDEX(LINE, 'eta_p =')
-        IF(K.NE.0) THEN
-            READ(LINE(K + 7:128), *, ERR = 35) ETAP
-            35     CONTINUE
-            LDLAB = .FALSE.
-        ENDIF
-        !
-        !--------------------------------------------
-        IF(LDLAB .AND. NIPOL.EQ.0) THEN
-            !------ process line for possible data labels
-            DO IP = 1, IPTOT
-                CALL STRIP(CPOLNAME(IP), NNAME)
+            if (lhead) then
+                !----- parse to get header info
                 !
-                !-------- mark this parameter for reading
-                K = INDEX(LINE, CPOLNAME(IP)(1:NNAME))
-                ITMP0(IP) = K
-                ITMP(IP) = K
-            ENDDO
-            !
-            DO JP = 1, JPTOT
-                CALL STRIP(CPOLSNAME(JP), NNAME)
+                !----- assume this will be the data-label line
+                ldlab = .true.
                 !
-                CPNAME = 'Top ' // CPOLSNAME(JP)
-                K1 = INDEX(LINE, CPNAME(1:NNAME + 4))
-                CPNAME = 'Top_' // CPOLSNAME(JP)
-                K2 = INDEX(LINE, CPNAME(1:NNAME + 4))
-                ITMP0(IPTOT + JP) = MAX(K1, K2)
-                ITMP (IPTOT + JP) = MAX(K1, K2)
+                !--------------------------------------------
+                k = index(line, 'Version')
+                if (k/=0) then
+                    !------ code,version line
+                    do k1 = 1, 128
+                        if (line(k1:k1)/=' ') exit
+                    enddo
+                    !
+                    if (k>k1) then
+                        Code = line(k1:k - 1)
+                        read (line(k + 7:128), *, err = 105) Version
+                    endif
+                    105           ldlab = .false.
+                endif
                 !
-                CPNAME = 'Bot ' // CPOLSNAME(JP)
-                K1 = INDEX(LINE, CPNAME(1:NNAME + 4))
-                CPNAME = 'Bot_' // CPOLSNAME(JP)
-                K2 = INDEX(LINE, CPNAME(1:NNAME + 4))
-                ITMP0(IPTOT + JP + JPTOT) = MAX(K1, K2)
-                ITMP (IPTOT + JP + JPTOT) = MAX(K1, K2)
-            ENDDO
-            !
-            !------ bubble-sort data label positions in line string
-            DO IPASS = 1, IPTOT + 2 * JPTOT
-                DO IP = 1, IPTOT + 2 * JPTOT - 1
-                    IF(ITMP(IP).GT.ITMP(IP + 1)) THEN
-                        ITMPP1 = ITMP(IP + 1)
-                        ITMP(IP + 1) = ITMP(IP)
-                        ITMP(IP) = ITMPP1
-                    ENDIF
-                ENDDO
-            ENDDO
-            !
-            !------ assign data position to each parameter
-            DO IPT = 1, IPTOT + 2 * JPTOT
-                IF(ITMP(IPT).GT.0) THEN
-                    NIPOL = NIPOL + 1
-                    DO IP = 1, IPTOT
-                        IF(ITMP(IPT).EQ.ITMP0(IP)) IPOL(IP) = NIPOL
-                    ENDDO
-                    DO JP = 1, JPTOT
-                        IF(ITMP(IPT).EQ.ITMP0(IPTOT + JP)) ISPOL(1, JP) = NIPOL
-                        IF(ITMP(IPT).EQ.ITMP0(IPTOT + JPTOT + JP)) ISPOL(2, JP) = NIPOL
-                    ENDDO
-                ENDIF
-            ENDDO
-            !
-        ENDIF
-        !
-        !--------------------------------------------
-        IF(INDEX(LINE, '-----').NE.0) THEN
-            LHEAD = .FALSE.
-        ENDIF
-        !
-        !--------------------------------------------------------------
-    ELSE
-        !----- read polar data lines
-        IA = NA + 1
-        !
-        NINP = IPTOT + 2 * JPTOT
-        CALL GETFLT(LINE, RINP(1), NINP, ERROR)
-        IF(ERROR) GO TO 90
-        !
-        DO IP = 1, IPTOT
-            CPOL(IA, IP) = RINP(IPOL(IP))
-        ENDDO
-        !
-        DO JP = 1, JPTOT
-            DO N = 1, NBL
-                IS1 = 2 * N - 1
-                IS2 = 2 * N
-                CPOLSD(IA, IS1, JP) = RINP(ISPOL(1, JP) + 2 * (N - 1))
-                CPOLSD(IA, IS2, JP) = RINP(ISPOL(2, JP) + 2 * (N - 1))
-            ENDDO
-        ENDDO
-        !
-        ACL = MAX(CPOL(IA, ICL), 0.001)
-        !
-        !
-        !----- try to find Re, Ma, Ncrit, Xtrip  in polar data
-        LIRE = .FALSE.
-        LIMA = .FALSE.
-        LJNC = .FALSE.
-        LJTP = .FALSE.
-        DO KP = 1, NIPOL
-            IF(IPOL(KP) .EQ. IRE) LIRE = .TRUE.
-            IF(IPOL(KP) .EQ. IMA) LIMA = .TRUE.
-            IF(ISPOL(1, KP) .EQ. JNC) LJNC = .TRUE.
-            IF(ISPOL(1, KP) .EQ. JTP) LJTP = .TRUE.
-        ENDDO
-        !
-        IF(.NOT. LIRE) THEN
-            !------ Re was not in polar data... set using header info
-            IF    (IRETYP.EQ.1) THEN
-                CPOL(IA, IRE) = REYN1
-            ELSEIF(IRETYP.EQ.2) THEN
-                CPOL(IA, IRE) = REYN1 / SQRT(ACL)
-            ELSEIF(IRETYP.EQ.3) THEN
-                CPOL(IA, IRE) = REYN1 / ACL
-            ENDIF
-        ENDIF
-        !
-        IF(.NOT. LIMA) THEN
-            !------ Mach was not in polar data... set using header info
-            IF    (IMATYP.EQ.1) THEN
-                CPOL(IA, IMA) = MACH1
-            ELSEIF(IMATYP.EQ.2) THEN
-                CPOL(IA, IMA) = MACH1 / SQRT(ACL)
-            ELSEIF(IMATYP.EQ.3) THEN
-                CPOL(IA, IMA) = MACH1 / ACL
-            ENDIF
-        ENDIF
-        !
-        IF(.NOT. LJNC) THEN
-            !------ Ncrit was not in polar data... set using header info
-            DO IS = 1, 2 * NBL
-                CPOLSD(IA, IS, JNC) = ACRIT(IS)
-            ENDDO
-        ENDIF
-        !
-        IF(.NOT. LJTP) THEN
-            !------ set trip data using header info
-            DO IS = 1, 2 * NBL
-                CPOLSD(IA, IS, JTP) = XTRIP(IS)
-            ENDDO
-        ENDIF
-        !
-        NA = IA
-    ENDIF
-    !
-    60   CONTINUE
-    !---- go read next line
-    GO TO 500
+                !--------------------------------------------
+                kf = index(line, 'for:')
+                if (kf/=0) then
+                    !------ airfoil name line
+                    Name = line(kf + 5:128)
+                    ldlab = .false.
+                endif
+                !
+                !--------------------------------------------
+                ke = index(line, 'elements')
+                if (ke>0) then
+                    !------ element-number line
+                    read (line(ke - 4:ke - 1), *, err = 100) Nbl
+                    !------ truncate name line to eliminate elements #
+                    Name = line(kf + 5:ke - 4)
+                    !
+                    if (2 * Nbl>Isx) then
+                        Nbl = Isx / 2
+                        write (*, *) 'POLREAD: Number of elements set to array limit', Nbl
+                    endif
+                    ldlab = .false.
+                endif
+                !
+                !--------------------------------------------
+                kr = index(line, 'Reynolds number')
+                km = index(line, 'Mach number')
+                !
+                if (kr/=0) then
+                    !------ Re-type line
+                    if (km>kr) then
+                        kend = km - 1
+                    else
+                        kend = 128
+                    endif
+                    if (index(line(kr:kend), 'fixed')/=0) then
+                        Iretyp = 1
+                    elseif (index(line(kr:kend), '1/sqrt(CL)')/=0) then
+                        Iretyp = 2
+                    elseif (index(line(kr:kend), '1/CL')/=0) then
+                        Iretyp = 3
+                    endif
+                    ldlab = .false.
+                endif
+                !
+                if (km/=0) then
+                    !------ Ma-type line
+                    if (kr>km) then
+                        kend = kr - 1
+                    else
+                        kend = 128
+                    endif
+                    if (index(line(km:kend), 'fixed')/=0) then
+                        Imatyp = 1
+                    elseif (index(line(km:kend), '1/sqrt(CL)')/=0) then
+                        Imatyp = 2
+                    elseif (index(line(km:kend), '1/CL')/=0) then
+                        Imatyp = 3
+                    endif
+                    ldlab = .false.
+                endif
+                !
+                !--------------------------------------------
+                !---- find specified BL trip location
+                k = index(line, 'xtrf')
+                if (k/=0) then
+                    !------ new style xtrip line
+                    kt = index(line, '(top)')
+                    kb = index(line, '(bottom)')
+                    ke = index(line, 'element ')
+                    !--- check for old style trip line
+                    ks = index(line, '(suc')
+                    kp = index(line, '(pre')
+                    !
+                    if (ke/=0) then
+                        read (line(ke + 7:ke + 12), *, err = 110) n
+                    else
+                        n = 1
+                    endif
+                    if (n<=Nbl) then
+                        is1 = 2 * n - 1
+                        is2 = 2 * n
+                        Xtrip(is1) = 1.0
+                        Xtrip(is2) = 1.0
+                        if (kt>0) read (line(k + 6:kt - 1), *, err = 110) Xtrip(is1)
+                        if (kb>kt) read (line(kt + 5:kb - 1), *, err = 110) Xtrip(is2)
+                        if (ks>0) read (line(k + 6:ks - 1), *, err = 110) Xtrip(is1)
+                        if (kp>ks) read (line(ks + 5:kp - 1), *, err = 110) Xtrip(is2)
+                    endif
+                    110           ldlab = .false.
+                endif
+                !
+                !--------------------------------------------
+                k = index(line, 'Mach =')
+                if (k/=0) then
+                    read (line(k + 6:128), *, err = 115) Mach1
+                    115           ldlab = .false.
+                endif
+                !
+                !--------------------------------------------
+                k = index(line, 'Re =')
+                if (k/=0) then
+                    read (line(k + 4:128), *, err = 120) Reyn1
+                    Reyn1 = Reyn1 * 1.0E6
+                    120           ldlab = .false.
+                endif
+                !
+                !--------------------------------------------
+                k = index(line, 'Ncrit =')
+                if (k/=0) then
+                    ninp = 2
+                    call getflt(line(k + 7:128), rinp(1), ninp, Error)
+                    if (.not.(ninp<=0 .or. Error)) then
+                        !
+                        if (ninp==1) then
+                            Acrit(1) = rinp(1)
+                            Acrit(2) = rinp(1)
+                        else
+                            Acrit(1) = rinp(1)
+                            Acrit(2) = rinp(2)
+                        endif
+                    endif
+                    ldlab = .false.
+                endif
+                !
+                !--------------------------------------------
+                k = index(line, 'pi_p =')
+                if (k/=0) then
+                    read (line(k + 6:128), *, err = 125) Ptrat
+                    125           ldlab = .false.
+                endif
+                !
+                !--------------------------------------------
+                k = index(line, 'eta_p =')
+                if (k/=0) then
+                    read (line(k + 7:128), *, err = 130) Etap
+                    130           ldlab = .false.
+                endif
+                !
+                !--------------------------------------------
+                if (ldlab .and. nipol==0) then
+                    !------ process line for possible data labels
+                    do ip = 1, IPTOT
+                        call strip(CPOlname(ip), nname)
+                        !
+                        !-------- mark this parameter for reading
+                        k = index(line, CPOlname(ip)(1:nname))
+                        itmp0(ip) = k
+                        itmp(ip) = k
+                    enddo
+                    !
+                    do jp = 1, JPTOT
+                        call strip(CPOlsname(jp), nname)
+                        !
+                        cpname = 'Top ' // CPOlsname(jp)
+                        k1 = index(line, cpname(1:nname + 4))
+                        cpname = 'Top_' // CPOlsname(jp)
+                        k2 = index(line, cpname(1:nname + 4))
+                        itmp0(IPTOT + jp) = max(k1, k2)
+                        itmp(IPTOT + jp) = max(k1, k2)
+                        !
+                        cpname = 'Bot ' // CPOlsname(jp)
+                        k1 = index(line, cpname(1:nname + 4))
+                        cpname = 'Bot_' // CPOlsname(jp)
+                        k2 = index(line, cpname(1:nname + 4))
+                        itmp0(IPTOT + jp + JPTOT) = max(k1, k2)
+                        itmp(IPTOT + jp + JPTOT) = max(k1, k2)
+                    enddo
+                    !
+                    !------ bubble-sort data label positions in line string
+                    do ipass = 1, IPTOT + 2 * JPTOT
+                        do ip = 1, IPTOT + 2 * JPTOT - 1
+                            if (itmp(ip)>itmp(ip + 1)) then
+                                itmpp1 = itmp(ip + 1)
+                                itmp(ip + 1) = itmp(ip)
+                                itmp(ip) = itmpp1
+                            endif
+                        enddo
+                    enddo
+                    !
+                    !------ assign data position to each parameter
+                    do ipt = 1, IPTOT + 2 * JPTOT
+                        if (itmp(ipt)>0) then
+                            nipol = nipol + 1
+                            do ip = 1, IPTOT
+                                if (itmp(ipt)==itmp0(ip)) ipol(ip) = nipol
+                            enddo
+                            do jp = 1, JPTOT
+                                if (itmp(ipt)==itmp0(IPTOT + jp)) ispol(1, jp) = nipol
+                                if (itmp(ipt)==itmp0(IPTOT + JPTOT + jp)) ispol(2, jp) = nipol
+                            enddo
+                        endif
+                    enddo
+                    !
+                endif
+                !
+                !--------------------------------------------
+                if (index(line, '-----')/=0) lhead = .false.
+                !
+                !--------------------------------------------------------------
+            else
+                !----- read polar data lines
+                ia = Na + 1
+                !
+                ninp = IPTOT + 2 * JPTOT
+                call getflt(line, rinp(1), ninp, Error)
+                if (Error) goto 300
+                !
+                do ip = 1, IPTOT
+                    Cpol(ia, ip) = rinp(ipol(ip))
+                enddo
+                !
+                do jp = 1, JPTOT
+                    do n = 1, Nbl
+                        is1 = 2 * n - 1
+                        is2 = 2 * n
+                        Cpolsd(ia, is1, jp) = rinp(ispol(1, jp) + 2 * (n - 1))
+                        Cpolsd(ia, is2, jp) = rinp(ispol(2, jp) + 2 * (n - 1))
+                    enddo
+                enddo
+                !
+                acl = max(Cpol(ia, ICL), 0.001)
+                !
+                !
+                !----- try to find Re, Ma, Ncrit, Xtrip  in polar data
+                lire = .false.
+                lima = .false.
+                ljnc = .false.
+                ljtp = .false.
+                do kp = 1, nipol
+                    if (ipol(kp)==IRE) lire = .true.
+                    if (ipol(kp)==IMA) lima = .true.
+                    if (ispol(1, kp)==JNC) ljnc = .true.
+                    if (ispol(1, kp)==JTP) ljtp = .true.
+                enddo
+                !
+                if (.not.lire) then
+                    !------ Re was not in polar data... set using header info
+                    if (Iretyp==1) then
+                        Cpol(ia, IRE) = Reyn1
+                    elseif (Iretyp==2) then
+                        Cpol(ia, IRE) = Reyn1 / sqrt(acl)
+                    elseif (Iretyp==3) then
+                        Cpol(ia, IRE) = Reyn1 / acl
+                    endif
+                endif
+                !
+                if (.not.lima) then
+                    !------ Mach was not in polar data... set using header info
+                    if (Imatyp==1) then
+                        Cpol(ia, IMA) = Mach1
+                    elseif (Imatyp==2) then
+                        Cpol(ia, IMA) = Mach1 / sqrt(acl)
+                    elseif (Imatyp==3) then
+                        Cpol(ia, IMA) = Mach1 / acl
+                    endif
+                endif
+                !
+                if (.not.ljnc) then
+                    !------ Ncrit was not in polar data... set using header info
+                    do is = 1, 2 * Nbl
+                        Cpolsd(ia, is, JNC) = Acrit(is)
+                    enddo
+                endif
+                !
+                if (.not.ljtp) then
+                    !------ set trip data using header info
+                    do is = 1, 2 * Nbl
+                        Cpolsd(ia, is, JTP) = Xtrip(is)
+                    enddo
+                endif
+                !
+                Na = ia
+                !
+                !---- go read next line
+            endif
+        endif
+    enddo
     !=============================================================
     !
-    80   CONTINUE
     !---- if file was opened here, then close it
-    IF(LOPEN) CLOSE(LU)
-    RETURN
+    200  if (lopen) close (Lu)
+    return
     !
-    90   CONTINUE
-    IF(LOPEN) CLOSE(LU)
-    ERROR = .TRUE.
-    RETURN
-    !
-    !..........................................
-    1000 FORMAT(A)
-END
+    300  if (lopen) close (Lu)
+    Error = .true.
+end subroutine polread
+!*==POLWRIT.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! POLREAD
 
 
-SUBROUTINE POLWRIT(LU, FNPOL, ERROR, LHEAD, &
-        NAX, IA1, IA2, CPOL, IPOL, NIPOL, &
-        REYN1, MACH1, ACRIT, XTRIP, &
-        PTRAT, ETAP, &
-        NAME, IRETYP, IMATYP, &
-        ISX, NBL, CPOLSD, JPOL, NJPOL, &
-        CODE, VERSION, LQUERY)
+subroutine polwrit(Lu, Fnpol, Error, Lhead, &
+        Nax, Ia1, Ia2, Cpol, Ipol, Nipol, &
+        Reyn1, Mach1, Acrit, Xtrip, &
+        Ptrat, Etap, &
+        Name, Iretyp, Imatyp, &
+        Isx, Nbl, Cpolsd, Jpol, Njpol, &
+        Code, Version, Lquery)
     use i_pindex
-    CHARACTER*(*) FNPOL, NAME
-    LOGICAL ERROR, LHEAD, LQUERY
-    CHARACTER*(*) CODE
-    REAL CPOL(NAX, IPTOT), CPOLSD(NAX, ISX, JPTOT)
-    REAL MACH1, ACRIT(ISX), XTRIP(ISX)
-    INTEGER IPOL(IPTOT), JPOL(JPTOT)
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    character(*) :: Code, Fnpol, Name
+    logical :: Error, Lhead, Lquery
+    real :: Etap, Mach1, Ptrat, Reyn1, Version
+    integer :: Ia1, Ia2, Imatyp, Iretyp, Isx, Lu, Nax, Nbl, Nipol, Njpol
+    real, dimension(Isx) :: Acrit, Xtrip
+    real, dimension(Nax, IPTOT) :: Cpol
+    real, dimension(Nax, Isx, JPTOT) :: Cpolsd
+    integer, dimension(IPTOT) :: Ipol
+    integer, dimension(JPTOT) :: Jpol
+    intent (in) Acrit, Code, Cpol, Cpolsd, Etap, Fnpol, Ia1, Ia2, Imatyp, Ipol, Iretyp, Isx, Jpol, Lhead, &
+            & Lquery, Lu, Mach1, Name, Nax, Nbl, Nipol, Njpol, Ptrat, Reyn1, Version, Xtrip
+    intent (out) Error
+    !
+    ! Local variables
+    !
+    character(1) :: ans
+    integer :: ia, iffbc, ip, is, is1, is2, ismom, jp, kd, kdot, kf, kl, kp, n, nblank, nf, nform, nname
+    character(29) :: line1, line2
+    character(128) :: lined, linef, linel
+    logical :: lopen
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !--------------------------------------------------------
     !     Writes polar save file
     !
@@ -479,140 +532,144 @@ SUBROUTINE POLWRIT(LU, FNPOL, ERROR, LHEAD, &
     !  Output:
     !     ERROR   T if a OPER or WRITE error occurred
     !--------------------------------------------------------
-    CHARACTER*29 LINE1, LINE2
-    CHARACTER*128 LINEL, LINED, LINEF
-    CHARACTER*1 ANS
-    LOGICAL LOPEN
     !
-    ERROR = .FALSE.
+    Error = .false.
     !
     !---- do we have to open the file?
-    LOPEN = FNPOL .NE. ' '
+    lopen = Fnpol/=' '
     !
-    IF(LOPEN) THEN
-        OPEN(LU, FILE = FNPOL, STATUS = 'OLD', ERR = 20)
+    if (lopen) then
+        open (Lu, file = Fnpol, status = 'OLD', err = 50)
         !
-        IF(LQUERY) THEN
-            WRITE(*, *)
-            WRITE(*, *) 'Output file exists.  Overwrite?  Y'
-            READ(*, 1000) ANS
+        if (Lquery) then
+            write (*, *)
+            write (*, *) 'Output file exists.  Overwrite?  Y'
+            read (*, 99010) ans
             !
-            IF(INDEX('Nn', ANS).EQ.0) GO TO 22
+            if (index('Nn', ans)==0) goto 100
             !
-            CLOSE(LU)
-            WRITE(*, *) 'Polar file not saved'
-            RETURN
-        ENDIF
+            close (Lu)
+            write (*, *) 'Polar file not saved'
+            return
+        endif
         !
-        20    OPEN(LU, FILE = FNPOL, STATUS = 'UNKNOWN', ERR = 90)
-        22    REWIND(LU)
-    ENDIF
+        50   open (Lu, file = Fnpol, status = 'UNKNOWN', err = 200)
+        100  rewind (Lu)
+    endif
     !
-    IF(LHEAD) THEN
-        WRITE(LU, *) ' '
-        WRITE(LU, 8000) CODE, VERSION
-        WRITE(LU, *) ' '
-        IF(NBL.EQ.1) THEN
-            WRITE(LU, 9001) NAME
-        ELSE
-            WRITE(LU, 9002) NAME, NBL
-        ENDIF
+    if (Lhead) then
+        write (Lu, *) ' '
+        write (Lu, 99001) Code, Version
+        99001 format (7x, a, 9x, 'Version', f5.2)
+        write (Lu, *) ' '
+        if (Nbl==1) then
+            write (Lu, 99002) Name
+            99002  format (1x, 'Calculated polar for: ', a)
+        else
+            write (Lu, 99003) Name, Nbl
+            99003  format (1x, 'Calculated polar for: ', a, i4, ' elements')
+        endif
         !
-        IFFBC = 0
-        ISMOM = 0
+        iffbc = 0
+        ismom = 0
         !
-        IF(IFFBC.NE.0 .AND. ISMOM.NE.0) THEN
-            IF(IFFBC.EQ.1)  LINE1 = ' Solid wall far field        '
-            IF(IFFBC.EQ.2)  LINE1 = ' Vortex + doublet far field  '
-            IF(IFFBC.EQ.3)  LINE1 = ' Constant pressure far field '
-            IF(IFFBC.EQ.4)  LINE1 = ' Supersonic wave far field   '
-            IF(IFFBC.GE.5)  LINE1 = '                             '
-            IF(ISMOM.EQ.1)  LINE2 = '   S-momentum conserved      '
-            IF(ISMOM.EQ.2)  LINE2 = '   Entropy conserved         '
-            IF(ISMOM.EQ.3)  LINE2 = '   Entropy conserved near LE '
-            IF(ISMOM.EQ.4)  LINE2 = '   S-mom conserved at shocks '
-            IF(ISMOM.GE.5)  LINE2 = '                             '
-            WRITE(LU, 9006) LINE1, LINE2
-            9006   FORMAT(1X, 3X, 2A29)
-        ENDIF
+        if (iffbc/=0 .and. ismom/=0) then
+            if (iffbc==1) line1 = ' Solid wall far field        '
+            if (iffbc==2) line1 = ' Vortex + doublet far field  '
+            if (iffbc==3) line1 = ' Constant pressure far field '
+            if (iffbc==4) line1 = ' Supersonic wave far field   '
+            if (iffbc>=5) line1 = '                             '
+            if (ismom==1) line2 = '   S-momentum conserved      '
+            if (ismom==2) line2 = '   Entropy conserved         '
+            if (ismom==3) line2 = '   Entropy conserved near LE '
+            if (ismom==4) line2 = '   S-mom conserved at shocks '
+            if (ismom>=5) line2 = '                             '
+            write (Lu, 99004) line1, line2
+            99004  format (1x, 3x, 2A29)
+        endif
         !
-        WRITE(LU, *) ' '
+        write (Lu, *) ' '
         !
-        LINE1 = ' '
-        LINE2 = ' '
-        IF(IRETYP.EQ.1) LINE1 = ' Reynolds number fixed       '
-        IF(IRETYP.EQ.2) LINE1 = ' Reynolds number ~ 1/sqrt(CL)'
-        IF(IRETYP.EQ.3) LINE1 = ' Reynolds number ~ 1/CL      '
-        IF(IMATYP.EQ.1) LINE2 = '   Mach number fixed         '
-        IF(IMATYP.EQ.2) LINE2 = '   Mach number ~ 1/sqrt(CL)  '
-        IF(IMATYP.EQ.3) LINE2 = '   Mach number ~ 1/CL        '
-        WRITE(LU, 9005) IRETYP, IMATYP, LINE1, LINE2
+        line1 = ' '
+        line2 = ' '
+        if (Iretyp==1) line1 = ' Reynolds number fixed       '
+        if (Iretyp==2) line1 = ' Reynolds number ~ 1/sqrt(CL)'
+        if (Iretyp==3) line1 = ' Reynolds number ~ 1/CL      '
+        if (Imatyp==1) line2 = '   Mach number fixed         '
+        if (Imatyp==2) line2 = '   Mach number ~ 1/sqrt(CL)  '
+        if (Imatyp==3) line2 = '   Mach number ~ 1/CL        '
+        write (Lu, 99005) Iretyp, Imatyp, line1, line2
+        99005 format (1x, i1, i2, 2A29)
         !
-        WRITE(LU, *) ' '
-        DO N = 1, NBL
-            IS1 = 2 * N - 1
-            IS2 = 2 * N
-            IF(NBL.EQ.1) THEN
-                WRITE(LU, 9011) XTRIP(IS1), XTRIP(IS2)
-            ELSE
-                WRITE(LU, 9012) XTRIP(IS1), XTRIP(IS2), N
-            ENDIF
-        ENDDO
-        WRITE(LU, 9015) MACH1, REYN1 / 1.0E6, ACRIT(1), ACRIT(2)
-        IF(PTRAT .NE. 0.0) WRITE(LU, 9017) PTRAT, ETAP
-        WRITE(LU, *) ' '
+        write (Lu, *) ' '
+        do n = 1, Nbl
+            is1 = 2 * n - 1
+            is2 = 2 * n
+            if (Nbl==1) then
+                write (Lu, 99006) Xtrip(is1), Xtrip(is2)
+                99006      format (1x, 'xtrf = ', f7.3, ' (top)    ', f9.3, ' (bottom)  ')
+            else
+                write (Lu, 99007) Xtrip(is1), Xtrip(is2), n
+                99007      format (1x, 'xtrf = ', f7.3, ' (top)    ', f9.3, ' (bottom)     element', i3)
+            endif
+        enddo
+        write (Lu, 99008) Mach1, Reyn1 / 1.0E6, Acrit(1), Acrit(2)
+        99008 format (1x, 'Mach = ', f7.3, 5x, 'Re = ', f9.3, ' e 6', 5x, 'Ncrit = ', 20F7.3)
+        if (Ptrat/=0.0) write (Lu, 99009) Ptrat, Etap
+        99009 format (1x, 'pi_p = ', f7.4, 5x, 'eta_p = ', f9.4)
+        write (Lu, *) ' '
         !
-        LINEL = ' '
-        LINED = ' '
+        linel = ' '
+        lined = ' '
         !
-        KL = 1
-        KD = 1
+        kl = 1
+        kd = 1
         !
-        DO 30 KP = 1, NIPOL
-            IP = IPOL(KP)
-            IF(IP.EQ.0) GO TO 30
-            !
-            KDOT = INDEX(CPOLFORM(IP), '.')
-            IF(KDOT.EQ.0) KDOT = LEN(CPOLFORM(IP))
-            READ(CPOLFORM(IP)(2:KDOT - 1), *, ERR = 95) NFORM
-            !
-            CALL STRIP(CPOLNAME(IP), NNAME)
-            NBLANK = MAX((NFORM - NNAME + 2) / 2, 0)
-            !
-            LINEL(KL + 1 + NBLANK:KL + NNAME + NBLANK) = CPOLNAME(IP)(1:NNAME)
-            KL = KL + NFORM
-            !
-            LINED(KD + 2:KD + NFORM) = '--------------------------------'
-            KD = KD + NFORM
-        30    CONTINUE
-        !
-        DO 32 KP = 1, NJPOL
-            JP = JPOL(KP)
-            IF(JP.EQ.0) GO TO 32
-            !
-            KDOT = INDEX(CPOLSFORM(JP), '.')
-            IF(KDOT.EQ.0) KDOT = LEN(CPOLSFORM(JP))
-            READ(CPOLSFORM(JP)(2:KDOT - 1), *, ERR = 95) NFORM
-            !
-            CALL STRIP(CPOLSNAME(JP), NNAME)
-            NBLANK = MAX((NFORM - NNAME - 2) / 2, 0)
-            !
-            DO N = 1, NBL
-                LINEL(KL + 1 + NBLANK:KL + 4 + NNAME + NBLANK) = &
-                        'Top_' // CPOLSNAME(JP)(1:NNAME)
-                KL = KL + NFORM
+        do kp = 1, Nipol
+            ip = Ipol(kp)
+            if (ip/=0) then
                 !
-                LINED(KD + 2:KD + NFORM) = '--------------------------------'
-                KD = KD + NFORM
+                kdot = index(CPOlform(ip), '.')
+                if (kdot==0) kdot = len(CPOlform(ip))
+                read (CPOlform(ip)(2:kdot - 1), *, err = 300) nform
                 !
-                LINEL(KL + 1 + NBLANK:KL + 4 + NNAME + NBLANK) = &
-                        'Bot_' // CPOLSNAME(JP)(1:NNAME)
-                KL = KL + NFORM
+                call strip(CPOlname(ip), nname)
+                nblank = max((nform - nname + 2) / 2, 0)
                 !
-                LINED(KD + 2:KD + NFORM) = '--------------------------------'
-                KD = KD + NFORM
-            ENDDO
-        32    CONTINUE
+                linel(kl + 1 + nblank:kl + nname + nblank) = CPOlname(ip)(1:nname)
+                kl = kl + nform
+                !
+                lined(kd + 2:kd + nform) = '--------------------------------'
+                kd = kd + nform
+            endif
+        enddo
+        !
+        do kp = 1, Njpol
+            jp = Jpol(kp)
+            if (jp/=0) then
+                !
+                kdot = index(CPOlsform(jp), '.')
+                if (kdot==0) kdot = len(CPOlsform(jp))
+                read (CPOlsform(jp)(2:kdot - 1), *, err = 300) nform
+                !
+                call strip(CPOlsname(jp), nname)
+                nblank = max((nform - nname - 2) / 2, 0)
+                !
+                do n = 1, Nbl
+                    linel(kl + 1 + nblank:kl + 4 + nname + nblank) = 'Top_' // CPOlsname(jp)(1:nname)
+                    kl = kl + nform
+                    !
+                    lined(kd + 2:kd + nform) = '--------------------------------'
+                    kd = kd + nform
+                    !
+                    linel(kl + 1 + nblank:kl + 4 + nname + nblank) = 'Bot_' // CPOlsname(jp)(1:nname)
+                    kl = kl + nform
+                    !
+                    lined(kd + 2:kd + nform) = '--------------------------------'
+                    kd = kd + nform
+                enddo
+            endif
+        enddo
         !
         !
         !
@@ -628,82 +685,97 @@ SUBROUTINE POLWRIT(LU, FNPOL, ERROR, LHEAD, &
         !CC       3.453   1.3750   0.00921   0.00213  -0.1450  0.9231  0.5382
         !       K = 62
 
-        WRITE(LU, 1000) LINEL(1:KL)
-        WRITE(LU, 1000) LINED(1:KD)
+        write (Lu, 99010) linel(1:kl)
+        write (Lu, 99010) lined(1:kd)
         !
-    ENDIF
+    endif
     !
 
-    LINEF = '(1X'
-    KF = 3
-    DO KP = 1, NIPOL
-        IP = IPOL(KP)
-        NF = LEN(CPOLFORM(IP))
+    linef = '(1X'
+    kf = 3
+    do kp = 1, Nipol
+        ip = Ipol(kp)
+        nf = len(CPOlform(ip))
         !
-        LINEF(KF + 1:KF + NF + 1) = ',' // CPOLFORM(IP)
-        KF = KF + NF + 1
-    ENDDO
-    DO KP = 1, NJPOL
-        JP = JPOL(KP)
-        NF = LEN(CPOLSFORM(JP))
+        linef(kf + 1:kf + nf + 1) = ',' // CPOlform(ip)
+        kf = kf + nf + 1
+    enddo
+    do kp = 1, Njpol
+        jp = Jpol(kp)
+        nf = len(CPOlsform(jp))
         !
-        DO N = 1, NBL
-            LINEF(KF + 1:KF + NF + 1) = ',' // CPOLSFORM(JP)
-            KF = KF + NF + 1
+        do n = 1, Nbl
+            linef(kf + 1:kf + nf + 1) = ',' // CPOlsform(jp)
+            kf = kf + nf + 1
             !
-            LINEF(KF + 1:KF + NF + 1) = ',' // CPOLSFORM(JP)
-            KF = KF + NF + 1
-        ENDDO
-    ENDDO
-    LINEF(KF + 1:KF + 1) = ')'
-    KF = KF + 1
+            linef(kf + 1:kf + nf + 1) = ',' // CPOlsform(jp)
+            kf = kf + nf + 1
+        enddo
+    enddo
+    linef(kf + 1:kf + 1) = ')'
+    kf = kf + 1
     !
     !
-    DO 40 IA = IA1, IA2
-        WRITE(LU, LINEF)&
-                (CPOL(IA, IPOL(KP)), KP = 1, NIPOL), &
-                ((CPOLSD(IA, IS, JPOL(KP)), IS = 1, 2 * NBL), KP = 1, NJPOL)
-    40 CONTINUE
+    do ia = Ia1, Ia2
+        write (Lu, linef) (Cpol(ia, Ipol(kp)), kp = 1, Nipol),&
+                ((Cpolsd(ia, is, Jpol(kp)), is = 1, 2 * Nbl), kp = 1, Njpol)
+    enddo
     !
     !
     !---- if file was opened here, then close it
-    IF(LOPEN) CLOSE(LU)
-    RETURN
+    if (lopen) close (Lu)
+    return
     !
-    90   CONTINUE
-    ERROR = .TRUE.
-    RETURN
+    200  Error = .true.
+    return
     !
-    95   CONTINUE
-    WRITE(*, *) '? Bad CPOLFORM set up in PINDEX.INC'
-    STOP
+    300  write (*, *) '? Bad CPOLFORM set up in PINDEX.INC'
+    stop
     !
     !......................................................................
-    1000 FORMAT(A)
-    8000 FORMAT(7X, A, 9X, 'Version', F5.2)
-    9001 FORMAT(1X, 'Calculated polar for: ', A)
-    9002 FORMAT(1X, 'Calculated polar for: ', A, I4, ' elements')
-    9005 FORMAT(1X, I1, I2, 2A29)
-    9011 FORMAT(1X, &
-            'xtrf = ', F7.3, ' (top)    ', F9.3, ' (bottom)  ')
-    9012 FORMAT(1X, &
-            'xtrf = ', F7.3, ' (top)    ', F9.3, ' (bottom)     element', I3)
-    9015 FORMAT(1X, &
-            'Mach = ', F7.3, 5X, 'Re = ', F9.3, ' e 6', 5X, 'Ncrit = ', 20F7.3)
-    9017 FORMAT(1X, &
-            'pi_p = ', F7.4, 5X, 'eta_p = ', F9.4)
+    99010 format (a)
     !CC      3.453   1.3750   0.00921     0.500  -0.1450  0.9231  0.5382 -0.00942
     !CC      3.453   1.3750   0.00921     0.500  -0.1450  0.9231  0.5382
-END
+end subroutine polwrit
+!*==POLREF.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 
 
-SUBROUTINE POLREF(LU, FNREF, ERROR, &
-        NFX, NF, XYREF, LABREF)
+subroutine polref(Lu, Fnref, Error, Nfx, Nf, Xyref, Labref)
     use i_pindex
-    CHARACTER*(*) FNREF, LABREF
-    LOGICAL ERROR
-    DIMENSION NF(4)
-    DIMENSION XYREF(NFX, 2, 4)
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    logical :: Error
+    character(*) :: Fnref, Labref
+    integer :: Lu, Nfx
+    integer, dimension(4) :: Nf
+    real, dimension(Nfx, 2, 4) :: Xyref
+    intent (in) Fnref, Lu, Nfx
+    intent (out) Error, Labref, Nf
+    intent (inout) Xyref
+    !
+    ! Local variables
+    !
+    integer :: i, k
+    character(80) :: line
+    logical :: lopen
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !--------------------------------------------------------
     !     Reads in polar reference data file
     !
@@ -720,38 +792,33 @@ SUBROUTINE POLREF(LU, FNREF, ERROR, &
     !     XYREF(...) reference polar data
     !     LABREF(.)  reference polar label
     !--------------------------------------------------------
-    LOGICAL LOPEN
-    CHARACTER*80 LINE
     !
-    ERROR = .FALSE.
-    LOPEN = FNREF(1:1) .NE. ' '
-    IF(LOPEN) OPEN(LU, FILE = FNREF, STATUS = 'OLD', ERR = 900)
+    Error = .false.
+    lopen = Fnref(1:1)/=' '
+    if (lopen) open (Lu, file = Fnref, status = 'OLD', err = 100)
     !
     !---- try to read data label
-    READ(LU, 1000, END = 900) LINE
-    1000 FORMAT(A)
+    read (Lu, 99001, end = 100) line
+    99001 format (a)
     !
     !---- set data label if present
-    IF(LINE(1:1).EQ.'#') THEN
-        LABREF = LINE(2:80)
-    ELSE
-        LABREF = ' '
-        REWIND(LU)
-    ENDIF
+    if (line(1:1)=='#') then
+        Labref = line(2:80)
+    else
+        Labref = ' '
+        rewind (Lu)
+    endif
     !
-    DO 100 K = 1, 4
-        DO 10 I = 1, NFX
-            READ(LU, *, END = 11, ERR = 900) XYREF(I, 1, K), XYREF(I, 2, K)
-            IF(XYREF(I, 1, K) .EQ. 999.0) GO TO 11
-        10   CONTINUE
-        11   NF(K) = I - 1
-    100 CONTINUE
-    IF(LOPEN) CLOSE(LU)
-    RETURN
+    do k = 1, 4
+        do i = 1, Nfx
+            read (Lu, *, end = 50, err = 100) Xyref(i, 1, k), Xyref(i, 2, k)
+            if (Xyref(i, 1, k)==999.0) exit
+        enddo
+        50   Nf(k) = i - 1
+    enddo
+    if (lopen) close (Lu)
+    return
     !
-    900 CONTINUE
-    ERROR = .TRUE.
+    100  Error = .true.
     !
-    RETURN
-END
-! POLREF
+end subroutine polref

@@ -1,8 +1,13 @@
+!*==ABCOPY.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
+! INTX
+
+
+
 !***********************************************************************
 !    Module:  xgdes.f
-! 
-!    Copyright (C) 2000 Mark Drela 
-! 
+!
+!    Copyright (C) 2000 Mark Drela
+!
 !    This program is free software; you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
 !    the Free Software Foundation; either version 2 of the License, or
@@ -19,113 +24,162 @@
 !***********************************************************************
 !
 
-SUBROUTINE ABCOPY(LCONF)
+subroutine abcopy(Lconf)
     use m_spline
     use i_xfoil
-    LOGICAL LCONF
+    implicit none
     !
-    IF(NB.LE.1) THEN
-        WRITE(*, *) 'ABCOPY: Buffer airfoil not available.'
-        RETURN
-    ELSEIF(NB.GT.IQX - 5) THEN
-        WRITE(*, *) 'Maximum number of panel nodes  : ', IQX - 5
-        WRITE(*, *) 'Number of buffer airfoil points: ', NB
-        WRITE(*, *) 'Current airfoil cannot be set.'
-        WRITE(*, *) 'Try executing PANE at Top Level instead.'
-        RETURN
-    ENDIF
-    IF(N.NE.NB) LBLINI = .FALSE.
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    logical :: Lconf
+    intent (in) Lconf
+    !
+    ! Local variables
+    !
+    integer :: i, j
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    if (NB<=1) then
+        write (*, *) 'ABCOPY: Buffer airfoil not available.'
+        return
+    elseif (NB>IQX - 5) then
+        write (*, *) 'Maximum number of panel nodes  : ', IQX - 5
+        write (*, *) 'Number of buffer airfoil points: ', NB
+        write (*, *) 'Current airfoil cannot be set.'
+        write (*, *) 'Try executing PANE at Top Level instead.'
+        return
+    endif
+    if (N/=NB) LBLini = .false.
     !
     N = NB
-    DO 101 I = 1, N
-        X(I) = XB(I)
-        Y(I) = YB(I)
-    101 CONTINUE
-    LGSAME = .TRUE.
+    do i = 1, N
+        X(i) = XB(i)
+        Y(i) = YB(i)
+    enddo
+    LGSame = .true.
     !
-    IF(LBFLAP) THEN
+    if (LBFlap) then
         XOF = XBF
         YOF = YBF
-        LFLAP = .TRUE.
-    ENDIF
+        LFLap = .true.
+    endif
     !
     !---- strip out doubled points
-    I = 1
-    102  CONTINUE
-    I = I + 1
-    IF(X(I - 1).EQ.X(I) .AND. Y(I - 1).EQ.Y(I)) THEN
-        DO 104 J = I, N - 1
-            X(J) = X(J + 1)
-            Y(J) = Y(J + 1)
-        104    CONTINUE
-        N = N - 1
-    ENDIF
-    IF(I.LT.N) GO TO 102
-    !
-    CALL SCALC(X, Y, S, N)
-    CALL SEGSPL(X, XP, S, N)
-    CALL SEGSPL(Y, YP, S, N)
+    i = 1
+    do
+        i = i + 1
+        if (X(i - 1)==X(i) .and. Y(i - 1)==Y(i)) then
+            do j = i, N - 1
+                X(j) = X(j + 1)
+                Y(j) = Y(j + 1)
+            enddo
+            N = N - 1
+        endif
+        if (i>=N) then
+            !
+            call scalc(X, Y, S, N)
+            call segspl(X, XP, S, N)
+            call segspl(Y, YP, S, N)
 
-    CALL NCALC(X, Y, S, N, NX, NY)
+            call ncalc(X, Y, S, N, NX, NY)
 
-    CALL LEFIND(SLE, X, XP, Y, YP, S, N)
-    XLE = SEVAL(SLE, X, XP, S, N)
-    YLE = SEVAL(SLE, Y, YP, S, N)
-    XTE = 0.5 * (X(1) + X(N))
-    YTE = 0.5 * (Y(1) + Y(N))
-    CHORD = SQRT((XTE - XLE)**2 + (YTE - YLE)**2)
+            call lefind(SLE, X, XP, Y, YP, S, N)
+            XLE = seval(SLE, X, XP, S, N)
+            YLE = seval(SLE, Y, YP, S, N)
+            XTE = 0.5 * (X(1) + X(N))
+            YTE = 0.5 * (Y(1) + Y(N))
+            CHOrd = sqrt((XTE - XLE)**2 + (YTE - YLE)**2)
 
-    CALL TECALC
-    CALL APCALC
+            call tecalc
+            call apcalc
+            !
+            LGAmu = .false.
+            LQInu = .false.
+            LWAke = .false.
+            LQAij = .false.
+            LADij = .false.
+            LWDij = .false.
+            LIPan = .false.
+            LVConv = .false.
+            LSCini = .false.
+            !CC      LBLINI = .FALSE.
+            !
+            if (Lconf) write (*, 99001) N
+            99001  format (/' Current airfoil nodes set from buffer airfoil nodes (', i4, ' )')
+            exit
+        endif
+    enddo
     !
-    LGAMU = .FALSE.
-    LQINU = .FALSE.
-    LWAKE = .FALSE.
-    LQAIJ = .FALSE.
-    LADIJ = .FALSE.
-    LWDIJ = .FALSE.
-    LIPAN = .FALSE.
-    LVCONV = .FALSE.
-    LSCINI = .FALSE.
-    !CC      LBLINI = .FALSE.
-    !
-    IF(LCONF) WRITE(*, 1200) N
-    1200 FORMAT(/' Current airfoil nodes set from buffer airfoil nodes (', &
-            I4, ' )')
-    !
-    RETURN
-END
+end subroutine abcopy
+!*==GETXYF.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! ABCOPY
 
 
-SUBROUTINE GETXYF(X, XP, Y, YP, S, N, TOPS, BOTS, XF, YF)
+subroutine getxyf(X, Xp, Y, Yp, S, N, Tops, Bots, Xf, Yf)
     use m_spline
-    DIMENSION X(N), XP(N), Y(N), YP(N), S(N)
+    implicit none
     !
-    IF(XF .EQ. -999.0)&
-            CALL ASKR('Enter flap hinge x location^', XF)
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    real :: Bots, Tops, Xf, Yf
+    integer :: N
+    real, dimension(N) :: S, X, Xp, Y, Yp
+    intent (in) Y, Yp
+    intent (inout) Bots, Tops, Yf
+    !
+    ! Local variables
+    !
+    real :: boty, topy, yrel
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    if (Xf==-999.0) call askr('Enter flap hinge x location^', Xf)
     !
     !---- find top and bottom y at hinge x location
-    TOPS = S(1) + (X(1) - XF)
-    BOTS = S(N) - (X(N) - XF)
-    CALL SINVRT(TOPS, XF, X, XP, S, N)
-    CALL SINVRT(BOTS, XF, X, XP, S, N)
-    TOPY = SEVAL(TOPS, Y, YP, S, N)
-    BOTY = SEVAL(BOTS, Y, YP, S, N)
+    Tops = S(1) + (X(1) - Xf)
+    Bots = S(N) - (X(N) - Xf)
+    call sinvrt(Tops, Xf, X, Xp, S, N)
+    call sinvrt(Bots, Xf, X, Xp, S, N)
+    topy = seval(Tops, Y, Yp, S, N)
+    boty = seval(Bots, Y, Yp, S, N)
     !
-    WRITE(*, 1000) TOPY, BOTY
-    1000 FORMAT(/'  Top    surface:  y =', F8.4, '     y/t = 1.0'&
-            /'  Bottom surface:  y =', F8.4, '     y/t = 0.0')
+    write (*, 99001) topy, boty
+    99001 format (/'  Top    surface:  y =', f8.4, '     y/t = 1.0'/'  Bottom surface:  y =', f8.4, '     y/t = 0.0')
     !
-    IF(YF .EQ. -999.0)&
-            CALL ASKR(&
-                    'Enter flap hinge y location (or 999 to specify y/t)^', YF)
+    if (Yf==-999.0) call askr('Enter flap hinge y location (or 999 to specify y/t)^', Yf)
     !
-    IF(YF .EQ. 999.0) THEN
-        CALL ASKR('Enter flap hinge relative y/t location^', YREL)
-        YF = TOPY * YREL + BOTY * (1.0 - YREL)
-    ENDIF
+    if (Yf==999.0) then
+        call askr('Enter flap hinge relative y/t location^', yrel)
+        Yf = topy * yrel + boty * (1.0 - yrel)
+    endif
     !
-    RETURN
-END
-! GETXYF
+end subroutine getxyf

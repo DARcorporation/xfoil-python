@@ -5,9 +5,12 @@ enable_language(Fortran)
 set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -O -fbounds-check -finit-real=inf -ffpe-trap=invalid,zero -fdefault-real-8")
 set(SRC_DIR "src")
 add_executable(xfoil
-        # Modules
+        # Include modules
         ${SRC_DIR}/i_pindex.f90
         ${SRC_DIR}/i_xfoil.f90
+        ${SRC_DIR}/i_blpar.f90
+        ${SRC_DIR}/i_circle.f90
+        ${SRC_DIR}/i_xbl.f90
         # Source
         ${SRC_DIR}/aread.f90
         ${SRC_DIR}/iopol.f90

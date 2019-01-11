@@ -1,4 +1,97 @@
+!*==I_XFOIL.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 module i_xfoil
+    use i_pindex
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! PARAMETER definitions
+    !
+    integer, parameter :: IQX = 370, IPX = 5, ISX = 2, IWX = IQX / 8 + 2, IBX = 4 * IQX, IZX = IQX + IWX, &
+            & IVX = IQX / 2 + IWX + 50, NAX = 800, NPX = 12, NFX = 128, NTX = 2 * IBX
+    !
+    ! Local variables
+    !
+    real, dimension(ISX) :: acrit, tindex, xoctr, xssitr, xstrip, yoctr
+    real, dimension(ISX, NPX) :: acritp, xstripp
+    real :: adeg, alfa, algam, angbte, ante, apx1ba, apx1bt, apx2ba, apx2bt, areab, aste, avisc, awake, &
+            & cambrb, cd, cdf, cdp, ch, chg, chord, chordb, chq, circ, cl, clgam, clspec, cl_alf, cl_msq, &
+            & cm, cmgam, cosa, cpdel, cpmax, cpmin, cpmn, cpmni, cpmnv, cpstar, cterat, ctrrat, cvpar, dste, &
+            & dtor, dxyc, dxyg, dxyp, dyoffc, dyoffp, ei11ba, ei11bt, ei22ba, ei22bt, faca, facair, ffilt, &
+            & gamm1, gamma, gamte, gamte_a, gtick, hfx, hfy, hmom, hopi, minf, minf1, minf_cl, mvisc, pfac, &
+            & pi, plotar, psio, qdof0, qdof1, qdof2, qdof3, qfac, qinf, qopi, qstar
+    real, dimension(IQX, IQX) :: aij, q
+    integer, dimension(IQX) :: aijpiv
+    real, dimension(IPX) :: alqsp, clqsp, cmqsp
+    real, dimension(IZX) :: apanel, cpi, cpv, dqdm, dzdm, nx, ny, qinv, qinv_a, qvis, s, sig, x, xp, y, yp
+    real, dimension(IQX, IZX) :: bij
+    real, dimension(IWX, IQX) :: cij
+    character(48), dimension(NPX) :: codepol, namepol, nameref
+    real, dimension(NAX, IPTOT, NPX) :: cpol
+    real, dimension(3, 4) :: cpolplf
+    real, dimension(NFX, 2, 4, NPX) :: cpolref
+    real, dimension(NAX, ISX, JPTOT, NPX) :: cpolsd
+    real, dimension(IQX, 2, NPX) :: cpolxy
+    real, dimension(IQX) :: cpref, dq, dqdg, dzdg, dzdn, gam, gam_a, qf0, qf1, qf2, qf3, xpref
+    real, dimension(IVX, ISX) :: ctau, ctq, delt, dis, dstr, guxd, guxq, mass, tau, thet, tstr, uedg, uinv, &
+            & uinv_a, uslp, vti, xssi
+    real, dimension(IZX, IZX) :: dij
+    real, dimension(NPX) :: etapp, machp1, ptratp, reynp1, verspol
+    character(64) :: fname, ocname, oname, prefix
+    real, dimension(IQX, 2) :: gamu
+    integer :: iacqsp, idamp, idev, idevrp, imxbl, ipact, ipslu, iq1, iq2, ismxbl, ist, itmax, ixblp, &
+            & kdelim, kimage, kqtarg, matyp, n, nb, nc1, ncam, ncm, ncolor, ncpref, nipol, nipol0, njpol, &
+            & nlref, nname, nover, npan, npol, npolref, nprefix, nqsp, nseqex, nsp, nsys, ntk, nw, retyp
+    integer, dimension(ISX) :: iblte, icols, itran, nbl
+    integer, dimension(NPX) :: icolp, icolr, ilinp, imatyp, iretyp, isymr, napol, nxypol
+    integer, dimension(IVX, ISX) :: ipan, isys
+    integer, dimension(IPTOT) :: ipol
+    character(80) :: ispars
+    integer, dimension(JPTOT) :: jpol
+    character(32) :: labref
+    logical :: ladij, laecen, lalfa, lbflap, lblgrd, lblini, lblsym, lclip, lclock, lcminp, lcpgrd, lcpinv, &
+            & lcpref, lcpxx, lcslop, lcurs, ldcplot, leiw, lflap, lforef, lfreqp, lgamu, lgeopl, lggrid, &
+            & lgparm, lgsame, lgslop, lgsym, lgtick, lhmomp, limage, lipan, liqset, lland, lnorm, lpacc, &
+            & lpcdh, lpcdw, lpcmdot, lpfile, lpfilx, lpgrid, lplcam, lplegn, lplist, lplot, lppsho, lqaij, &
+            & lqgrid, lqinu, lqrefl, lqslop, lqspec, lqsppl, lqsym, lqvdes, lscini, lsym, lvconv, lvisc, &
+            & lvlab, lwake, lwdij, ok, sharp
+    character(48) :: name
+    integer, dimension(4, NPX) :: ndref
+    real, dimension(NTX) :: pcam, pcamp, xcadd, xcam, xpadd, ycadd, ycaddp, ycam, ycamp, ypadd, ypaddp
+    character(64), dimension(NPX) :: pfname, pfnamx
+    real, dimension(IBX) :: qgamm, sb, sspec, xb, xbp, xspoc, yb, ybp, yspoc
+    real, dimension(IZX, 2) :: qinvu
+    real, dimension(IBX, IPX) :: qspec, qspecp
+    real :: qtan1, qtan2, radble, reinf, reinf1, reinf_cl, rlx, rmsbl, rmxbl, sble, scrnfr, sigte, sigte_a, &
+            & sina, size, sle, ssple, sst, sst_go, sst_gp, thickb, tklam, tkl_msq, uedel, uemax, uemin, ufac, &
+            & uprwt, vaccel, version, vfac, waklen, xalwid, xbf, xbmax, xbmin, xcdwid, xcmax, xcmin, xcmref, &
+            & xcpmni, xcpmnv, xgmax, xgmin, xle, xmarg, xocwid, xof, xofa, xofair, xoff, xpage, xpmax, xpmin, &
+            & xpref1, xpref2, xsf, xsref1, xsref2, xte, xwind, ybf, ybmax, ybmin, ycmax, ycmin, ycmref, ygmax, &
+            & ygmin, yimage, yle, ymarg, yof, yofa, yofair, yoff, ypage, ypmax, ypmin, ysf
+    real, dimension(2 * IBX) :: scm, stk, xcm, xcmp, xtk, xtkp, ycm, ycmp, ytk, ytkp
+    real, dimension(5 * IBX) :: snew
+    logical, dimension(ISX) :: tforce
+    real, dimension(3, 2, IZX) :: va, vb, vdel
+    real, dimension(3, IZX, IZX) :: vm
+    character(1) :: vmxbl
+    real, dimension(3, 2) :: vz
+    real, dimension(6 * IQX) :: w1, w2, w3, w4, w5, w6, w7, w8
+    real, dimension(IWX) :: wgap
+    real :: ysfp, yte, ywind, z_alfa, z_qdof0, z_qdof1, z_qdof2, z_qdof3, z_qinf
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! PARAMETER definitions
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !
     !====  XFOIL code global INCLUDE file  =====
     !
@@ -19,108 +112,19 @@ module i_xfoil
     ! NTX   number of points in thickness/camber arrays
     !
     !---- include polar variable indexing parameters
-    use i_pindex
     !
-    integer , parameter  ::  IQX = 370 , IPX = 5 , ISX = 2 , IWX = IQX/8 + 2 , IBX = 4*IQX , IZX = IQX + IWX ,        &
-            &                         IVX = IQX/2 + IWX + 50 , NAX = 800 , NPX = 12 , NFX = 128 , NTX = 2*IBX
     !
     !---- dimension temporary work and storage arrays
-    real , dimension(IQX,IZX)  ::  BIJ
-    real , dimension(IWX,IQX)  ::  CIJ
-    real , dimension(6*IQX)  ::  W1 , W2 , W3 , W4 , W5 , W6 , W7 , W8
 
-    character(48) , dimension(NPX)  ::  CODepol , NAMepol , NAMeref
-    character(64)  ::  FNAme , OCName , ONAme , PREfix
-    character(80)  ::  ISPars
-    character(48)  ::  NAMe
-    character(64) , dimension(NPX)  ::  PFName , PFNamx
-    character(32)  ::  LABref
-    character(1)  ::  VMXbl
 
-    integer  ::  IACqsp , IQ1 , IQ2 , KQTarg , NC1 , NNAme , NPRefix , NQSp , NSP
 
-    integer , dimension(NPX)  ::  ICOlp , ICOlr , ILInp , IMAtyp , IREtyp , ISYmr , NAPol , NXYpol
-    integer  ::  IPAct , NCPref , NIPol , NIPol0 , NJPol , NLRef , NPOl , NPOlref
-    integer , dimension(IPTOT)  ::  IPOl
-    integer , dimension(JPTOT)  ::  JPOl
-    integer , dimension(4,NPX)  ::  NDRef
 
-    integer , dimension(IQX)  ::  AIJpiv
-    integer , dimension(ISX)  ::  ICOls
-    integer  ::  IDEv , IDEvrp , IPSlu , IST , ITMax , KDElim , KIMage , MATyp , N , NB , NCM , NCOlor , NOVer ,      &
-            &             NPAn , NSEqex , NTK , NW , RETyp
 
-    integer , dimension(ISX)  ::  IBLte , ITRan , NBL
-    integer  ::  IDAmp , IXBlp , NSYs
-    integer , dimension(IVX,ISX)  ::  IPAn , ISYs
 
-    integer  ::  IMXbl , ISMxbl
-    integer  ::  NCAm
 
-    logical  ::  LADij , LAEcen , LALfa , LBFlap , LBLgrd , LBLini , LBLsym , LCLip , LCLock , LCMinp , LCPgrd ,      &
-            &             LCPinv , LCPref , LCPxx , LCSlop , LCUrs , LDCplot , LEIw , LFLap , LFOref , LFReqp , LGAmu ,        &
-            &             LGEopl , LGGrid , LGParm , LGSame , LGSlop , LGSym , LGTick , LHMomp , LIMage , LIPan , LIQset ,     &
-            &             LLAnd , LNOrm , LPAcc , LPCdh , LPCdw , LPCmdot , LPFile , LPFilx , LPGrid , LPLcam , LPLegn ,       &
-            &             LPList , LPLot , LPPsho , LQAij , LQGrid , LQInu , LQRefl , LQSlop , LQSpec , LQSppl , LQSym ,       &
-            &             LQVdes , LSCini , LSYm , LVConv , LVIsc , LVLab , LWAke , LWDij , OK , SHArp
-    logical , dimension(ISX)  ::  TFOrce
 
-    real  ::  VERsion
-    real , dimension(IQX,IQX)  ::  AIJ
-    real , dimension(IZX,IZX)  ::  DIJ
-    real , dimension(IZX)  ::  CPI , CPV , QINv , QINv_a , QVIs
-    real , dimension(IZX,2)  ::  QINvu
-    real  ::  CHOrd , SLE , WAKlen , XLE , XTE , YIMage , YLE , YTE
-    real , dimension(IZX)  ::  S , X , XP , Y , YP
-    real , dimension(IWX)  ::  WGAp
-    real  ::  ANTe , ASTe , DSTe , GAMte , GAMte_a , SIGte , SIGte_a , SST , SST_go , SST_gp
-    real , dimension(IZX)  ::  APAnel , NX , NY , SIG
-    real , dimension(IQX)  ::  GAM , GAM_a
-    real , dimension(IQX,2)  ::  GAMu
-    real  ::  ALGam , CLGam , CLSpec , CMGam , FFIlt , QDOf0 , QDOf1 , QDOf2 , QDOf3 , SSPle
-    real , dimension(IPX)  ::  ALQsp , CLQsp , CMQsp
-    real , dimension(IQX)  ::  QF0 , QF1 , QF2 , QF3
-    real , dimension(IBX)  ::  QGAmm , SSPec , XSPoc , YSPoc
-    real , dimension(IBX,IPX)  ::  QSPec , QSPecp
-    real  ::  ADEg , ALFa , AVIsc , AWAke , CD , CDF , CDP , CIRc , CL , CL_alf , CL_msq , CM , COSa , CPMn , CPMni , &
-            &          CPMnv , CPStar , GAMm1 , GAMma , MINf , MINf1 , MINf_cl , MVIsc , PSIo , QINf , QSTar , SINa , TKLam ,  &
-            &          TKL_msq , XCMref , XCPmni , XCPmnv , YCMref
-    real , dimension(ISX,NPX)  ::  ACRitp , XSTripp
-    real , dimension(NAX,IPTOT,NPX)  ::  CPOl
-    real , dimension(NFX,2,4,NPX)  ::  CPOlref
-    real , dimension(NAX,ISX,JPTOT,NPX)  ::  CPOlsd
-    real , dimension(IQX,2,NPX)  ::  CPOlxy
-    real , dimension(IQX)  ::  CPRef , XPRef
-    real , dimension(NPX)  ::  ETApp , MAChp1 , PTRatp , REYnp1 , VERspol
-    real  ::  DTOr , HOPi , PI , QOPi
-    real  ::  CTErat , CTRrat , CVPar , XPRef1 , XPRef2 , XSRef1 , XSRef2
-    real  ::  CH , CHG , CHQ , CPDel , CPMax , CPMin , FACa , FACair , PFAc , PLOtar , QFAc , SCRnfr , SIZe , UEDel , &
-            &          UEMax , UEMin , UFAc , UPRwt , VFAc , XALwid , XCDwid , XMArg , XOCwid , XOFa , XOFair , XPAge , XWInd ,&
-            &          YMArg , YOFa , YOFair , YPAge , YWInd
-    real , dimension(3,4)  ::  CPOlplf
-    real  ::  ANGbte , APX1ba , APX1bt , APX2ba , APX2bt , AREab , CAMbrb , CHOrdb , EI11ba , EI11bt , EI22ba ,       &
-            &          EI22bt , HFX , HFY , HMOm , RADble , SBLe , THIckb , XBF , XBMax , XBMin , XOF , YBF , YBMax , YBMin ,  &
-            &          YOF
-    real , dimension(IBX)  ::  SB , XB , XBP , YB , YBP
-    real , dimension(2*IBX)  ::  SCM , STK , XCM , XCMp , XTK , XTKp , YCM , YCMp , YTK , YTKp
-    real , dimension(5*IBX)  ::  SNEw
-    real , dimension(ISX)  ::  ACRit , TINdex , XOCtr , XSSitr , XSTrip , YOCtr
-    real , dimension(IVX,ISX)  ::  CTAu , CTQ , DELt , DIS , DSTr , GUXd , GUXq , MASs , TAU , THEt , TSTr , UEDg ,   &
-            &                               UINv , UINv_a , USLp , VTI , XSSi
-    real  ::  REInf , REInf1 , REInf_cl
-    real  ::  RLX , RMSbl , RMXbl , VACcel
-    real  ::  DXYc , DXYg , DXYp , DYOffc , DYOffp , GTIck , XCMax , XCMin , XGMax , XGMin , XOFf , XPMax , XPMin ,   &
-            &          XSF , YCMax , YCMin , YGMax , YGMin , YOFf , YPMax , YPMin , YSF , YSFp
-    real , dimension(NTX)  ::  PCAm , PCAmp , XCAdd , XCAm , XPAdd , YCAdd , YCAddp , YCAm , YCAmp , YPAdd , YPAddp
 
-    real , dimension(IQX)  ::  DQ , DQDg , DZDg , DZDn
-    real , dimension(IZX)  ::  DQDm , DZDm
-    real , dimension(IQX,IQX)  ::  Q
-    real  ::  QTAn1 , QTAn2 , Z_Alfa , Z_Qdof0 , Z_Qdof1 , Z_Qdof2 , Z_Qdof3 , Z_Qinf
 
-    real , dimension(3,2,IZX)  ::  VA , VB , VDEl
-    real , dimension(3,IZX,IZX)  ::  VM
-    real , dimension(3,2)  ::  VZ
     !
     !
     !

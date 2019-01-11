@@ -1,8 +1,10 @@
+!*==LEFIND.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
+! GETXYF
 !***********************************************************************
 !    Module:  xgeom.f
-! 
-!    Copyright (C) 2000 Mark Drela 
-! 
+!
+!    Copyright (C) 2000 Mark Drela
+!
 !    This program is free software; you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
 !    the Free Software Foundation; either version 2 of the License, or
@@ -18,9 +20,39 @@
 !    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 !***********************************************************************
 
-SUBROUTINE LEFIND(SLE, X, XP, Y, YP, S, N)
+subroutine lefind(Sle, X, Xp, Y, Yp, S, N)
     use m_spline
-    DIMENSION X(*), XP(*), Y(*), YP(*), S(*)
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    integer :: N
+    real :: Sle
+    real, dimension(*) :: S, X, Xp, Y, Yp
+    intent (in) N, S, X, Xp, Y, Yp
+    intent (inout) Sle
+    !
+    ! Local variables
+    !
+    real :: dotp, dseps, dsle, dx, dxdd, dxds, dxte, dy, dydd, dyds, dyte, res, ress, xchord, xle, xte, &
+            & ychord, yle, yte
+    integer :: i, iter
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !------------------------------------------------------
     !     Locates leading edge spline-parameter value SLE
     !
@@ -33,64 +65,91 @@ SUBROUTINE LEFIND(SLE, X, XP, Y, YP, S, N)
     !------------------------------------------------------
     !
     !---- convergence tolerance
-    DSEPS = (S(N) - S(1)) * 1.0E-5
+    dseps = (S(N) - S(1)) * 1.0E-5
     !
     !---- set trailing edge point coordinates
-    XTE = 0.5 * (X(1) + X(N))
-    YTE = 0.5 * (Y(1) + Y(N))
+    xte = 0.5 * (X(1) + X(N))
+    yte = 0.5 * (Y(1) + Y(N))
     !
     !---- get first guess for SLE
-    DO 10 I = 3, N - 2
-        DXTE = X(I) - XTE
-        DYTE = Y(I) - YTE
-        DX = X(I + 1) - X(I)
-        DY = Y(I + 1) - Y(I)
-        DOTP = DXTE * DX + DYTE * DY
-        IF(DOTP .LT. 0.0) GO TO 11
-    10 CONTINUE
+    do i = 3, N - 2
+        dxte = X(i) - xte
+        dyte = Y(i) - yte
+        dx = X(i + 1) - X(i)
+        dy = Y(i + 1) - Y(i)
+        dotp = dxte * dx + dyte * dy
+        if (dotp<0.0) exit
+    enddo
     !
-    11 SLE = S(I)
+    Sle = S(i)
     !
     !---- check for sharp LE case
-    IF(S(I) .EQ. S(I - 1)) THEN
-        !cc        WRITE(*,*) 'Sharp LE found at ',I,SLE
-        RETURN
-    ENDIF
+    !cc        WRITE(*,*) 'Sharp LE found at ',I,SLE
+    if (S(i)==S(i - 1)) return
     !
     !---- Newton iteration to get exact SLE value
-    DO 20 ITER = 1, 50
-        XLE = SEVAL(SLE, X, XP, S, N)
-        YLE = SEVAL(SLE, Y, YP, S, N)
-        DXDS = DEVAL(SLE, X, XP, S, N)
-        DYDS = DEVAL(SLE, Y, YP, S, N)
-        DXDD = D2VAL(SLE, X, XP, S, N)
-        DYDD = D2VAL(SLE, Y, YP, S, N)
+    do iter = 1, 50
+        xle = seval(Sle, X, Xp, S, N)
+        yle = seval(Sle, Y, Yp, S, N)
+        dxds = deval(Sle, X, Xp, S, N)
+        dyds = deval(Sle, Y, Yp, S, N)
+        dxdd = d2val(Sle, X, Xp, S, N)
+        dydd = d2val(Sle, Y, Yp, S, N)
         !
-        XCHORD = XLE - XTE
-        YCHORD = YLE - YTE
+        xchord = xle - xte
+        ychord = yle - yte
         !
         !------ drive dot product between chord line and LE tangent to zero
-        RES = XCHORD * DXDS + YCHORD * DYDS
-        RESS = DXDS * DXDS + DYDS * DYDS&
-                + XCHORD * DXDD + YCHORD * DYDD
+        res = xchord * dxds + ychord * dyds
+        ress = dxds * dxds + dyds * dyds + xchord * dxdd + ychord * dydd
         !
         !------ Newton delta for SLE
-        DSLE = -RES / RESS
+        dsle = -res / ress
         !
-        DSLE = MAX(DSLE, -0.02 * ABS(XCHORD + YCHORD))
-        DSLE = MIN(DSLE, 0.02 * ABS(XCHORD + YCHORD))
-        SLE = SLE + DSLE
-        IF(ABS(DSLE) .LT. DSEPS) RETURN
-    20 CONTINUE
-    WRITE(*, *) 'LEFIND:  LE point not found.  Continuing...'
-    SLE = S(I)
-    RETURN
-END
+        dsle = max(dsle, -0.02 * abs(xchord + ychord))
+        dsle = min(dsle, 0.02 * abs(xchord + ychord))
+        Sle = Sle + dsle
+        if (abs(dsle)<dseps) return
+    enddo
+    write (*, *) 'LEFIND:  LE point not found.  Continuing...'
+    Sle = S(i)
+end subroutine lefind
+!*==SOPPS.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 
 
-SUBROUTINE SOPPS(SOPP, SI, X, XP, Y, YP, S, N, SLE)
+subroutine sopps(Sopp, Si, X, Xp, Y, Yp, S, N, Sle)
     use m_spline
-    DIMENSION X(*), XP(*), Y(*), YP(*), S(*)
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    integer :: N
+    real :: Si, Sle, Sopp
+    real, dimension(*) :: S, X, Xp, Y, Yp
+    intent (in) N, S, Si, Sle, X, Xp, Y, Yp
+    intent (inout) Sopp
+    !
+    ! Local variables
+    !
+    real :: chord, dsopp, dxc, dyc, res, resd, sfrac, slen, xbar, xi, xle, xopp, xoppd, xte, yi, yle, &
+            & yopp, yoppd, yte
+    integer :: in, inopp, iter
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !--------------------------------------------------
     !     Calculates arc length SOPP of point
     !     which is opposite of point SI, on the
@@ -98,144 +157,198 @@ SUBROUTINE SOPPS(SOPP, SI, X, XP, Y, YP, S, N, SLE)
     !--------------------------------------------------
     !
     !---- reference length for testing convergence
-    SLEN = S(N) - S(1)
+    slen = S(N) - S(1)
     !
     !---- set chordline vector
-    XLE = SEVAL(SLE, X, XP, S, N)
-    YLE = SEVAL(SLE, Y, YP, S, N)
-    XTE = 0.5 * (X(1) + X(N))
-    YTE = 0.5 * (Y(1) + Y(N))
-    CHORD = SQRT((XTE - XLE)**2 + (YTE - YLE)**2)
-    DXC = (XTE - XLE) / CHORD
-    DYC = (YTE - YLE) / CHORD
+    xle = seval(Sle, X, Xp, S, N)
+    yle = seval(Sle, Y, Yp, S, N)
+    xte = 0.5 * (X(1) + X(N))
+    yte = 0.5 * (Y(1) + Y(N))
+    chord = sqrt((xte - xle)**2 + (yte - yle)**2)
+    dxc = (xte - xle) / chord
+    dyc = (yte - yle) / chord
     !
-    IF(SI.LT.SLE) THEN
-        IN = 1
-        INOPP = N
-    ELSE
-        IN = N
-        INOPP = 1
-    ENDIF
-    SFRAC = (SI - SLE) / (S(IN) - SLE)
-    SOPP = SLE + SFRAC * (S(INOPP) - SLE)
+    if (Si<Sle) then
+        in = 1
+        inopp = N
+    else
+        in = N
+        inopp = 1
+    endif
+    sfrac = (Si - Sle) / (S(in) - Sle)
+    Sopp = Sle + sfrac * (S(inopp) - Sle)
     !
-    IF(ABS(SFRAC) .LE. 1.0E-5) THEN
-        SOPP = SLE
-        RETURN
-    ENDIF
+    if (abs(sfrac)<=1.0E-5) then
+        Sopp = Sle
+        return
+    endif
     !
     !---- XBAR = x coordinate in chord-line axes
-    XI = SEVAL(SI, X, XP, S, N)
-    YI = SEVAL(SI, Y, YP, S, N)
-    XLE = SEVAL(SLE, X, XP, S, N)
-    YLE = SEVAL(SLE, Y, YP, S, N)
-    XBAR = (XI - XLE) * DXC + (YI - YLE) * DYC
+    xi = seval(Si, X, Xp, S, N)
+    yi = seval(Si, Y, Yp, S, N)
+    xle = seval(Sle, X, Xp, S, N)
+    yle = seval(Sle, Y, Yp, S, N)
+    xbar = (xi - xle) * dxc + (yi - yle) * dyc
     !
     !---- converge on exact opposite point with same XBAR value
-    DO 300 ITER = 1, 12
-        XOPP = SEVAL(SOPP, X, XP, S, N)
-        YOPP = SEVAL(SOPP, Y, YP, S, N)
-        XOPPD = DEVAL(SOPP, X, XP, S, N)
-        YOPPD = DEVAL(SOPP, Y, YP, S, N)
+    do iter = 1, 12
+        xopp = seval(Sopp, X, Xp, S, N)
+        yopp = seval(Sopp, Y, Yp, S, N)
+        xoppd = deval(Sopp, X, Xp, S, N)
+        yoppd = deval(Sopp, Y, Yp, S, N)
         !
-        RES = (XOPP - XLE) * DXC + (YOPP - YLE) * DYC - XBAR
-        RESD = XOPPD * DXC + YOPPD * DYC
+        res = (xopp - xle) * dxc + (yopp - yle) * dyc - xbar
+        resd = xoppd * dxc + yoppd * dyc
         !
-        IF(ABS(RES) / SLEN .LT. 1.0E-5) GO TO 305
-        IF(RESD .EQ. 0.0) GO TO 303
+        if (abs(res) / slen<1.0E-5) goto 99999
+        if (resd==0.0) exit
         !
-        DSOPP = -RES / RESD
-        SOPP = SOPP + DSOPP
+        dsopp = -res / resd
+        Sopp = Sopp + dsopp
         !
-        IF(ABS(DSOPP) / SLEN .LT. 1.0E-5) GO TO 305
-    300  CONTINUE
-    303  WRITE(*, *)&
-            'SOPPS: Opposite-point location failed. Continuing...'
-    SOPP = SLE + SFRAC * (S(INOPP) - SLE)
+        if (abs(dsopp) / slen<1.0E-5) goto 99999
+    enddo
+    write (*, *) 'SOPPS: Opposite-point location failed. Continuing...'
+    Sopp = Sle + sfrac * (S(inopp) - Sle)
     !
-    305  CONTINUE
-    RETURN
-END
+99999 end subroutine sopps
+!*==NORM.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! SOPPS
 
 
 
-SUBROUTINE NORM(X, XP, Y, YP, S, N)
+subroutine norm(X, Xp, Y, Yp, S, N)
     use m_spline
-    DIMENSION X(*), XP(*), Y(*), YP(*), S(*)
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    integer :: N
+    real, dimension(*) :: S, X, Xp, Y, Yp
+    intent (inout) S, X, Y
+    !
+    ! Local variables
+    !
+    real :: fudge, sle, xmax, xmin, ymin
+    integer :: i
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !-----------------------------------------------
     !     Scales coordinates to get unit chord
     !-----------------------------------------------
     !
-    CALL SCALC(X, Y, S, N)
-    CALL SEGSPL(X, XP, S, N)
-    CALL SEGSPL(Y, YP, S, N)
+    call scalc(X, Y, S, N)
+    call segspl(X, Xp, S, N)
+    call segspl(Y, Yp, S, N)
     !
-    CALL LEFIND(SLE, X, XP, Y, YP, S, N)
+    call lefind(sle, X, Xp, Y, Yp, S, N)
     !
-    XMAX = 0.5 * (X(1) + X(N))
-    XMIN = SEVAL(SLE, X, XP, S, N)
-    YMIN = SEVAL(SLE, Y, YP, S, N)
+    xmax = 0.5 * (X(1) + X(N))
+    xmin = seval(sle, X, Xp, S, N)
+    ymin = seval(sle, Y, Yp, S, N)
     !
-    FUDGE = 1.0 / (XMAX - XMIN)
-    DO 40 I = 1, N
-        X(I) = (X(I) - XMIN) * FUDGE
-        Y(I) = (Y(I) - YMIN) * FUDGE
-        S(I) = S(I) * FUDGE
-    40 CONTINUE
+    fudge = 1.0 / (xmax - xmin)
+    do i = 1, N
+        X(i) = (X(i) - xmin) * fudge
+        Y(i) = (Y(i) - ymin) * fudge
+        S(i) = S(i) * fudge
+    enddo
     !
-    RETURN
-END
+end subroutine norm
+!*==GEOPAR.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 
 
-SUBROUTINE GEOPAR(X, XP, Y, YP, S, N, T, &
-        SLE, CHORD, AREA, RADLE, ANGTE, &
-        EI11A, EI22A, APX1A, APX2A, &
-        EI11T, EI22T, APX1T, APX2T, &
-        THICK, CAMBR)
+subroutine geopar(X, Xp, Y, Yp, S, N, T, &
+        Sle, Chord, Area, Radle, Angte, Ei11a, Ei22a, Apx1a, Apx2a, Ei11t, Ei22t, Apx1t, Apx2t, Thick, &
+        & Cambr)
     use m_spline
     use m_xutils
-    DIMENSION X(*), XP(*), Y(*), YP(*), S(*), T(*)
+    implicit none
     !
-    PARAMETER (IBX = 600)
-    DIMENSION&
-            XCAM(2 * IBX), YCAM(2 * IBX), YCAMP(2 * IBX), &
-            XTHK(2 * IBX), YTHK(2 * IBX), YTHKP(2 * IBX)
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! PARAMETER definitions
+    !
+    integer, parameter :: IBX = 600
+    !
+    ! Dummy arguments
+    !
+    real :: Angte, Apx1a, Apx1t, Apx2a, Apx2t, Area, Cambr, Chord, Ei11a, Ei11t, Ei22a, Ei22t, Radle, Sle, &
+            & Thick
+    integer :: N
+    real, dimension(*) :: S, T, X, Xp, Y, Yp
+    intent (out) Angte, Chord, Radle
+    !
+    ! Local variables
+    !
+    real :: ang1, ang2, chsq, curvle, slen, xcambr, xcena, xcent, xle, xte, xthick, ycena, ycent, yle, yte
+    integer :: i
+    real, dimension(2 * IBX) :: xcam, xthk, ycam, ycamp, ythk, ythkp
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! PARAMETER definitions
+    !
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
     !------------------------------------------------------
     !     Sets geometric parameters for airfoil shape
     !------------------------------------------------------
-    CALL LEFIND(SLE, X, XP, Y, YP, S, N)
+    call lefind(Sle, X, Xp, Y, Yp, S, N)
     !
-    XLE = SEVAL(SLE, X, XP, S, N)
-    YLE = SEVAL(SLE, Y, YP, S, N)
-    XTE = 0.5 * (X(1) + X(N))
-    YTE = 0.5 * (Y(1) + Y(N))
+    xle = seval(Sle, X, Xp, S, N)
+    yle = seval(Sle, Y, Yp, S, N)
+    xte = 0.5 * (X(1) + X(N))
+    yte = 0.5 * (Y(1) + Y(N))
     !
-    CHSQ = (XTE - XLE)**2 + (YTE - YLE)**2
-    CHORD = SQRT(CHSQ)
+    chsq = (xte - xle)**2 + (yte - yle)**2
+    Chord = sqrt(chsq)
     !
-    CURVLE = CURV(SLE, X, XP, Y, YP, S, N)
+    curvle = curv(Sle, X, Xp, Y, Yp, S, N)
     !
-    RADLE = 0.0
-    IF(ABS(CURVLE) .GT. 0.001 * (S(N) - S(1))) RADLE = 1.0 / CURVLE
+    Radle = 0.0
+    if (abs(curvle)>0.001 * (S(N) - S(1))) Radle = 1.0 / curvle
     !
-    ANG1 = ATAN2(-YP(1), -XP(1))
-    ANG2 = ATANC(YP(N), XP(N), ANG1)
-    ANGTE = ANG2 - ANG1
+    ang1 = atan2(-Yp(1), -Xp(1))
+    ang2 = atanc(Yp(N), Xp(N), ang1)
+    Angte = ang2 - ang1
     !
 
-    DO I = 1, N
-        T(I) = 1.0
-    ENDDO
+    do i = 1, N
+        T(i) = 1.0
+    enddo
     !
-    CALL AECALC(N, X, Y, T, 1, &
-            AREA, XCENA, YCENA, EI11A, EI22A, APX1A, APX2A)
+    call aecalc(N, X, Y, T, 1, Area, xcena, ycena, Ei11a, Ei22a, Apx1a, Apx2a)
     !
-    CALL AECALC(N, X, Y, T, 2, &
-            SLEN, XCENT, YCENT, EI11T, EI22T, APX1T, APX2T)
+    call aecalc(N, X, Y, T, 2, slen, xcent, ycent, Ei11t, Ei22t, Apx1t, Apx2t)
     !
     !--- Old, approximate thickness,camber routine (on discrete points only)
-    CALL TCCALC(X, XP, Y, YP, S, N, THICK, XTHICK, CAMBR, XCAMBR)
+    call tccalc(X, Xp, Y, Yp, S, N, Thick, xthick, Cambr, xcambr)
     !
     !--- More accurate thickness and camber estimates
     !c      CALL GETCAM(XCAM,YCAM,NCAM,XTHK,YTHK,NTHK,
@@ -244,21 +357,51 @@ SUBROUTINE GEOPAR(X, XP, Y, YP, S, N, T, &
     !c      CALL GETMAX(XTHK,YTHK,YTHKP,NTHK,XTHICK,THICK)
     !c      THICK = 2.0*THICK
     !
-    WRITE(*, 1000) THICK, XTHICK, CAMBR, XCAMBR
-    1000 FORMAT(' Max thickness = ', F12.6, '  at x = ', F7.3, &
-            /' Max camber    = ', F12.6, '  at x = ', F7.3)
+    write (*, 99001) Thick, xthick, Cambr, xcambr
+    99001 format (' Max thickness = ', f12.6, '  at x = ', f7.3, /' Max camber    = ', f12.6, '  at x = ', f7.3)
 
 
     !
-    RETURN
-END
+end subroutine geopar
+!*==AECALC.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! GEOPAR
 
 
-SUBROUTINE AECALC(N, X, Y, T, ITYPE, &
-        AREA, XCEN, YCEN, EI11, EI22, APX1, APX2)
-        use m_spline
-    DIMENSION X(*), Y(*), T(*)
+subroutine aecalc(N, X, Y, T, Itype, Area, Xcen, Ycen, Ei11, Ei22, Apx1, Apx2)
+    use m_spline
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    real :: Apx1, Apx2, Area, Ei11, Ei22, Xcen, Ycen
+    integer :: Itype, N
+    real, dimension(*) :: T, X, Y
+    intent (in) Itype, N, T, X, Y
+    intent (out) Area
+    intent (inout) Apx1, Apx2, Ei11, Ei22, Xcen, Ycen
+    !
+    ! Local variables
+    !
+    real :: aint, c1, c2, da, ds, dx, dy, eisq, eixx, eixy, eiyy, s1, s2, sgn, sint, ta, xa, xint, &
+            & xxint, xyint, ya, yint, yyint
+    integer :: io, ip
+    real, save :: pi
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !---------------------------------------------------------------
     !     Calculates geometric properties of shape X,Y
     !
@@ -275,125 +418,153 @@ SUBROUTINE AECALC(N, X, Y, T, ITYPE, &
     !       EI11,EI22  principal moments of inertia
     !       APX1,APX2  principal-axis angles
     !---------------------------------------------------------------
-    DATA PI / 3.141592653589793238 /
+    data pi/3.141592653589793238/
     !
-    SINT = 0.0
-    AINT = 0.0
-    XINT = 0.0
-    YINT = 0.0
-    XXINT = 0.0
-    XYINT = 0.0
-    YYINT = 0.0
+    sint = 0.0
+    aint = 0.0
+    xint = 0.0
+    yint = 0.0
+    xxint = 0.0
+    xyint = 0.0
+    yyint = 0.0
     !
-    DO 10 IO = 1, N
-        IF(IO.EQ.N) THEN
-            IP = 1
-        ELSE
-            IP = IO + 1
-        ENDIF
+    do io = 1, N
+        if (io==N) then
+            ip = 1
+        else
+            ip = io + 1
+        endif
         !
-        DX = X(IO) - X(IP)
-        DY = Y(IO) - Y(IP)
-        XA = (X(IO) + X(IP)) * 0.50
-        YA = (Y(IO) + Y(IP)) * 0.50
-        TA = (T(IO) + T(IP)) * 0.50
+        dx = X(io) - X(ip)
+        dy = Y(io) - Y(ip)
+        xa = (X(io) + X(ip)) * 0.50
+        ya = (Y(io) + Y(ip)) * 0.50
+        ta = (T(io) + T(ip)) * 0.50
         !
-        DS = SQRT(DX * DX + DY * DY)
-        SINT = SINT + DS
+        ds = sqrt(dx * dx + dy * dy)
+        sint = sint + ds
 
-        IF(ITYPE.EQ.1) THEN
+        if (Itype==1) then
             !-------- integrate over airfoil cross-section
-            DA = YA * DX
-            AINT = AINT + DA
-            XINT = XINT + XA * DA
-            YINT = YINT + YA * DA / 2.0
-            XXINT = XXINT + XA * XA * DA
-            XYINT = XYINT + XA * YA * DA / 2.0
-            YYINT = YYINT + YA * YA * DA / 3.0
-        ELSE
+            da = ya * dx
+            aint = aint + da
+            xint = xint + xa * da
+            yint = yint + ya * da / 2.0
+            xxint = xxint + xa * xa * da
+            xyint = xyint + xa * ya * da / 2.0
+            yyint = yyint + ya * ya * da / 3.0
+        else
             !-------- integrate over skin thickness
-            DA = TA * DS
-            AINT = AINT + DA
-            XINT = XINT + XA * DA
-            YINT = YINT + YA * DA
-            XXINT = XXINT + XA * XA * DA
-            XYINT = XYINT + XA * YA * DA
-            YYINT = YYINT + YA * YA * DA
-        ENDIF
+            da = ta * ds
+            aint = aint + da
+            xint = xint + xa * da
+            yint = yint + ya * da
+            xxint = xxint + xa * xa * da
+            xyint = xyint + xa * ya * da
+            yyint = yyint + ya * ya * da
+        endif
         !
-    10   CONTINUE
+    enddo
     !
-    AREA = AINT
+    Area = aint
     !
-    IF(AINT .EQ. 0.0) THEN
-        XCEN = 0.0
-        YCEN = 0.0
-        EI11 = 0.0
-        EI22 = 0.0
-        APX1 = 0.0
-        APX2 = ATAN2(1.0, 0.0)
-        RETURN
-    ENDIF
+    if (aint==0.0) then
+        Xcen = 0.0
+        Ycen = 0.0
+        Ei11 = 0.0
+        Ei22 = 0.0
+        Apx1 = 0.0
+        Apx2 = atan2(1.0, 0.0)
+        return
+    endif
     !
     !
     !---- calculate centroid location
-    XCEN = XINT / AINT
-    YCEN = YINT / AINT
+    Xcen = xint / aint
+    Ycen = yint / aint
     !
     !---- calculate inertias
-    EIXX = YYINT - YCEN * YCEN * AINT
-    EIXY = XYINT - XCEN * YCEN * AINT
-    EIYY = XXINT - XCEN * XCEN * AINT
+    eixx = yyint - Ycen * Ycen * aint
+    eixy = xyint - Xcen * Ycen * aint
+    eiyy = xxint - Xcen * Xcen * aint
     !
     !---- set principal-axis inertias, EI11 is closest to "up-down" bending inertia
-    EISQ = 0.25 * (EIXX - EIYY)**2 + EIXY**2
-    SGN = SIGN(1.0, EIYY - EIXX)
-    EI11 = 0.5 * (EIXX + EIYY) - SGN * SQRT(EISQ)
-    EI22 = 0.5 * (EIXX + EIYY) + SGN * SQRT(EISQ)
+    eisq = 0.25 * (eixx - eiyy)**2 + eixy**2
+    sgn = sign(1.0, eiyy - eixx)
+    Ei11 = 0.5 * (eixx + eiyy) - sgn * sqrt(eisq)
+    Ei22 = 0.5 * (eixx + eiyy) + sgn * sqrt(eisq)
     !
-    IF(EI11.EQ.0.0 .OR. EI22.EQ.0.0) THEN
+    if (Ei11==0.0 .or. Ei22==0.0) then
         !----- vanishing section stiffness
-        APX1 = 0.0
-        APX2 = ATAN2(1.0, 0.0)
+        Apx1 = 0.0
+        Apx2 = atan2(1.0, 0.0)
         !
-    ELSEIF(EISQ / (EI11 * EI22) .LT. (0.001 * SINT)**4) THEN
+    elseif (eisq / (Ei11 * Ei22)<(0.001 * sint)**4) then
         !----- rotationally-invariant section (circle, square, etc.)
-        APX1 = 0.0
-        APX2 = ATAN2(1.0, 0.0)
+        Apx1 = 0.0
+        Apx2 = atan2(1.0, 0.0)
         !
-    ELSE
+    else
         !----- normal airfoil section
-        C1 = EIXY
-        S1 = EIXX - EI11
+        c1 = eixy
+        s1 = eixx - Ei11
         !
-        C2 = EIXY
-        S2 = EIXX - EI22
+        c2 = eixy
+        s2 = eixx - Ei22
         !
-        IF(ABS(S1).GT.ABS(S2)) THEN
-            APX1 = ATAN2(S1, C1)
-            APX2 = APX1 + 0.5 * PI
-        ELSE
-            APX2 = ATAN2(S2, C2)
-            APX1 = APX2 - 0.5 * PI
-        ENDIF
+        if (abs(s1)>abs(s2)) then
+            Apx1 = atan2(s1, c1)
+            Apx2 = Apx1 + 0.5 * pi
+        else
+            Apx2 = atan2(s2, c2)
+            Apx1 = Apx2 - 0.5 * pi
+        endif
 
-        IF(APX1.LT.-0.5 * PI) APX1 = APX1 + PI
-        IF(APX1.GT.+0.5 * PI) APX1 = APX1 - PI
-        IF(APX2.LT.-0.5 * PI) APX2 = APX2 + PI
-        IF(APX2.GT.+0.5 * PI) APX2 = APX2 - PI
+        if (Apx1<-0.5 * pi) Apx1 = Apx1 + pi
+        if (Apx1>+0.5 * pi) Apx1 = Apx1 - pi
+        if (Apx2<-0.5 * pi) Apx2 = Apx2 + pi
+        if (Apx2>+0.5 * pi) Apx2 = Apx2 - pi
         !
-    ENDIF
+    endif
     !
-    RETURN
-END
+end subroutine aecalc
+!*==TCCALC.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! AECALC
 
 
 
-SUBROUTINE TCCALC(X, XP, Y, YP, S, N, &
-        THICK, XTHICK, CAMBR, XCAMBR)
-        use m_spline
-    DIMENSION X(*), XP(*), Y(*), YP(*), S(*)
+subroutine tccalc(X, Xp, Y, Yp, S, N, Thick, Xthick, Cambr, Xcambr)
+    use m_spline
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    real :: Cambr, Thick, Xcambr, Xthick
+    integer :: N
+    real, dimension(*) :: S, X, Xp, Y, Yp
+    intent (out) Xcambr, Xthick
+    intent (inout) Cambr, Thick
+    !
+    ! Local variables
+    !
+    real :: chord, dxc, dyc, sle, sopp, xbar, xle, xopp, xte, ybar, ybarop, yc, yle, yopp, yt, yte
+    integer :: i
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !---------------------------------------------------------------
     !     Calculates max thickness and camber at airfoil points
     !
@@ -409,111 +580,170 @@ SUBROUTINE TCCALC(X, XP, Y, YP, S, N, &
     !       THICK  max thickness
     !       CAMBR  max camber
     !---------------------------------------------------------------
-    CALL LEFIND(SLE, X, XP, Y, YP, S, N)
-    XLE = SEVAL(SLE, X, XP, S, N)
-    YLE = SEVAL(SLE, Y, YP, S, N)
-    XTE = 0.5 * (X(1) + X(N))
-    YTE = 0.5 * (Y(1) + Y(N))
-    CHORD = SQRT((XTE - XLE)**2 + (YTE - YLE)**2)
+    call lefind(sle, X, Xp, Y, Yp, S, N)
+    xle = seval(sle, X, Xp, S, N)
+    yle = seval(sle, Y, Yp, S, N)
+    xte = 0.5 * (X(1) + X(N))
+    yte = 0.5 * (Y(1) + Y(N))
+    chord = sqrt((xte - xle)**2 + (yte - yle)**2)
     !
     !---- set unit chord-line vector
-    DXC = (XTE - XLE) / CHORD
-    DYC = (YTE - YLE) / CHORD
+    dxc = (xte - xle) / chord
+    dyc = (yte - yle) / chord
     !
-    THICK = 0.
-    XTHICK = 0.
-    CAMBR = 0.
-    XCAMBR = 0.
+    Thick = 0.
+    Xthick = 0.
+    Cambr = 0.
+    Xcambr = 0.
     !
     !---- go over each point, finding the y-thickness and camber
-    DO 30 I = 1, N
-        XBAR = (X(I) - XLE) * DXC + (Y(I) - YLE) * DYC
-        YBAR = (Y(I) - YLE) * DXC - (X(I) - XLE) * DYC
+    do i = 1, N
+        xbar = (X(i) - xle) * dxc + (Y(i) - yle) * dyc
+        ybar = (Y(i) - yle) * dxc - (X(i) - xle) * dyc
         !
         !------ set point on the opposite side with the same chord x value
-        CALL SOPPS(SOPP, S(I), X, XP, Y, YP, S, N, SLE)
-        XOPP = SEVAL(SOPP, X, XP, S, N)
-        YOPP = SEVAL(SOPP, Y, YP, S, N)
+        call sopps(sopp, S(i), X, Xp, Y, Yp, S, N, sle)
+        xopp = seval(sopp, X, Xp, S, N)
+        yopp = seval(sopp, Y, Yp, S, N)
         !
-        YBAROP = (YOPP - YLE) * DXC - (XOPP - XLE) * DYC
+        ybarop = (yopp - yle) * dxc - (xopp - xle) * dyc
         !
-        YC = 0.5 * (YBAR + YBAROP)
-        YT = ABS(YBAR - YBAROP)
+        yc = 0.5 * (ybar + ybarop)
+        yt = abs(ybar - ybarop)
         !
-        IF(ABS(YC) .GT. ABS(CAMBR)) THEN
-            CAMBR = YC
-            XCAMBR = XOPP
-        ENDIF
-        IF(ABS(YT) .GT. ABS(THICK)) THEN
-            THICK = YT
-            XTHICK = XOPP
-        ENDIF
-    30 CONTINUE
+        if (abs(yc)>abs(Cambr)) then
+            Cambr = yc
+            Xcambr = xopp
+        endif
+        if (abs(yt)>abs(Thick)) then
+            Thick = yt
+            Xthick = xopp
+        endif
+    enddo
     !
-    RETURN
-END
+end subroutine tccalc
+!*==CANG.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! TCCALC
 
 
 
 
-SUBROUTINE CANG(X, Y, N, IPRINT, IMAX, AMAX)
-        use m_spline
-    DIMENSION X(*), Y(*)
+subroutine cang(X, Y, N, Iprint, Imax, Amax)
+    use m_spline
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    real :: Amax
+    integer :: Imax, Iprint, N
+    real, dimension(*) :: X, Y
+    intent (in) Iprint, N, X, Y
+    intent (inout) Amax, Imax
+    !
+    ! Local variables
+    !
+    real :: angl, crossp, dx1, dx2, dy1, dy2
+    integer :: i
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !-------------------------------------------------------------------
     !     IPRINT=2:   Displays all panel node corner angles
     !     IPRINT=1:   Displays max panel node corner angle
     !     IPRINT=0:   No display... just returns values
     !-------------------------------------------------------------------
     !
-    AMAX = 0.0
-    IMAX = 1
+    Amax = 0.0
+    Imax = 1
     !
     !---- go over each point, calculating corner angle
-    IF(IPRINT.EQ.2) WRITE(*, 1050)
-    DO 30 I = 2, N - 1
-        DX1 = X(I) - X(I - 1)
-        DY1 = Y(I) - Y(I - 1)
-        DX2 = X(I) - X(I + 1)
-        DY2 = Y(I) - Y(I + 1)
+    if (Iprint==2) write (*, 99001)
+    !
+    99001 format (/'  i       x        y      angle')
+    do i = 2, N - 1
+        dx1 = X(i) - X(i - 1)
+        dy1 = Y(i) - Y(i - 1)
+        dx2 = X(i) - X(i + 1)
+        dy2 = Y(i) - Y(i + 1)
         !
         !------ allow for doubled points
-        IF(DX1.EQ.0.0 .AND. DY1.EQ.0.0) THEN
-            DX1 = X(I) - X(I - 2)
-            DY1 = Y(I) - Y(I - 2)
-        ENDIF
-        IF(DX2.EQ.0.0 .AND. DY2.EQ.0.0) THEN
-            DX2 = X(I) - X(I + 2)
-            DY2 = Y(I) - Y(I + 2)
-        ENDIF
+        if (dx1==0.0 .and. dy1==0.0) then
+            dx1 = X(i) - X(i - 2)
+            dy1 = Y(i) - Y(i - 2)
+        endif
+        if (dx2==0.0 .and. dy2==0.0) then
+            dx2 = X(i) - X(i + 2)
+            dy2 = Y(i) - Y(i + 2)
+        endif
         !
-        CROSSP = (DX2 * DY1 - DY2 * DX1)&
-                / SQRT((DX1**2 + DY1**2) * (DX2**2 + DY2**2))
-        ANGL = ASIN(CROSSP) * (180.0 / 3.1415926)
-        IF(IPRINT.EQ.2) WRITE(*, 1100) I, X(I), Y(I), ANGL
-        IF(ABS(ANGL) .GT. ABS(AMAX)) THEN
-            AMAX = ANGL
-            IMAX = I
-        ENDIF
-    30 CONTINUE
+        crossp = (dx2 * dy1 - dy2 * dx1) / sqrt((dx1**2 + dy1**2) * (dx2**2 + dy2**2))
+        angl = asin(crossp) * (180.0 / 3.1415926)
+        if (Iprint==2) write (*, 99002) i, X(i), Y(i), angl
+        !CC             120   0.2134  -0.0234   25.322
+        99002 format (1x, i3, 2F9.4, f9.3)
+        if (abs(angl)>abs(Amax)) then
+            Amax = angl
+            Imax = i
+        endif
+    enddo
     !
-    IF(IPRINT.GE.1) WRITE(*, 1200) AMAX, IMAX, X(IMAX), Y(IMAX)
+    if (Iprint>=1) write (*, 99003) Amax, Imax, X(Imax), Y(Imax)
+    99003 format (/' Maximum panel corner angle =', f7.3, '   at  i,x,y  = ', i3, 2F9.4)
     !
-    RETURN
-    !
-    1050 FORMAT(/'  i       x        y      angle')
-    !CC             120   0.2134  -0.0234   25.322
-    1100 FORMAT(1X, I3, 2F9.4, F9.3)
-    1200 FORMAT(/' Maximum panel corner angle =', F7.3, &
-            '   at  i,x,y  = ', I3, 2F9.4)
-END
+end subroutine cang
+!*==INTER.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! CANG
 
 
 
-SUBROUTINE INTER(X0, XP0, Y0, YP0, S0, N0, SLE0, &
-        X1, XP1, Y1, YP1, S1, N1, SLE1, &
-        X, Y, N, FRAC)
+subroutine inter(X0, Xp0, Y0, Yp0, S0, N0, Sle0, X1, Xp1, Y1, Yp1, S1, N1, Sle1, X, Y, N, Frac)
+    use m_spline
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    real :: Frac, Sle0, Sle1
+    integer :: N, N0, N1
+    real, dimension(N0) :: S0, X0, Xp0, Y0, Yp0
+    real, dimension(N1) :: S1, X1, Xp1, Y1, Yp1
+    real, dimension(*) :: X, Y
+    intent (in) Frac, N0, N1, S0, S1, Sle0, Sle1, X0, X1, Xp0, Xp1, Y0, Y1, Yp0, Yp1
+    intent (out) X, Y
+    intent (inout) N
+    !
+    ! Local variables
+    !
+    real :: bots0, bots1, f0, f1, sn, st0, st1, tops0, tops1, xt0, xt1, yt0, yt1
+    integer :: i
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !     .....................................................................
     !
     !     Interpolates two source airfoil shapes into an "intermediate" shape.
@@ -527,58 +757,86 @@ SUBROUTINE INTER(X0, XP0, Y0, YP0, S0, N0, SLE0, &
     !        each surface.
     !     .....................................................................
     !
-        use m_spline
-    REAL X0(N0), Y0(N0), XP0(N0), YP0(N0), S0(N0)
-    REAL X1(N1), Y1(N1), XP1(N1), YP1(N1), S1(N1)
-    REAL X(*), Y(*)
     !
     !---- number of points in interpolated airfoil is the same as in airfoil 0
     N = N0
     !
     !---- interpolation weighting fractions
-    F0 = 1.0 - FRAC
-    F1 = FRAC
+    f0 = 1.0 - Frac
+    f1 = Frac
     !
     !---- top side spline parameter increments
-    TOPS0 = S0(1) - SLE0
-    TOPS1 = S1(1) - SLE1
+    tops0 = S0(1) - Sle0
+    tops1 = S1(1) - Sle1
     !
     !---- bottom side spline parameter increments
-    BOTS0 = S0(N0) - SLE0
-    BOTS1 = S1(N1) - SLE1
+    bots0 = S0(N0) - Sle0
+    bots1 = S1(N1) - Sle1
     !
-    DO 50 I = 1, N
+    do i = 1, N
         !
         !------ normalized spline parameter is taken from airfoil 0 value
-        IF(S0(I).LT.SLE0) SN = (S0(I) - SLE0) / TOPS0    ! top side
-        IF(S0(I).GE.SLE0) SN = (S0(I) - SLE0) / BOTS0    ! bottom side
+        if (S0(i)<Sle0) sn = (S0(i) - Sle0) / tops0             ! top side
+        if (S0(i)>=Sle0) sn = (S0(i) - Sle0) / bots0            ! bottom side
         !
         !------ set actual spline parameters
-        ST0 = S0(I)
-        IF(ST0.LT.SLE0) ST1 = SLE1 + TOPS1 * SN
-        IF(ST0.GE.SLE0) ST1 = SLE1 + BOTS1 * SN
+        st0 = S0(i)
+        if (st0<Sle0) st1 = Sle1 + tops1 * sn
+        if (st0>=Sle0) st1 = Sle1 + bots1 * sn
         !
         !------ set input coordinates at common spline parameter location
-        XT0 = SEVAL(ST0, X0, XP0, S0, N0)
-        YT0 = SEVAL(ST0, Y0, YP0, S0, N0)
-        XT1 = SEVAL(ST1, X1, XP1, S1, N1)
-        YT1 = SEVAL(ST1, Y1, YP1, S1, N1)
+        xt0 = seval(st0, X0, Xp0, S0, N0)
+        yt0 = seval(st0, Y0, Yp0, S0, N0)
+        xt1 = seval(st1, X1, Xp1, S1, N1)
+        yt1 = seval(st1, Y1, Yp1, S1, N1)
         !
         !------ set interpolated x,y coordinates
-        X(I) = F0 * XT0 + F1 * XT1
-        Y(I) = F0 * YT0 + F1 * YT1
+        X(i) = f0 * xt0 + f1 * xt1
+        Y(i) = f0 * yt0 + f1 * yt1
         !
-    50 CONTINUE
+    enddo
     !
-    RETURN
-END
+end subroutine inter
+!*==INTERX.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! INTER
 
 
 
-SUBROUTINE INTERX(X0, XP0, Y0, YP0, S0, N0, SLE0, &
-        X1, XP1, Y1, YP1, S1, N1, SLE1, &
-        X, Y, N, FRAC)
+subroutine interx(X0, Xp0, Y0, Yp0, S0, N0, Sle0, X1, Xp1, Y1, Yp1, S1, N1, Sle1, X, Y, N, Frac)
+    use m_spline
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    real :: Frac, Sle0, Sle1
+    integer :: N, N0, N1
+    real, dimension(N0) :: S0, X0, Xp0, Y0, Yp0
+    real, dimension(N1) :: S1, X1, Xp1, Y1, Yp1
+    real, dimension(N) :: X, Y
+    intent (in) Frac, Sle0, Sle1, Y0, Y1, Yp0, Yp1
+    intent (out) X, Y
+    intent (inout) N
+    !
+    ! Local variables
+    !
+    real :: f0, f1, st0, st1, xle0, xle1, xn, xt0, xt1, yt0, yt1
+    integer :: i
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !     .....................................................................
     !
     !     Interpolates two source airfoil shapes into an "intermediate" shape.
@@ -592,74 +850,89 @@ SUBROUTINE INTERX(X0, XP0, Y0, YP0, S0, N0, SLE0, &
     !        each surface.
     !     .....................................................................
     !
-        use m_spline
-    REAL X0(N0), Y0(N0), XP0(N0), YP0(N0), S0(N0)
-    REAL X1(N1), Y1(N1), XP1(N1), YP1(N1), S1(N1)
-    REAL X(N), Y(N)
     !
     !---- number of points in interpolated airfoil is the same as in airfoil 0
     N = N0
     !
     !---- interpolation weighting fractions
-    F0 = 1.0 - FRAC
-    F1 = FRAC
+    f0 = 1.0 - Frac
+    f1 = Frac
     !
-    XLE0 = SEVAL(SLE0, X0, XP0, S0, N0)
-    XLE1 = SEVAL(SLE1, X1, XP1, S1, N1)
+    xle0 = seval(Sle0, X0, Xp0, S0, N0)
+    xle1 = seval(Sle1, X1, Xp1, S1, N1)
     !
-    DO 50 I = 1, N
+    do i = 1, N
         !
         !------ normalized x parameter is taken from airfoil 0 value
-        IF(S0(I).LT.SLE0) XN = (X0(I) - XLE0) / (X0(1) - XLE0)
-        IF(S0(I).GE.SLE0) XN = (X0(I) - XLE0) / (X0(N0) - XLE0)
+        if (S0(i)<Sle0) xn = (X0(i) - xle0) / (X0(1) - xle0)
+        if (S0(i)>=Sle0) xn = (X0(i) - xle0) / (X0(N0) - xle0)
         !
         !------ set target x and initial spline parameters
-        XT0 = X0(I)
-        ST0 = S0(I)
-        IF(ST0.LT.SLE0) THEN
-            XT1 = XLE1 + (X1(1) - XLE1) * XN
-            ST1 = SLE1 + (S1(1) - SLE1) * XN
-        ELSE
-            XT1 = XLE1 + (X1(N1) - XLE1) * XN
-            ST1 = SLE1 + (S1(N1) - SLE1) * XN
-        ENDIF
+        xt0 = X0(i)
+        st0 = S0(i)
+        if (st0<Sle0) then
+            xt1 = xle1 + (X1(1) - xle1) * xn
+            st1 = Sle1 + (S1(1) - Sle1) * xn
+        else
+            xt1 = xle1 + (X1(N1) - xle1) * xn
+            st1 = Sle1 + (S1(N1) - Sle1) * xn
+        endif
         !
-        CALL SINVRT(ST0, XT0, X0, XP0, S0, N0)
-        CALL SINVRT(ST1, XT1, X1, XP1, S1, N1)
+        call sinvrt(st0, xt0, X0, Xp0, S0, N0)
+        call sinvrt(st1, xt1, X1, Xp1, S1, N1)
         !
         !------ set input coordinates at common spline parameter location
-        XT0 = SEVAL(ST0, X0, XP0, S0, N0)
-        YT0 = SEVAL(ST0, Y0, YP0, S0, N0)
-        XT1 = SEVAL(ST1, X1, XP1, S1, N1)
-        YT1 = SEVAL(ST1, Y1, YP1, S1, N1)
+        xt0 = seval(st0, X0, Xp0, S0, N0)
+        yt0 = seval(st0, Y0, Yp0, S0, N0)
+        xt1 = seval(st1, X1, Xp1, S1, N1)
+        yt1 = seval(st1, Y1, Yp1, S1, N1)
         !
         !------ set interpolated x,y coordinates
-        X(I) = F0 * XT0 + F1 * XT1
-        Y(I) = F0 * YT0 + F1 * YT1
+        X(i) = f0 * xt0 + f1 * xt1
+        Y(i) = f0 * yt0 + f1 * yt1
         !
-    50 CONTINUE
+    enddo
     !
-    RETURN
-END
+end subroutine interx
+!*==BENDUMP.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! INTERX
 
 
 
 
 
-SUBROUTINE BENDUMP(N, X, Y)
-    REAL X(*), Y(*)
+subroutine bendump(N, X, Y)
+    implicit none
     !
-    PEX = 16.0
-    CALL IJSECT(N, X, Y, PEX, &
-            AREA, SLEN, &
-            XMIN, XMAX, XEXINT, &
-            YMIN, YMAX, YEXINT, &
-            XC, YC, &
-            XCT, YCT, &
-            AIXX, AIYY, &
-            AIXXT, AIYYT, &
-            AJ, AJT)
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    integer :: N
+    real, dimension(*) :: X, Y
+    !
+    ! Local variables
+    !
+    real :: aixx, aixxt, aiyy, aiyyt, aj, ajt, area, pex, slen, xbar, xbart, xc, xct, xexint, xmax, xmin, &
+            & ybar, ybart, yc, yct, yexint, ymax, ymin
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    pex = 16.0
+    call ijsect(N, X, Y, pex, area, slen, &
+            xmin, xmax, xexint, ymin, ymax, yexint, xc, yc, xct, yct, aixx, aiyy, aixxt, aiyyt, aj, ajt)
     !      CALL IJSECT(N,X,Y, PEX,
     !     &    AREA, SLEN,
     !     &    XC, XMIN, XMAX, XEXINT,
@@ -668,75 +941,96 @@ SUBROUTINE BENDUMP(N, X, Y)
     !     &    AIYY, AIYYT,
     !     &    AJ  , AJT   )
     !
-    WRITE(*, *)
-    WRITE(*, 1200) 'Area =', AREA
-    WRITE(*, 1200) 'Slen =', SLEN
-    WRITE(*, *)
-    WRITE(*, 1200) 'X-bending parameters(solid):'
-    WRITE(*, 1200) '        Xc =', XC
-    WRITE(*, 1200) '  max X-Xc =', XMAX - XC
-    WRITE(*, 1200) '  min X-Xc =', XMIN - XC
-    WRITE(*, 1200) '       Iyy =', AIYY
-    XBAR = MAX(ABS(XMAX - XC), ABS(XMIN - XC))
-    WRITE(*, 1200) ' Iyy/(X-Xc)=', AIYY / XBAR
-    WRITE(*, *)
-    WRITE(*, 1200) 'Y-bending parameters(solid):'
-    WRITE(*, 1200) '        Yc =', YC
-    WRITE(*, 1200) '  max Y-Yc =', YMAX - YC
-    WRITE(*, 1200) '  min Y-Yc =', YMIN - YC
-    WRITE(*, 1200) '       Ixx =', AIXX
-    YBAR = MAX(ABS(YMAX - YC), ABS(YMIN - YC))
-    WRITE(*, 1200) ' Ixx/(Y-Yc)=', AIXX / YBAR
-    WRITE(*, *)
-    WRITE(*, 1200) '       J   =', AJ
+    write (*, *)
+    write (*, 99001) 'Area =', area
+    write (*, 99001) 'Slen =', slen
+    write (*, *)
+    write (*, 99001) 'X-bending parameters(solid):'
+    write (*, 99001) '        Xc =', xc
+    write (*, 99001) '  max X-Xc =', xmax - xc
+    write (*, 99001) '  min X-Xc =', xmin - xc
+    write (*, 99001) '       Iyy =', aiyy
+    xbar = max(abs(xmax - xc), abs(xmin - xc))
+    write (*, 99001) ' Iyy/(X-Xc)=', aiyy / xbar
+    write (*, *)
+    write (*, 99001) 'Y-bending parameters(solid):'
+    write (*, 99001) '        Yc =', yc
+    write (*, 99001) '  max Y-Yc =', ymax - yc
+    write (*, 99001) '  min Y-Yc =', ymin - yc
+    write (*, 99001) '       Ixx =', aixx
+    ybar = max(abs(ymax - yc), abs(ymin - yc))
+    write (*, 99001) ' Ixx/(Y-Yc)=', aixx / ybar
+    write (*, *)
+    write (*, 99001) '       J   =', aj
     !
-    WRITE(*, *)
-    WRITE(*, *)
-    WRITE(*, 1200) 'X-bending parameters(skin):'
-    WRITE(*, 1200) '         Xc =', XCT
-    WRITE(*, 1200) '   max X-Xc =', XMAX - XCT
-    WRITE(*, 1200) '   min X-Xc =', XMIN - XCT
-    WRITE(*, 1200) '      Iyy/t =', AIYYT
-    XBART = MAX(ABS(XMAX - XCT), ABS(XMIN - XCT))
-    WRITE(*, 1200) ' Iyy/t(X-Xc)=', AIYYT / XBART
-    WRITE(*, *)
-    WRITE(*, 1200) 'Y-bending parameters(skin):'
-    WRITE(*, 1200) '         Yc =', YCT
-    WRITE(*, 1200) '   max Y-Yc =', YMAX - YCT
-    WRITE(*, 1200) '   min Y-Yc =', YMIN - YCT
-    WRITE(*, 1200) '      Ixx/t =', AIXXT
-    YBART = MAX(ABS(YMAX - YCT), ABS(YMIN - YCT))
-    WRITE(*, 1200) ' Ixx/t(Y-Yc)=', AIXXT / YBART
-    WRITE(*, *)
-    WRITE(*, 1200) '      J/t   =', AJT
+    write (*, *)
+    write (*, *)
+    write (*, 99001) 'X-bending parameters(skin):'
+    write (*, 99001) '         Xc =', xct
+    write (*, 99001) '   max X-Xc =', xmax - xct
+    write (*, 99001) '   min X-Xc =', xmin - xct
+    write (*, 99001) '      Iyy/t =', aiyyt
+    xbart = max(abs(xmax - xct), abs(xmin - xct))
+    write (*, 99001) ' Iyy/t(X-Xc)=', aiyyt / xbart
+    write (*, *)
+    write (*, 99001) 'Y-bending parameters(skin):'
+    write (*, 99001) '         Yc =', yct
+    write (*, 99001) '   max Y-Yc =', ymax - yct
+    write (*, 99001) '   min Y-Yc =', ymin - yct
+    write (*, 99001) '      Ixx/t =', aixxt
+    ybart = max(abs(ymax - yct), abs(ymin - yct))
+    write (*, 99001) ' Ixx/t(Y-Yc)=', aixxt / ybart
+    write (*, *)
+    write (*, 99001) '      J/t   =', ajt
     !
     !      WRITE(*,*)
     !      WRITE(*,1200) '  power-avg X-Xc =', XEXINT
     !      WRITE(*,1200) '  power-avg Y-Yc =', YEXINT
     !
-    RETURN
+    return
     !
-    1200 FORMAT(1X, A, G14.6)
-END
+    99001 format (1x, a, g14.6)
+end subroutine bendump
+!*==BENDUMP2.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! BENDUMP
 
 
 
-SUBROUTINE BENDUMP2(N, X, Y, T)
-    REAL X(*), Y(*), T(*)
+subroutine bendump2(N, X, Y, T)
+    implicit none
     !
-    DTR = ATAN(1.0) / 45.0
+    !*** Start of declarations rewritten by SPAG
     !
-    PEX = 16.0
-    CALL IJSECT(N, X, Y, PEX, &
-            AREA, SLEN, &
-            XMIN, XMAX, XEXINT, &
-            YMIN, YMAX, YEXINT, &
-            XC, YC, &
-            XCT, YCT, &
-            AIXX, AIYY, &
-            AIXXT, AIYYT, &
-            AJ, AJT)
+    ! Dummy arguments
+    !
+    integer :: N
+    real, dimension(*) :: T, X, Y
+    !
+    ! Local variables
+    !
+    real :: aixx, aixxt, aiyy, aiyyt, aj, ajt, apx1a, apx1t, apx2a, apx2t, area, dtr, ei11a, ei11t, ei22a, &
+            & ei22t, pex, slen, xbara, xbart, xc, xcena, xcent, xct, xexint, xmax, xmin, ybara, ybart, yc, &
+            & ycena, ycent, yct, yexint, ymax, ymin
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    dtr = atan(1.0) / 45.0
+    !
+    pex = 16.0
+    call ijsect(N, X, Y, pex, area, slen, &
+            xmin, xmax, xexint, ymin, ymax, yexint, xc, yc, xct, yct, aixx, aiyy, aixxt, aiyyt, aj, ajt)
     !      CALL IJSECT(N,X,Y, PEX,
     !     &    AREA, SLEN,
     !     &    XC, XMIN, XMAX, XEXINT,
@@ -746,240 +1040,286 @@ SUBROUTINE BENDUMP2(N, X, Y, T)
     !     &    AJ  , AJT   )
     !
     !
-    CALL AECALC(N, X, Y, T, 1, &
-            AREA, XCENA, YCENA, EI11A, EI22A, APX1A, APX2A)
+    call aecalc(N, X, Y, T, 1, area, xcena, ycena, ei11a, ei22a, apx1a, apx2a)
     !
-    CALL AECALC(N, X, Y, T, 2, &
-            SLEN, XCENT, YCENT, EI11T, EI22T, APX1T, APX2T)
+    call aecalc(N, X, Y, T, 2, slen, xcent, ycent, ei11t, ei22t, apx1t, apx2t)
     !
 
-    WRITE(*, *)
-    WRITE(*, 1200) 'Area =', AREA
-    WRITE(*, 1200) 'Slen =', SLEN
-    WRITE(*, *)
-    WRITE(*, 1200) 'X-bending parameters:'
-    WRITE(*, 1200) 'solid centroid Xc=', XCENA
-    WRITE(*, 1200) 'skin  centroid Xc=', XCENT
-    WRITE(*, 1200) ' solid max X-Xc  =', XMAX - XCENA
-    WRITE(*, 1200) ' solid min X-Xc  =', XMIN - XCENA
-    WRITE(*, 1200) ' skin  max X-Xc  =', XMAX - XCENT
-    WRITE(*, 1200) ' skin  min X-Xc  =', XMIN - XCENT
-    WRITE(*, 1200) '     solid Iyy   =', EI22A
-    WRITE(*, 1200) '     skin  Iyy/t =', EI22T
-    XBARA = MAX(ABS(XMAX - XCENA), ABS(XMIN - XCENA))
-    XBART = MAX(ABS(XMAX - XCENT), ABS(XMIN - XCENT))
-    WRITE(*, 1200) ' solid Iyy/(X-Xc)=', EI22A / XBARA
-    WRITE(*, 1200) ' skin Iyy/t(X-Xc)=', EI22T / XBART
+    write (*, *)
+    write (*, 99001) 'Area =', area
+    write (*, 99001) 'Slen =', slen
+    write (*, *)
+    write (*, 99001) 'X-bending parameters:'
+    write (*, 99001) 'solid centroid Xc=', xcena
+    write (*, 99001) 'skin  centroid Xc=', xcent
+    write (*, 99001) ' solid max X-Xc  =', xmax - xcena
+    write (*, 99001) ' solid min X-Xc  =', xmin - xcena
+    write (*, 99001) ' skin  max X-Xc  =', xmax - xcent
+    write (*, 99001) ' skin  min X-Xc  =', xmin - xcent
+    write (*, 99001) '     solid Iyy   =', ei22a
+    write (*, 99001) '     skin  Iyy/t =', ei22t
+    xbara = max(abs(xmax - xcena), abs(xmin - xcena))
+    xbart = max(abs(xmax - xcent), abs(xmin - xcent))
+    write (*, 99001) ' solid Iyy/(X-Xc)=', ei22a / xbara
+    write (*, 99001) ' skin Iyy/t(X-Xc)=', ei22t / xbart
     !
-    WRITE(*, *)
-    WRITE(*, 1200) 'Y-bending parameters:'
-    WRITE(*, 1200) 'solid centroid Yc=', YCENA
-    WRITE(*, 1200) 'skin  centroid Yc=', YCENT
-    WRITE(*, 1200) ' solid max Y-Yc  =', YMAX - YCENA
-    WRITE(*, 1200) ' solid min Y-Yc  =', YMIN - YCENA
-    WRITE(*, 1200) ' skin  max Y-Yc  =', YMAX - YCENT
-    WRITE(*, 1200) ' skin  min Y-Yc  =', YMIN - YCENT
-    WRITE(*, 1200) '     solid Ixx   =', EI11A
-    WRITE(*, 1200) '     skin  Ixx/t =', EI11T
-    YBARA = MAX(ABS(YMAX - YCENA), ABS(YMIN - YCENA))
-    YBART = MAX(ABS(YMAX - YCENT), ABS(YMIN - YCENT))
-    WRITE(*, 1200) ' solid Ixx/(Y-Yc)=', EI11A / YBARA
-    WRITE(*, 1200) ' skin Ixx/t(Y-Yc)=', EI11T / YBART
+    write (*, *)
+    write (*, 99001) 'Y-bending parameters:'
+    write (*, 99001) 'solid centroid Yc=', ycena
+    write (*, 99001) 'skin  centroid Yc=', ycent
+    write (*, 99001) ' solid max Y-Yc  =', ymax - ycena
+    write (*, 99001) ' solid min Y-Yc  =', ymin - ycena
+    write (*, 99001) ' skin  max Y-Yc  =', ymax - ycent
+    write (*, 99001) ' skin  min Y-Yc  =', ymin - ycent
+    write (*, 99001) '     solid Ixx   =', ei11a
+    write (*, 99001) '     skin  Ixx/t =', ei11t
+    ybara = max(abs(ymax - ycena), abs(ymin - ycena))
+    ybart = max(abs(ymax - ycent), abs(ymin - ycent))
+    write (*, 99001) ' solid Ixx/(Y-Yc)=', ei11a / ybara
+    write (*, 99001) ' skin Ixx/t(Y-Yc)=', ei11t / ybart
     !
-    WRITE(*, *)
-    WRITE(*, 1200) ' solid principal axis angle (deg ccw) =', APX1A / DTR
-    WRITE(*, 1200) ' skin  principal axis angle (deg ccw) =', APX1T / DTR
+    write (*, *)
+    write (*, 99001) ' solid principal axis angle (deg ccw) =', apx1a / dtr
+    write (*, 99001) ' skin  principal axis angle (deg ccw) =', apx1t / dtr
 
     !      WRITE(*,*)
     !      WRITE(*,1200) '  power-avg X-Xc =', XEXINT
     !      WRITE(*,1200) '  power-avg Y-Yc =', YEXINT
     !
-    WRITE(*, *)
-    WRITE(*, 1200) '    solid J     =', AJ
-    WRITE(*, 1200) '    skin  J/t   =', AJT
-    RETURN
+    write (*, *)
+    write (*, 99001) '    solid J     =', aj
+    write (*, 99001) '    skin  J/t   =', ajt
+    return
     !
-    1200 FORMAT(1X, A, G14.6)
-END
+    99001 format (1x, a, g14.6)
+end subroutine bendump2
+!*==IJSECT.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! BENDUMP2
 
 
 
-SUBROUTINE IJSECT(N, X, Y, PEX, &
-        AREA, SLEN, &
-        XMIN, XMAX, XEXINT, &
-        YMIN, YMAX, YEXINT, &
-        XC, YC, &
-        XCT, YCT, &
-        AIXX, AIYY, &
-        AIXXT, AIYYT, &
-        AJ, AJT)
-    DIMENSION X(*), Y(*)
+subroutine ijsect(N, X, Y, Pex, Area, Slen, &
+        Xmin, Xmax, Xexint, Ymin, Ymax, Yexint, Xc, Yc, Xct, Yct, Aixx, Aiyy, Aixxt, Aiyyt, Aj, Ajt)
+    implicit none
     !
-    XMIN = X(1)
-    XMAX = X(1)
-    YMIN = Y(1)
-    YMAX = Y(1)
+    !*** Start of declarations rewritten by SPAG
     !
-    DX = X(1) - X(N)
-    DY = Y(1) - Y(N)
-    DS = SQRT(DX * DX + DY * DY)
-    XAVG = 0.5 * (X(1) + X(N))
-    YAVG = 0.5 * (Y(1) + Y(N))
+    ! Dummy arguments
     !
-    X_DY = DY * XAVG
-    XX_DY = DY * XAVG**2
-    XXX_DY = DY * XAVG**3
-    X_DS = DS * XAVG
-    XX_DS = DS * XAVG**2
+    real :: Aixx, Aixxt, Aiyy, Aiyyt, Aj, Ajt, Area, Pex, Slen, Xc, Xct, Xexint, Xmax, Xmin, Yc, Yct, &
+            & Yexint, Ymax, Ymin
+    integer :: N
+    real, dimension(*) :: X, Y
+    intent (in) N, X, Y
+    intent (out) Aixx, Aixxt, Aiyy, Aiyyt, Ajt
+    intent (inout) Aj, Area, Slen, Xc, Xct, Xmax, Xmin, Yc, Yct, Ymax, Ymin
     !
-    Y_DX = DX * YAVG
-    YY_DX = DX * YAVG**2
-    YYY_DX = DX * YAVG**3
-    Y_DS = DS * YAVG
-    YY_DS = DS * YAVG**2
+    ! Local variables
     !
-    C_DS = DS
+    real :: c_ds, ds, dx, dy, frac, sint, xavg, xint, xxx_dy, xx_ds, xx_dy, x_ds, x_dy, yavg, yint, yopp, &
+            & yyy_dx, yy_ds, yy_dx, y_ds, y_dx
+    integer :: i, imid, j
     !
-    DO 10 I = 2, N
-        DX = X(I) - X(I - 1)
-        DY = Y(I) - Y(I - 1)
-        DS = SQRT(DX * DX + DY * DY)
-        XAVG = 0.5 * (X(I) + X(I - 1))
-        YAVG = 0.5 * (Y(I) + Y(I - 1))
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    Xmin = X(1)
+    Xmax = X(1)
+    Ymin = Y(1)
+    Ymax = Y(1)
+    !
+    dx = X(1) - X(N)
+    dy = Y(1) - Y(N)
+    ds = sqrt(dx * dx + dy * dy)
+    xavg = 0.5 * (X(1) + X(N))
+    yavg = 0.5 * (Y(1) + Y(N))
+    !
+    x_dy = dy * xavg
+    xx_dy = dy * xavg**2
+    xxx_dy = dy * xavg**3
+    x_ds = ds * xavg
+    xx_ds = ds * xavg**2
+    !
+    y_dx = dx * yavg
+    yy_dx = dx * yavg**2
+    yyy_dx = dx * yavg**3
+    y_ds = ds * yavg
+    yy_ds = ds * yavg**2
+    !
+    c_ds = ds
+    !
+    do i = 2, N
+        dx = X(i) - X(i - 1)
+        dy = Y(i) - Y(i - 1)
+        ds = sqrt(dx * dx + dy * dy)
+        xavg = 0.5 * (X(i) + X(i - 1))
+        yavg = 0.5 * (Y(i) + Y(i - 1))
         !
-        X_DY = X_DY + DY * XAVG
-        XX_DY = XX_DY + DY * XAVG**2
-        XXX_DY = XXX_DY + DY * XAVG**3
-        X_DS = X_DS + DS * XAVG
-        XX_DS = XX_DS + DS * XAVG**2
+        x_dy = x_dy + dy * xavg
+        xx_dy = xx_dy + dy * xavg**2
+        xxx_dy = xxx_dy + dy * xavg**3
+        x_ds = x_ds + ds * xavg
+        xx_ds = xx_ds + ds * xavg**2
         !
-        Y_DX = Y_DX + DX * YAVG
-        YY_DX = YY_DX + DX * YAVG**2
-        YYY_DX = YYY_DX + DX * YAVG**3
-        Y_DS = Y_DS + DS * YAVG
-        YY_DS = YY_DS + DS * YAVG**2
+        y_dx = y_dx + dx * yavg
+        yy_dx = yy_dx + dx * yavg**2
+        yyy_dx = yyy_dx + dx * yavg**3
+        y_ds = y_ds + ds * yavg
+        yy_ds = yy_ds + ds * yavg**2
         !
-        C_DS = C_DS + DS
+        c_ds = c_ds + ds
         !
-        XMIN = MIN(XMIN, X(I))
-        XMAX = MAX(XMAX, X(I))
-        YMIN = MIN(YMIN, Y(I))
-        YMAX = MAX(YMAX, Y(I))
-    10   CONTINUE
+        Xmin = min(Xmin, X(i))
+        Xmax = max(Xmax, X(i))
+        Ymin = min(Ymin, Y(i))
+        Ymax = max(Ymax, Y(i))
+    enddo
     !
-    AREA = -Y_DX
-    SLEN = C_DS
+    Area = -y_dx
+    Slen = c_ds
     !
-    IF(AREA.EQ.0.0) RETURN
+    if (Area==0.0) return
     !
-    XC = XX_DY / (2.0 * X_DY)
-    XCT = X_DS / C_DS
-    AIYY = XXX_DY / 3.0 - XX_DY * XC + X_DY * XC**2
-    AIYYT = XX_DS - X_DS * XCT * 2.0 + C_DS * XCT**2
+    Xc = xx_dy / (2.0 * x_dy)
+    Xct = x_ds / c_ds
+    Aiyy = xxx_dy / 3.0 - xx_dy * Xc + x_dy * Xc**2
+    Aiyyt = xx_ds - x_ds * Xct * 2.0 + c_ds * Xct**2
     !
-    YC = YY_DX / (2.0 * Y_DX)
-    YCT = Y_DS / C_DS
-    AIXX = -YYY_DX / 3.0 + YY_DX * YC - Y_DX * YC**2
-    AIXXT = YY_DS - Y_DS * YCT * 2.0 + C_DS * YCT**2
+    Yc = yy_dx / (2.0 * y_dx)
+    Yct = y_ds / c_ds
+    Aixx = -yyy_dx / 3.0 + yy_dx * Yc - y_dx * Yc**2
+    Aixxt = yy_ds - y_ds * Yct * 2.0 + c_ds * Yct**2
     !
     !
-    SINT = 0.
-    XINT = 0.
-    YINT = 0.
+    sint = 0.
+    xint = 0.
+    yint = 0.
     !
-    DO 20 I = 2, N
-        DX = X(I) - X(I - 1)
-        DY = Y(I) - Y(I - 1)
-        DS = SQRT(DX * DX + DY * DY)
-        XAVG = 0.5 * (X(I) + X(I - 1)) - XC
-        YAVG = 0.5 * (Y(I) + Y(I - 1)) - YC
+    do i = 2, N
+        dx = X(i) - X(i - 1)
+        dy = Y(i) - Y(i - 1)
+        ds = sqrt(dx * dx + dy * dy)
+        xavg = 0.5 * (X(i) + X(i - 1)) - Xc
+        yavg = 0.5 * (Y(i) + Y(i - 1)) - Yc
         !
-        SINT = SINT + DS
+        sint = sint + ds
         !c        XINT = XINT + DS * ABS(XAVG)**PEX
         !c        YINT = YINT + DS * ABS(YAVG)**PEX
-    20   CONTINUE
+    enddo
     !
-    DO I = 1, N - 1
-        IF(X(I + 1) .GE. X(I)) GO TO 30
-    ENDDO
-    IMID = N / 2
-    30   IMID = I
+    do i = 1, N - 1
+        if (X(i + 1)>=X(i)) goto 100
+    enddo
+    imid = N / 2
+    100  imid = i
     !
-    AJ = 0.0
-    DO I = 2, IMID
-        XAVG = 0.5 * (X(I) + X(I - 1))
-        YAVG = 0.5 * (Y(I) + Y(I - 1))
-        DX = X(I - 1) - X(I)
+    Aj = 0.0
+    do i = 2, imid
+        xavg = 0.5 * (X(i) + X(i - 1))
+        yavg = 0.5 * (Y(i) + Y(i - 1))
+        dx = X(i - 1) - X(i)
         !
-        IF(XAVG.GT.X(N)) THEN
-            YOPP = Y(N)
-            GO TO 41
-        ENDIF
-        IF(XAVG.LE.X(IMID)) THEN
-            YOPP = Y(IMID)
-            GO TO 41
-        ENDIF
+        if (xavg>X(N)) then
+            yopp = Y(N)
+            goto 150
+        endif
+        if (xavg<=X(imid)) then
+            yopp = Y(imid)
+            goto 150
+        endif
         !
-        DO J = N, IMID, -1
-            IF(XAVG.GT.X(J - 1) .AND. XAVG.LE.X(J)) THEN
-                FRAC = (XAVG - X(J - 1))&
-                        / (X(J) - X(J - 1))
-                YOPP = Y(J - 1) + (Y(J) - Y(J - 1)) * FRAC
-                GO TO 41
-            ENDIF
-        ENDDO
-        41     CONTINUE
+        do j = N, imid, -1
+            if (xavg>X(j - 1) .and. xavg<=X(j)) then
+                frac = (xavg - X(j - 1)) / (X(j) - X(j - 1))
+                yopp = Y(j - 1) + (Y(j) - Y(j - 1)) * frac
+                exit
+            endif
+        enddo
         !
-        AJ = AJ + ABS(YAVG - YOPP)**3 * DX / 3.0
-    ENDDO
+        150  Aj = Aj + abs(yavg - yopp)**3 * dx / 3.0
+    enddo
     !
-    AJT = 4.0 * AREA**2 / SLEN
+    Ajt = 4.0 * Area**2 / Slen
     !
     !c      XEXINT = (XINT/SINT)**(1.0/PEX)
     !c      YEXINT = (YINT/SINT)**(1.0/PEX)
     !
-    RETURN
-END
+end subroutine ijsect
+!*==HALF.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! IJSECT
 
 
-SUBROUTINE HALF(X, Y, S, N)
+subroutine half(X, Y, S, N)
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    integer :: N
+    real, dimension(*) :: S, X, Y
+    intent (in) S
+    intent (inout) N, X, Y
+    !
+    ! Local variables
+    !
+    integer :: i, inext, k
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !-------------------------------------------------
     !     Halves the number of points in airfoil
     !-------------------------------------------------
-    REAL X(*), Y(*), S(*)
     !
-    K = 1
-    INEXT = 3
-    DO 20 I = 2, N - 1
+    k = 1
+    inext = 3
+    do i = 2, N - 1
         !------ if corner is found, preserve it.
-        IF(S(I) .EQ. S(I + 1)) THEN
-            K = K + 1
-            X(K) = X(I)
-            Y(K) = Y(I)
-            K = K + 1
-            X(K) = X(I + 1)
-            Y(K) = Y(I + 1)
-            INEXT = I + 3
-        ENDIF
+        if (S(i)==S(i + 1)) then
+            k = k + 1
+            X(k) = X(i)
+            Y(k) = Y(i)
+            k = k + 1
+            X(k) = X(i + 1)
+            Y(k) = Y(i + 1)
+            inext = i + 3
+        endif
         !
-        IF(I.EQ.INEXT) THEN
-            K = K + 1
-            X(K) = X(I)
-            Y(K) = Y(I)
-            INEXT = I + 2
-        ENDIF
+        if (i==inext) then
+            k = k + 1
+            X(k) = X(i)
+            Y(k) = Y(i)
+            inext = i + 2
+        endif
         !
-    20 CONTINUE
-    K = K + 1
-    X(K) = X(N)
-    Y(K) = Y(N)
+    enddo
+    k = k + 1
+    X(k) = X(N)
+    Y(k) = Y(N)
     !
     !---- set new number of points
-    N = K
+    N = k
     !
-    RETURN
-END
-! HALF
-
+end subroutine half

@@ -1,8 +1,11 @@
+!*==MDES.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
+! HALF
+
 !***********************************************************************
 !    Module:  xmdes.f
-! 
-!    Copyright (C) 2000 Mark Drela 
-! 
+!
+!    Copyright (C) 2000 Mark Drela
+!
 !    This program is free software; you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
 !    the Free Software Foundation; either version 2 of the License, or
@@ -18,430 +21,526 @@
 !    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 !***********************************************************************
 !
-SUBROUTINE MDES
+subroutine mdes
+    use m_xqdes
+    use m_spline
+    use i_xfoil
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    character(128), save :: argold
+    real :: cfilt, clq, g
+    character(4) :: comand
+    character(128) :: comarg
+    character(4), save :: comold
+    logical :: error, lcnpl, lrecalc
+    integer :: i, k, kqsp, lu, ninput, ntmp, ntqspl
+    integer, dimension(20) :: iinput
+    character(80) :: line
+    real :: qcomp
+    real, dimension(20) :: rinput
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !------------------------------------
     !     Full-Inverse design routine.
     !     Based on circle plane mapping.
     !------------------------------------
-        use m_spline
-    use i_xfoil
-    LOGICAL LCNPL, LRECALC
     !
-    CHARACTER*4 COMAND, COMOLD
-    CHARACTER*80 LINE
     !
-    CHARACTER*128 COMARG, ARGOLD
-    CHARACTER*1 CHKEY
     !
-    REAL XBOX(2), YBOX(2)
-    REAL XSP(IBX), YSP(IBX, IPX), YSPD(IBX, IPX)
     !
-    DIMENSION IINPUT(20)
-    DIMENSION RINPUT(20)
-    LOGICAL ERROR, LPLNEW
     !
-    SAVE COMOLD, ARGOLD
     !
     !---- statement function for compressible Karman-Tsien velocity
-    QCOMP(G) = G * (1.0 - TKLAM) / (1.0 - TKLAM * (G / QINF)**2)
+    qcomp(g) = g * (1.0 - TKLam) / (1.0 - TKLam * (g / QINf)**2)
     !
-    COMAND = '****'
-    COMARG = ' '
-    LRECALC = .FALSE.
+    comand = '****'
+    comarg = ' '
+    lrecalc = .false.
     !
-    IF(N.EQ.0) THEN
-        WRITE(*, *)
-        WRITE(*, *) '***  No airfoil available  ***'
-        RETURN
-    ENDIF
+    if (N==0) then
+        write (*, *)
+        write (*, *) '***  No airfoil available  ***'
+        return
+    endif
     !
-    LCNPL = .FALSE.
-    LSYM = .TRUE.
+    lcnpl = .false.
+    LSYm = .true.
     !
-    NTQSPL = 1
-    IF(LQSLOP) NTQSPL = 4
+    ntqspl = 1
+    if (LQSlop) ntqspl = 4
     !
-    1 CONTINUE
     !
     !---- see if current Qspec, if any, didn't come from Mixed-Inverse
-    IF(NSP.NE.NC1) THEN
-        LQSPEC = .FALSE.
+    100  if (NSP/=NC1) then
+        LQSpec = .false.
         IQ1 = 1
         IQ2 = NC1
-    ENDIF
+    endif
     !
     !---- initialize Fourier transform arrays if it hasn't been done
-    IF(.NOT.LEIW) CALL EIWSET(NC1)
-    LEIW = .TRUE.
+    if (.not.LEIw) call eiwset(NC1)
+    LEIw = .true.
     !
     !---- if Qspec alpha has never been set, set it to current alpha
-    IF(NQSP .EQ. 0) THEN
-        IACQSP = 1
-        ALQSP(1) = ALFA
-        NQSP = 1
-    ENDIF
+    if (NQSp==0) then
+        IACqsp = 1
+        ALQsp(1) = ALFa
+        NQSp = 1
+    endif
     !
-    IF(.NOT.LSCINI) THEN
+    if (.not.LSCini) then
         !------ initialize s(w) for current airfoil, generating its Cn coefficients
-        CALL SCINIT(N, X, XP, Y, YP, S, SLE)
-        LSCINI = .TRUE.
+        call scinit(N, X, XP, Y, YP, S, SLE)
+        LSCini = .true.
         !
         !------ set up to initialize Qspec to current conditions
-        LQSPEC = .FALSE.
-    ENDIF
+        LQSpec = .false.
+    endif
     !
     !---- set initial Q for current alpha
-    ALGAM = ALFA
-    CALL MAPGAM(1, ALGAM, CLGAM, CMGAM)
-    WRITE(*, 1150) ALGAM / DTOR, CLGAM
+    ALGam = ALFa
+    call mapgam(1, ALGam, CLGam, CMGam)
+    write (*, 99009) ALGam / DTOr, CLGam
     !
-    IF(.NOT.LQSPEC) THEN
+    if (.not.LQSpec) then
         !------ set Cn coefficients from current Q
-        CALL CNCALC(QGAMM, .FALSE.)
+        call cncalc(QGAmm, .false.)
         !
         !------ set Qspec from Cn coefficients
-        CALL QSPCIR
-        WRITE(*, 1190)
-    ENDIF
+        call qspcir
+        write (*, 99001)
+        99001 format (/' Qspec initialized to current Q')
+    endif
     !
     !====================================================
     !---- start of menu loop
-    500  CONTINUE
-    COMOLD = COMAND
-    ARGOLD = COMARG
-    !
-    501  IF(LQSYM) THEN
-        CALL ASKC('.MDESs^', COMAND, COMARG)
-    ELSE
-        CALL ASKC('.MDES^', COMAND, COMARG)
-    ENDIF
-    !
-    505  CONTINUE
-    !
-    !---- process previous command ?
-    IF(COMAND(1:1).EQ.'!') THEN
-        IF(COMOLD.EQ.'****') THEN
-            WRITE(*, *) 'Previous .MDES command not valid'
-            GO TO 501
-        ELSE
-            COMAND = COMOLD
-            COMARG = ARGOLD
-            LRECALC = .TRUE.
-        ENDIF
-    ELSE
-        LRECALC = .FALSE.
-    ENDIF
-    !
-    IF(COMAND.EQ.'    ') THEN
-        !----- just <return> was typed... clean up plotting and exit OPER
-        RETURN
-    ENDIF
-    !
-    !---- extract command line numeric arguments
-    DO I = 1, 20
-        IINPUT(I) = 0
-        RINPUT(I) = 0.0
-    ENDDO
-    NINPUT = 0
-    CALL GETINT(COMARG, IINPUT, NINPUT, ERROR)
-    NINPUT = 0
-    CALL GETFLT(COMARG, RINPUT, NINPUT, ERROR)
-    !
-    !--------------------------------------------------------
-    IF(COMAND.EQ.'?   ') THEN
-        WRITE(*, 1050)
-        1050  FORMAT(&
-                /'   <cr>   Return to Top Level'&
-                /'   !      Redo previous command'&
-                //'   INIT   Re-initialize mapping'&
-                /'   QSET   Reset Qspec <== Q'&
-                /'   AQ r.. Show/select alpha(s) for Qspec'&
-                /'   CQ r.. Show/select  CL(s)   for Qspec'&
-                //'   Symm   Toggle symmetry flag'&
-                /'   TGAP r Set new TE gap'&
-                /'   TANG r Set new TE angle'&
-                /'   SMOO   Smooth Qspec inside target segment'&
-                /'   Filt   Apply Hanning filter to entire Qspec'&
-                /'   SLOP   Toggle modified-Qspec slope matching flag'&
-                //'   eXec   Execute  full-inverse calculation'&
-                //'   PERT   Perturb one Cn and generate geometry')
+    200  comold = comand
+    argold = comarg
+    do
         !
-        !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'INIT') THEN
-        LQSPEC = .FALSE.
-        LSCINI = .FALSE.
-        GO TO 1
-        !
-        !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'QSET') THEN
-        CALL CNCALC(QGAMM, .FALSE.)
-        IF(LQSYM) CALL CNSYMM
-        CALL QSPCIR
-        !
-        LCNPL = .FALSE.
-        !
-        !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'AQ  ') THEN
-        !----- set Qspec(s) for specified alphas
-        IF(NINPUT.GE.1) THEN
-            NQSP = MIN(NINPUT, IPX)
-            DO K = 1, NQSP
-                ALQSP(K) = RINPUT(K) * DTOR
-            ENDDO
-        ELSE
-            WRITE(*, 1150) ALGAM / DTOR, CLGAM
-            WRITE(*, 1161) (ALQSP(K) / DTOR, K=1, NQSP)
-            161    WRITE(*, 1162)
-            1161   FORMAT(/' Current Qspec alphas  =', 20F9.3)
-            1162   FORMAT(' New alphas or <return>:  ', $)
-            READ (*, 5000) LINE
-            NTMP = IPX
-            CALL GETFLT(LINE, W1, NTMP, ERROR)
-            IF(ERROR) GO TO 161
-            NTMP = MIN(NTMP, IPX)
+        if (LQSym) then
+            call askc('.MDESs^', comand, comarg)
+        else
+            call askc('.MDES^', comand, comarg)
+        endif
+        do
             !
-            !------ if just <return> was hit, don't do anything
-            IF(NTMP .EQ. 0) GO TO 500
             !
-            NQSP = NTMP
-            DO K = 1, NQSP
-                ALQSP(K) = W1(K) * DTOR
-            ENDDO
-        ENDIF
-        !
-        IACQSP = 1
-        CALL QSPCIR
-        !
-        LCNPL = .FALSE.
-        !
-        !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'CQ  ') THEN
-        !----- set Qspec(s) for specified CLs
-        IF(NINPUT.GE.1) THEN
-            NQSP = MIN(NINPUT, IPX)
-            DO K = 1, NQSP
-                CLQSP(K) = RINPUT(K)
-            ENDDO
-        ELSE
-            WRITE(*, 1150) ALGAM / DTOR, CLGAM
-            WRITE(*, 1171) (CLQSP(K), K = 1, NQSP)
-            171    WRITE(*, 1172)
-            1171   FORMAT(/' Current Qspec CLs  =', 20F8.4)
-            1172   FORMAT(' New CLs or <return>:  ', $)
-            READ (*, 5000) LINE
-            NTMP = IPX
-            CALL GETFLT(LINE, W1, NTMP, ERROR)
-            IF(ERROR) GO TO 171
-            NTMP = MIN(NTMP, IPX)
+            !---- process previous command ?
+            if (comand(1:1)/='!') then
+                lrecalc = .false.
+            elseif (comold=='****') then
+                write (*, *) 'Previous .MDES command not valid'
+                goto 300
+            else
+                comand = comold
+                comarg = argold
+                lrecalc = .true.
+            endif
             !
-            !------ if just <return> was hit, don't do anything
-            IF(NTMP .EQ. 0) GO TO 500
+            !----- just <return> was typed... clean up plotting and exit OPER
+            if (comand=='    ') return
             !
-            NQSP = NTMP
-            DO K = 1, NQSP
-                CLQSP(K) = W1(K)
-            ENDDO
-        ENDIF
-        !
-        IACQSP = 2
-        CALL QSPCIR
-        !
-        LCNPL = .FALSE.
-        !
-        !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'SYMM' .OR.&
-            COMAND.EQ.'S   ') THEN
-        LQSYM = .NOT.LQSYM
-        IF(LQSYM) THEN
-            WRITE(*, *) 'Qspec symmetry forcing enabled.'
-            !cc       KQSP = 1
-            !cc       CALL SYMQSP(KQSP)
-            !cc       CALL CNCALC(QSPEC(1,KQSP),.FALSE.)
-            CALL CNSYMM
-            CALL QSPCIR
+            !---- extract command line numeric arguments
+            do i = 1, 20
+                iinput(i) = 0
+                rinput(i) = 0.0
+            enddo
+            ninput = 0
+            call getint(comarg, iinput, ninput, error)
+            ninput = 0
+            call getflt(comarg, rinput, ninput, error)
             !
-            LCNPL = .FALSE.
-        ELSE
-            WRITE(*, *) 'Qspec symmetry forcing disabled.'
-        ENDIF
-        !
-        !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'TGAP') THEN
-        CALL DZTSET(RINPUT, NINPUT)
-        !
-        !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'TANG') THEN
-        CALL AGTSET(RINPUT, NINPUT)
-        !
-        !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'READ') THEN
-        !----- read in Qspec
-        KQSP = 1
-        CALL GETVOV(KQSP)
-        CALL CNCALC(QSPEC(1, KQSP), .FALSE.)
-        IF(LQSYM) CALL CNSYMM
-        LCNPL = .FALSE.
-        !
-        KQSP = 1
-        CALL QSPINT(ALQSP(KQSP), QSPEC(1, KQSP), QINF, MINF, &
-                CLQSP(KQSP), CMQSP(KQSP))
-        WRITE(*, 1200) ALGAM / DTOR, CLGAM, CMGAM
-        WRITE(*, 1210) KQSP, ALQSP(KQSP) / DTOR, CLQSP(KQSP), CMQSP(KQSP)
-        !
-        !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'SMOO') THEN
-        !----- smooth Qspec within target segment
-        KQSP = KQTARG
-        CALL SMOOQ(IQ1, IQ2, KQSP)
-        CALL CNCALC(QSPEC(1, KQSP), LQSYM)
-        CALL QSPCIR
-        !
-        WRITE(*, 1200) ALGAM / DTOR, CLGAM, CMGAM
-        !
-        DO KQSP = 1, NQSP
-            CALL QSPINT(ALQSP(KQSP), QSPEC(1, KQSP), QINF, MINF, &
-                    CLQ, CMQSP(KQSP))
+            !--------------------------------------------------------
+            if (comand=='?   ') then
+                write (*, 99002)
+                99002      format (&
+                        /'   <cr>   Return to Top Level'&
+                        /'   !      Redo previous command'&
+                        //'   INIT   Re-initialize mapping'&
+                        /'   QSET   Reset Qspec <== Q'&
+                        /'   AQ r.. Show/select alpha(s) for Qspec'&
+                        /'   CQ r.. Show/select  CL(s)   for Qspec'&
+                        //'   Symm   Toggle symmetry flag'&
+                        /'   TGAP r Set new TE gap'&
+                        /'   TANG r Set new TE angle'&
+                        /'   SMOO   Smooth Qspec inside target segment'&
+                        /'   Filt   Apply Hanning filter to entire Qspec'&
+                        /'   SLOP   Toggle modified-Qspec slope matching flag'&
+                        //'   eXec   Execute  full-inverse calculation'&
+                        //'   PERT   Perturb one Cn and generate geometry')
+                !
+                !--------------------------------------------------------
+            elseif (comand=='INIT') then
+                LQSpec = .false.
+                LSCini = .false.
+                goto 100
+                !
+                !--------------------------------------------------------
+            elseif (comand=='QSET') then
+                call cncalc(QGAmm, .false.)
+                if (LQSym) call cnsymm
+                call qspcir
+                !
+                lcnpl = .false.
+                !
+                !--------------------------------------------------------
+            elseif (comand=='AQ  ') then
+                !----- set Qspec(s) for specified alphas
+                if (ninput>=1) then
+                    NQSp = min(ninput, IPX)
+                    do k = 1, NQSp
+                        ALQsp(k) = rinput(k) * DTOr
+                    enddo
+                else
+                    write (*, 99009) ALGam / DTOr, CLGam
+                    write (*, 99003) (ALQsp(k) / DTOr, k=1, NQSp)
+                    99003          format (/' Current Qspec alphas  =', 20F9.3)
+                    do
+                        write (*, 99004)
+                        99004              format (' New alphas or <return>:  ', $)
+                        read (*, 99012) line
+                        ntmp = IPX
+                        call getflt(line, W1, ntmp, error)
+                        if (.not.(error)) then
+                            ntmp = min(ntmp, IPX)
+                            !
+                            !------ if just <return> was hit, don't do anything
+                            if (ntmp==0) goto 200
+                            !
+                            NQSp = ntmp
+                            do k = 1, NQSp
+                                ALQsp(k) = W1(k) * DTOr
+                            enddo
+                            exit
+                        endif
+                    enddo
+                endif
+                !
+                IACqsp = 1
+                call qspcir
+                !
+                lcnpl = .false.
+                !
+                !--------------------------------------------------------
+            elseif (comand=='CQ  ') then
+                !----- set Qspec(s) for specified CLs
+                if (ninput>=1) then
+                    NQSp = min(ninput, IPX)
+                    do k = 1, NQSp
+                        CLQsp(k) = rinput(k)
+                    enddo
+                else
+                    write (*, 99009) ALGam / DTOr, CLGam
+                    write (*, 99005) (CLQsp(k), k = 1, NQSp)
+                    99005          format (/' Current Qspec CLs  =', 20F8.4)
+                    do
+                        write (*, 99006)
+                        99006              format (' New CLs or <return>:  ', $)
+                        read (*, 99012) line
+                        ntmp = IPX
+                        call getflt(line, W1, ntmp, error)
+                        if (.not.(error)) then
+                            ntmp = min(ntmp, IPX)
+                            !
+                            !------ if just <return> was hit, don't do anything
+                            if (ntmp==0) goto 200
+                            !
+                            NQSp = ntmp
+                            do k = 1, NQSp
+                                CLQsp(k) = W1(k)
+                            enddo
+                            exit
+                        endif
+                    enddo
+                endif
+                !
+                IACqsp = 2
+                call qspcir
+                !
+                lcnpl = .false.
+                !
+                !--------------------------------------------------------
+            elseif (comand=='SYMM' .or. comand=='S   ') then
+                LQSym = .not.LQSym
+                if (LQSym) then
+                    write (*, *) 'Qspec symmetry forcing enabled.'
+                    !cc       KQSP = 1
+                    !cc       CALL SYMQSP(KQSP)
+                    !cc       CALL CNCALC(QSPEC(1,KQSP),.FALSE.)
+                    call cnsymm
+                    call qspcir
+                    !
+                    lcnpl = .false.
+                else
+                    write (*, *) 'Qspec symmetry forcing disabled.'
+                endif
+                !
+                !--------------------------------------------------------
+            elseif (comand=='TGAP') then
+                call dztset(rinput, ninput)
+                !
+                !--------------------------------------------------------
+            elseif (comand=='TANG') then
+                call agtset(rinput, ninput)
+                !
+                !--------------------------------------------------------
+            elseif (comand=='READ') then
+                !----- read in Qspec
+                kqsp = 1
+                call getvov(kqsp)
+                call cncalc(QSPec(1, kqsp), .false.)
+                if (LQSym) call cnsymm
+                lcnpl = .false.
+                !
+                kqsp = 1
+                call qspint(ALQsp(kqsp), QSPec(1, kqsp), QINf, MINf, CLQsp(kqsp), CMQsp(kqsp))
+                write (*, 99010) ALGam / DTOr, CLGam, CMGam
+                write (*, 99011) kqsp, ALQsp(kqsp) / DTOr, CLQsp(kqsp), CMQsp(kqsp)
+                !
+                !--------------------------------------------------------
+            elseif (comand=='SMOO') then
+                !----- smooth Qspec within target segment
+                kqsp = KQTarg
+                call smooq(IQ1, IQ2, kqsp)
+                call cncalc(QSPec(1, kqsp), LQSym)
+                call qspcir
+                !
+                write (*, 99010) ALGam / DTOr, CLGam, CMGam
+                !
+                do kqsp = 1, NQSp
+                    call qspint(ALQsp(kqsp), QSPec(1, kqsp), QINf, MINf, clq, CMQsp(kqsp))
+                    !
+                    !------- set new CL only if alpha is prescribed
+                    if (IACqsp==1) CLQsp(kqsp) = clq
+                    !
+                    write (*, 99011) kqsp, ALQsp(kqsp) / DTOr, CLQsp(kqsp), CMQsp(kqsp)
+                enddo
+                LQSppl = .false.
+                !
+                !--------------------------------------------------------
+            elseif (comand=='FILT' .or. comand=='F   ') then
+                !----- apply modified Hanning filter to Cn coefficients
+                cfilt = 0.2
+                call cnfilt(cfilt)
+                call piqsum
+                call qspcir
+                !
+                write (*, 99010) ALGam / DTOr, CLGam, CMGam
+                !
+                do kqsp = 1, NQSp
+                    call qspint(ALQsp(kqsp), QSPec(1, kqsp), QINf, MINf, clq, CMQsp(kqsp))
+                    !
+                    !------- set new CL only if alpha is prescribed
+                    if (IACqsp==1) CLQsp(kqsp) = clq
+                    !
+                    write (*, 99011) kqsp, ALQsp(kqsp) / DTOr, CLQsp(kqsp), CMQsp(kqsp)
+                enddo
+                LQSppl = .false.
+                !
+                !--------------------------------------------------------
+            elseif (comand=='DUMP') then
+                FNAme = comarg
+                if (FNAme(1:1)==' ') call asks('Enter Cn output filename^', FNAme)
+                !
+                lu = 19
+                open (lu, file = FNAme, status = 'UNKNOWN')
+                call cndump(lu)
+                close (lu)
+                !
+                !--------------------------------------------------------
+            elseif (comand=='EXEC' .or. comand=='X   ') then
+                !----- execute full-inverse calculation
+                call mapgen(FFIlt, NB, XB, YB)
+                !
+                !----- spline new buffer airfoil
+                call scalc(XB, YB, SB, NB)
+                call splind(XB, XBP, SB, NB, -999.0, -999.0)
+                call splind(YB, YBP, SB, NB, -999.0, -999.0)
+                !
+                call geopar(XB, XBP, YB, YBP, SB, NB, W1, &
+                        SBLe, CHOrdb, AREab, RADble, ANGbte, EI11ba, EI22ba, APX1ba, APX2ba, EI11bt, EI22bt, &
+                        & APX1bt, APX2bt, THIckb, CAMbrb)
+                !
+                !
+                LQSppl = .false.
+                LGSame = .false.
+                lcnpl = .false.
+                !
+                write (*, 99007)
+                99007      format (//' New buffer airfoil generated'/&
+                        ' Execute PANE at Top Level to set new current airfoil'/)
+                !
+                !--------------------------------------------------------
+            elseif (comand=='PERT') then
+                call pert(QSPec(1, 1))
+                !----- set Q(s) for changed Cn
+                call qspcir
+                !----- go generate perturbed geometry
+                comand = 'EXEC'
+                comarg = ' '
+                cycle
+                !
+                !--------------------------------------------------------
+            else
+                write (*, 99008) comand
+                99008      format (' Command ', a4, ' not recognized.  Type a " ? " for list.')
+                comand = '****'
+                !
+            endif
             !
-            !------- set new CL only if alpha is prescribed
-            IF(IACQSP.EQ.1) CLQSP(KQSP) = CLQ
-            !
-            WRITE(*, 1210) KQSP, ALQSP(KQSP) / DTOR, CLQSP(KQSP), CMQSP(KQSP)
-        ENDDO
-        LQSPPL = .FALSE.
-        !
-        !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'FILT' .OR.&
-            COMAND.EQ.'F   ') THEN
-        !----- apply modified Hanning filter to Cn coefficients
-        CFILT = 0.2
-        CALL CNFILT(CFILT)
-        CALL PIQSUM
-        CALL QSPCIR
-        !
-        WRITE(*, 1200) ALGAM / DTOR, CLGAM, CMGAM
-        !
-        DO KQSP = 1, NQSP
-            CALL QSPINT(ALQSP(KQSP), QSPEC(1, KQSP), QINF, MINF, &
-                    CLQ, CMQSP(KQSP))
-            !
-            !------- set new CL only if alpha is prescribed
-            IF(IACQSP.EQ.1) CLQSP(KQSP) = CLQ
-            !
-            WRITE(*, 1210) KQSP, ALQSP(KQSP) / DTOR, CLQSP(KQSP), CMQSP(KQSP)
-        ENDDO
-        LQSPPL = .FALSE.
-        !
-        !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'DUMP') THEN
-        FNAME = COMARG
-        IF(FNAME(1:1).EQ.' ')&
-                CALL ASKS('Enter Cn output filename^', FNAME)
-        !
-        LU = 19
-        OPEN(LU, FILE = FNAME, STATUS = 'UNKNOWN')
-        CALL CNDUMP(LU)
-        CLOSE(LU)
-        !
-        !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'EXEC' .OR.&
-            COMAND.EQ.'X   ') THEN
-        !----- execute full-inverse calculation
-        CALL MAPGEN(FFILT, NB, XB, YB)
-        !
-        !----- spline new buffer airfoil
-        CALL SCALC(XB, YB, SB, NB)
-        CALL SPLIND(XB, XBP, SB, NB, -999.0, -999.0)
-        CALL SPLIND(YB, YBP, SB, NB, -999.0, -999.0)
-        !
-        CALL GEOPAR(XB, XBP, YB, YBP, SB, NB, W1, &
-                SBLE, CHORDB, AREAB, RADBLE, ANGBTE, &
-                EI11BA, EI22BA, APX1BA, APX2BA, &
-                EI11BT, EI22BT, APX1BT, APX2BT, &
-                THICKB, CAMBRB)
-        !
-        !
-        LQSPPL = .FALSE.
-        LGSAME = .FALSE.
-        LCNPL = .FALSE.
-        !
-        WRITE(*, 1300)
-        1300  FORMAT(//' New buffer airfoil generated'&
-                /' Execute PANE at Top Level to set new current airfoil'/)
-        !
-        !--------------------------------------------------------
-    ELSEIF(COMAND.EQ.'PERT') THEN
-        CALL PERT(QSPEC(1, 1))
-        !----- set Q(s) for changed Cn
-        CALL QSPCIR
-        !----- go generate perturbed geometry
-        COMAND = 'EXEC'
-        COMARG = ' '
-        GO TO 505
-        !
-        !--------------------------------------------------------
-    ELSE
-        WRITE(*, 1100) COMAND
-        1100  FORMAT(' Command ', A4, ' not recognized.  Type a " ? " for list.')
-        COMAND = '****'
-        !
-    ENDIF
-    !
-    GO TO 500
+            goto 200
+        enddo
+        exit
+    300  enddo
     !
     !....................................................
     !
-    1150 FORMAT(/' Current Q operating condition:', &
-            '   alpha = ', F7.3, '     CL = ', F8.4)
-    1190 FORMAT(/' Qspec initialized to current Q')
-    1200 FORMAT(&
-            /' Current :  alpha =', F9.4, '    CL =', F11.6, '    CM =', F11.6)
-    1210 FORMAT(&
-            ' Qspec', I2, &
-            ' :  alpha =', F9.4, '    CL =', F11.6, '    CM =', F11.6)
-    5000 FORMAT(A)
-END
+    99009 format (/' Current Q operating condition:', '   alpha = ', f7.3, '     CL = ', f8.4)
+    99010 format (/' Current :  alpha =', f9.4, '    CL =', f11.6, '    CM =', f11.6)
+    99011 format (' Qspec', i2, ' :  alpha =', f9.4, '    CL =', f11.6, '    CM =', f11.6)
+    99012 format (a)
+end subroutine mdes
+!*==DZTSET.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! MDES
 
 
-SUBROUTINE DZTSET(RINPUT, NINPUT)
+subroutine dztset(Rinput, Ninput)
+    use m_xqdes
     use m_spline
-    INCLUDE 'CIRCLE.INC'
-    DIMENSION RINPUT(*)
+    use i_circle
+    implicit none
     !
-    IF(NINPUT.GE.2) THEN
-        DXNEW = RINPUT(1)
-        DYNEW = RINPUT(2)
-    ELSE
-        WRITE(*, 1170) REAL(DZTE), IMAG(DZTE)
-        1170  FORMAT(/' Current TE gap  dx/c dy/c =', 2F7.4)
-        CALL ASKR('Enter new TE gap dx/c^', DXNEW)
-        CALL ASKR('Enter new TE gap dy/c^', DYNEW)
-    ENDIF
+    !*** Start of declarations rewritten by SPAG
     !
-    DZTE = CMPLX(DXNEW, DYNEW)
-    RETURN
-END
+    ! Dummy arguments
+    !
+    integer :: Ninput
+    real, dimension(*) :: Rinput
+    intent (in) Ninput, Rinput
+    !
+    ! Local variables
+    !
+    real :: dxnew, dynew
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    if (Ninput>=2) then
+        dxnew = Rinput(1)
+        dynew = Rinput(2)
+    else
+        write (*, 99001) real(DZTe), imag(DZTe)
+        99001 format (/' Current TE gap  dx/c dy/c =', 2F7.4)
+        call askr('Enter new TE gap dx/c^', dxnew)
+        call askr('Enter new TE gap dy/c^', dynew)
+    endif
+    !
+    DZTe = cmplx(dxnew, dynew)
+end subroutine dztset
+!*==AGTSET.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 
 
-SUBROUTINE AGTSET(RINPUT, NINPUT)
+subroutine agtset(Rinput, Ninput)
+    use m_xqdes
     use m_spline
-    INCLUDE 'CIRCLE.INC'
-    DIMENSION RINPUT(*)
+    use i_circle
+    implicit none
     !
-    IF(NINPUT.GE.2) THEN
-        AGTED = RINPUT(1)
-    ELSE
-        WRITE(*, 1180) AGTE * 180.0
-        1180  FORMAT(/' Current TE angle =', F7.3, ' deg.')
-        CALL ASKR('Enter new TE angle (deg)^', AGTED)
-    ENDIF
+    !*** Start of declarations rewritten by SPAG
     !
-    AGTE = AGTED / 180.0
-    RETURN
-END
+    ! Dummy arguments
+    !
+    integer :: Ninput
+    real, dimension(*) :: Rinput
+    intent (in) Ninput, Rinput
+    !
+    ! Local variables
+    !
+    real :: agted
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    if (Ninput>=2) then
+        agted = Rinput(1)
+    else
+        write (*, 99001) AGTe * 180.0
+        99001 format (/' Current TE angle =', f7.3, ' deg.')
+        call askr('Enter new TE angle (deg)^', agted)
+    endif
+    !
+    AGTe = agted / 180.0
+end subroutine agtset
+!*==MAPGAM.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 
 
-SUBROUTINE MAPGAM(IAC, ALG, CLG, CMG)
+subroutine mapgam(Iac, Alg, Clg, Cmg)
+    use m_xqdes
+    use m_spline
+    use i_xfoil
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    real :: Alg, Clg, Cmg
+    integer :: Iac
+    !
+    ! Local variables
+    !
+    real :: chsq, chx, chy, xic, yic
+    integer :: i
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !--------------------------------------------
     !     Sets mapped Q for current airfoil
     !     for angle of attack or CL.
@@ -449,286 +548,352 @@ SUBROUTINE MAPGAM(IAC, ALG, CLG, CMG)
     !       IAC=1: specified ALGAM
     !       IAC=2: specified CLGAM
     !--------------------------------------------
-    use m_spline
-    use i_xfoil
     !
     !---- calculate q(w), set number of circle points NSP
-    CALL QCCALC(IAC, ALG, CLG, CMG, MINF, QINF, NSP, W1, W2, W5, W6)
+    call qccalc(Iac, Alg, Clg, Cmg, MINf, QINf, NSP, W1, W2, W5, W6)
     !
     !---- store q(w), s(w), x(w), y(w)
-    CHX = XTE - XLE
-    CHY = YTE - YLE
-    CHSQ = CHX**2 + CHY**2
-    DO 3 I = 1, NSP
-        QGAMM(I) = W6(I)
-        SSPEC(I) = W5(I)
-        XIC = SEVAL(S(N) * SSPEC(I), X, XP, S, N)
-        YIC = SEVAL(S(N) * SSPEC(I), Y, YP, S, N)
-        XSPOC(I) = ((XIC - XLE) * CHX + (YIC - YLE) * CHY) / CHSQ
-        YSPOC(I) = ((YIC - YLE) * CHX - (XIC - XLE) * CHY) / CHSQ
-    3 CONTINUE
-    SSPLE = SLE / S(N)
+    chx = XTE - XLE
+    chy = YTE - YLE
+    chsq = chx**2 + chy**2
+    do i = 1, NSP
+        QGAmm(i) = W6(i)
+        SSPec(i) = W5(i)
+        xic = seval(S(N) * SSPec(i), X, XP, S, N)
+        yic = seval(S(N) * SSPec(i), Y, YP, S, N)
+        XSPoc(i) = ((xic - XLE) * chx + (yic - YLE) * chy) / chsq
+        YSPoc(i) = ((yic - YLE) * chx - (xic - XLE) * chy) / chsq
+    enddo
+    SSPle = SLE / S(N)
     !
-    RETURN
-END
+end subroutine mapgam
+!*==QSPCIR.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! MAPGAM
 
 
-SUBROUTINE QSPCIR
+subroutine qspcir
+    use m_xqdes
+    use m_spline
+    use i_xfoil
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    integer :: kqsp
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !----------------------------------------------------
     !     Sets Qspec arrays for all design alphas or CLs
     !----------------------------------------------------
+    !
+    do kqsp = 1, NQSp
+        call qccalc(IACqsp, ALQsp(kqsp), CLQsp(kqsp), CMQsp(kqsp), MINf, QINf, NSP, W1, W2, W5, QSPec(1, kqsp))
+        call splqsp(kqsp)
+    enddo
+    LQSpec = .true.
+    !
+end subroutine qspcir
+!*==MAPGEN.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
+
+
+subroutine mapgen(Ffilt, N, X, Y)
+    use m_xqdes
     use m_spline
-    use i_xfoil
+    use i_circle
+    implicit none
     !
-    DO 10 KQSP = 1, NQSP
-        CALL QCCALC(IACQSP, ALQSP(KQSP), CLQSP(KQSP), CMQSP(KQSP), &
-                MINF, QINF, NSP, W1, W2, W5, QSPEC(1, KQSP))
-        CALL SPLQSP(KQSP)
-    10   CONTINUE
-    LQSPEC = .TRUE.
+    !*** Start of declarations rewritten by SPAG
     !
-    RETURN
-END
-
-
-SUBROUTINE MAPGEN(FFILT, N, X, Y)
+    ! Dummy arguments
+    !
+    real :: Ffilt
+    integer :: N
+    real, dimension(NC) :: X, Y
+    intent (out) N, X, Y
+    !
+    ! Local variables
+    !
+    complex, dimension(IMX / 4) :: dcn
+    real :: dcnmax, dx, dy, qimoff
+    integer :: i, itercn, l, m, ncn
+    complex, dimension(IMX / 4, IMX / 4) :: qq
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !--------------------------------------------------------
     !     Calculates the geometry from the speed function
     !     Fourier coefficients Cn, modifying them as needed
     !     to achieve specified constraints.
     !--------------------------------------------------------
-    use m_spline
-    INCLUDE 'CIRCLE.INC'
-    DIMENSION X(NC), Y(NC)
     !
-    COMPLEX QQ(IMX / 4, IMX / 4), DCN(IMX / 4)
     !
     !---- preset rotation offset of airfoil so that initial angle is close
     !-    to the old airfoil's angle
-    DX = XCOLD(2) - XCOLD(1)
-    DY = YCOLD(2) - YCOLD(1)
-    QIM0 = ATAN2(DX, -DY) + 0.5 * PI * (1.0 + AGTE)
-    QIMOFF = QIM0 - IMAG(CN(0))
-    CN(0) = CN(0) + CMPLX(0.0, QIMOFF)
+    dx = XCOld(2) - XCOld(1)
+    dy = YCOld(2) - YCOld(1)
+    QIM0 = atan2(dx, -dy) + 0.5 * PI * (1.0 + AGTe)
+    qimoff = QIM0 - imag(CN(0))
+    CN(0) = CN(0) + cmplx(0.0, qimoff)
     !
     !---- inverse-transform and calculate geometry ZC = z(w)
     !cc   CALL CNFILT(FFILT)
-    CALL PIQSUM
-    CALL ZCCALC(MCT)
+    call piqsum
+    call zccalc(MCT)
     !
     !---- scale,rotate z(w) to get previous chord and orientation
-    CALL ZCNORM(MCT)
+    call zcnorm(MCT)
     !
     !CCC---- put back rotation offset so speed routine QCCALC gets the right alpha
     !CC      CN(0) = CN(0) - CMPLX( 0.0 , QIMOFF )
     !
     !---- enforce Lighthill's first constraint
-    CN(0) = CMPLX(0.0, IMAG(CN(0)))
+    CN(0) = cmplx(0.0, imag(CN(0)))
     !
     !---- number of free coefficients
-    NCN = 1
+    ncn = 1
     !
     !---- Newton iteration loop for modified Cn's
-    DO 100 ITERCN = 1, 10
-        DO M = 1, NCN
-            DO L = 1, NCN
-                QQ(M, L) = 0.
-            ENDDO
-            DCN(M) = 0.
-            QQ(M, M) = 1.0
-        ENDDO
+    do itercn = 1, 10
+        do m = 1, ncn
+            do l = 1, ncn
+                qq(m, l) = 0.
+            enddo
+            dcn(m) = 0.
+            qq(m, m) = 1.0
+        enddo
         !
         !------ fix TE gap
-        M = 1
-        DCN(M) = ZC(1) - ZC(NC) - DZTE
-        DO L = 1, NCN
-            QQ(M, L) = ZC_CN(1, L) - ZC_CN(NC, L)
-        ENDDO
+        m = 1
+        dcn(m) = ZC(1) - ZC(NC) - DZTe
+        do l = 1, ncn
+            qq(m, l) = ZC_cn(1, l) - ZC_cn(NC, l)
+        enddo
         !
-        CALL CGAUSS(IMX / 4, NCN, QQ, DCN, 1)
+        call cgauss(IMX / 4, ncn, qq, dcn, 1)
         !
-        DCNMAX = 0.
-        DO M = 1, NCN
-            CN(M) = CN(M) - DCN(M)
-            DCNMAX = MAX(ABS(DCN(M)), DCNMAX)
-        ENDDO
+        dcnmax = 0.
+        do m = 1, ncn
+            CN(m) = CN(m) - dcn(m)
+            dcnmax = max(abs(dcn(m)), dcnmax)
+        enddo
         !
         !cc     CALL CNFILT(FFILT)
-        CALL PIQSUM
+        call piqsum
         !
-        CALL ZCCALC(MCT)
-        CALL ZCNORM(MCT)
+        call zccalc(MCT)
+        call zcnorm(MCT)
         !
-        WRITE(*, *) ITERCN, DCNMAX
-        IF(DCNMAX.LE.5.0E-5) GO TO 101
-    100 CONTINUE
-    WRITE(*, *)
-    WRITE(*, *) 'MAPGEN: Geometric constraints not fully converged'
+        write (*, *) itercn, dcnmax
+        if (dcnmax<=5.0E-5) goto 100
+    enddo
+    write (*, *)
+    write (*, *) 'MAPGEN: Geometric constraints not fully converged'
     !
-    101 CONTINUE
     !
     !---- return new airfoil coordinates
-    N = NC
-    DO 120 I = 1, NC
-        X(I) = REAL(ZC(I))
-        Y(I) = IMAG(ZC(I))
-    120  CONTINUE
+    100  N = NC
+    do i = 1, NC
+        X(i) = real(ZC(i))
+        Y(i) = imag(ZC(i))
+    enddo
     !
-    RETURN
-END
+end subroutine mapgen
+!*==SCINIT.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! MAPGEN
 
 
-SUBROUTINE SCINIT(N, X, XP, Y, YP, S, SLE)
+subroutine scinit(N, X, Xp, Y, Yp, S, Sle)
+    use m_xqdes
+    use m_spline
+    use i_circle
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    integer :: N
+    real :: Sle
+    real, dimension(N) :: S, X, Xp, Y, Yp
+    intent (in) N, S, Sle, X, Xp, Y, Yp
+    !
+    ! Local variables
+    !
+    real :: bots, chordx, chordy, cvabs, cvle, dscmax, dsdwle, dxds, dxte, dyds, dyte, dzwt, hwc, qim, sic, &
+            & sinw, sinwe, tops, wwt, xle, yle
+    real, save :: ceps, seps
+    complex :: dcn, zle, zte
+    integer :: ic, ipass, itgap
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !----------------------------------------------------------
     !     Calculates the circle-plane coordinate s(w) = SC
-    !     at each point of the current geometry.  
+    !     at each point of the current geometry.
     !     A by-product is the complex-mapping coefficients Cn.
     !     (see CNCALC header for more info).
     !----------------------------------------------------------
-    use m_spline
-    DIMENSION X(N), XP(N), Y(N), YP(N), S(N)
     !
-    INCLUDE 'CIRCLE.INC'
-    COMPLEX DCN, ZLE, ZTE
     !c      DATA CEPS, SEPS / 1.0E-5, 5.0E-5 /
-    DATA CEPS, SEPS / 1.0E-7, 5.0E-7 /
+    data ceps, seps/1.0E-7, 5.0E-7/
     !
     !---- set TE angle parameter
-    AGTE = (ATAN2(XP(N), -YP(N))&
-            - ATAN2(XP(1), -YP(1))) / PI - 1.0
+    AGTe = (atan2(Xp(N), -Yp(N)) - atan2(Xp(1), -Yp(1))) / PI - 1.0
     !
     !---- set surface angle at first point
-    AG0 = ATAN2(XP(1), -YP(1))
+    AG0 = atan2(Xp(1), -Yp(1))
     !
     !---- temporary offset Qo to make  Q(w)-Qo = 0  at  w = 0 , 2 pi
     !-     --- avoids Gibbs problems with Q(w)'s Fourier sine transform
-    QIM0 = AG0 + 0.5 * PI * (1.0 + AGTE)
+    QIM0 = AG0 + 0.5 * PI * (1.0 + AGTe)
     !
-    XLE = SEVAL(SLE, X, XP, S, N)
-    YLE = SEVAL(SLE, Y, YP, S, N)
+    xle = seval(Sle, X, Xp, S, N)
+    yle = seval(Sle, Y, Yp, S, N)
     !
     !---- save TE gap and airfoil chord
-    DXTE = X(1) - X(N)
-    DYTE = Y(1) - Y(N)
-    DZTE = CMPLX(DXTE, DYTE)
+    dxte = X(1) - X(N)
+    dyte = Y(1) - Y(N)
+    DZTe = cmplx(dxte, dyte)
     !
-    CHORDX = 0.5 * (X(1) + X(N)) - XLE
-    CHORDY = 0.5 * (Y(1) + Y(N)) - YLE
-    CHORDZ = CMPLX(CHORDX, CHORDY)
-    ZLEOLD = CMPLX(XLE, YLE)
+    chordx = 0.5 * (X(1) + X(N)) - xle
+    chordy = 0.5 * (Y(1) + Y(N)) - yle
+    CHOrdz = cmplx(chordx, chordy)
+    ZLEold = cmplx(xle, yle)
     !
-    WRITE(*, 1100) REAL(DZTE), IMAG(DZTE), AGTE * 180.0
-    1100 FORMAT(/' Current TE gap  dx dy =', 2F7.4, &
-            '    TE angle =', F7.3, ' deg.' /)
-    WRITE(*, *) 'Initializing mapping coordinate ...'
+    write (*, 99001) real(DZTe), imag(DZTe), AGTe * 180.0
+    99001 format (/' Current TE gap  dx dy =', 2F7.4, '    TE angle =', f7.3, ' deg.'/)
+    write (*, *) 'Initializing mapping coordinate ...'
     !
     !---- set approximate slope ds/dw at airfoil nose
-    CVLE = CURV(SLE, X, XP, Y, YP, S, N) * S(N)
-    CVABS = ABS(CVLE)
-    DSDWLE = MAX(1.0E-3, 0.5 / CVABS)
+    cvle = curv(Sle, X, Xp, Y, Yp, S, N) * S(N)
+    cvabs = abs(cvle)
+    dsdwle = max(1.0E-3, 0.5 / cvabs)
     !
-    TOPS = SLE / S(N)
-    BOTS = (S(N) - SLE) / S(N)
+    tops = Sle / S(N)
+    bots = (S(N) - Sle) / S(N)
     !
     !---- set initial top surface s(w)
-    WWT = 1.0 - 2.0 * DSDWLE / TOPS
-    DO 10 IC = 1, (NC - 1) / 2 + 1
-        SC(IC) = TOPS * (1.0 - COS(WWT * WC(IC)))&
-                / (1.0 - COS(WWT * PI))
-    10 CONTINUE
+    wwt = 1.0 - 2.0 * dsdwle / tops
+    do ic = 1, (NC - 1) / 2 + 1
+        SC(ic) = tops * (1.0 - cos(wwt * WC(ic))) / (1.0 - cos(wwt * PI))
+    enddo
     !
     !---- set initial bottom surface s(w)
-    WWT = 1.0 - 2.0 * DSDWLE / BOTS
-    DO 15 IC = (NC - 1) / 2 + 2, NC
-        SC(IC) = 1.0&
-                - BOTS * (1.0 - COS(WWT * (WC(NC) - WC(IC))))&
-                        / (1.0 - COS(WWT * PI))
-    15 CONTINUE
+    wwt = 1.0 - 2.0 * dsdwle / bots
+    do ic = (NC - 1) / 2 + 2, NC
+        SC(ic) = 1.0 - bots * (1.0 - cos(wwt * (WC(NC) - WC(ic)))) / (1.0 - cos(wwt * PI))
+    enddo
     !
     !---- iteration loop for s(w) array
-    DO 500 IPASS = 1, 30
+    do ipass = 1, 30
         !
         !---- calculate imaginary part of harmonic function  P(w) + iQ(w)
-        DO 20 IC = 1, NC
+        do ic = 1, NC
             !
-            SIC = S(1) + (S(N) - S(1)) * SC(IC)
-            DXDS = DEVAL(SIC, X, XP, S, N)
-            DYDS = DEVAL(SIC, Y, YP, S, N)
+            sic = S(1) + (S(N) - S(1)) * SC(ic)
+            dxds = deval(sic, X, Xp, S, N)
+            dyds = deval(sic, Y, Yp, S, N)
             !
             !------ set Q(w) - Qo   (Qo defined so that Q(w)-Qo = 0  at  w = 0 , 2 pi)
-            QIM = ATAN2(DXDS, -DYDS)&
-                    - 0.5 * (WC(IC) - PI) * (1.0 + AGTE)&
-                    - QIM0
+            qim = atan2(dxds, -dyds) - 0.5 * (WC(ic) - PI) * (1.0 + AGTe) - QIM0
             !
-            PIQ(IC) = CMPLX(0.0, QIM)
+            PIQ(ic) = cmplx(0.0, qim)
             !
-        20 CONTINUE
+        enddo
         !
         !---- Fourier-decompose Q(w)
-        CALL FTP
+        call ftp
         !
         !---- zero out average real part and add on Qo we took out above
-        CN(0) = CMPLX(0.0, IMAG(CN(0)) + QIM0)
+        CN(0) = cmplx(0.0, imag(CN(0)) + QIM0)
         !
         !---- transform back to get entire  PIQ = P(w) + iQ(w)
-        CALL PIQSUM
+        call piqsum
         !
         !---- save s(w) for monitoring of changes in s(w) by ZCCALC
-        DO 30 IC = 1, NC
-            SCOLD(IC) = SC(IC)
-        30 CONTINUE
+        do ic = 1, NC
+            SCOld(ic) = SC(ic)
+        enddo
         !
         !---- correct n=1 complex coefficient Cn for proper TE gap
-        DO 40 ITGAP = 1, 5
-            CALL ZCCALC(1)
+        do itgap = 1, 5
+            call zccalc(1)
             !
             !------ set current LE,TE locations
-            CALL ZLEFIND(ZLE, ZC, WC, NC, PIQ, AGTE)
-            ZTE = 0.5 * (ZC(1) + ZC(NC))
+            call zlefind(zle, ZC, WC, NC, PIQ, AGTe)
+            zte = 0.5 * (ZC(1) + ZC(NC))
             !
-            DZWT = ABS(ZTE - ZLE) / ABS(CHORDZ)
-            DCN = -(ZC(1) - ZC(NC) - DZWT * DZTE)&
-                    / (ZC_CN(1, 1) - ZC_CN(NC, 1))
-            CN(1) = CN(1) + DCN
+            dzwt = abs(zte - zle) / abs(CHOrdz)
+            dcn = -(ZC(1) - ZC(NC) - dzwt * DZTe) / (ZC_cn(1, 1) - ZC_cn(NC, 1))
+            CN(1) = CN(1) + dcn
             !
-            CALL PIQSUM
-            IF(ABS(DCN) .LT. CEPS) GO TO 41
-        40 CONTINUE
-        41 CONTINUE
+            call piqsum
+            if (abs(dcn)<ceps) exit
+        enddo
         !
-        DSCMAX = 0.
-        DO 50 IC = 1, NC
-            DSCMAX = MAX(DSCMAX, ABS(SC(IC) - SCOLD(IC)))
-        50 CONTINUE
+        dscmax = 0.
+        do ic = 1, NC
+            dscmax = max(dscmax, abs(SC(ic) - SCOld(ic)))
+        enddo
         !
-        WRITE(*, *) IPASS, '     max(dw) =', DSCMAX
-        IF(DSCMAX .LT. SEPS) GO TO 505
+        write (*, *) ipass, '     max(dw) =', dscmax
+        if (dscmax<seps) exit
         !
-    500 CONTINUE
-    505 CONTINUE
+    enddo
     !
     !---- normalize final geometry
-    CALL ZCNORM(1)
+    call zcnorm(1)
     !
     !---- set final  s(w), x(w), y(w)  arrays for old airfoil
-    DO 510 IC = 1, NC
-        SCOLD(IC) = SC(IC)
-        XCOLD(IC) = REAL(ZC(IC))
-        YCOLD(IC) = IMAG(ZC(IC))
-    510 CONTINUE
+    do ic = 1, NC
+        SCOld(ic) = SC(ic)
+        XCOld(ic) = real(ZC(ic))
+        YCOld(ic) = imag(ZC(ic))
+    enddo
     !
-    DO 600 IC = 1, NC
-        SINW = 2.0 * SIN(0.5 * WC(IC))
-        SINWE = 0.
-        IF(SINW.GT.0.0) SINWE = SINW**(1.0 - AGTE)
+    do ic = 1, NC
+        sinw = 2.0 * sin(0.5 * WC(ic))
+        sinwe = 0.
+        if (sinw>0.0) sinwe = sinw**(1.0 - AGTe)
         !
-        HWC = 0.5 * (WC(IC) - PI) * (1.0 + AGTE) - 0.5 * PI
-        ZCOLDW(IC) = SINWE * EXP(PIQ(IC) + CMPLX(0.0, HWC))
-    600 CONTINUE
+        hwc = 0.5 * (WC(ic) - PI) * (1.0 + AGTe) - 0.5 * PI
+        ZCOldw(ic) = sinwe * exp(PIQ(ic) + cmplx(0.0, hwc))
+    enddo
     !
-    QIMOLD = IMAG(CN(0))
+    QIMold = imag(CN(0))
     !
     !C---- print out Fourier coefficients
     !      write(*,*) ' '
@@ -738,13 +903,46 @@ SUBROUTINE SCINIT(N, X, XP, Y, YP, S, SLE)
     !cc 7000   format(1x,i3,2f10.6)
     !  700 continue
     !
-    RETURN
-END
+end subroutine scinit
+!*==CNCALC.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! SCINIT
 
 
 
-SUBROUTINE CNCALC(QC, LSYMM)
+subroutine cncalc(Qc, Lsymm)
+    use m_xqdes
+    use m_spline
+    use i_circle
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    logical :: Lsymm
+    real, dimension(NC) :: Qc
+    intent (in) Lsymm
+    !
+    ! Local variables
+    !
+    real :: alfcir, cnr, cosw, pfun, sinw, sinwe, wcle
+    complex, dimension(0:IMX) :: cnsav
+    integer :: ic, m
+    real, dimension(ICX) :: qcw
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !----------------------------------------------------------
     !     Calculates the complex Fourier coefficients Cn of
     !     the real part of the harmonic function P(w) + iQ(w)
@@ -765,31 +963,25 @@ SUBROUTINE CNCALC(QC, LSYMM)
     !
     !     depending on whether the speed q(w) or the
     !     geometry z(w) is specified for that particular
-    !     value of w.  
+    !     value of w.
     !     (z(w) option is currently implemented separately in SCINIT)
     !
-    !     By Fourier-transforming P(w) into a sequence 
-    !     of Fourier coefficients Cn, its complex conjugate 
-    !     function Q(w) is automatically determined by an 
-    !     inverse transformation in PIQSUM.  The overall 
-    !     P(w) + iQ(w) then uniquely defines the overall 
+    !     By Fourier-transforming P(w) into a sequence
+    !     of Fourier coefficients Cn, its complex conjugate
+    !     function Q(w) is automatically determined by an
+    !     inverse transformation in PIQSUM.  The overall
+    !     P(w) + iQ(w) then uniquely defines the overall
     !     airfoil geometry, which is calculated in ZCCALC.
     !
     !     If LSYMM=t, then the Real(Cn) change from current
     !     Cn values is doubled, and Imag(Cn) is zeroed out.
     !----------------------------------------------------------
-    use m_spline
-    REAL QC(NC)
-    LOGICAL LSYMM
     !
-    INCLUDE 'CIRCLE.INC'
-    DIMENSION QCW(ICX)
     !
-    COMPLEX CNSAV(0:IMX)
     !
     !c      REAL WCJ(2)
     !
-    IF(NC .GT. ICX) STOP 'CNCALC: Array overflow.'
+    if (NC>ICX) stop 'CNCALC: Array overflow.'
     !
     !cC---- assume q(w) segment is entire airfoil
     !c      WCJ(1) = WC(1)
@@ -802,37 +994,37 @@ SUBROUTINE CNCALC(QC, LSYMM)
     !c      ENDIF
     !
     !---- spline q(w)
-    CALL SPLIND(QC, QCW, WC, NC, -999.0, -999.0)
+    call splind(Qc, qcw, WC, NC, -999.0, -999.0)
     !
     !---- get approximate w value at stagnation point
-    DO 10 IC = 2, NC
-        IF(QC(IC).LT.0.0) GO TO 11
-    10 CONTINUE
-    11 WCLE = WC(IC)
+    do ic = 2, NC
+        if (Qc(ic)<0.0) exit
+    enddo
+    wcle = WC(ic)
     !
     !---- set exact numerical w value at stagnation point from splined q(w)
-    CALL SINVRT(WCLE, 0.0, QC, QCW, WC, NC)
+    call sinvrt(wcle, 0.0, Qc, qcw, WC, NC)
     !
     !---- set corresponding circle plane alpha
-    ALFCIR = 0.5 * (WCLE - PI)
+    alfcir = 0.5 * (wcle - PI)
     !
     !---- calculate real part of harmonic function  P(w) + iQ(w)
-    DO 120 IC = 2, NC - 1
+    do ic = 2, NC - 1
         !
-        COSW = 2.0 * COS(0.5 * WC(IC) - ALFCIR)
-        SINW = 2.0 * SIN(0.5 * WC(IC))
-        SINWE = SINW**AGTE
+        cosw = 2.0 * cos(0.5 * WC(ic) - alfcir)
+        sinw = 2.0 * sin(0.5 * WC(ic))
+        sinwe = sinw**AGTe
         !
         !c        IF(WC(IC).GE.WCJ(1) .AND. WC(IC).LE.WCJ(2)) THEN
         !
         !------- set P(w) from q(w)
-        IF(ABS(COSW).LT.1.0E-4) THEN
+        if (abs(cosw)<1.0E-4) then
             !-------- use asymptotic form near stagnation point
-            PFUN = ABS(SINWE / QCW(IC))
-        ELSE
+            pfun = abs(sinwe / qcw(ic))
+        else
             !-------- use actual expression
-            PFUN = ABS(COSW * SINWE / QC(IC))
-        ENDIF
+            pfun = abs(cosw * sinwe / Qc(ic))
+        endif
         !
         !c        ELSE
         !cC
@@ -841,97 +1033,194 @@ SUBROUTINE CNCALC(QC, LSYMM)
         !cC
         !c        ENDIF
         !
-        PIQ(IC) = CMPLX(LOG(PFUN), 0.0)
+        PIQ(ic) = cmplx(log(pfun), 0.0)
         !
-    120 CONTINUE
+    enddo
     !
     !---- extrapolate P(w) to TE
     PIQ(1) = 3.0 * PIQ(2) - 3.0 * PIQ(3) + PIQ(4)
     PIQ(NC) = 3.0 * PIQ(NC - 1) - 3.0 * PIQ(NC - 2) + PIQ(NC - 3)
     !
-    DO 50 M = 0, MC
-        CNSAV(M) = CN(M)
-    50   CONTINUE
+    do m = 0, MC
+        cnsav(m) = CN(m)
+    enddo
     !
     !---- Fourier-transform P(w) to get new Cn coefficients
-    CALL FTP
-    CN(0) = CMPLX(0.0, QIMOLD)
+    call ftp
+    CN(0) = cmplx(0.0, QIMold)
     !
-    IF(LSYMM) THEN
-        DO 60 M = 1, MC
-            CNR = 2.0 * REAL(CN(M)) - REAL(CNSAV(M))
-            CN(M) = CMPLX(CNR, 0.0)
-        60     CONTINUE
-    ENDIF
+    if (Lsymm) then
+        do m = 1, MC
+            cnr = 2.0 * real(CN(m)) - real(cnsav(m))
+            CN(m) = cmplx(cnr, 0.0)
+        enddo
+    endif
     !
-    CALL PIQSUM
+    call piqsum
     !
-    RETURN
-END
+end subroutine cncalc
+!*==CNSYMM.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! CNCALC
 
 
-SUBROUTINE CNSYMM
+subroutine cnsymm
+    use m_xqdes
     use m_spline
-    INCLUDE 'CIRCLE.INC'
+    use i_circle
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    integer :: m
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !
     !---- eliminate imaginary (camber) parts of mapping coefficients
-    DO 10 M = 1, MC
-        CN(M) = CMPLX(REAL(CN(M)), 0.0)
-    10 CONTINUE
+    do m = 1, MC
+        CN(m) = cmplx(real(CN(m)), 0.0)
+    enddo
     !
-    CALL PIQSUM
-    RETURN
-END
+    call piqsum
+end subroutine cnsymm
+!*==PIQSUM.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! CNSYMM
 
 
-SUBROUTINE PIQSUM
+subroutine piqsum
+    use m_xqdes
+    use m_spline
+    use i_circle
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    integer :: ic, m
+    complex :: zsum
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !---------------------------------------------
-    !     Inverse-transform to get back modified 
+    !     Inverse-transform to get back modified
     !     speed function and its conjugate.
     !---------------------------------------------
-    use m_spline
-    INCLUDE 'CIRCLE.INC'
-    COMPLEX ZSUM
     !
-    DO 300 IC = 1, NC
-        ZSUM = (0.0, 0.0)
-        DO 310 M = 0, MC
-            ZSUM = ZSUM + CN(M) * CONJG(EIW(IC, M))
-        310   CONTINUE
-        PIQ(IC) = ZSUM
-    300 CONTINUE
+    do ic = 1, NC
+        zsum = (0.0, 0.0)
+        do m = 0, MC
+            zsum = zsum + CN(m) * conjg(EIW(ic, m))
+        enddo
+        PIQ(ic) = zsum
+    enddo
     !
-    RETURN
-END
+end subroutine piqsum
+!*==CNFILT.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! PIQSUM
 
 
-SUBROUTINE CNFILT(FFILT)
+subroutine cnfilt(Ffilt)
+    use m_xqdes
+    use m_spline
+    use i_circle
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    real :: Ffilt
+    intent (in) Ffilt
+    !
+    ! Local variables
+    !
+    real :: cwt, cwtx, freq
+    integer :: m
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !-------------------------------------
-    !     Filters out upper harmonics 
+    !     Filters out upper harmonics
     !     with modified Hanning filter.
     !-------------------------------------
-    use m_spline
-    INCLUDE 'CIRCLE.INC'
     !
-    IF(FFILT.EQ.0.0) RETURN
+    if (Ffilt==0.0) return
     !
-    DO 10 M = 0, MC
-        FREQ = FLOAT(M) / FLOAT(MC)
-        CWT = 0.5 * (1.0 + COS(PI * FREQ))
-        CWTX = CWT
-        IF(FFILT.GT.0.0) CWTX = CWT**FFILT
-        CN(M) = CN(M) * CWTX
-    10 CONTINUE
+    do m = 0, MC
+        freq = float(m) / float(MC)
+        cwt = 0.5 * (1.0 + cos(PI * freq))
+        cwtx = cwt
+        if (Ffilt>0.0) cwtx = cwt**Ffilt
+        CN(m) = CN(m) * cwtx
+    enddo
     !
-    RETURN
-END
+end subroutine cnfilt
+!*==ZCCALC.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! CNFILT
 
 
-SUBROUTINE ZCCALC(MTEST)
+subroutine zccalc(Mtest)
+    use m_xqdes
+    use m_spline
+    use i_circle
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    integer :: Mtest
+    intent (in) Mtest
+    !
+    ! Local variables
+    !
+    complex :: dzdw1, dzdw2, dz_piq1, dz_piq2
+    real :: hwc, sinw, sinwe
+    integer :: ic, m
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !--------------------------------------------------------
     !     Calculates the airfoil geometry z(w) from the
     !     harmonic function P(w) + iQ(w).  Also normalizes
@@ -939,622 +1228,861 @@ SUBROUTINE ZCCALC(MTEST)
     !     the geometry sensitivities dz/dCn  (1 < n < MTEST)
     !     for each point.
     !--------------------------------------------------------
-    use m_spline
-    INCLUDE 'CIRCLE.INC'
-    COMPLEX DZDW1, DZDW2, DZ_PIQ1, DZ_PIQ2
     !
     !---- integrate upper airfoil surface coordinates from x,y = 4,0
-    IC = 1
-    ZC(IC) = (4.0, 0.0)
-    DO 10 M = 1, MTEST
-        ZC_CN(IC, M) = (0.0, 0.0)
-    10 CONTINUE
+    ic = 1
+    ZC(ic) = (4.0, 0.0)
+    do m = 1, Mtest
+        ZC_cn(ic, m) = (0.0, 0.0)
+    enddo
     !
-    SINW = 2.0 * SIN(0.5 * WC(IC))
-    SINWE = 0.
-    IF(SINW.GT.0.0) SINWE = SINW**(1.0 - AGTE)
+    sinw = 2.0 * sin(0.5 * WC(ic))
+    sinwe = 0.
+    if (sinw>0.0) sinwe = sinw**(1.0 - AGTe)
     !
-    HWC = 0.5 * (WC(IC) - PI) * (1.0 + AGTE) - 0.5 * PI
-    DZDW1 = SINWE * EXP(PIQ(IC) + CMPLX(0.0, HWC))
-    DO 20 IC = 2, NC
+    hwc = 0.5 * (WC(ic) - PI) * (1.0 + AGTe) - 0.5 * PI
+    dzdw1 = sinwe * exp(PIQ(ic) + cmplx(0.0, hwc))
+    do ic = 2, NC
         !
-        SINW = 2.0 * SIN(0.5 * WC(IC))
-        SINWE = 0.
-        IF(SINW.GT.0.0) SINWE = SINW**(1.0 - AGTE)
+        sinw = 2.0 * sin(0.5 * WC(ic))
+        sinwe = 0.
+        if (sinw>0.0) sinwe = sinw**(1.0 - AGTe)
         !
-        HWC = 0.5 * (WC(IC) - PI) * (1.0 + AGTE) - 0.5 * PI
-        DZDW2 = SINWE * EXP(PIQ(IC) + CMPLX(0.0, HWC))
+        hwc = 0.5 * (WC(ic) - PI) * (1.0 + AGTe) - 0.5 * PI
+        dzdw2 = sinwe * exp(PIQ(ic) + cmplx(0.0, hwc))
         !
-        ZC(IC) = 0.5 * (DZDW1 + DZDW2) * DWC + ZC(IC - 1)
-        DZ_PIQ1 = 0.5 * (DZDW1) * DWC
-        DZ_PIQ2 = 0.5 * (DZDW2) * DWC
+        ZC(ic) = 0.5 * (dzdw1 + dzdw2) * DWC + ZC(ic - 1)
+        dz_piq1 = 0.5 * (dzdw1) * DWC
+        dz_piq2 = 0.5 * (dzdw2) * DWC
         !
-        DO 210 M = 1, MTEST
-            ZC_CN(IC, M) = DZ_PIQ1 * CONJG(EIW(IC - 1, M))&
-                    + DZ_PIQ2 * CONJG(EIW(IC, M))&
-                    + ZC_CN(IC - 1, M)
-        210   CONTINUE
+        do m = 1, Mtest
+            ZC_cn(ic, m) = dz_piq1 * conjg(EIW(ic - 1, m)) + dz_piq2 * conjg(EIW(ic, m)) + ZC_cn(ic - 1, m)
+        enddo
         !
-        DZDW1 = DZDW2
-    20 CONTINUE
+        dzdw1 = dzdw2
+    enddo
     !
     !---- set arc length array s(w)
     SC(1) = 0.
-    DO 50 IC = 2, NC
-        SC(IC) = SC(IC - 1) + ABS(ZC(IC) - ZC(IC - 1))
-    50 CONTINUE
+    do ic = 2, NC
+        SC(ic) = SC(ic - 1) + abs(ZC(ic) - ZC(ic - 1))
+    enddo
     !
     !---- normalize arc length
-    DO 60 IC = 1, NC
-        SC(IC) = SC(IC) / SC(NC)
-    60 CONTINUE
+    do ic = 1, NC
+        SC(ic) = SC(ic) / SC(NC)
+    enddo
     !
-    RETURN
-END
+end subroutine zccalc
+!*==ZCNORM.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! ZCCALC
 
 
-SUBROUTINE ZCNORM(MTEST)
+subroutine zcnorm(Mtest)
+    use m_xqdes
+    use m_spline
+    use i_circle
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    integer :: Mtest
+    intent (in) Mtest
+    !
+    ! Local variables
+    !
+    integer :: ic, m
+    real :: qimoff
+    complex :: zcnew, zc_zte, zle, zte
+    complex, dimension(IMX / 4) :: zte_cn
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !-----------------------------------------------
     !     Normalizes the complex airfoil z(w) to
     !     the old chord and angle, and resets the
     !     influence coefficients  dz/dCn .
     !-----------------------------------------------
-    use m_spline
-    INCLUDE 'CIRCLE.INC'
-    COMPLEX DZDW1, DZDW2
-    COMPLEX ZCNEW, ZLE, ZTE, ZC_ZTE, ZTE_CN(IMX / 4)
     !
     !---- find current LE location
-    CALL ZLEFIND(ZLE, ZC, WC, NC, PIQ, AGTE)
+    call zlefind(zle, ZC, WC, NC, PIQ, AGTe)
     !
     !---- place leading edge at origin
-    DO 60 IC = 1, NC
-        ZC(IC) = ZC(IC) - ZLE
-    60 CONTINUE
+    do ic = 1, NC
+        ZC(ic) = ZC(ic) - zle
+    enddo
     !
     !---- set normalizing quantities and sensitivities
-    ZTE = 0.5 * (ZC(1) + ZC(NC))
-    DO 480 M = 1, MTEST
-        ZTE_CN(M) = 0.5 * (ZC_CN(1, M) + ZC_CN(NC, M))
-    480 CONTINUE
+    zte = 0.5 * (ZC(1) + ZC(NC))
+    do m = 1, Mtest
+        zte_cn(m) = 0.5 * (ZC_cn(1, m) + ZC_cn(NC, m))
+    enddo
     !
     !---- normalize airfoil to proper chord, put LE at old position,
     !-    and set sensitivities dz/dCn for the rescaled coordinates
-    DO 500 IC = 1, NC
-        ZCNEW = CHORDZ * ZC(IC) / ZTE
-        ZC_ZTE = -ZCNEW / ZTE
-        ZC(IC) = ZCNEW
-        DO 510 M = 1, MTEST
-            ZC_CN(IC, M) = CHORDZ * ZC_CN(IC, M) / ZTE + ZC_ZTE * ZTE_CN(M)
-        510   CONTINUE
-    500 CONTINUE
+    do ic = 1, NC
+        zcnew = CHOrdz * ZC(ic) / zte
+        zc_zte = -zcnew / zte
+        ZC(ic) = zcnew
+        do m = 1, Mtest
+            ZC_cn(ic, m) = CHOrdz * ZC_cn(ic, m) / zte + zc_zte * zte_cn(m)
+        enddo
+    enddo
     !
     !---- add on rotation to mapping coefficient so QCCALC gets the right alpha
-    QIMOFF = -IMAG(LOG(CHORDZ / ZTE))
-    CN(0) = CN(0) - CMPLX(0.0, QIMOFF)
+    qimoff = -imag(log(CHOrdz / zte))
+    CN(0) = CN(0) - cmplx(0.0, qimoff)
     !
     !---- shift airfoil to put LE at old location
-    DO 600 IC = 1, NC
-        ZC(IC) = ZC(IC) + ZLEOLD
-    600  CONTINUE
+    do ic = 1, NC
+        ZC(ic) = ZC(ic) + ZLEold
+    enddo
     !
-    RETURN
-END
+end subroutine zcnorm
+!*==QCCALC.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! ZCNORM
 
 
-SUBROUTINE QCCALC(ISPEC, ALFA, CL, CM, MINF, QINF, &
-        NCIR, XCIR, YCIR, SCIR, QCIR)
+subroutine qccalc(Ispec, Alfa, Cl, Cm, Minf, Qinf, Ncir, Xcir, Ycir, Scir, Qcir)
+    use m_xqdes
+    use m_spline
+    use i_circle
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    real :: Alfa, Cl, Cm, Minf, Qinf
+    integer :: Ispec, Ncir
+    real, dimension(NC) :: Qcir, Scir, Xcir, Ycir
+    intent (in) Ispec, Minf, Qinf
+    intent (out) Cm, Ncir, Scir, Xcir, Ycir
+    intent (inout) Alfa, Cl, Qcir
+    !
+    ! Local variables
+    !
+    real, save :: aeps
+    real :: alfcir, beta, bfac, clt, clt_a, cpcom1, cpcom2, cpc_a1, cpc_a2, cpc_q1, cpc_q2, cpinc1, cpinc2, &
+            & cpi_q1, cpi_q2, dalfa, eppp, ppp, sinw, sinwe
+    complex :: cft, cft_a, cmt, dz, eia, za
+    integer :: ic, icp, ipass
+    real, dimension(ICX) :: qc_a
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !---------------------------------------------------
     !     Calculates the surface speed from the complex
     !     speed function so that either a prescribed
-    !     ALFA or CL is achieved, depending on whether 
-    !     ISPEC=1 or 2.  The CL calculation uses the 
+    !     ALFA or CL is achieved, depending on whether
+    !     ISPEC=1 or 2.  The CL calculation uses the
     !     transformed Karman-Tsien Cp.
     !---------------------------------------------------
-    use m_spline
-    INCLUDE 'CIRCLE.INC'
-    COMPLEX DZ, ZA, EIA, CMT, CFT, CFT_A
-    DIMENSION XCIR(NC), YCIR(NC), SCIR(NC), QCIR(NC)
-    DIMENSION QC_A(ICX)
-    REAL MINF
-    DATA AEPS / 5.0E-7 /
+    data aeps/5.0E-7/
     !
     !---- Karman-Tsien quantities
-    BETA = SQRT(1.0 - MINF**2)
-    BFAC = 0.5 * MINF**2 / (1.0 + BETA)
+    beta = sqrt(1.0 - Minf**2)
+    bfac = 0.5 * Minf**2 / (1.0 + beta)
     !
-    NCIR = NC
+    Ncir = NC
     !
     !---- Newton iteration loop (executed only once if alpha specified)
-    DO 1 IPASS = 1, 10
+    do ipass = 1, 10
         !
         !------ set alpha in the circle plane
-        ALFCIR = ALFA - IMAG(CN(0))
+        alfcir = Alfa - imag(CN(0))
         !
-        CMT = (0.0, 0.0)
-        CFT = (0.0, 0.0)
-        CFT_A = (0.0, 0.0)
+        cmt = (0.0, 0.0)
+        cft = (0.0, 0.0)
+        cft_a = (0.0, 0.0)
         !
         !------ set surface speed for current circle plane alpha
-        DO 10 IC = 1, NC
-            PPP = REAL(PIQ(IC))
-            EPPP = EXP(-PPP)
-            SINW = 2.0 * SIN(0.5 * WC(IC))
+        do ic = 1, NC
+            ppp = real(PIQ(ic))
+            eppp = exp(-ppp)
+            sinw = 2.0 * sin(0.5 * WC(ic))
             !
-            IF(AGTE.EQ.0.0) THEN
-                SINWE = 1.0
-            ELSE IF(SINW.GT.0.0) THEN
-                SINWE = SINW**AGTE
-            ELSE
-                SINWE = 0.0
-            ENDIF
+            if (AGTe==0.0) then
+                sinwe = 1.0
+            elseif (sinw>0.0) then
+                sinwe = sinw**AGTe
+            else
+                sinwe = 0.0
+            endif
             !
-            QCIR(IC) = 2.0 * COS(0.5 * WC(IC) - ALFCIR) * SINWE * EPPP
-            QC_A(IC) = 2.0 * SIN(0.5 * WC(IC) - ALFCIR) * SINWE * EPPP
+            Qcir(ic) = 2.0 * cos(0.5 * WC(ic) - alfcir) * sinwe * eppp
+            qc_a(ic) = 2.0 * sin(0.5 * WC(ic) - alfcir) * sinwe * eppp
             !
-            XCIR(IC) = REAL(ZC(IC))
-            YCIR(IC) = IMAG(ZC(IC))
-            SCIR(IC) = SC(IC)
-        10   CONTINUE
+            Xcir(ic) = real(ZC(ic))
+            Ycir(ic) = imag(ZC(ic))
+            Scir(ic) = SC(ic)
+        enddo
         !
         !------ integrate compressible  Cp dz  to get complex force  CL + iCD
-        IC = 1
-        CPINC1 = 1.0 - (QCIR(IC) / QINF)**2
-        CPI_Q1 = -2.0 * QCIR(IC) / QINF**2
-        CPCOM1 = CPINC1 / (BETA + BFAC * CPINC1)
-        CPC_Q1 = (1.0 - BFAC * CPCOM1) / (BETA + BFAC * CPINC1) * CPI_Q1
-        CPC_A1 = CPC_Q1 * QC_A(IC)
-        DO 20 IC = 1, NC
-            ICP = IC + 1
-            IF(IC.EQ.NC) ICP = 1
+        ic = 1
+        cpinc1 = 1.0 - (Qcir(ic) / Qinf)**2
+        cpi_q1 = -2.0 * Qcir(ic) / Qinf**2
+        cpcom1 = cpinc1 / (beta + bfac * cpinc1)
+        cpc_q1 = (1.0 - bfac * cpcom1) / (beta + bfac * cpinc1) * cpi_q1
+        cpc_a1 = cpc_q1 * qc_a(ic)
+        do ic = 1, NC
+            icp = ic + 1
+            if (ic==NC) icp = 1
             !
-            CPINC2 = 1.0 - (QCIR(ICP) / QINF)**2
-            CPI_Q2 = -2.0 * QCIR(ICP) / QINF**2
-            CPCOM2 = CPINC2 / (BETA + BFAC * CPINC2)
-            CPC_Q2 = (1.0 - BFAC * CPCOM2) / (BETA + BFAC * CPINC2) * CPI_Q2
-            CPC_A2 = CPC_Q2 * QC_A(ICP)
+            cpinc2 = 1.0 - (Qcir(icp) / Qinf)**2
+            cpi_q2 = -2.0 * Qcir(icp) / Qinf**2
+            cpcom2 = cpinc2 / (beta + bfac * cpinc2)
+            cpc_q2 = (1.0 - bfac * cpcom2) / (beta + bfac * cpinc2) * cpi_q2
+            cpc_a2 = cpc_q2 * qc_a(icp)
             !
-            ZA = (ZC(ICP) + ZC(IC)) * 0.5 - (0.25, 0.0)
-            DZ = ZC(ICP) - ZC(IC)
+            za = (ZC(icp) + ZC(ic)) * 0.5 - (0.25, 0.0)
+            dz = ZC(icp) - ZC(ic)
             !
-            CMT = CMT - 0.5 * (CPCOM1 + CPCOM2) * DZ * CONJG(ZA)&
-                    + (CPCOM1 - CPCOM2) * DZ * CONJG(DZ) / 12.0
-            CFT = CFT + 0.5 * (CPCOM1 + CPCOM2) * DZ
-            CFT_A = CFT_A + 0.5 * (CPC_A1 + CPC_A2) * DZ
+            cmt = cmt - 0.5 * (cpcom1 + cpcom2) * dz * conjg(za) + (cpcom1 - cpcom2) * dz * conjg(dz) / 12.0
+            cft = cft + 0.5 * (cpcom1 + cpcom2) * dz
+            cft_a = cft_a + 0.5 * (cpc_a1 + cpc_a2) * dz
             !
-            CPCOM1 = CPCOM2
-            CPC_A1 = CPC_A2
-        20   CONTINUE
+            cpcom1 = cpcom2
+            cpc_a1 = cpc_a2
+        enddo
         !
         !------ rotate force vector into freestream coordinates
-        EIA = EXP(CMPLX(0.0, -ALFA))
-        CFT = CFT * EIA
-        CFT_A = CFT_A * EIA + CFT * (0.0, -1.0)
+        eia = exp(cmplx(0.0, -Alfa))
+        cft = cft * eia
+        cft_a = cft_a * eia + cft * (0.0, -1.0)
         !
         !------ lift is real part of complex force vector
-        CLT = REAL(CFT)
-        CLT_A = REAL(CFT_A)
+        clt = real(cft)
+        clt_a = real(cft_a)
         !
         !------ moment is real part of complex moment
-        CM = REAL(CMT)
+        Cm = real(cmt)
         !
-        IF(ISPEC.EQ.1) THEN
+        if (Ispec==1) then
             !------- if alpha is prescribed, we're done
-            CL = CLT
-            RETURN
-        ELSE
+            Cl = clt
+            return
+        else
             !------- adjust alpha with Newton-Raphson to get specified CL
-            DALFA = (CL - CLT) / CLT_A
-            ALFA = ALFA + DALFA
-            IF(ABS(DALFA) .LT. AEPS) RETURN
-        ENDIF
+            dalfa = (Cl - clt) / clt_a
+            Alfa = Alfa + dalfa
+            if (abs(dalfa)<aeps) return
+        endif
         !
-    1 CONTINUE
-    WRITE(*, *) 'QCCALC: CL convergence failed.  dAlpha =', DALFA
+    enddo
+    write (*, *) 'QCCALC: CL convergence failed.  dAlpha =', dalfa
     !
-    RETURN
-END
+end subroutine qccalc
+!*==QSPINT.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! QCCALC
 
 
 
-SUBROUTINE QSPINT(ALQSP, QSPEC, QINF, MINF, CLQSP, CMQSP)
+subroutine qspint(Alqsp, Qspec, Qinf, Minf, Clqsp, Cmqsp)
+    use m_xqdes
+    use m_spline
+    use i_circle
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    real :: Alqsp, Clqsp, Cmqsp, Minf, Qinf
+    real, dimension(NC) :: Qspec
+    intent (in) Alqsp, Minf, Qinf, Qspec
+    intent (inout) Clqsp, Cmqsp
+    !
+    ! Local variables
+    !
+    real :: aq, ax, ay, beta, bfac, ca, cpq1, cpq2, cqinc, du, dx, dy, sa
+    integer :: i, ip
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !--------------------------------------------
-    !     Integrates circle-plane array surface 
+    !     Integrates circle-plane array surface
     !     pressures to get CL and CM
     !--------------------------------------------
-    use m_spline
-    INCLUDE 'CIRCLE.INC'
-    DIMENSION QSPEC(NC)
-    REAL MINF
     !
-    SA = SIN(ALQSP)
-    CA = COS(ALQSP)
+    sa = sin(Alqsp)
+    ca = cos(Alqsp)
     !
-    BETA = SQRT(1.0 - MINF**2)
-    BFAC = 0.5 * MINF**2 / (1.0 + BETA)
+    beta = sqrt(1.0 - Minf**2)
+    bfac = 0.5 * Minf**2 / (1.0 + beta)
     !
-    CLQSP = 0.0
-    CMQSP = 0.0
+    Clqsp = 0.0
+    Cmqsp = 0.0
     !
-    I = 1
-    CQINC = 1.0 - (QSPEC(I) / QINF)**2
-    CPQ1 = CQINC / (BETA + BFAC * CQINC)
+    i = 1
+    cqinc = 1.0 - (Qspec(i) / Qinf)**2
+    cpq1 = cqinc / (beta + bfac * cqinc)
     !
-    DO 10 I = 1, NC
-        IP = I + 1
-        IF(I.EQ.NC) IP = 1
+    do i = 1, NC
+        ip = i + 1
+        if (i==NC) ip = 1
         !
-        CQINC = 1.0 - (QSPEC(IP) / QINF)**2
-        CPQ2 = CQINC / (BETA + BFAC * CQINC)
+        cqinc = 1.0 - (Qspec(ip) / Qinf)**2
+        cpq2 = cqinc / (beta + bfac * cqinc)
         !
-        DX = (XCOLD(IP) - XCOLD(I)) * CA + (YCOLD(IP) - YCOLD(I)) * SA
-        DY = (YCOLD(IP) - YCOLD(I)) * CA - (XCOLD(IP) - XCOLD(I)) * SA
-        DU = CPQ2 - CPQ1
+        dx = (XCOld(ip) - XCOld(i)) * ca + (YCOld(ip) - YCOld(i)) * sa
+        dy = (YCOld(ip) - YCOld(i)) * ca - (XCOld(ip) - XCOld(i)) * sa
+        du = cpq2 - cpq1
         !
-        AX = 0.5 * (XCOLD(IP) + XCOLD(I)) * CA + 0.5 * (YCOLD(IP) + YCOLD(I)) * SA
-        AY = 0.5 * (YCOLD(IP) + YCOLD(I)) * CA - 0.5 * (XCOLD(IP) + XCOLD(I)) * SA
-        AQ = 0.5 * (CPQ2 + CPQ1)
+        ax = 0.5 * (XCOld(ip) + XCOld(i)) * ca + 0.5 * (YCOld(ip) + YCOld(i)) * sa
+        ay = 0.5 * (YCOld(ip) + YCOld(i)) * ca - 0.5 * (XCOld(ip) + XCOld(i)) * sa
+        aq = 0.5 * (cpq2 + cpq1)
         !
-        CLQSP = CLQSP + DX * AQ
-        CMQSP = CMQSP - DX * (AQ * (AX - 0.25) + DU * DX / 12.0)&
-                - DY * (AQ * AY + DU * DY / 12.0)
+        Clqsp = Clqsp + dx * aq
+        Cmqsp = Cmqsp - dx * (aq * (ax - 0.25) + du * dx / 12.0) - dy * (aq * ay + du * dy / 12.0)
         !
-        CPQ1 = CPQ2
-    10 CONTINUE
+        cpq1 = cpq2
+    enddo
     !
-    RETURN
-END
+end subroutine qspint
+!*==FTP.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! QSPINT
 
 
-SUBROUTINE FTP
+subroutine ftp
+    use m_xqdes
+    use m_spline
+    use i_circle
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    integer :: ic, m
+    complex :: zsum
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !----------------------------------------------------------------
     !     Slow-Fourier-Transform P(w) using Trapezoidal integration.
     !----------------------------------------------------------------
-    use m_spline
-    INCLUDE 'CIRCLE.INC'
-    COMPLEX ZSUM
     !
-    DO 200 M = 0, MC
-        ZSUM = (0.0, 0.0)
-        DO 210 IC = 2, NC - 1
-            ZSUM = ZSUM + PIQ(IC) * EIW(IC, M)
-        210   CONTINUE
-        CN(M) = (0.5 * (PIQ(1) * EIW(1, M) + PIQ(NC) * EIW(NC, M))&
-                + ZSUM) * DWC / PI
-    200 CONTINUE
+    do m = 0, MC
+        zsum = (0.0, 0.0)
+        do ic = 2, NC - 1
+            zsum = zsum + PIQ(ic) * EIW(ic, m)
+        enddo
+        CN(m) = (0.5 * (PIQ(1) * EIW(1, m) + PIQ(NC) * EIW(NC, m)) + zsum) * DWC / PI
+    enddo
     CN(0) = 0.5 * CN(0)
     !
-    RETURN
-END
+end subroutine ftp
+!*==EIWSET.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! FTP
 
 
-SUBROUTINE EIWSET(NC1)
+subroutine eiwset(Nc1)
+    use m_xqdes
+    use m_spline
+    use i_circle
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    integer :: Nc1
+    intent (in) Nc1
+    !
+    ! Local variables
+    !
+    integer :: ic, ic1, m
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !----------------------------------------------------
     !     Calculates the uniformly-spaced circle-plane
     !     coordinate array WC (omega), and the
     !     corresponding complex unit numbers exp(inw)
     !     for Slow Fourier Transform operations.
     !----------------------------------------------------
-    use m_spline
-    INCLUDE 'CIRCLE.INC'
     !
-    PI = 4.0 * ATAN(1.0)
+    PI = 4.0 * atan(1.0)
     !
     !---- set requested number of points in circle plane
-    NC = NC1
-    MC = NC1 / 4
-    MCT = NC1 / 16
+    NC = Nc1
+    MC = Nc1 / 4
+    MCT = Nc1 / 16
     !
-    IF(NC.GT.ICX) STOP 'EIWSET: Array overflow. Increase ICX.'
+    if (NC>ICX) stop 'EIWSET: Array overflow. Increase ICX.'
     !
-    DWC = 2.0 * PI / FLOAT(NC - 1)
+    DWC = 2.0 * PI / float(NC - 1)
     !
-    DO 10 IC = 1, NC
-        WC(IC) = DWC * FLOAT(IC - 1)
-    10 CONTINUE
+    do ic = 1, NC
+        WC(ic) = DWC * float(ic - 1)
+    enddo
     !
     !---- set  m = 0  numbers
-    DO 20 IC = 1, NC
-        EIW(IC, 0) = (1.0, 0.0)
-    20 CONTINUE
+    do ic = 1, NC
+        EIW(ic, 0) = (1.0, 0.0)
+    enddo
     !
     !---- set  m = 1  numbers
-    DO 30 IC = 1, NC
-        EIW(IC, 1) = EXP(CMPLX(0.0, WC(IC)))
-    30 CONTINUE
+    do ic = 1, NC
+        EIW(ic, 1) = exp(cmplx(0.0, WC(ic)))
+    enddo
     !
     !---- set  m > 1  numbers by indexing appropriately from  m = 1  numbers
-    DO 40 M = 2, MC
-        DO 410 IC = 1, NC
-            IC1 = M * (IC - 1)
-            IC1 = MOD(IC1, (NC - 1)) + 1
-            EIW(IC, M) = EIW(IC1, 1)
-        410   CONTINUE
-    40 CONTINUE
+    do m = 2, MC
+        do ic = 1, NC
+            ic1 = m * (ic - 1)
+            ic1 = mod(ic1, (NC - 1)) + 1
+            EIW(ic, m) = EIW(ic1, 1)
+        enddo
+    enddo
     !
-    RETURN
-END
+end subroutine eiwset
+!*==PERT.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! EIWSET
 
 
 
-SUBROUTINE PERT(QSPEC)
+subroutine pert(Qspec)
+    use m_xqdes
+    use m_spline
+    use i_circle
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    real, dimension(ICX) :: Qspec
+    !
+    ! Local variables
+    !
+    complex, dimension(IMX / 4) :: dcn
+    real :: dcni, dcnmax, dcnr, dx, dy, qimoff
+    integer :: itercn, l, m, ncn
+    complex, dimension(IMX / 4, IMX / 4) :: qq
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !--------------------------------------------------------
     !     Calculates the perturbed geometry resulting from
     !     one Cn mapping coefficient being perturbed by user.
     !--------------------------------------------------------
-    use m_spline
-    INCLUDE 'CIRCLE.INC'
-    DIMENSION QSPEC(ICX)
     !
-    COMPLEX QQ(IMX / 4, IMX / 4), DCN(IMX / 4)
     !
     !---- calculate mapping coefficients for initial airfoil shape
-    CALL CNCALC(QSPEC, .FALSE.)
+    call cncalc(Qspec, .false.)
     !
     !---- preset rotation offset of airfoil so that initial angle is close
     !-    to the old airfoil's angle
-    DX = XCOLD(2) - XCOLD(1)
-    DY = YCOLD(2) - YCOLD(1)
-    QIM0 = ATAN2(DX, -DY) + 0.5 * PI * (1.0 + AGTE)
-    QIMOFF = QIM0 - IMAG(CN(0))
-    CN(0) = CN(0) + CMPLX(0.0, QIMOFF)
+    dx = XCOld(2) - XCOld(1)
+    dy = YCOld(2) - YCOld(1)
+    QIM0 = atan2(dx, -dy) + 0.5 * PI * (1.0 + AGTe)
+    qimoff = QIM0 - imag(CN(0))
+    CN(0) = CN(0) + cmplx(0.0, qimoff)
     !
-    WRITE(*, *)
-    WRITE(*, *) 'Current mapping coefficients...'
-    WRITE(*, *) '      n    Re(Cn)      Im(Cn)'
+    write (*, *)
+    write (*, *) 'Current mapping coefficients...'
+    write (*, *) '      n    Re(Cn)      Im(Cn)'
     !cc   DO M = 1, NC
-    DO M = 1, MIN(NC, 32)
-        WRITE(*, 1010) M, REAL(CN(M)), IMAG(CN(M))
-        1010   FORMAT(4X, I4, 2F12.6)
-    ENDDO
-    !
-    10   WRITE(*, 1050)
-    1050 FORMAT(/4X, 'Enter  n, delta(Cnr), delta(Cni):  ', $)
-    READ(*, *, ERR = 10) M, DCNR, DCNI
-    IF(M.LE.0) THEN
-        GO TO 10
-    ELSEIF(M.GT.NC) THEN
-        WRITE(*, *) 'Max number of modes is', NC
-        GO TO 10
-    ENDIF
-    CN(M) = CN(M) + CMPLX(DCNR, DCNI)
-    !
-    !---- inverse-transform and calculate geometry
-    !cc   CALL CNFILT(FFILT)
-    CALL PIQSUM
-    CALL ZCCALC(MCT)
-    !
-    !---- normalize chord and set exact previous alpha
-    CALL ZCNORM(MCT)
-    !
-    !CC---- put back rotation offset so speed routine QCCALC gets the right alpha
-    !CC      CN(0) = CN(0) - CMPLX( 0.0 , QIMOFF )
+    do m = 1, min(NC, 32)
+        write (*, 99001) m, real(CN(m)), imag(CN(m))
+        99001 format (4x, i4, 2F12.6)
+    enddo
+    100  do
+        !
+        write (*, 99002)
+        99002 format (/4x, 'Enter  n, delta(Cnr), delta(Cni):  ', $)
+        read (*, *, err = 100) m, dcnr, dcni
+        if (m<=0) cycle
+        if (m>NC) then
+            write (*, *) 'Max number of modes is', NC
+            cycle
+        endif
+        CN(m) = CN(m) + cmplx(dcnr, dcni)
+        !
+        !---- inverse-transform and calculate geometry
+        !cc   CALL CNFILT(FFILT)
+        call piqsum
+        call zccalc(MCT)
+        !
+        !---- normalize chord and set exact previous alpha
+        call zcnorm(MCT)
+        !
+        !CC---- put back rotation offset so speed routine QCCALC gets the right alpha
+        !CC      CN(0) = CN(0) - CMPLX( 0.0 , QIMOFF )
 
-    !---- enforce Lighthill's first constraint
-    CN(0) = CMPLX(0.0, IMAG(CN(0)))
+        !---- enforce Lighthill's first constraint
+        CN(0) = cmplx(0.0, imag(CN(0)))
 
-    !---- number of free coefficients
-    NCN = 1
+        !---- number of free coefficients
+        ncn = 1
 
-    !---- Newton iteration loop for modified Cn's
-    DO 100 ITERCN = 1, 10
+        !---- Newton iteration loop for modified Cn's
+        do itercn = 1, 10
 
-        !------ fix TE gap
-        M = 1
-        DCN(M) = ZC(1) - ZC(NC) - DZTE
-        DO L = 1, NCN
-            QQ(M, L) = ZC_CN(1, L) - ZC_CN(NC, L)
-        ENDDO
-        !
-        CALL CGAUSS(IMX / 4, NCN, QQ, DCN, 1)
-        !
-        DCNMAX = 0.
-        DO M = 1, NCN
-            CN(M) = CN(M) - DCN(M)
-            DCNMAX = MAX(ABS(DCN(M)), DCNMAX)
-        ENDDO
-        !
-        !cc     CALL CNFILT(FFILT)
-        CALL PIQSUM
-        !
-        CALL ZCCALC(MCT)
-        CALL ZCNORM(MCT)
-        !
-        WRITE(*, *) ITERCN, DCNMAX
-        IF(DCNMAX.LE.5.0E-5) GO TO 101
-    100  CONTINUE
-    WRITE(*, *) 'TE gap,chord did not converge'
-    101  CONTINUE
-    RETURN
-END
+            !------ fix TE gap
+            m = 1
+            dcn(m) = ZC(1) - ZC(NC) - DZTe
+            do l = 1, ncn
+                qq(m, l) = ZC_cn(1, l) - ZC_cn(NC, l)
+            enddo
+            !
+            call cgauss(IMX / 4, ncn, qq, dcn, 1)
+            !
+            dcnmax = 0.
+            do m = 1, ncn
+                CN(m) = CN(m) - dcn(m)
+                dcnmax = max(abs(dcn(m)), dcnmax)
+            enddo
+            !
+            !cc     CALL CNFILT(FFILT)
+            call piqsum
+            !
+            call zccalc(MCT)
+            call zcnorm(MCT)
+            !
+            write (*, *) itercn, dcnmax
+            if (dcnmax<=5.0E-5) goto 99999
+        enddo
+        write (*, *) 'TE gap,chord did not converge'
+        exit
+    enddo
+99999 end subroutine pert
+!*==CNDUMP.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! PERT
 
 
 
-SUBROUTINE CNDUMP(LU)
+subroutine cndump(Lu)
+    use m_xqdes
+    use m_spline
+    use i_circle
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    integer :: Lu
+    intent (in) Lu
+    !
+    ! Local variables
+    !
+    integer :: m
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !--------------------------------------------------------
     !     Writes out the Fourier coefficients Cn
     !--------------------------------------------------------
-    use m_spline
-    INCLUDE 'CIRCLE.INC'
     !
-    do 700 m = 0, mc
-        write(LU, 7000) m, real(cn(m)), imag(cn(m))&
-                , real(piq(m + 1)), imag(piq(m + 1))
-    700 continue
+    do m = 0, MC
+        write (Lu, 99001) m, real(CN(m)), imag(CN(m)), real(PIQ(m + 1)), imag(PIQ(m + 1))
+    enddo
     !
-    do 710 m = mc + 1, nc - 1
-        write(LU, 7000) m, 0.0, 0.0&
-                , real(piq(m + 1)), imag(piq(m + 1))
-    710 continue
+    do m = MC + 1, NC - 1
+        write (Lu, 99001) m, 0.0, 0.0, real(PIQ(m + 1)), imag(PIQ(m + 1))
+    enddo
     !
-    7000 format(1x, i3, 4f11.6)
+    99001 format (1x, i3, 4F11.6)
     !
-    RETURN
-END
+end subroutine cndump
+!*==GETVOV.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 
 
-SUBROUTINE GETVOV(KQSP)
+subroutine getvov(Kqsp)
+    use m_xqdes
     use m_spline
     use i_xfoil
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    integer :: Kqsp
+    !
+    ! Local variables
+    !
+    integer :: i, k, kk, lu
+    real :: qsnew, ss, sspan, sstart
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !LED ENTIRE ROUTINE
     !
-    KK = 0
-    DO 5 I = 1, IQX
-        W1(I) = 0.
-        W2(I) = 0.
-        W3(I) = 0.
-    5 CONTINUE
+    kk = 0
+    do i = 1, IQX
+        W1(i) = 0.
+        W2(i) = 0.
+        W3(i) = 0.
+    enddo
     !
-    LU = 2
+    lu = 2
     !
-    CALL ASKS('Enter V/Vinf vs s data filename^', FNAME)
-    OPEN(LU, FILE = FNAME, STATUS = 'OLD', ERR = 98)
+    call asks('Enter V/Vinf vs s data filename^', FNAme)
+    open (lu, file = FNAme, status = 'OLD', err = 200)
     !
     !---- read the Qspec file
-    DO 10 K = 1, IQX
-        READ(LU, *, END = 11, ERR = 99) W1(K), W2(K)
-    10 CONTINUE
-    11 KK = K - 1
-    CLOSE(LU)
+    do k = 1, IQX
+        read (lu, *, end = 100, err = 300) W1(k), W2(k)
+    enddo
+    100  kk = k - 1
+    close (lu)
     !
     !---- nondimensionalize S distances
-    SSPAN = W1(KK) - W1(1)
-    SSTART = W1(1)
-    DO 15 K = 1, KK
-        W1(K) = 1. - (W1(K) - SSTART) / SSPAN
-    15 CONTINUE
+    sspan = W1(kk) - W1(1)
+    sstart = W1(1)
+    do k = 1, kk
+        W1(k) = 1. - (W1(k) - sstart) / sspan
+    enddo
     !
     !---- sort input points then, removing identical pairs
-    CALL SORT(KK, W1, W2)
+    call sort(kk, W1, W2)
     !
     !---- spline input points
-    CALL SPLIND(W2, W3, W1, KK, -999.0, -999.0)
+    call splind(W2, W3, W1, kk, -999.0, -999.0)
     !
     !---- set Qspec array
-    DO 20 I = 1, NSP
-        SS = SSPEC(I)
+    do i = 1, NSP
+        ss = SSPec(i)
         !
         !------ evaluate spline at SSPEC positions
-        QSNEW = SEVAL(SS, W2, W3, W1, KK)
+        qsnew = seval(ss, W2, W3, W1, kk)
         !
         !------ set incompressible speed from new compressible speed
-        QSPEC(I, KQSP) = QINCOM(QSNEW, QINF, TKLAM)
+        QSPec(i, Kqsp) = qincom(qsnew, QINf, TKLam)
         !
-    20 CONTINUE
+    enddo
     !
     !---- spline new Qspec array
-    CALL SPLQSP(KQSP)
+    call splqsp(Kqsp)
     !
-    RETURN
+    return
     !
-    98 WRITE(*, *) 'GETVOV: File OPEN error.'
-    RETURN
+    200  write (*, *) 'GETVOV: File OPEN error.'
+    return
     !
-    99 WRITE(*, *) 'GETVOV: File READ error.'
-    CLOSE(LU)
-    RETURN
+    300  write (*, *) 'GETVOV: File READ error.'
+    close (lu)
     !
-END
+end subroutine getvov
+!*==ZLEFIND.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! GETVOV
 
 
-SUBROUTINE ZLEFIND(ZLE, ZC, WC, NC, PIQ, AGTE)
+subroutine zlefind(Zle, Zc, Wc, Nc, Piq, Agte)
     use m_spline
-    COMPLEX ZLE, ZC(*), PIQ(*)
-    DIMENSION WC(*)
+    implicit none
     !
-    COMPLEX DZDW1, DZDW2, ZTE
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! PARAMETER definitions
+    !
+    integer, parameter :: NTX = 33
+    !
+    ! Dummy arguments
+    !
+    real :: Agte
+    integer :: Nc
+    complex :: Zle
+    complex, dimension(*) :: Piq, Zc
+    real, dimension(*) :: Wc
+    intent (in) Agte, Nc, Piq, Zc
+    intent (out) Zle
+    !
+    ! Local variables
+    !
+    real :: dist, dmax, dwcle, dxdd, dxdw, dydd, dydw, hwc, res, resw, sinw, sinwe, wcle, xchord, xcle, &
+            & xcte, ychord, ycle, ycte
+    complex :: dzdw1, dzdw2, zte
+    integer :: i, ic, ic1, ic2, icle, itcle, nic
+    real, save :: pi
+    real, dimension(NTX) :: xc, xcw, yc, ycw
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! PARAMETER definitions
+    !
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
     !
     !---- temporary work arrays for splining near leading edge
-    PARAMETER (NTX = 33)
-    DIMENSION XC(NTX), YC(NTX), XCW(NTX), YCW(NTX)
     !
-    DATA  PI /3.1415926535897932384/
+    data pi/3.1415926535897932384/
     !
-    ZTE = 0.5 * (ZC(1) + ZC(NC))
+    zte = 0.5 * (Zc(1) + Zc(Nc))
     !
     !---- find point farthest from TE
-    DMAX = 0.0
-    DO 30 IC = 1, NC
-        DIST = ABS(ZC(IC) - ZTE)
+    dmax = 0.0
+    do ic = 1, Nc
+        dist = abs(Zc(ic) - zte)
         !
-        IF(DIST.GT.DMAX) THEN
-            DMAX = DIST
-            ICLE = IC
-        ENDIF
-    30 CONTINUE
+        if (dist>dmax) then
+            dmax = dist
+            icle = ic
+        endif
+    enddo
     !
     !---- set restricted spline limits around leading edge
-    IC1 = MAX(ICLE - (NTX - 1) / 2, 1)
-    IC2 = MIN(ICLE + (NTX - 1) / 2, NC)
+    ic1 = max(icle - (NTX - 1) / 2, 1)
+    ic2 = min(icle + (NTX - 1) / 2, Nc)
     !
     !---- set up derivatives at spline endpoints
-    SINW = 2.0 * SIN(0.5 * WC(IC1))
-    SINWE = SINW**(1.0 - AGTE)
-    HWC = 0.5 * (WC(IC1) - PI) * (1.0 + AGTE) - 0.5 * PI
-    DZDW1 = SINWE * EXP(PIQ(IC1) + CMPLX(0.0, HWC))
+    sinw = 2.0 * sin(0.5 * Wc(ic1))
+    sinwe = sinw**(1.0 - Agte)
+    hwc = 0.5 * (Wc(ic1) - pi) * (1.0 + Agte) - 0.5 * pi
+    dzdw1 = sinwe * exp(Piq(ic1) + cmplx(0.0, hwc))
     !
-    SINW = 2.0 * SIN(0.5 * WC(IC2))
-    SINWE = SINW**(1.0 - AGTE)
-    HWC = 0.5 * (WC(IC2) - PI) * (1.0 + AGTE) - 0.5 * PI
-    DZDW2 = SINWE * EXP(PIQ(IC2) + CMPLX(0.0, HWC))
+    sinw = 2.0 * sin(0.5 * Wc(ic2))
+    sinwe = sinw**(1.0 - Agte)
+    hwc = 0.5 * (Wc(ic2) - pi) * (1.0 + Agte) - 0.5 * pi
+    dzdw2 = sinwe * exp(Piq(ic2) + cmplx(0.0, hwc))
     !
     !---- fill temporary x,y coordinate arrays
-    DO 40 IC = IC1, IC2
-        I = IC - IC1 + 1
-        XC(I) = REAL(ZC(IC))
-        YC(I) = IMAG(ZC(IC))
-    40 CONTINUE
+    do ic = ic1, ic2
+        i = ic - ic1 + 1
+        xc(i) = real(Zc(ic))
+        yc(i) = imag(Zc(ic))
+    enddo
     !
     !---- calculate spline near leading edge with derivative end conditions
-    NIC = IC2 - IC1 + 1
-    CALL SPLIND(XC, XCW, WC(IC1), NIC, REAL(DZDW1), REAL(DZDW2))
-    CALL SPLIND(YC, YCW, WC(IC1), NIC, IMAG(DZDW1), IMAG(DZDW2))
+    nic = ic2 - ic1 + 1
+    call splind(xc, xcw, Wc(ic1), nic, real(dzdw1), real(dzdw2))
+    call splind(yc, ycw, Wc(ic1), nic, imag(dzdw1), imag(dzdw2))
     !
-    XCTE = 0.5 * REAL(ZC(1) + ZC(NC))
-    YCTE = 0.5 * IMAG(ZC(1) + ZC(NC))
+    xcte = 0.5 * real(Zc(1) + Zc(Nc))
+    ycte = 0.5 * imag(Zc(1) + Zc(Nc))
     !
     !---- initial guess for leading edge coordinate
-    WCLE = WC(ICLE)
+    wcle = Wc(icle)
     !
     !---- Newton loop for improved leading edge coordinate
-    DO 50 ITCLE = 1, 10
-        XCLE = SEVAL(WCLE, XC, XCW, WC(IC1), NIC)
-        YCLE = SEVAL(WCLE, YC, YCW, WC(IC1), NIC)
-        DXDW = DEVAL(WCLE, XC, XCW, WC(IC1), NIC)
-        DYDW = DEVAL(WCLE, YC, YCW, WC(IC1), NIC)
-        DXDD = D2VAL(WCLE, XC, XCW, WC(IC1), NIC)
-        DYDD = D2VAL(WCLE, YC, YCW, WC(IC1), NIC)
+    do itcle = 1, 10
+        xcle = seval(wcle, xc, xcw, Wc(ic1), nic)
+        ycle = seval(wcle, yc, ycw, Wc(ic1), nic)
+        dxdw = deval(wcle, xc, xcw, Wc(ic1), nic)
+        dydw = deval(wcle, yc, ycw, Wc(ic1), nic)
+        dxdd = d2val(wcle, xc, xcw, Wc(ic1), nic)
+        dydd = d2val(wcle, yc, ycw, Wc(ic1), nic)
         !
-        XCHORD = XCLE - XCTE
-        YCHORD = YCLE - YCTE
+        xchord = xcle - xcte
+        ychord = ycle - ycte
         !
         !------ drive dot product between chord line and LE tangent to zero
-        RES = XCHORD * DXDW + YCHORD * DYDW
-        RESW = DXDW * DXDW + DYDW * DYDW&
-                + XCHORD * DXDD + YCHORD * DYDD
+        res = xchord * dxdw + ychord * dydw
+        resw = dxdw * dxdw + dydw * dydw + xchord * dxdd + ychord * dydd
         !
-        DWCLE = -RES / RESW
-        WCLE = WCLE + DWCLE
+        dwcle = -res / resw
+        wcle = wcle + dwcle
         !
-        IF(ABS(DWCLE).LT.1.0E-5) GO TO 51
-    50 CONTINUE
-    WRITE(*, *) 'ZLEFIND: LE location failed.'
-    WCLE = WC(ICLE)
-    51 CONTINUE
+        if (abs(dwcle)<1.0E-5) goto 100
+    enddo
+    write (*, *) 'ZLEFIND: LE location failed.'
+    wcle = Wc(icle)
     !
     !---- set final leading edge point complex coordinate
-    XCLE = SEVAL(WCLE, XC, XCW, WC(IC1), NIC)
-    YCLE = SEVAL(WCLE, YC, YCW, WC(IC1), NIC)
-    ZLE = CMPLX(XCLE, YCLE)
+    100  xcle = seval(wcle, xc, xcw, Wc(ic1), nic)
+    ycle = seval(wcle, yc, ycw, Wc(ic1), nic)
+    Zle = cmplx(xcle, ycle)
     !
-    RETURN
-END
-! ZLEFIND
+end subroutine zlefind

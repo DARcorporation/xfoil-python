@@ -1,8 +1,9 @@
+!*==M_SPLINE.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 !***********************************************************************
 !    Module:  spline.f
-! 
-!    Copyright (C) 2000 Mark Drela 
-! 
+!
+!    Copyright (C) 2000 Mark Drela
+!
 !    This program is free software; you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
 !    the Free Software Foundation; either version 2 of the License, or
@@ -18,11 +19,55 @@
 !    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 !***********************************************************************
 module m_spline
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    !*** End of declarations rewritten by SPAG
+    !
 contains
-    SUBROUTINE SPLINE(X, XS, S, N)
-        DIMENSION X(N), XS(N), S(N)
-        PARAMETER (NMAX = 1000)
-        DIMENSION A(NMAX), B(NMAX), C(NMAX)
+    subroutine spline(X, Xs, S, N)
+        implicit none
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! PARAMETER definitions
+        !
+        integer, parameter :: NMAX = 1000
+        !
+        ! Dummy arguments
+        !
+        integer :: N
+        real, dimension(N) :: S, X, Xs
+        intent (in) S, X
+        !
+        ! Local variables
+        !
+        real, dimension(NMAX) :: a, b, c
+        real :: dsm, dsp
+        integer :: i
+        !
+        !*** End of declarations rewritten by SPAG
+        !
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! PARAMETER definitions
+        !
+        !
+        ! Dummy arguments
+        !
+        !
+        ! Local variables
+        !
+        !
+        !*** End of declarations rewritten by SPAG
+        !
         !-------------------------------------------------------
         !     Calculates spline coefficients for X(S).          |
         !     Zero 2nd derivative end conditions are used.      |
@@ -35,37 +80,70 @@ contains
         !     N        number of points           (input)       |
         !                                                       |
         !-------------------------------------------------------
-        IF(N.GT.NMAX) STOP 'SPLINE: array overflow, increase NMAX'
+        if (N>NMAX) stop 'SPLINE: array overflow, increase NMAX'
         !
-        DO 1 I = 2, N - 1
-            DSM = S(I) - S(I - 1)
-            DSP = S(I + 1) - S(I)
-            B(I) = DSP
-            A(I) = 2.0 * (DSM + DSP)
-            C(I) = DSM
-            XS(I) = 3.0 * ((X(I + 1) - X(I)) * DSM / DSP + (X(I) - X(I - 1)) * DSP / DSM)
-        1 CONTINUE
+        do i = 2, N - 1
+            dsm = S(i) - S(i - 1)
+            dsp = S(i + 1) - S(i)
+            b(i) = dsp
+            a(i) = 2.0 * (dsm + dsp)
+            c(i) = dsm
+            Xs(i) = 3.0 * ((X(i + 1) - X(i)) * dsm / dsp + (X(i) - X(i - 1)) * dsp / dsm)
+        enddo
         !
         !---- set zero second derivative end conditions
-        A(1) = 2.0
-        C(1) = 1.0
-        XS(1) = 3.0 * (X(2) - X(1)) / (S(2) - S(1))
-        B(N) = 1.0
-        A(N) = 2.0
-        XS(N) = 3.0 * (X(N) - X(N - 1)) / (S(N) - S(N - 1))
+        a(1) = 2.0
+        c(1) = 1.0
+        Xs(1) = 3.0 * (X(2) - X(1)) / (S(2) - S(1))
+        b(N) = 1.0
+        a(N) = 2.0
+        Xs(N) = 3.0 * (X(N) - X(N - 1)) / (S(N) - S(N - 1))
         !
         !---- solve for derivative array XS
-        CALL TRISOL(A, B, C, XS, N)
+        call trisol(a, b, c, Xs, N)
         !
-        RETURN
-    END
+    end subroutine spline
     ! SPLINE
 
 
-    SUBROUTINE SPLIND(X, XS, S, N, XS1, XS2)
-        DIMENSION X(N), XS(N), S(N)
-        PARAMETER (NMAX = 1000)
-        DIMENSION  A(NMAX), B(NMAX), C(NMAX)
+    subroutine splind(X, Xs, S, N, Xs1, Xs2)
+        implicit none
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! PARAMETER definitions
+        !
+        integer, parameter :: NMAX = 1000
+        !
+        ! Dummy arguments
+        !
+        integer :: N
+        real :: Xs1, Xs2
+        real, dimension(N) :: S, X, Xs
+        intent (in) S, X, Xs1, Xs2
+        !
+        ! Local variables
+        !
+        real, dimension(NMAX) :: a, b, c
+        real :: dsm, dsp
+        integer :: i
+        !
+        !*** End of declarations rewritten by SPAG
+        !
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! PARAMETER definitions
+        !
+        !
+        ! Dummy arguments
+        !
+        !
+        ! Local variables
+        !
+        !
+        !*** End of declarations rewritten by SPAG
+        !
         !-------------------------------------------------------
         !     Calculates spline coefficients for X(S).          |
         !     Specified 1st derivative and/or usual zero 2nd    |
@@ -84,67 +162,93 @@ contains
         !              derivative end condition(s) are used     |
         !                                                       |
         !-------------------------------------------------------
-        IF(N.GT.NMAX) STOP 'SPLIND: array overflow, increase NMAX'
+        if (N>NMAX) stop 'SPLIND: array overflow, increase NMAX'
         !
-        DO 1 I = 2, N - 1
-            DSM = S(I) - S(I - 1)
-            DSP = S(I + 1) - S(I)
-            B(I) = DSP
-            A(I) = 2.0 * (DSM + DSP)
-            C(I) = DSM
-            XS(I) = 3.0 * ((X(I + 1) - X(I)) * DSM / DSP + (X(I) - X(I - 1)) * DSP / DSM)
-        1 CONTINUE
+        do i = 2, N - 1
+            dsm = S(i) - S(i - 1)
+            dsp = S(i + 1) - S(i)
+            b(i) = dsp
+            a(i) = 2.0 * (dsm + dsp)
+            c(i) = dsm
+            Xs(i) = 3.0 * ((X(i + 1) - X(i)) * dsm / dsp + (X(i) - X(i - 1)) * dsp / dsm)
+        enddo
         !
-        IF(XS1.EQ.999.0) THEN
+        if (Xs1==999.0) then
             !----- set zero second derivative end condition
-            A(1) = 2.0
-            C(1) = 1.0
-            XS(1) = 3.0 * (X(2) - X(1)) / (S(2) - S(1))
-        ELSE IF(XS1.EQ.-999.0) THEN
+            a(1) = 2.0
+            c(1) = 1.0
+            Xs(1) = 3.0 * (X(2) - X(1)) / (S(2) - S(1))
+        elseif (Xs1==-999.0) then
             !----- set zero third derivative end condition
-            A(1) = 1.0
-            C(1) = 1.0
-            XS(1) = 2.0 * (X(2) - X(1)) / (S(2) - S(1))
-        ELSE
+            a(1) = 1.0
+            c(1) = 1.0
+            Xs(1) = 2.0 * (X(2) - X(1)) / (S(2) - S(1))
+        else
             !----- set specified first derivative end condition
-            A(1) = 1.0
-            C(1) = 0.
-            XS(1) = XS1
-        ENDIF
+            a(1) = 1.0
+            c(1) = 0.
+            Xs(1) = Xs1
+        endif
         !
-        IF(XS2.EQ.999.0) THEN
-            B(N) = 1.0
-            A(N) = 2.0
-            XS(N) = 3.0 * (X(N) - X(N - 1)) / (S(N) - S(N - 1))
-        ELSE IF(XS2.EQ.-999.0) THEN
-            B(N) = 1.0
-            A(N) = 1.0
-            XS(N) = 2.0 * (X(N) - X(N - 1)) / (S(N) - S(N - 1))
-        ELSE
-            A(N) = 1.0
-            B(N) = 0.
-            XS(N) = XS2
-        ENDIF
+        if (Xs2==999.0) then
+            b(N) = 1.0
+            a(N) = 2.0
+            Xs(N) = 3.0 * (X(N) - X(N - 1)) / (S(N) - S(N - 1))
+        elseif (Xs2==-999.0) then
+            b(N) = 1.0
+            a(N) = 1.0
+            Xs(N) = 2.0 * (X(N) - X(N - 1)) / (S(N) - S(N - 1))
+        else
+            a(N) = 1.0
+            b(N) = 0.
+            Xs(N) = Xs2
+        endif
         !
-        IF(N.EQ.2 .AND. XS1.EQ.-999.0 .AND. XS2.EQ.-999.0) THEN
-            B(N) = 1.0
-            A(N) = 2.0
-            XS(N) = 3.0 * (X(N) - X(N - 1)) / (S(N) - S(N - 1))
-        ENDIF
+        if (N==2 .and. Xs1==-999.0 .and. Xs2==-999.0) then
+            b(N) = 1.0
+            a(N) = 2.0
+            Xs(N) = 3.0 * (X(N) - X(N - 1)) / (S(N) - S(N - 1))
+        endif
         !
         !---- solve for derivative array XS
-        CALL TRISOL(A, B, C, XS, N)
+        call trisol(a, b, c, Xs, N)
         !
-        RETURN
-    END
+    end subroutine splind
     ! SPLIND
 
 
 
-    SUBROUTINE SPLINA(X, XS, S, N)
-        IMPLICIT REAL (A-H, O-Z)
-        DIMENSION X(N), XS(N), S(N)
-        LOGICAL LEND
+    subroutine splina(X, Xs, S, N)
+        implicit none
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! Dummy arguments
+        !
+        integer :: N
+        real, dimension(N) :: S, X, Xs
+        intent (in) N, S, X
+        intent (out) Xs
+        !
+        ! Local variables
+        !
+        real :: ds, dx, xs1, xs2
+        integer :: i
+        logical :: lend
+        !
+        !*** End of declarations rewritten by SPAG
+        !
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! Dummy arguments
+        !
+        !
+        ! Local variables
+        !
+        !
+        !*** End of declarations rewritten by SPAG
+        !
         !-------------------------------------------------------
         !     Calculates spline coefficients for X(S).          |
         !     A simple averaging of adjacent segment slopes     |
@@ -160,34 +264,60 @@ contains
         !                                                       |
         !-------------------------------------------------------
         !
-        LEND = .TRUE.
-        DO 1 I = 1, N - 1
-            DS = S(I + 1) - S(I)
-            IF (DS.EQ.0.) THEN
-                XS(I) = XS1
-                LEND = .TRUE.
-            ELSE
-                DX = X(I + 1) - X(I)
-                XS2 = DX / DS
-                IF (LEND) THEN
-                    XS(I) = XS2
-                    LEND = .FALSE.
-                ELSE
-                    XS(I) = 0.5 * (XS1 + XS2)
-                ENDIF
-            ENDIF
-            XS1 = XS2
-        1 CONTINUE
-        XS(N) = XS1
+        lend = .true.
+        do i = 1, N - 1
+            ds = S(i + 1) - S(i)
+            if (ds==0.) then
+                Xs(i) = xs1
+                lend = .true.
+            else
+                dx = X(i + 1) - X(i)
+                xs2 = dx / ds
+                if (lend) then
+                    Xs(i) = xs2
+                    lend = .false.
+                else
+                    Xs(i) = 0.5 * (xs1 + xs2)
+                endif
+            endif
+            xs1 = xs2
+        enddo
+        Xs(N) = xs1
         !
-        RETURN
-    END
+    end subroutine splina
     ! SPLINA
 
 
 
-    SUBROUTINE TRISOL(A, B, C, D, KK)
-        DIMENSION A(KK), B(KK), C(KK), D(KK)
+    subroutine trisol(A, B, C, D, Kk)
+        implicit none
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! Dummy arguments
+        !
+        integer :: Kk
+        real, dimension(Kk) :: A, B, C, D
+        intent (in) B, Kk
+        intent (inout) A, C, D
+        !
+        ! Local variables
+        !
+        integer :: k, km
+        !
+        !*** End of declarations rewritten by SPAG
+        !
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! Dummy arguments
+        !
+        !
+        ! Local variables
+        !
+        !
+        !*** End of declarations rewritten by SPAG
+        !
         !-----------------------------------------
         !     Solves KK long, tri-diagonal system |
         !                                         |
@@ -201,114 +331,226 @@ contains
         !     the solution.  A, C are destroyed.  |
         !-----------------------------------------
         !
-        DO 1 K = 2, KK
-            KM = K - 1
-            C(KM) = C(KM) / A(KM)
-            D(KM) = D(KM) / A(KM)
-            A(K) = A(K) - B(K) * C(KM)
-            D(K) = D(K) - B(K) * D(KM)
-        1 CONTINUE
+        do k = 2, Kk
+            km = k - 1
+            C(km) = C(km) / A(km)
+            D(km) = D(km) / A(km)
+            A(k) = A(k) - B(k) * C(km)
+            D(k) = D(k) - B(k) * D(km)
+        enddo
         !
-        D(KK) = D(KK) / A(KK)
+        D(Kk) = D(Kk) / A(Kk)
         !
-        DO 2 K = KK - 1, 1, -1
-            D(K) = D(K) - C(K) * D(K + 1)
-        2 CONTINUE
+        do k = Kk - 1, 1, -1
+            D(k) = D(k) - C(k) * D(k + 1)
+        enddo
         !
-        RETURN
-    END
+    end subroutine trisol
     ! TRISOL
 
 
-    FUNCTION SEVAL(SS, X, XS, S, N)
-        DIMENSION X(N), XS(N), S(N)
+    function seval(Ss, X, Xs, S, N)
+        implicit none
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! Dummy arguments
+        !
+        integer :: N
+        real :: Ss
+        real, dimension(N) :: S, X, Xs
+        real :: seval
+        intent (in) N, S, Ss, X, Xs
+        !
+        ! Local variables
+        !
+        real :: cx1, cx2, ds, t
+        integer :: i, ilow, imid
+        !
+        !*** End of declarations rewritten by SPAG
+        !
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! Dummy arguments
+        !
+        !
+        ! Local variables
+        !
+        !
+        !*** End of declarations rewritten by SPAG
+        !
         !--------------------------------------------------
         !     Calculates X(SS)                             |
         !     XS array must have been calculated by SPLINE |
         !--------------------------------------------------
-        ILOW = 1
-        I = N
+        ilow = 1
+        i = N
         !
-        10 IF(I - ILOW .LE. 1) GO TO 11
+        do while (i - ilow>1)
+            !
+            imid = (i + ilow) / 2
+            if (Ss<S(imid)) then
+                i = imid
+            else
+                ilow = imid
+            endif
+        enddo
         !
-        IMID = (I + ILOW) / 2
-        IF(SS .LT. S(IMID)) THEN
-            I = IMID
-        ELSE
-            ILOW = IMID
-        ENDIF
-        GO TO 10
-        !
-        11 DS = S(I) - S(I - 1)
-        T = (SS - S(I - 1)) / DS
-        CX1 = DS * XS(I - 1) - X(I) + X(I - 1)
-        CX2 = DS * XS(I) - X(I) + X(I - 1)
-        SEVAL = T * X(I) + (1.0 - T) * X(I - 1) + (T - T * T) * ((1.0 - T) * CX1 - T * CX2)
-        RETURN
-    END
+        ds = S(i) - S(i - 1)
+        t = (Ss - S(i - 1)) / ds
+        cx1 = ds * Xs(i - 1) - X(i) + X(i - 1)
+        cx2 = ds * Xs(i) - X(i) + X(i - 1)
+        seval = t * X(i) + (1.0 - t) * X(i - 1) + (t - t * t) * ((1.0 - t) * cx1 - t * cx2)
+    end function seval
     ! SEVAL
 
-    FUNCTION DEVAL(SS, X, XS, S, N)
-        DIMENSION X(N), XS(N), S(N)
+    function deval(Ss, X, Xs, S, N)
+        implicit none
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! Dummy arguments
+        !
+        integer :: N
+        real :: Ss
+        real :: deval
+        real, dimension(N) :: S, X, Xs
+        intent (in) N, S, Ss, X, Xs
+        !
+        ! Local variables
+        !
+        real :: cx1, cx2, ds, t
+        integer :: i, ilow, imid
+        !
+        !*** End of declarations rewritten by SPAG
+        !
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! Dummy arguments
+        !
+        !
+        ! Local variables
+        !
+        !
+        !*** End of declarations rewritten by SPAG
+        !
         !--------------------------------------------------
         !     Calculates dX/dS(SS)                         |
         !     XS array must have been calculated by SPLINE |
         !--------------------------------------------------
-        ILOW = 1
-        I = N
+        ilow = 1
+        i = N
         !
-        10 IF(I - ILOW .LE. 1) GO TO 11
+        do while (i - ilow>1)
+            !
+            imid = (i + ilow) / 2
+            if (Ss<S(imid)) then
+                i = imid
+            else
+                ilow = imid
+            endif
+        enddo
         !
-        IMID = (I + ILOW) / 2
-        IF(SS .LT. S(IMID)) THEN
-            I = IMID
-        ELSE
-            ILOW = IMID
-        ENDIF
-        GO TO 10
-        !
-        11 DS = S(I) - S(I - 1)
-        T = (SS - S(I - 1)) / DS
-        CX1 = DS * XS(I - 1) - X(I) + X(I - 1)
-        CX2 = DS * XS(I) - X(I) + X(I - 1)
-        DEVAL = X(I) - X(I - 1) + (1. - 4.0 * T + 3.0 * T * T) * CX1 + T * (3.0 * T - 2.) * CX2
-        DEVAL = DEVAL / DS
-        RETURN
-    END
+        ds = S(i) - S(i - 1)
+        t = (Ss - S(i - 1)) / ds
+        cx1 = ds * Xs(i - 1) - X(i) + X(i - 1)
+        cx2 = ds * Xs(i) - X(i) + X(i - 1)
+        deval = X(i) - X(i - 1) + (1. - 4.0 * t + 3.0 * t * t) * cx1 + t * (3.0 * t - 2.) * cx2
+        deval = deval / ds
+    end function deval
     ! DEVAL
 
-    FUNCTION D2VAL(SS, X, XS, S, N)
-        DIMENSION X(N), XS(N), S(N)
+    function d2val(Ss, X, Xs, S, N)
+        implicit none
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! Dummy arguments
+        !
+        integer :: N
+        real :: Ss
+        real :: d2val
+        real, dimension(N) :: S, X, Xs
+        intent (in) N, S, Ss, X, Xs
+        !
+        ! Local variables
+        !
+        real :: cx1, cx2, ds, t
+        integer :: i, ilow, imid
+        !
+        !*** End of declarations rewritten by SPAG
+        !
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! Dummy arguments
+        !
+        !
+        ! Local variables
+        !
+        !
+        !*** End of declarations rewritten by SPAG
+        !
         !--------------------------------------------------
         !     Calculates d2X/dS2(SS)                       |
         !     XS array must have been calculated by SPLINE |
         !--------------------------------------------------
-        ILOW = 1
-        I = N
+        ilow = 1
+        i = N
         !
-        10 IF(I - ILOW .LE. 1) GO TO 11
+        do while (i - ilow>1)
+            !
+            imid = (i + ilow) / 2
+            if (Ss<S(imid)) then
+                i = imid
+            else
+                ilow = imid
+            endif
+        enddo
         !
-        IMID = (I + ILOW) / 2
-        IF(SS .LT. S(IMID)) THEN
-            I = IMID
-        ELSE
-            ILOW = IMID
-        ENDIF
-        GO TO 10
-        !
-        11 DS = S(I) - S(I - 1)
-        T = (SS - S(I - 1)) / DS
-        CX1 = DS * XS(I - 1) - X(I) + X(I - 1)
-        CX2 = DS * XS(I) - X(I) + X(I - 1)
-        D2VAL = (6. * T - 4.) * CX1 + (6. * T - 2.0) * CX2
-        D2VAL = D2VAL / DS**2
-        RETURN
-    END
+        ds = S(i) - S(i - 1)
+        t = (Ss - S(i - 1)) / ds
+        cx1 = ds * Xs(i - 1) - X(i) + X(i - 1)
+        cx2 = ds * Xs(i) - X(i) + X(i - 1)
+        d2val = (6. * t - 4.) * cx1 + (6. * t - 2.0) * cx2
+        d2val = d2val / ds**2
+    end function d2val
     ! D2VAL
 
 
-    FUNCTION CURV(SS, X, XS, Y, YS, S, N)
-        DIMENSION X(N), XS(N), Y(N), YS(N), S(N)
+    function curv(Ss, X, Xs, Y, Ys, S, N)
+        implicit none
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! Dummy arguments
+        !
+        integer :: N
+        real :: Ss
+        real :: curv
+        real, dimension(N) :: S, X, Xs, Y, Ys
+        intent (in) N, S, Ss, X, Xs, Y, Ys
+        !
+        ! Local variables
+        !
+        real :: cx1, cx2, cy1, cy2, ds, sd, t, xd, xdd, yd, ydd
+        integer :: i, ilow, imid
+        !
+        !*** End of declarations rewritten by SPAG
+        !
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! Dummy arguments
+        !
+        !
+        ! Local variables
+        !
+        !
+        !*** End of declarations rewritten by SPAG
+        !
         !-----------------------------------------------
         !     Calculates curvature of splined 2-D curve |
         !     at S = SS                                 |
@@ -319,44 +561,72 @@ contains
         !              (calculated earlier by SPLINE)   |
         !-----------------------------------------------
         !
-        ILOW = 1
-        I = N
+        ilow = 1
+        i = N
         !
-        10 IF(I - ILOW .LE. 1) GO TO 11
+        do while (i - ilow>1)
+            !
+            imid = (i + ilow) / 2
+            if (Ss<S(imid)) then
+                i = imid
+            else
+                ilow = imid
+            endif
+        enddo
         !
-        IMID = (I + ILOW) / 2
-        IF(SS .LT. S(IMID)) THEN
-            I = IMID
-        ELSE
-            ILOW = IMID
-        ENDIF
-        GO TO 10
+        ds = S(i) - S(i - 1)
+        t = (Ss - S(i - 1)) / ds
         !
-        11 DS = S(I) - S(I - 1)
-        T = (SS - S(I - 1)) / DS
+        cx1 = ds * Xs(i - 1) - X(i) + X(i - 1)
+        cx2 = ds * Xs(i) - X(i) + X(i - 1)
+        xd = X(i) - X(i - 1) + (1.0 - 4.0 * t + 3.0 * t * t) * cx1 + t * (3.0 * t - 2.0) * cx2
+        xdd = (6.0 * t - 4.0) * cx1 + (6.0 * t - 2.0) * cx2
         !
-        CX1 = DS * XS(I - 1) - X(I) + X(I - 1)
-        CX2 = DS * XS(I) - X(I) + X(I - 1)
-        XD = X(I) - X(I - 1) + (1.0 - 4.0 * T + 3.0 * T * T) * CX1 + T * (3.0 * T - 2.0) * CX2
-        XDD = (6.0 * T - 4.0) * CX1 + (6.0 * T - 2.0) * CX2
+        cy1 = ds * Ys(i - 1) - Y(i) + Y(i - 1)
+        cy2 = ds * Ys(i) - Y(i) + Y(i - 1)
+        yd = Y(i) - Y(i - 1) + (1.0 - 4.0 * t + 3.0 * t * t) * cy1 + t * (3.0 * t - 2.0) * cy2
+        ydd = (6.0 * t - 4.0) * cy1 + (6.0 * t - 2.0) * cy2
         !
-        CY1 = DS * YS(I - 1) - Y(I) + Y(I - 1)
-        CY2 = DS * YS(I) - Y(I) + Y(I - 1)
-        YD = Y(I) - Y(I - 1) + (1.0 - 4.0 * T + 3.0 * T * T) * CY1 + T * (3.0 * T - 2.0) * CY2
-        YDD = (6.0 * T - 4.0) * CY1 + (6.0 * T - 2.0) * CY2
+        sd = sqrt(xd * xd + yd * yd)
+        sd = max(sd, 0.001 * ds)
         !
-        SD = SQRT(XD * XD + YD * YD)
-        SD = MAX(SD, 0.001 * DS)
+        curv = (xd * ydd - yd * xdd) / sd**3
         !
-        CURV = (XD * YDD - YD * XDD) / SD**3
-        !
-        RETURN
-    END
+    end function curv
     ! CURV
 
 
-    FUNCTION CURVS(SS, X, XS, Y, YS, S, N)
-        DIMENSION X(N), XS(N), Y(N), YS(N), S(N)
+    function curvs(Ss, X, Xs, Y, Ys, S, N)
+        implicit none
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! Dummy arguments
+        !
+        integer :: N
+        real :: Ss
+        real :: curvs
+        real, dimension(N) :: S, X, Xs, Y, Ys
+        intent (in) N, S, Ss, X, Xs, Y, Ys
+        !
+        ! Local variables
+        !
+        real :: bot, cx1, cx2, cy1, cy2, dbotdt, ds, dtopdt, sd, t, top, xd, xdd, xddd, yd, ydd, yddd
+        integer :: i, ilow, imid
+        !
+        !*** End of declarations rewritten by SPAG
+        !
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! Dummy arguments
+        !
+        !
+        ! Local variables
+        !
+        !
+        !*** End of declarations rewritten by SPAG
+        !
         !-----------------------------------------------
         !     Calculates curvature derivative of        |
         !     splined 2-D curve at S = SS               |
@@ -367,52 +637,80 @@ contains
         !              (calculated earlier by SPLINE)   |
         !-----------------------------------------------
         !
-        ILOW = 1
-        I = N
+        ilow = 1
+        i = N
         !
-        10 IF(I - ILOW .LE. 1) GO TO 11
+        do while (i - ilow>1)
+            !
+            imid = (i + ilow) / 2
+            if (Ss<S(imid)) then
+                i = imid
+            else
+                ilow = imid
+            endif
+        enddo
         !
-        IMID = (I + ILOW) / 2
-        IF(SS .LT. S(IMID)) THEN
-            I = IMID
-        ELSE
-            ILOW = IMID
-        ENDIF
-        GO TO 10
+        ds = S(i) - S(i - 1)
+        t = (Ss - S(i - 1)) / ds
         !
-        11 DS = S(I) - S(I - 1)
-        T = (SS - S(I - 1)) / DS
+        cx1 = ds * Xs(i - 1) - X(i) + X(i - 1)
+        cx2 = ds * Xs(i) - X(i) + X(i - 1)
+        xd = X(i) - X(i - 1) + (1.0 - 4.0 * t + 3.0 * t * t) * cx1 + t * (3.0 * t - 2.0) * cx2
+        xdd = (6.0 * t - 4.0) * cx1 + (6.0 * t - 2.0) * cx2
+        xddd = 6.0 * cx1 + 6.0 * cx2
         !
-        CX1 = DS * XS(I - 1) - X(I) + X(I - 1)
-        CX2 = DS * XS(I) - X(I) + X(I - 1)
-        XD = X(I) - X(I - 1) + (1.0 - 4.0 * T + 3.0 * T * T) * CX1 + T * (3.0 * T - 2.0) * CX2
-        XDD = (6.0 * T - 4.0) * CX1 + (6.0 * T - 2.0) * CX2
-        XDDD = 6.0 * CX1 + 6.0 * CX2
+        cy1 = ds * Ys(i - 1) - Y(i) + Y(i - 1)
+        cy2 = ds * Ys(i) - Y(i) + Y(i - 1)
+        yd = Y(i) - Y(i - 1) + (1.0 - 4.0 * t + 3.0 * t * t) * cy1 + t * (3.0 * t - 2.0) * cy2
+        ydd = (6.0 * t - 4.0) * cy1 + (6.0 * t - 2.0) * cy2
+        yddd = 6.0 * cy1 + 6.0 * cy2
         !
-        CY1 = DS * YS(I - 1) - Y(I) + Y(I - 1)
-        CY2 = DS * YS(I) - Y(I) + Y(I - 1)
-        YD = Y(I) - Y(I - 1) + (1.0 - 4.0 * T + 3.0 * T * T) * CY1 + T * (3.0 * T - 2.0) * CY2
-        YDD = (6.0 * T - 4.0) * CY1 + (6.0 * T - 2.0) * CY2
-        YDDD = 6.0 * CY1 + 6.0 * CY2
+        sd = sqrt(xd * xd + yd * yd)
+        sd = max(sd, 0.001 * ds)
         !
-        SD = SQRT(XD * XD + YD * YD)
-        SD = MAX(SD, 0.001 * DS)
+        bot = sd**3
+        dbotdt = 3.0 * sd * (xd * xdd + yd * ydd)
         !
-        BOT = SD**3
-        DBOTDT = 3.0 * SD * (XD * XDD + YD * YDD)
+        top = xd * ydd - yd * xdd
+        dtopdt = xd * yddd - yd * xddd
         !
-        TOP = XD * YDD - YD * XDD
-        DTOPDT = XD * YDDD - YD * XDDD
+        curvs = (dtopdt * bot - dbotdt * top) / bot**2
         !
-        CURVS = (DTOPDT * BOT - DBOTDT * TOP) / BOT**2
-        !
-        RETURN
-    END
+    end function curvs
     ! CURVS
 
 
-    SUBROUTINE SINVRT(SI, XI, X, XS, S, N)
-        DIMENSION X(N), XS(N), S(N)
+    subroutine sinvrt(Si, Xi, X, Xs, S, N)
+        implicit none
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! Dummy arguments
+        !
+        integer :: N
+        real :: Si, Xi
+        real, dimension(N) :: S, X, Xs
+        intent (in) N, S, X, Xi, Xs
+        intent (inout) Si
+        !
+        ! Local variables
+        !
+        real :: ds, res, resp, sisav
+        integer :: iter
+        !
+        !*** End of declarations rewritten by SPAG
+        !
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! Dummy arguments
+        !
+        !
+        ! Local variables
+        !
+        !
+        !*** End of declarations rewritten by SPAG
+        !
         !-------------------------------------------------------
         !     Calculates the "inverse" spline function S(X).    |
         !     Since S(X) can be multi-valued or not defined,    |
@@ -426,178 +724,283 @@ contains
         !                                                       |
         !-------------------------------------------------------
         !
-        SISAV = SI
+        sisav = Si
         !
-        DO 10 ITER = 1, 10
-            RES = SEVAL(SI, X, XS, S, N) - XI
-            RESP = DEVAL(SI, X, XS, S, N)
-            DS = -RES / RESP
-            SI = SI + DS
-            IF(ABS(DS / (S(N) - S(1))) .LT. 1.0E-5) RETURN
-        10 CONTINUE
-        WRITE(*, *)&
-                'SINVRT: spline inversion failed. Input value returned.'
-        SI = SISAV
+        do iter = 1, 10
+            res = seval(Si, X, Xs, S, N) - Xi
+            resp = deval(Si, X, Xs, S, N)
+            ds = -res / resp
+            Si = Si + ds
+            if (abs(ds / (S(N) - S(1)))<1.0E-5) return
+        enddo
+        write (*, *) 'SINVRT: spline inversion failed. Input value returned.'
+        Si = sisav
         !
-        RETURN
-    END
+    end subroutine sinvrt
     ! SINVRT
 
 
-    SUBROUTINE SCALC(X, Y, S, N)
-        DIMENSION X(N), Y(N), S(N)
+    subroutine scalc(X, Y, S, N)
+        implicit none
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! Dummy arguments
+        !
+        integer :: N
+        real, dimension(N) :: S, X, Y
+        intent (in) N, X, Y
+        intent (inout) S
+        !
+        ! Local variables
+        !
+        integer :: i
+        !
+        !*** End of declarations rewritten by SPAG
+        !
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! Dummy arguments
+        !
+        !
+        ! Local variables
+        !
+        !
+        !*** End of declarations rewritten by SPAG
+        !
         !----------------------------------------
         !     Calculates the arc length array S  |
         !     for a 2-D array of points (X,Y).   |
         !----------------------------------------
         !
         S(1) = 0.
-        DO 10 I = 2, N
-            S(I) = S(I - 1) + SQRT((X(I) - X(I - 1))**2 + (Y(I) - Y(I - 1))**2)
-        10 CONTINUE
+        do i = 2, N
+            S(i) = S(i - 1) + sqrt((X(i) - X(i - 1))**2 + (Y(i) - Y(i - 1))**2)
+        enddo
         !
-        RETURN
-    END
+    end subroutine scalc
     ! SCALC
 
 
-    SUBROUTINE SPLNXY(X, XS, Y, YS, S, N)
-        DIMENSION X(N), XS(N), Y(N), YS(N), S(N)
+    subroutine splnxy(X, Xs, Y, Ys, S, N)
+        implicit none
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! PARAMETER definitions
+        !
+        integer, parameter :: KMAX = 32
+        !
+        ! Dummy arguments
+        !
+        integer :: N
+        real, dimension(N) :: S, X, Xs, Y, Ys
+        intent (inout) S
+        !
+        ! Local variables
+        !
+        real :: cx1, cx2, cy1, cy2, ds, dx, dy, serr, sint, sint1, sint2, t
+        integer :: i, ipass, k, kk, npass
+        real, dimension(0:KMAX) :: xt, yt
+        !
+        !*** End of declarations rewritten by SPAG
+        !
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! PARAMETER definitions
+        !
+        !
+        ! Dummy arguments
+        !
+        !
+        ! Local variables
+        !
+        !
+        !*** End of declarations rewritten by SPAG
+        !
         !-----------------------------------------
         !     Splines 2-D shape X(S), Y(S), along |
         !     with true arc length parameter S.   |
         !-----------------------------------------
-        PARAMETER (KMAX = 32)
-        DIMENSION XT(0:KMAX), YT(0:KMAX)
         !
-        KK = KMAX
-        NPASS = 10
+        kk = KMAX
+        npass = 10
         !
         !---- set first estimate of arc length parameter
-        CALL SCALC(X, Y, S, N)
+        call scalc(X, Y, S, N)
         !
         !---- spline X(S) and Y(S)
-        CALL SEGSPL(X, XS, S, N)
-        CALL SEGSPL(Y, YS, S, N)
+        call segspl(X, Xs, S, N)
+        call segspl(Y, Ys, S, N)
         !
         !---- re-integrate true arc length
-        DO 100 IPASS = 1, NPASS
+        do ipass = 1, npass
             !
-            SERR = 0.
+            serr = 0.
             !
-            DS = S(2) - S(1)
-            DO I = 2, N
-                DX = X(I) - X(I - 1)
-                DY = Y(I) - Y(I - 1)
+            ds = S(2) - S(1)
+            do i = 2, N
+                dx = X(i) - X(i - 1)
+                dy = Y(i) - Y(i - 1)
                 !
-                CX1 = DS * XS(I - 1) - DX
-                CX2 = DS * XS(I) - DX
-                CY1 = DS * YS(I - 1) - DY
-                CY2 = DS * YS(I) - DY
+                cx1 = ds * Xs(i - 1) - dx
+                cx2 = ds * Xs(i) - dx
+                cy1 = ds * Ys(i - 1) - dy
+                cy2 = ds * Ys(i) - dy
                 !
-                XT(0) = 0.
-                YT(0) = 0.
-                DO K = 1, KK - 1
-                    T = FLOAT(K) / FLOAT(KK)
-                    XT(K) = T * DX + (T - T * T) * ((1.0 - T) * CX1 - T * CX2)
-                    YT(K) = T * DY + (T - T * T) * ((1.0 - T) * CY1 - T * CY2)
-                ENDDO
-                XT(KK) = DX
-                YT(KK) = DY
+                xt(0) = 0.
+                yt(0) = 0.
+                do k = 1, kk - 1
+                    t = float(k) / float(kk)
+                    xt(k) = t * dx + (t - t * t) * ((1.0 - t) * cx1 - t * cx2)
+                    yt(k) = t * dy + (t - t * t) * ((1.0 - t) * cy1 - t * cy2)
+                enddo
+                xt(kk) = dx
+                yt(kk) = dy
                 !
-                SINT1 = 0.
-                DO K = 1, KK
-                    SINT1 = SINT1&
-                            + SQRT((XT(K) - XT(K - 1))**2 + (YT(K) - YT(K - 1))**2)
-                ENDDO
+                sint1 = 0.
+                do k = 1, kk
+                    sint1 = sint1 + sqrt((xt(k) - xt(k - 1))**2 + (yt(k) - yt(k - 1))**2)
+                enddo
                 !
-                SINT2 = 0.
-                DO K = 2, KK, 2
-                    SINT2 = SINT2&
-                            + SQRT((XT(K) - XT(K - 2))**2 + (YT(K) - YT(K - 2))**2)
-                ENDDO
+                sint2 = 0.
+                do k = 2, kk, 2
+                    sint2 = sint2 + sqrt((xt(k) - xt(k - 2))**2 + (yt(k) - yt(k - 2))**2)
+                enddo
                 !
-                SINT = (4.0 * SINT1 - SINT2) / 3.0
+                sint = (4.0 * sint1 - sint2) / 3.0
                 !
-                IF(ABS(SINT - DS) .GT. ABS(SERR))  SERR = SINT - DS
+                if (abs(sint - ds)>abs(serr)) serr = sint - ds
                 !
-                IF(I.LT.N) DS = S(I + 1) - S(I)
+                if (i<N) ds = S(i + 1) - S(i)
                 !
-                S(I) = S(I - 1) + SQRT(SINT)
-            ENDDO
+                S(i) = S(i - 1) + sqrt(sint)
+            enddo
             !
-            SERR = SERR / (S(N) - S(1))
-            WRITE(*, *) IPASS, SERR
+            serr = serr / (S(N) - S(1))
+            write (*, *) ipass, serr
             !
             !------ re-spline X(S) and Y(S)
-            CALL SEGSPL(X, XS, S, N)
-            CALL SEGSPL(Y, YS, S, N)
+            call segspl(X, Xs, S, N)
+            call segspl(Y, Ys, S, N)
             !
-            IF(ABS(SERR) .LT. 1.0E-7) RETURN
+            if (abs(serr)<1.0E-7) return
             !
-        100  CONTINUE
+        enddo
         !
-        RETURN
-    END
+    end subroutine splnxy
     ! SPLNXY
 
 
 
-    SUBROUTINE SEGSPL(X, XS, S, N)
+    subroutine segspl(X, Xs, S, N)
+        implicit none
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! Dummy arguments
+        !
+        integer :: N
+        real, dimension(N) :: S, X, Xs
+        intent (in) N
+        !
+        ! Local variables
+        !
+        integer :: iseg, iseg0, nseg
+        !
+        !*** End of declarations rewritten by SPAG
+        !
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! Dummy arguments
+        !
+        !
+        ! Local variables
+        !
+        !
+        !*** End of declarations rewritten by SPAG
+        !
         !-----------------------------------------------
         !     Splines X(S) array just like SPLINE,      |
         !     but allows derivative discontinuities     |
         !     at segment joints.  Segment joints are    |
         !     defined by identical successive S values. |
         !-----------------------------------------------
-        DIMENSION X(N), XS(N), S(N)
         !
-        IF(S(1).EQ.S(2)) STOP 'SEGSPL:  First input point duplicated'
-        IF(S(N).EQ.S(N - 1)) STOP 'SEGSPL:  Last  input point duplicated'
+        if (S(1)==S(2)) stop 'SEGSPL:  First input point duplicated'
+        if (S(N)==S(N - 1)) stop 'SEGSPL:  Last  input point duplicated'
         !
-        ISEG0 = 1
-        DO 10 ISEG = 2, N - 2
-            IF(S(ISEG).EQ.S(ISEG + 1)) THEN
-                NSEG = ISEG - ISEG0 + 1
-                CALL SPLIND(X(ISEG0), XS(ISEG0), S(ISEG0), NSEG, -999.0, -999.0)
-                ISEG0 = ISEG + 1
-            ENDIF
-        10 CONTINUE
+        iseg0 = 1
+        do iseg = 2, N - 2
+            if (S(iseg)==S(iseg + 1)) then
+                nseg = iseg - iseg0 + 1
+                call splind(X(iseg0), Xs(iseg0), S(iseg0), nseg, -999.0, -999.0)
+                iseg0 = iseg + 1
+            endif
+        enddo
         !
-        NSEG = N - ISEG0 + 1
-        CALL SPLIND(X(ISEG0), XS(ISEG0), S(ISEG0), NSEG, -999.0, -999.0)
+        nseg = N - iseg0 + 1
+        call splind(X(iseg0), Xs(iseg0), S(iseg0), nseg, -999.0, -999.0)
         !
-        RETURN
-    END
+    end subroutine segspl
     ! SEGSPL
 
 
 
-    SUBROUTINE SEGSPLD(X, XS, S, N, XS1, XS2)
+    subroutine segspld(X, Xs, S, N, Xs1, Xs2)
+        implicit none
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! Dummy arguments
+        !
+        integer :: N
+        real :: Xs1, Xs2
+        real, dimension(N) :: S, X, Xs
+        intent (in) N
+        !
+        ! Local variables
+        !
+        integer :: iseg, iseg0, nseg
+        !
+        !*** End of declarations rewritten by SPAG
+        !
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! Dummy arguments
+        !
+        !
+        ! Local variables
+        !
+        !
+        !*** End of declarations rewritten by SPAG
+        !
         !-----------------------------------------------
         !     Splines X(S) array just like SPLIND,      |
         !     but allows derivative discontinuities     |
         !     at segment joints.  Segment joints are    |
         !     defined by identical successive S values. |
         !-----------------------------------------------
-        DIMENSION X(N), XS(N), S(N)
         !
-        IF(S(1).EQ.S(2)) STOP 'SEGSPL:  First input point duplicated'
-        IF(S(N).EQ.S(N - 1)) STOP 'SEGSPL:  Last  input point duplicated'
+        if (S(1)==S(2)) stop 'SEGSPL:  First input point duplicated'
+        if (S(N)==S(N - 1)) stop 'SEGSPL:  Last  input point duplicated'
         !
-        ISEG0 = 1
-        DO 10 ISEG = 2, N - 2
-            IF(S(ISEG).EQ.S(ISEG + 1)) THEN
-                NSEG = ISEG - ISEG0 + 1
-                CALL SPLIND(X(ISEG0), XS(ISEG0), S(ISEG0), NSEG, XS1, XS2)
-                ISEG0 = ISEG + 1
-            ENDIF
-        10 CONTINUE
+        iseg0 = 1
+        do iseg = 2, N - 2
+            if (S(iseg)==S(iseg + 1)) then
+                nseg = iseg - iseg0 + 1
+                call splind(X(iseg0), Xs(iseg0), S(iseg0), nseg, Xs1, Xs2)
+                iseg0 = iseg + 1
+            endif
+        enddo
         !
-        NSEG = N - ISEG0 + 1
-        CALL SPLIND(X(ISEG0), XS(ISEG0), S(ISEG0), NSEG, XS1, XS2)
+        nseg = N - iseg0 + 1
+        call splind(X(iseg0), Xs(iseg0), S(iseg0), nseg, Xs1, Xs2)
         !
-        RETURN
-    END
+    end subroutine segspld
     ! SEGSPL
 end module m_spline

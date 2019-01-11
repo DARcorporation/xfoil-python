@@ -1,8 +1,10 @@
+!*==NACA4.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
+! POLREF
 !***********************************************************************
 !    Module:  naca.f
-! 
-!    Copyright (C) 2000 Mark Drela 
-! 
+!
+!    Copyright (C) 2000 Mark Drela
+!
 !    This program is free software; you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
 !    the Free Software Foundation; either version 2 of the License, or
@@ -18,162 +20,208 @@
 !    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 !***********************************************************************
 
-SUBROUTINE NACA4(IDES, XX, YT, YC, NSIDE, XB, YB, NB, NAME)
-    REAL XX(NSIDE), YT(NSIDE), YC(NSIDE)
-    REAL XB(2 * NSIDE), YB(2 * NSIDE)
-    REAL M
-    CHARACTER*(*) NAME
+subroutine naca4(Ides, Xx, Yt, Yc, Nside, Xb, Yb, Nb, Name)
+    implicit none
     !
-    CHARACTER*10 DIGITS
-    DATA DIGITS / '0123456789' /
+    !*** Start of declarations rewritten by SPAG
     !
-    !---- TE point bunching parameter
-    DATA AN / 1.5 /
+    ! Dummy arguments
     !
-    N4 = IDES / 1000
-    N3 = (IDES - N4 * 1000) / 100
-    N2 = (IDES - N4 * 1000 - N3 * 100) / 10
-    N1 = (IDES - N4 * 1000 - N3 * 100 - N2 * 10)
+    integer :: Ides, Nb, Nside
+    character(*) :: Name
+    real, dimension(2 * Nside) :: Xb, Yb
+    real, dimension(Nside) :: Xx, Yc, Yt
+    intent (in) Ides, Nside
+    intent (out) Name, Nb, Xb, Yb
+    intent (inout) Xx, Yc, Yt
     !
-    M = FLOAT(N4) / 100.0
-    P = FLOAT(N3) / 10.0
-    T = FLOAT(N2 * 10 + N1) / 100.0
+    ! Local variables
     !
-    ANP = AN + 1.0
-    DO 10 I = 1, NSIDE
-        FRAC = FLOAT(I - 1) / FLOAT(NSIDE - 1)
-        IF(I.EQ.NSIDE) THEN
-            XX(I) = 1.0
-        ELSE
-            XX(I) = 1.0 - ANP * FRAC * (1.0 - FRAC)**AN - (1.0 - FRAC)**ANP
-        ENDIF
-        YT(I) = (0.29690 * SQRT(XX(I))&
-                - 0.12600 * XX(I)&
-                - 0.35160 * XX(I)**2&
-                + 0.28430 * XX(I)**3&
-                - 0.10150 * XX(I)**4) * T / 0.20
-        IF(XX(I).LT.P) THEN
-            YC(I) = M / P**2 * (2.0 * P * XX(I) - XX(I)**2)
-        ELSE
-            YC(I) = M / (1.0 - P)**2 * ((1.0 - 2.0 * P) + 2.0 * P * XX(I) - XX(I)**2)
-        ENDIF
-    10 CONTINUE
+    real, save :: an
+    real :: anp, frac, m, p, t
+    character(10), save :: digits
+    integer :: i, ib, n1, n2, n3, n4
     !
-    IB = 0
-    DO 20 I = NSIDE, 1, -1
-        IB = IB + 1
-        XB(IB) = XX(I)
-        YB(IB) = YC(I) + YT(I)
-    20 CONTINUE
-    DO 30 I = 2, NSIDE
-        IB = IB + 1
-        XB(IB) = XX(I)
-        YB(IB) = YC(I) - YT(I)
-    30 CONTINUE
-    NB = IB
+    !*** End of declarations rewritten by SPAG
     !
-    NAME = 'NACA'
-    NAME(6:9) = DIGITS(N4 + 1:N4 + 1)&
-            // DIGITS(N3 + 1:N3 + 1)&
-            // DIGITS(N2 + 1:N2 + 1)&
-            // DIGITS(N1 + 1:N1 + 1)
     !
-    RETURN
-END
-
-
-SUBROUTINE NACA5(IDES, XX, YT, YC, NSIDE, XB, YB, NB, NAME)
-    REAL XX(NSIDE), YT(NSIDE), YC(NSIDE)
-    REAL XB(2 * NSIDE), YB(2 * NSIDE)
-    REAL M
+    !*** Start of declarations rewritten by SPAG
     !
-    CHARACTER*(*) NAME
+    ! Dummy arguments
     !
-    CHARACTER*10 DIGITS
-    DATA DIGITS / '0123456789' /
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    data digits/'0123456789'/
     !
     !---- TE point bunching parameter
-    DATA AN / 1.5 /
+    data an/1.5/
     !
-    N5 = IDES / 10000
-    N4 = (IDES - N5 * 10000) / 1000
-    N3 = (IDES - N5 * 10000 - N4 * 1000) / 100
-    N2 = (IDES - N5 * 10000 - N4 * 1000 - N3 * 100) / 10
-    N1 = (IDES - N5 * 10000 - N4 * 1000 - N3 * 100 - N2 * 10)
+    n4 = Ides / 1000
+    n3 = (Ides - n4 * 1000) / 100
+    n2 = (Ides - n4 * 1000 - n3 * 100) / 10
+    n1 = (Ides - n4 * 1000 - n3 * 100 - n2 * 10)
     !
-    N543 = 100 * N5 + 10 * N4 + N3
+    m = float(n4) / 100.0
+    p = float(n3) / 10.0
+    t = float(n2 * 10 + n1) / 100.0
     !
-    IF      (N543 .EQ. 210) THEN
+    anp = an + 1.0
+    do i = 1, Nside
+        frac = float(i - 1) / float(Nside - 1)
+        if (i==Nside) then
+            Xx(i) = 1.0
+        else
+            Xx(i) = 1.0 - anp * frac * (1.0 - frac)**an - (1.0 - frac)**anp
+        endif
+        Yt(i) = (0.29690 * sqrt(Xx(i)) - 0.12600 * Xx(i) - 0.35160 * Xx(i)**2 + 0.28430 * Xx(i)**3 - 0.10150 * Xx(i)**4) * t / 0.20
+        if (Xx(i)<p) then
+            Yc(i) = m / p**2 * (2.0 * p * Xx(i) - Xx(i)**2)
+        else
+            Yc(i) = m / (1.0 - p)**2 * ((1.0 - 2.0 * p) + 2.0 * p * Xx(i) - Xx(i)**2)
+        endif
+    enddo
+    !
+    ib = 0
+    do i = Nside, 1, -1
+        ib = ib + 1
+        Xb(ib) = Xx(i)
+        Yb(ib) = Yc(i) + Yt(i)
+    enddo
+    do i = 2, Nside
+        ib = ib + 1
+        Xb(ib) = Xx(i)
+        Yb(ib) = Yc(i) - Yt(i)
+    enddo
+    Nb = ib
+    !
+    Name = 'NACA'
+    Name(6:9) = digits(n4 + 1:n4 + 1) // digits(n3 + 1:n3 + 1) // digits(n2 + 1:n2 + 1) // digits(n1 + 1:n1 + 1)
+    !
+end subroutine naca4
+!*==NACA5.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
+
+
+subroutine naca5(Ides, Xx, Yt, Yc, Nside, Xb, Yb, Nb, Name)
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    integer :: Ides, Nb, Nside
+    character(*) :: Name
+    real, dimension(2 * Nside) :: Xb, Yb
+    real, dimension(Nside) :: Xx, Yc, Yt
+    intent (in) Nside
+    intent (out) Name, Nb, Xb, Yb
+    intent (inout) Ides, Xx, Yc, Yt
+    !
+    ! Local variables
+    !
+    real, save :: an
+    real :: anp, c, frac, m, t
+    character(10), save :: digits
+    integer :: i, ib, n1, n2, n3, n4, n5, n543
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !
+    data digits/'0123456789'/
+    !
+    !---- TE point bunching parameter
+    data an/1.5/
+    !
+    n5 = Ides / 10000
+    n4 = (Ides - n5 * 10000) / 1000
+    n3 = (Ides - n5 * 10000 - n4 * 1000) / 100
+    n2 = (Ides - n5 * 10000 - n4 * 1000 - n3 * 100) / 10
+    n1 = (Ides - n5 * 10000 - n4 * 1000 - n3 * 100 - n2 * 10)
+    !
+    n543 = 100 * n5 + 10 * n4 + n3
+    !
+    if (n543==210) then
         !c     P = 0.05
-        M = 0.0580
-        C = 361.4
-    ELSE IF (N543 .EQ. 220) THEN
+        m = 0.0580
+        c = 361.4
+    elseif (n543==220) then
         !c     P = 0.10
-        M = 0.1260
-        C = 51.64
-    ELSE IF (N543 .EQ. 230) THEN
+        m = 0.1260
+        c = 51.64
+    elseif (n543==230) then
         !c     P = 0.15
-        M = 0.2025
-        C = 15.957
-    ELSE IF (N543 .EQ. 240) THEN
+        m = 0.2025
+        c = 15.957
+    elseif (n543==240) then
         !c     P = 0.20
-        M = 0.2900
-        C = 6.643
-    ELSE IF (N543 .EQ. 250) THEN
+        m = 0.2900
+        c = 6.643
+    elseif (n543==250) then
         !c     P = 0.25
-        M = 0.3910
-        C = 3.230
-    ELSE
-        WRITE(*, *) 'Illegal 5-digit designation'
-        WRITE(*, *) 'First three digits must be 210, 220, ... 250'
-        IDES = 0
-        RETURN
-    ENDIF
+        m = 0.3910
+        c = 3.230
+    else
+        write (*, *) 'Illegal 5-digit designation'
+        write (*, *) 'First three digits must be 210, 220, ... 250'
+        Ides = 0
+        return
+    endif
     !
     !
-    T = FLOAT(N2 * 10 + N1) / 100.0
+    t = float(n2 * 10 + n1) / 100.0
     !
-    ANP = AN + 1.0
-    DO 10 I = 1, NSIDE
-        FRAC = FLOAT(I - 1) / FLOAT(NSIDE - 1)
-        IF(I.EQ.NSIDE) THEN
-            XX(I) = 1.0
-        ELSE
-            XX(I) = 1.0 - ANP * FRAC * (1.0 - FRAC)**AN - (1.0 - FRAC)**ANP
-        ENDIF
+    anp = an + 1.0
+    do i = 1, Nside
+        frac = float(i - 1) / float(Nside - 1)
+        if (i==Nside) then
+            Xx(i) = 1.0
+        else
+            Xx(i) = 1.0 - anp * frac * (1.0 - frac)**an - (1.0 - frac)**anp
+        endif
         !
-        YT(I) = (0.29690 * SQRT(XX(I))&
-                - 0.12600 * XX(I)&
-                - 0.35160 * XX(I)**2&
-                + 0.28430 * XX(I)**3&
-                - 0.10150 * XX(I)**4) * T / 0.20
-        IF(XX(I).LT.M) THEN
-            YC(I) = (C / 6.0) * (XX(I)**3 - 3.0 * M * XX(I)**2&
-                    + M * M * (3.0 - M) * XX(I))
-        ELSE
-            YC(I) = (C / 6.0) * M**3 * (1.0 - XX(I))
-        ENDIF
-    10 CONTINUE
+        Yt(i) = (0.29690 * sqrt(Xx(i)) - 0.12600 * Xx(i) - 0.35160 * Xx(i)**2 &
+                + 0.28430 * Xx(i)**3 - 0.10150 * Xx(i)**4) * t / 0.20
+        if (Xx(i)<m) then
+            Yc(i) = (c / 6.0) * (Xx(i)**3 - 3.0 * m * Xx(i)**2 + m * m * (3.0 - m) * Xx(i))
+        else
+            Yc(i) = (c / 6.0) * m**3 * (1.0 - Xx(i))
+        endif
+    enddo
     !
-    IB = 0
-    DO 20 I = NSIDE, 1, -1
-        IB = IB + 1
-        XB(IB) = XX(I)
-        YB(IB) = YC(I) + YT(I)
-    20 CONTINUE
-    DO 30 I = 2, NSIDE
-        IB = IB + 1
-        XB(IB) = XX(I)
-        YB(IB) = YC(I) - YT(I)
-    30 CONTINUE
-    NB = IB
+    ib = 0
+    do i = Nside, 1, -1
+        ib = ib + 1
+        Xb(ib) = Xx(i)
+        Yb(ib) = Yc(i) + Yt(i)
+    enddo
+    do i = 2, Nside
+        ib = ib + 1
+        Xb(ib) = Xx(i)
+        Yb(ib) = Yc(i) - Yt(i)
+    enddo
+    Nb = ib
     !
-    NAME = 'NACA'
-    NAME(6:10) = DIGITS(N5 + 1:N5 + 1)&
-            // DIGITS(N4 + 1:N4 + 1)&
-            // DIGITS(N3 + 1:N3 + 1)&
-            // DIGITS(N2 + 1:N2 + 1)&
-            // DIGITS(N1 + 1:N1 + 1)
+    Name = 'NACA'
+    Name(6:10) = digits(n5 + 1:n5 + 1) //&
+            digits(n4 + 1:n4 + 1) //&
+            digits(n3 + 1:n3 + 1) //&
+            digits(n2 + 1:n2 + 1) //&
+            digits(n1 + 1:n1 + 1)
     !
-    RETURN
-END
+end subroutine naca5

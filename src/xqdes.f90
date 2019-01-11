@@ -1,8 +1,10 @@
+!*==M_XQDES.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
+
 !***********************************************************************
 !    Module:  xqdes.f
-! 
-!    Copyright (C) 2000 Mark Drela 
-! 
+!
+!    Copyright (C) 2000 Mark Drela
+!
 !    This program is free software; you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
 !    the Free Software Foundation; either version 2 of the License, or
@@ -18,410 +20,523 @@
 !    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 !***********************************************************************
 !
-SUBROUTINE QDES
-    !------------------------------------------------------
-    !     Mixed-Inverse design routine. Based on the 
-    !     same panel formulation as basic analysis method.
-    !------------------------------------------------------
+module m_xqdes
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+contains
+    subroutine qdes
         use m_spline
-    use i_xfoil
-    CHARACTER*4 COMAND, COMOLD
-    LOGICAL LRECALC
-    !
-    CHARACTER*128 COMARG, ARGOLD
-    CHARACTER*1 CHKEY
-    !
-    REAL XBOX(2), YBOX(2)
-    REAL XSP(IBX), YSP(IBX, IPX), YSPD(IBX, IPX)
-    !
-    DIMENSION IINPUT(20)
-    DIMENSION RINPUT(20)
-    LOGICAL ERROR, LPLNEW
-    !
-    SAVE COMOLD, ARGOLD
-    !
-    !---- statement function for compressible Karman-Tsien velocity
-    QCOMP(G) = G * (1.0 - TKLAM) / (1.0 - TKLAM * (G / QINF)**2)
-    !
-    !
-    COMAND = '****'
-    COMARG = ' '
-    LRECALC = .FALSE.
-    !
-    IF(N.EQ.0) THEN
-        WRITE(*, *)
-        WRITE(*, *) '***  No airfoil available  ***'
-        RETURN
-    ENDIF
-    !
-    LSYM = .TRUE.
-    !
-    !---- number of sub-intervals for Qspec(s) plotting
-    NTQSPL = 1
-    IF(LQSLOP) NTQSPL = 8
-    !
-    !---- make sure a current solution exists
-    CALL SPECAL
-    !
-    !---- see if current Qspec, if any, didn't come from Full-Inverse
-    IF(NSP.NE.N) THEN
-        LQSPEC = .FALSE.
-        LIQSET = .FALSE.
-    ENDIF
-    !
-    !---- set alpha, etc corresponding to Q
-    ALGAM = ALFA
-    CLGAM = CL
-    CMGAM = CM
-    !
-    !---- set "old" speed distribution Q, arc length, and x/c,y/c arrays
-    CHX = XTE - XLE
-    CHY = YTE - YLE
-    CHSQ = CHX**2 + CHY**2
-    NSP = N
-    DO I = 1, NSP
-        QGAMM(I) = GAM(I)
-        SSPEC(I) = S(I) / S(N)
-        XSPOC(I) = ((X(I) - XLE) * CHX + (Y(I) - YLE) * CHY) / CHSQ
-        YSPOC(I) = ((Y(I) - YLE) * CHX - (X(I) - XLE) * CHY) / CHSQ
-    ENDDO
-    SSPLE = SLE / S(N)
-    !
-    WRITE(*, 1150) ALGAM / DTOR, CLGAM
-    1150 FORMAT(/' Current Q operating condition:'&
-            /' alpha = ', F8.3, ' deg.      CL = ', F8.4 /)
-    !
-    IF(.NOT.LQSPEC) THEN
-        !----- initialize Qspec to "old" solution and notify user
-        NQSP = 1
-        KQTARG = 1
-        CALL GAMQSP(1)
-        WRITE(*, 1155)
-        LQSPEC = .TRUE.
-    ENDIF
-    !
-    !
-    !====================================================
-    !---- start of menu loop
-    500  CONTINUE
-    COMOLD = COMAND
-    ARGOLD = COMARG
-    !
-    501  CALL ASKC('.QDES^', COMAND, COMARG)
-    !
-    !--------------------------------------------------------
-    !---- process previous command ?
-    IF(COMAND(1:1).EQ.'!') THEN
-        IF(COMOLD.EQ.'****') THEN
-            WRITE(*, *) 'Previous .QDES command not valid'
-            GO TO 501
-        ELSE
-            COMAND = COMOLD
-            COMARG = ARGOLD
-            LRECALC = .TRUE.
-        ENDIF
-    ELSE
-        LRECALC = .FALSE.
-    ENDIF
-    !
-    IF(COMAND.EQ.'    ') THEN
-        !----- just <return> was typed... clean up plotting and exit OPER
-        RETURN
-    ENDIF
-    !
-    !---- extract command line numeric arguments
-    DO I = 1, 20
-        IINPUT(I) = 0
-        RINPUT(I) = 0.0
-    ENDDO
-    NINPUT = 0
-    CALL GETINT(COMARG, IINPUT, NINPUT, ERROR)
-    NINPUT = 0
-    CALL GETFLT(COMARG, RINPUT, NINPUT, ERROR)
-    !
-    !--------------------------------------------------------
-    IF(COMAND.EQ.'?   ') THEN
-        WRITE(*, 1050)
-        1050  FORMAT(&
-                /'   <cr>   Return to Top Level'&
-                //'   QSET   Reset Qspec <== Q'&
-                /'   SMOO   Smooth Qspec inside target segment'&
-                /'   SLOP   Toggle modified-Qspec slope matching flag'&
-                /'   REST   Restore geometry from buffer airfoil'&
-                /'   CPXX   CPxx endpoint constraint toggle')
+        use i_xfoil
+        implicit none
         !
-        !--------------------------------------------------------
-        !---- re-initialize Qspec to Q
-    ELSEIF(COMAND.EQ.'QSET') THEN
-        CALL GAMQSP(1)
-        GO TO 500
+        !*** Start of declarations rewritten by SPAG
         !
-        !--------------------------------------------------------
-        !---- smooth Qspec within target segment, or entire Qspec if not marked off
-    ELSEIF(COMAND.EQ.'SMOO') THEN
+        ! Local variables
         !
-        KQSP = 1
-        CALL SMOOQ(IQ1, IQ2, KQSP)
-        CALL SPLQSP(KQSP)
+        character(128), save :: argold
+        real :: cdpq, chsq, chx, chy, clq_alf, clq_msq, g
+        character(4) :: comand
+        character(128) :: comarg
+        character(4), save :: comold
+        logical :: error, lrecalc
+        integer :: i, kqsp, ninput, ntqspl
+        integer, dimension(20) :: iinput
+        real :: qcomp
+        real, dimension(20) :: rinput
         !
-        CALL CLCALC(N, X, Y, QSPEC(1, KQSP), W1, ALFA, MINF, QINF, XCMREF, YCMREF, &
-                CLQSP(KQSP), CMQSP(KQSP), CDPQ, CLQ_ALF, CLQ_MSQ)
-        WRITE(*, 1200) CL, CM, CLQSP(KQSP), CMQSP(KQSP)
-        GO TO 500
+        !*** End of declarations rewritten by SPAG
         !
-        !--------------------------------------------------------
-        !---- toggle Qspec endpoint slope matching
-    ELSEIF(COMAND.EQ.'SLOP') THEN
-        LQSLOP = .NOT.LQSLOP
-        IF(LQSLOP) THEN
-            WRITE(*, *)&
-                    'Modified Qspec piece will be made tangent at endpoints'
-        ELSE
-            WRITE(*, *)&
-                    'Modified Qspec piece will not be made tangent at endpoints'
-        ENDIF
-        GO TO 500
         !
-        !--------------------------------------------------------
-        !---- toggle CPxx preservation constraints
-    ELSEIF(COMAND.EQ.'CPXX') THEN
-        LCPXX = .NOT.LCPXX
-        IF(LCPXX) THEN
-            WRITE(*, *) 'CPxx will be constrained'
-        ELSE
-            WRITE(*, *) 'CPxx will not be constrained'
-        ENDIF
-        GO TO 500
+        !*** Start of declarations rewritten by SPAG
         !
-        !--------------------------------------------------------
-        !---- restore and spline old airfoil
-    ELSEIF(COMAND.EQ.'REST') THEN
-        DO I = 1, N
-            X(I) = XB(I)
-            Y(I) = YB(I)
-        ENDDO
-        CALL SCALC(X, Y, S, N)
-        CALL SPLIND(X, XP, S, N, -999.0, -999.0)
-        CALL SPLIND(Y, YP, S, N, -999.0, -999.0)
-        CALL NCALC(X, Y, S, N, NX, NY)
-        CALL LEFIND(SLE, X, XP, Y, YP, S, N)
-        XLE = SEVAL(SLE, X, XP, S, N)
-        YLE = SEVAL(SLE, Y, YP, S, N)
-        CHORD = SQRT((0.5 * (X(1) + X(N)) - XLE)**2&
-                + (0.5 * (Y(1) + Y(N)) - YLE)**2)
-        CALL TECALC
-        CALL APCALC
-        LGAMU = .FALSE.
-        LQINU = .FALSE.
-        LGSAME = .TRUE.
+        ! Local variables
         !
-        !c       CALL NAMMOD(NAME,-1,1)
-        !c       CALL STRIP(NAME,NNAME)
         !
-        !--------------------------------------------------------
-    ELSE
-        WRITE(*, 1100) COMAND
-        1100  FORMAT(' Command ', A4, ' not recognized.  Type a " ? " for list.')
+        !*** End of declarations rewritten by SPAG
         !
-        COMAND = '****'
-    ENDIF
-    !
-    GO TO 500
-    !
-    !....................................................
-    !
-    1155 FORMAT(/' Qspec initialized to current Q.'/)
-    1200 FORMAT(/' Q    :   CL =', F11.6, '    CM =', F11.6&
-            /' Qspec:   CL =', F11.6, '    CM =', F11.6)
-END
+        !------------------------------------------------------
+        !     Mixed-Inverse design routine. Based on the
+        !     same panel formulation as basic analysis method.
+        !------------------------------------------------------
+        !
+        !
+        !
+        !
+        !
+        !---- statement function for compressible Karman-Tsien velocity
+        qcomp(g) = g * (1.0 - TKLam) / (1.0 - TKLam * (g / QINf)**2)
+        !
+        !
+        comand = '****'
+        comarg = ' '
+        lrecalc = .false.
+        !
+        if (N==0) then
+            write (*, *)
+            write (*, *) '***  No airfoil available  ***'
+            return
+        endif
+        !
+        LSYm = .true.
+        !
+        !---- number of sub-intervals for Qspec(s) plotting
+        ntqspl = 1
+        if (LQSlop) ntqspl = 8
+        !
+        !---- make sure a current solution exists
+        call specal
+        !
+        !---- see if current Qspec, if any, didn't come from Full-Inverse
+        if (NSP/=N) then
+            LQSpec = .false.
+            LIQset = .false.
+        endif
+        !
+        !---- set alpha, etc corresponding to Q
+        ALGam = ALFa
+        CLGam = CL
+        CMGam = CM
+        !
+        !---- set "old" speed distribution Q, arc length, and x/c,y/c arrays
+        chx = XTE - XLE
+        chy = YTE - YLE
+        chsq = chx**2 + chy**2
+        NSP = N
+        do i = 1, NSP
+            QGAmm(i) = GAM(i)
+            SSPec(i) = S(i) / S(N)
+            XSPoc(i) = ((X(i) - XLE) * chx + (Y(i) - YLE) * chy) / chsq
+            YSPoc(i) = ((Y(i) - YLE) * chx - (X(i) - XLE) * chy) / chsq
+        enddo
+        SSPle = SLE / S(N)
+        !
+        write (*, 99001) ALGam / DTOr, CLGam
+        99001 format (/' Current Q operating condition:'/' alpha = ', f8.3, ' deg.      CL = ', f8.4/)
+        !
+        if (.not.LQSpec) then
+            !----- initialize Qspec to "old" solution and notify user
+            NQSp = 1
+            KQTarg = 1
+            call gamqsp(1)
+            write (*, 99002)
+            !
+            !....................................................
+            !
+            99002 format (/' Qspec initialized to current Q.'/)
+            LQSpec = .true.
+        endif
+        do
+            !
+            !
+            !====================================================
+            !---- start of menu loop
+            comold = comand
+            argold = comarg
+            do
+                !
+                call askc('.QDES^', comand, comarg)
+                !
+                !--------------------------------------------------------
+                !---- process previous command ?
+                if (comand(1:1)/='!') then
+                    lrecalc = .false.
+                elseif (comold=='****') then
+                    write (*, *) 'Previous .QDES command not valid'
+                    cycle
+                else
+                    comand = comold
+                    comarg = argold
+                    lrecalc = .true.
+                endif
+                !
+                !----- just <return> was typed... clean up plotting and exit OPER
+                if (comand=='    ') return
+                !
+                !---- extract command line numeric arguments
+                do i = 1, 20
+                    iinput(i) = 0
+                    rinput(i) = 0.0
+                enddo
+                ninput = 0
+                call getint(comarg, iinput, ninput, error)
+                ninput = 0
+                call getflt(comarg, rinput, ninput, error)
+                !
+                !--------------------------------------------------------
+                if (comand=='?   ') then
+                    write (*, 99003)
+                    99003      format (&
+                            /'   <cr>   Return to Top Level'&
+                            //'   QSET   Reset Qspec <== Q'&
+                            /'   SMOO   Smooth Qspec inside target segment'&
+                            /'   SLOP   Toggle modified-Qspec slope matching flag'&
+                            /'   REST   Restore geometry from buffer airfoil'&
+                            /'   CPXX   CPxx endpoint constraint toggle')
+                    !
+                    !--------------------------------------------------------
+                    !---- re-initialize Qspec to Q
+                elseif (comand=='QSET') then
+                    call gamqsp(1)
+                    !
+                    !--------------------------------------------------------
+                    !---- smooth Qspec within target segment, or entire Qspec if not marked off
+                elseif (comand=='SMOO') then
+                    !
+                    kqsp = 1
+                    call smooq(IQ1, IQ2, kqsp)
+                    call splqsp(kqsp)
+                    !
+                    call clcalc(N, X, Y, QSPec(1, kqsp), W1, ALFa, MINf, QINf,&
+                            XCMref, YCMref, CLQsp(kqsp), CMQsp(kqsp), cdpq, clq_alf, clq_msq)
+                    write (*, 99004) CL, CM, CLQsp(kqsp), CMQsp(kqsp)
+                    99004      format (/' Q    :   CL =', f11.6, '    CM =', f11.6/&
+                            ' Qspec:   CL =', f11.6, '    CM =', f11.6)
+                    !
+                    !--------------------------------------------------------
+                    !---- toggle Qspec endpoint slope matching
+                elseif (comand=='SLOP') then
+                    LQSlop = .not.LQSlop
+                    if (LQSlop) then
+                        write (*, *) 'Modified Qspec piece will be made tangent at endpoints'
+                    else
+                        write (*, *) 'Modified Qspec piece will not be made tangent at endpoints'
+                    endif
+                    !
+                    !--------------------------------------------------------
+                    !---- toggle CPxx preservation constraints
+                elseif (comand=='CPXX') then
+                    LCPxx = .not.LCPxx
+                    if (LCPxx) then
+                        write (*, *) 'CPxx will be constrained'
+                    else
+                        write (*, *) 'CPxx will not be constrained'
+                    endif
+                    !
+                    !--------------------------------------------------------
+                    !---- restore and spline old airfoil
+                elseif (comand=='REST') then
+                    do i = 1, N
+                        X(i) = XB(i)
+                        Y(i) = YB(i)
+                    enddo
+                    call scalc(X, Y, S, N)
+                    call splind(X, XP, S, N, -999.0, -999.0)
+                    call splind(Y, YP, S, N, -999.0, -999.0)
+                    call ncalc(X, Y, S, N, NX, NY)
+                    call lefind(SLE, X, XP, Y, YP, S, N)
+                    XLE = seval(SLE, X, XP, S, N)
+                    YLE = seval(SLE, Y, YP, S, N)
+                    CHOrd = sqrt((0.5 * (X(1) + X(N)) - XLE)**2 + (0.5 * (Y(1) + Y(N)) - YLE)**2)
+                    call tecalc
+                    call apcalc
+                    LGAmu = .false.
+                    LQInu = .false.
+                    LGSame = .true.
+                    !
+                    !c       CALL NAMMOD(NAME,-1,1)
+                    !c       CALL STRIP(NAME,NNAME)
+                    !
+                    !--------------------------------------------------------
+                else
+                    write (*, 99005) comand
+                    99005      format (' Command ', a4, ' not recognized.  Type a " ? " for list.')
+                    !
+                    comand = '****'
+                endif
+                !
+                goto 100
+            enddo
+            exit
+        100  enddo
+    end subroutine qdes
 
 
-SUBROUTINE SPLQSP(KQSP)
-    !------------------------------------------------------
-    !     Splines Qspec(s).  The end intervals are treated
-    !     specially to avoid Gibbs-type problems from 
-    !     blindly splining to the stagnation point.
-    !------------------------------------------------------
-    use m_spline
-    use i_xfoil
-    !
-    !---- usual spline with natural end BCs
-    CALL SPLIND(QSPEC(2, KQSP), QSPECP(2, KQSP), SSPEC(2), NSP - 2, &
-            -999.0, -999.0)
-    !
-    !cC---- pseudo-monotonic spline with simple secant slope calculation
-    !c      CALL SPLINA(QSPEC(2,KQSP),QSPECP(2,KQSP),SSPEC(2),NSP-2)
-    !
-    !---- end intervals are splined separately with natural BCs at
-    !     the trailing edge and matching slopes at the interior points
-    !
-    I = 1
-    CALL SPLIND(QSPEC(I, KQSP), QSPECP(I, KQSP), SSPEC(I), 2, &
-            -999.0, QSPECP(I + 1, KQSP))
-    !
-    I = NSP - 1
-    CALL SPLIND(QSPEC(I, KQSP), QSPECP(I, KQSP), SSPEC(I), 2, &
-            QSPECP(I, KQSP), -999.0)
-    !
-    RETURN
-END
-
-
-SUBROUTINE SMOOQ(KQ1, KQ2, KQSP)
-    !--------------------------------------------
-    !     Smooths Qspec(s) inside target segment
-    !--------------------------------------------
-    use m_spline
-    use i_xfoil
-    !
-    !C---- calculate smoothing coordinate
-    !cc      IF(NSP.EQ.NC1) THEN
-    !C
-    !C------ mapping inverse: use circle plane coordinate
-    !        I = 1
-    !        W8(I) = 0.0
-    !        DO 10 I=2, NSP
-    !          SINW = 2.0*SIN( 0.25*(WC(I)+WC(I-1)) )
-    !          SINWE = SINW**(1.0-AGTE)
-    !C
-    !          DSDW = SINWE * EXP( REAL(0.5*(PIQ(I)+PIQ(I-1)) ))
-    !          W8(I) = W8(I-1) + (WC(I)-WC(I-1))/DSDW
-    !   10   CONTINUE
-    !        DO 11 I=1, NSP
-    !          W8(I) = W8(I)/W8(NSP)
-    ! 11     CONTINUE
-    !C
-    !C------ do not smooth first and last intervals in circle plane
-    !        KQ1 = MAX(IQ1,2)
-    !        KQ2 = MIN(IQ2,NSP-1)
-    !C
-    !cc      ELSE
-    !
-    !------ mixed inverse: use arc length coordinate
-    DO 15 I = 1, NSP
-        W8(I) = SSPEC(I)
-    15   CONTINUE
-    !
-    !cc      ENDIF
-    !
-    !
-    IF(KQ2 - KQ1 .LT. 2) THEN
-        WRITE(*, *) 'Segment is too short.  No smoothing possible.'
-        RETURN
-    ENDIF
-    !
-    !---- set smoothing length ( ~ distance over which data is smeared )
-    SMOOL = 0.002 * (W8(NSP) - W8(1))
-    !CC   CALL ASKR('Enter Qspec smoothing length^',SMOOL)
-    !
-    !---- set up tri-diagonal system for smoothed Qspec
-    SMOOSQ = SMOOL**2
-    DO 20 I = KQ1 + 1, KQ2 - 1
-        DSM = W8(I) - W8(I - 1)
-        DSP = W8(I + 1) - W8(I)
-        DSO = 0.5 * (W8(I + 1) - W8(I - 1))
+    subroutine splqsp(Kqsp)
+        use m_spline
+        use i_xfoil
+        implicit none
         !
-        W1(I) = SMOOSQ * (- 1.0 / DSM) / DSO
-        W2(I) = SMOOSQ * (1.0 / DSP + 1.0 / DSM) / DSO + 1.0
-        W3(I) = SMOOSQ * (-1.0 / DSP) / DSO
-    20 CONTINUE
-    !
-    !---- set fixed-Qspec end conditions
-    W2(KQ1) = 1.0
-    W3(KQ1) = 0.0
-    !
-    W1(KQ2) = 0.0
-    W2(KQ2) = 1.0
-    !
-    IF(LQSLOP) THEN
-        !----- also enforce slope matching at endpoints
-        I = KQ1 + 1
-        DSM = W8(I) - W8(I - 1)
-        DSP = W8(I + 1) - W8(I)
-        DS = W8(I + 1) - W8(I - 1)
-        W1(I) = -1.0 / DSM - (DSM / DS) / DSM
-        W2(I) = 1.0 / DSM + (DSM / DS) / DSM + (DSM / DS) / DSP
-        W3(I) = - (DSM / DS) / DSP
-        QSPP1 = W1(I) * QSPEC(I - 1, KQSP)&
-                + W2(I) * QSPEC(I, KQSP)&
-                + W3(I) * QSPEC(I + 1, KQSP)
+        !*** Start of declarations rewritten by SPAG
         !
-        I = KQ2 - 1
-        DSM = W8(I) - W8(I - 1)
-        DSP = W8(I + 1) - W8(I)
-        DS = W8(I + 1) - W8(I - 1)
-        W1(I) = (DSP / DS) / DSM
-        W2(I) = -1.0 / DSP - (DSP / DS) / DSP - (DSP / DS) / DSM
-        W3(I) = 1.0 / DSP + (DSP / DS) / DSP
-        QSPP2 = W1(I) * QSPEC(I - 1, KQSP)&
-                + W2(I) * QSPEC(I, KQSP)&
-                + W3(I) * QSPEC(I + 1, KQSP)
+        ! Dummy arguments
         !
-        QSPEC(KQ1 + 1, KQSP) = QSPP1
-        QSPEC(KQ2 - 1, KQSP) = QSPP2
-    ENDIF
-    !
-    !
-    !---- solve for smoothed Qspec array
-    CALL TRISOL(W2(KQ1), W1(KQ1), W3(KQ1), QSPEC(KQ1, KQSP), (KQ2 - KQ1 + 1))
-    !
-    !
-    !c      IF(LQSYM) THEN
-    !c        DO 40 I=KQ1+1, KQ2-1
-    !c          QSPEC(NSP-I+1,KQSP) = -QSPEC(I,KQSP)
-    !c 40     CONTINUE
-    !c      ENDIF
-    !
-    RETURN
-END
+        integer :: Kqsp
+        intent (in) Kqsp
+        !
+        ! Local variables
+        !
+        integer :: i
+        !
+        !*** End of declarations rewritten by SPAG
+        !
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! Dummy arguments
+        !
+        !
+        ! Local variables
+        !
+        !
+        !*** End of declarations rewritten by SPAG
+        !
+        !------------------------------------------------------
+        !     Splines Qspec(s).  The end intervals are treated
+        !     specially to avoid Gibbs-type problems from
+        !     blindly splining to the stagnation point.
+        !------------------------------------------------------
+        !
+        !---- usual spline with natural end BCs
+        call splind(QSPec(2, Kqsp), QSPecp(2, Kqsp), SSPec(2), NSP - 2, -999.0, -999.0)
+        !
+        !cC---- pseudo-monotonic spline with simple secant slope calculation
+        !c      CALL SPLINA(QSPEC(2,KQSP),QSPECP(2,KQSP),SSPEC(2),NSP-2)
+        !
+        !---- end intervals are splined separately with natural BCs at
+        !     the trailing edge and matching slopes at the interior points
+        !
+        i = 1
+        call splind(QSPec(i, Kqsp), QSPecp(i, Kqsp), SSPec(i), 2, -999.0, QSPecp(i + 1, Kqsp))
+        !
+        i = NSP - 1
+        call splind(QSPec(i, Kqsp), QSPecp(i, Kqsp), SSPec(i), 2, QSPecp(i, Kqsp), -999.0)
+        !
+    end subroutine splqsp
 
 
-FUNCTION QINCOM(QC, QINF, TKLAM)
-    !-------------------------------------
-    !     Sets incompressible speed from
-    !     Karman-Tsien compressible speed
-    !-------------------------------------
-    !
-    IF(TKLAM.LT.1.0E-4 .OR. ABS(QC).LT.1.0E-4) THEN
-        !----- for nearly incompressible case or very small speed, use asymptotic
-        !      expansion of singular quadratic formula to avoid numerical problems
-        QINCOM = QC / (1.0 - TKLAM)
-    ELSE
-        !----- use quadratic formula for typical case
-        TMP = 0.5 * (1.0 - TKLAM) * QINF / (QC * TKLAM)
-        QINCOM = QINF * TMP * (SQRT(1.0 + 1.0 / (TKLAM * TMP**2)) - 1.0)
-    ENDIF
-    RETURN
-END
+    subroutine smooq(Kq1, Kq2, Kqsp)
+        use m_spline
+        use i_xfoil
+        implicit none
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! Dummy arguments
+        !
+        integer :: Kq1, Kq2, Kqsp
+        intent (in) Kq1, Kq2, Kqsp
+        !
+        ! Local variables
+        !
+        real :: ds, dsm, dso, dsp, qspp1, qspp2, smool, smoosq
+        integer :: i
+        !
+        !*** End of declarations rewritten by SPAG
+        !
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! Dummy arguments
+        !
+        !
+        ! Local variables
+        !
+        !
+        !*** End of declarations rewritten by SPAG
+        !
+        !--------------------------------------------
+        !     Smooths Qspec(s) inside target segment
+        !--------------------------------------------
+        !
+        !C---- calculate smoothing coordinate
+        !cc      IF(NSP.EQ.NC1) THEN
+        !C
+        !C------ mapping inverse: use circle plane coordinate
+        !        I = 1
+        !        W8(I) = 0.0
+        !        DO 10 I=2, NSP
+        !          SINW = 2.0*SIN( 0.25*(WC(I)+WC(I-1)) )
+        !          SINWE = SINW**(1.0-AGTE)
+        !C
+        !          DSDW = SINWE * EXP( REAL(0.5*(PIQ(I)+PIQ(I-1)) ))
+        !          W8(I) = W8(I-1) + (WC(I)-WC(I-1))/DSDW
+        !   10   CONTINUE
+        !        DO 11 I=1, NSP
+        !          W8(I) = W8(I)/W8(NSP)
+        ! 11     CONTINUE
+        !C
+        !C------ do not smooth first and last intervals in circle plane
+        !        KQ1 = MAX(IQ1,2)
+        !        KQ2 = MIN(IQ2,NSP-1)
+        !C
+        !cc      ELSE
+        !
+        !------ mixed inverse: use arc length coordinate
+        do i = 1, NSP
+            W8(i) = SSPec(i)
+        enddo
+        !
+        !cc      ENDIF
+        !
+        !
+        if (Kq2 - Kq1<2) then
+            write (*, *) 'Segment is too short.  No smoothing possible.'
+            return
+        endif
+        !
+        !---- set smoothing length ( ~ distance over which data is smeared )
+        smool = 0.002 * (W8(NSP) - W8(1))
+        !CC   CALL ASKR('Enter Qspec smoothing length^',SMOOL)
+        !
+        !---- set up tri-diagonal system for smoothed Qspec
+        smoosq = smool**2
+        do i = Kq1 + 1, Kq2 - 1
+            dsm = W8(i) - W8(i - 1)
+            dsp = W8(i + 1) - W8(i)
+            dso = 0.5 * (W8(i + 1) - W8(i - 1))
+            !
+            W1(i) = smoosq * (-1.0 / dsm) / dso
+            W2(i) = smoosq * (1.0 / dsp + 1.0 / dsm) / dso + 1.0
+            W3(i) = smoosq * (-1.0 / dsp) / dso
+        enddo
+        !
+        !---- set fixed-Qspec end conditions
+        W2(Kq1) = 1.0
+        W3(Kq1) = 0.0
+        !
+        W1(Kq2) = 0.0
+        W2(Kq2) = 1.0
+        !
+        if (LQSlop) then
+            !----- also enforce slope matching at endpoints
+            i = Kq1 + 1
+            dsm = W8(i) - W8(i - 1)
+            dsp = W8(i + 1) - W8(i)
+            ds = W8(i + 1) - W8(i - 1)
+            W1(i) = -1.0 / dsm - (dsm / ds) / dsm
+            W2(i) = 1.0 / dsm + (dsm / ds) / dsm + (dsm / ds) / dsp
+            W3(i) = -(dsm / ds) / dsp
+            qspp1 = W1(i) * QSPec(i - 1, Kqsp) + W2(i) * QSPec(i, Kqsp) + W3(i) * QSPec(i + 1, Kqsp)
+            !
+            i = Kq2 - 1
+            dsm = W8(i) - W8(i - 1)
+            dsp = W8(i + 1) - W8(i)
+            ds = W8(i + 1) - W8(i - 1)
+            W1(i) = (dsp / ds) / dsm
+            W2(i) = -1.0 / dsp - (dsp / ds) / dsp - (dsp / ds) / dsm
+            W3(i) = 1.0 / dsp + (dsp / ds) / dsp
+            qspp2 = W1(i) * QSPec(i - 1, Kqsp) + W2(i) * QSPec(i, Kqsp) + W3(i) * QSPec(i + 1, Kqsp)
+            !
+            QSPec(Kq1 + 1, Kqsp) = qspp1
+            QSPec(Kq2 - 1, Kqsp) = qspp2
+        endif
+        !
+        !
+        !---- solve for smoothed Qspec array
+        call trisol(W2(Kq1), W1(Kq1), W3(Kq1), QSPec(Kq1, Kqsp), (Kq2 - Kq1 + 1))
+        !
+        !
+        !c      IF(LQSYM) THEN
+        !c        DO 40 I=KQ1+1, KQ2-1
+        !c          QSPEC(NSP-I+1,KQSP) = -QSPEC(I,KQSP)
+        !c 40     CONTINUE
+        !c      ENDIF
+        !
+    end subroutine smooq
 
 
-SUBROUTINE GAMQSP(KQSP)
-    !------------------------------------------------
-    !     Sets Qspec(s,k) from current speed Q(s).
-    !------------------------------------------------
-    use i_xfoil
-    !
-    ALQSP(KQSP) = ALGAM
-    CLQSP(KQSP) = CLGAM
-    CMQSP(KQSP) = CMGAM
-    !
-    DO 10 I = 1, NSP
-        QSPEC(I, KQSP) = QGAMM(I)
-    10   CONTINUE
-    !
-    !---- zero out Qspec DOFs
-    QDOF0 = 0.0
-    QDOF1 = 0.0
-    QDOF2 = 0.0
-    QDOF3 = 0.0
-    !
-    CALL SPLQSP(KQSP)
-    !
-    !---- reset target segment endpoints
-    IF(.NOT.LIQSET) THEN
-        IQ1 = 1
-        IQ2 = NSP
-    ENDIF
-    !
-    RETURN
-END
+    function qincom(Qc, Qinf, Tklam)
+        implicit none
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! Dummy arguments
+        !
+        real :: Qc, Qinf, Tklam
+        real :: qincom
+        intent (in) Qc, Qinf, Tklam
+        !
+        ! Local variables
+        !
+        real :: tmp
+        !
+        !*** End of declarations rewritten by SPAG
+        !
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! Dummy arguments
+        !
+        !
+        ! Local variables
+        !
+        !
+        !*** End of declarations rewritten by SPAG
+        !
+        !-------------------------------------
+        !     Sets incompressible speed from
+        !     Karman-Tsien compressible speed
+        !-------------------------------------
+        !
+        if (Tklam<1.0E-4 .or. abs(Qc)<1.0E-4) then
+            !----- for nearly incompressible case or very small speed, use asymptotic
+            !      expansion of singular quadratic formula to avoid numerical problems
+            qincom = Qc / (1.0 - Tklam)
+        else
+            !----- use quadratic formula for typical case
+            tmp = 0.5 * (1.0 - Tklam) * Qinf / (Qc * Tklam)
+            qincom = Qinf * tmp * (sqrt(1.0 + 1.0 / (Tklam * tmp**2)) - 1.0)
+        endif
+    end function qincom
+
+
+    subroutine gamqsp(Kqsp)
+        use i_xfoil
+        implicit none
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! Dummy arguments
+        !
+        integer :: Kqsp
+        !
+        ! Local variables
+        !
+        integer :: i
+        !
+        !*** End of declarations rewritten by SPAG
+        !
+        !
+        !*** Start of declarations rewritten by SPAG
+        !
+        ! Dummy arguments
+        !
+        !
+        ! Local variables
+        !
+        !
+        !*** End of declarations rewritten by SPAG
+        !
+        !------------------------------------------------
+        !     Sets Qspec(s,k) from current speed Q(s).
+        !------------------------------------------------
+        !
+        ALQsp(Kqsp) = ALGam
+        CLQsp(Kqsp) = CLGam
+        CMQsp(Kqsp) = CMGam
+        !
+        do i = 1, NSP
+            QSPec(i, Kqsp) = QGAmm(i)
+        enddo
+        !
+        !---- zero out Qspec DOFs
+        QDOf0 = 0.0
+        QDOf1 = 0.0
+        QDOf2 = 0.0
+        QDOf3 = 0.0
+        !
+        call splqsp(Kqsp)
+        !
+        !---- reset target segment endpoints
+        if (.not.LIQset) then
+            IQ1 = 1
+            IQ2 = NSP
+        endif
+        !
+    end subroutine gamqsp
+
+end module m_xqdes

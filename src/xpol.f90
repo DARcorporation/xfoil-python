@@ -1,8 +1,9 @@
+!*==PLRSET.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 !***********************************************************************
 !    Module:  xpol.f
-! 
-!    Copyright (C) 2000 Mark Drela 
-! 
+!
+!    Copyright (C) 2000 Mark Drela
+!
 !    This program is free software; you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
 !    the Free Software Foundation; either version 2 of the License, or
@@ -19,461 +20,528 @@
 !***********************************************************************
 
 
-SUBROUTINE PLRSET(IP)
+subroutine plrset(Ip)
+    use m_spline
+    use i_xfoil
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    integer :: Ip
+    intent (inout) Ip
+    !
+    ! Local variables
+    !
+    real :: dsfrac, dsq, sizref
+    logical :: error
+    integer :: i, iopt
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !--------------------------------------------------------------
     !     Selects slot IP for saving polar.
     !     Resets all parameters if necessary.
     !--------------------------------------------------------------
-    use m_spline
-    use i_xfoil
-    LOGICAL ERROR
     !
-    IF(IP.LE.0) THEN
+    if (Ip<=0) then
         !----- invalid polar index
-        RETURN
+        return
         !
-    ELSEIF(IP.GE.1 .AND. IP.LE.NPOL) THEN
-        WRITE(*, *)
-        WRITE(*, *) 'Existing stored polar is chosen for appending...'
-        NIPOL = NIPOL0
-        IF(LCMINP) THEN
-            NIPOL = NIPOL + 1
-            IPOL(NIPOL) = IMC
-        ENDIF
-        IF(LHMOMP) THEN
-            NIPOL = NIPOL + 1
-            IPOL(NIPOL) = ICH
-        ENDIF
-        CALL POLWRIT(6, ' ', ERROR, .TRUE., &
-                NAX, 1, NAPOL(IP), CPOL(1, 1, IP), IPOL, NIPOL, &
-                REYNP1(IP), MACHP1(IP), ACRITP(1, IP), XSTRIPP(1, IP), &
-                PTRATP(IP), ETAPP(IP), &
-                NAMEPOL(IP), IRETYP(IP), IMATYP(IP), &
-                ISX, 1, CPOLSD(1, 1, 1, IP), JPOL, NJPOL, &
-                'XFOIL', VERSION, .FALSE.)
-        NIPOL = NIPOL0
+    elseif (Ip>=1 .and. Ip<=NPOl) then
+        write (*, *)
+        write (*, *) 'Existing stored polar is chosen for appending...'
+        NIPol = NIPol0
+        if (LCMinp) then
+            NIPol = NIPol + 1
+            IPOl(NIPol) = IMC
+        endif
+        if (LHMomp) then
+            NIPol = NIPol + 1
+            IPOl(NIPol) = ICH
+        endif
+        call polwrit(6, ' ', error, .true., NAX, 1, NAPol(Ip), &
+                CPOl(1, 1, Ip), IPOl, NIPol, REYnp1(Ip), MAChp1(Ip), ACRitp(1, Ip), &
+                & XSTripp(1, Ip), PTRatp(Ip), ETApp(Ip), &
+                NAMepol(Ip), IREtyp(Ip), IMAtyp(Ip), ISX, 1, CPOlsd(1, 1, 1, Ip), JPOl, NJPol, &
+                &'XFOIL', VERsion, .false.)
+        NIPol = NIPol0
         !
         !----- check if geometries differ...
-        IF(N.NE.NXYPOL(IP)) GO TO 10
-        SIZREF = S(N) - S(1)
-        DO I = 1, N
-            DSQ = (X(I) - CPOLXY(I, 1, IP))**2 + (Y(I) - CPOLXY(I, 2, IP))**2
-            DSFRAC = SQRT(DSQ) / SIZREF
-            IF(DSFRAC .GT. 0.00001) GO TO 10
-        ENDDO
-        GO TO 20
+        if (N==NXYpol(Ip)) then
+            sizref = S(N) - S(1)
+            do i = 1, N
+                dsq = (X(i) - CPOlxy(i, 1, Ip))**2 + (Y(i) - CPOlxy(i, 2, Ip))**2
+                dsfrac = sqrt(dsq) / sizref
+                if (dsfrac>0.00001) goto 50
+            enddo
+            goto 100
+        endif
         !
-        10    WRITE(*, *) 'Current airfoil differs from airfoil of stored polar'
-        WRITE(*, 1100)
-        1100  FORMAT(&
+        50   write (*, *) 'Current airfoil differs from airfoil of stored polar'
+        write (*, 99001)
+        99001 format (&
                 /'   - - - - - - - - - - - - - - - - - - - - - - - - - - - -'&
                 /'    0  abort polar accumulation'&
                 /'    1  compute with current airfoil'&
                 /'    2  compute with stored  airfoil', &
                 ' (overwrite current airfoil)')
-        CALL ASKI('   Select action^', IOPT)
-        IF(IOPT.EQ.0) THEN
-            IP = 0
-            RETURN
-        ELSEIF(IOPT.EQ.2) THEN
-            CALL APCOPY(IP)
-        ENDIF
+        call aski('   Select action^', iopt)
+        if (iopt==0) then
+            Ip = 0
+            return
+        elseif (iopt==2) then
+            call apcopy(Ip)
+        endif
         !
-        20    CONTINUE
-        WRITE(*, *)
-        WRITE(*, *) 'Setting current parameters to those of stored polar'
+        100  write (*, *)
+        write (*, *) 'Setting current parameters to those of stored polar'
         !
-        NAME = NAMEPOL(IP)
-        CALL STRIP(NAME, NNAME)
+        NAMe = NAMepol(Ip)
+        call strip(NAMe, NNAme)
         !
-        RETYP = IRETYP(IP)
-        MATYP = IMATYP(IP)
+        RETyp = IREtyp(Ip)
+        MATyp = IMAtyp(Ip)
         !
-        MINF1 = MACHP1(IP)
-        REINF1 = REYNP1(IP)
+        MINf1 = MAChp1(Ip)
+        REInf1 = REYnp1(Ip)
         !
-        ACRIT(1) = ACRITP(1, IP)
-        ACRIT(2) = ACRITP(2, IP)
+        ACRit(1) = ACRitp(1, Ip)
+        ACRit(2) = ACRitp(2, Ip)
         !
-        XSTRIP(1) = XSTRIPP(1, IP)
-        XSTRIP(2) = XSTRIPP(2, IP)
+        XSTrip(1) = XSTripp(1, Ip)
+        XSTrip(2) = XSTripp(2, Ip)
         !
-    ELSE
+    else
         !----- new polar slot is chosen
-        NPOL = IP
+        NPOl = Ip
         !
-        NAPOL(IP) = 0
+        NAPol(Ip) = 0
         !
-        NAMEPOL(IP) = NAME
-        IRETYP(IP) = RETYP
-        IMATYP(IP) = MATYP
+        NAMepol(Ip) = NAMe
+        IREtyp(Ip) = RETyp
+        IMAtyp(Ip) = MATyp
         !
-        IF(LVISC) THEN
-            REYNP1(IP) = REINF1
-        ELSE
-            REYNP1(IP) = 0.
-        ENDIF
-        MACHP1(IP) = MINF1
+        if (LVIsc) then
+            REYnp1(Ip) = REInf1
+        else
+            REYnp1(Ip) = 0.
+        endif
+        MAChp1(Ip) = MINf1
         !
-        ACRITP(1, IP) = ACRIT(1)
-        ACRITP(2, IP) = ACRIT(2)
+        ACRitp(1, Ip) = ACRit(1)
+        ACRitp(2, Ip) = ACRit(2)
         !
-        XSTRIPP(1, IP) = XSTRIP(1)
-        XSTRIPP(2, IP) = XSTRIP(2)
+        XSTripp(1, Ip) = XSTrip(1)
+        XSTripp(2, Ip) = XSTrip(2)
         !
-        NXYPOL(IP) = N
-        DO I = 1, N
-            CPOLXY(I, 1, IP) = X(I)
-            CPOLXY(I, 2, IP) = Y(I)
-        ENDDO
+        NXYpol(Ip) = N
+        do i = 1, N
+            CPOlxy(i, 1, Ip) = X(i)
+            CPOlxy(i, 2, Ip) = Y(i)
+        enddo
         !
-        WRITE(*, 2100) IP, NAMEPOL(IP)
-        2100  FORMAT(/' Polar', I3, ' newly created for accumulation'&
-                /' Airfoil archived with polar: ', A)
-    ENDIF
+        write (*, 99002) Ip, NAMepol(Ip)
+        99002 format (/' Polar', i3, ' newly created for accumulation'/' Airfoil archived with polar: ', a)
+    endif
     !
-END
+end subroutine plrset
+!*==APCOPY.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! PLRSET
 
 
-SUBROUTINE APCOPY(IP)
+subroutine apcopy(Ip)
     use m_spline
     use i_xfoil
+    implicit none
     !
-    NOLD = N
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    integer :: Ip
+    intent (in) Ip
+    !
+    ! Local variables
+    !
+    integer :: i, nold
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    nold = N
 
-    N = NXYPOL(IP)
-    DO I = 1, N
-        X(I) = CPOLXY(I, 1, IP)
-        Y(I) = CPOLXY(I, 2, IP)
-    ENDDO
-    NAME = NAMEPOL(IP)
+    N = NXYpol(Ip)
+    do i = 1, N
+        X(i) = CPOlxy(i, 1, Ip)
+        Y(i) = CPOlxy(i, 2, Ip)
+    enddo
+    NAMe = NAMepol(Ip)
     !
-    CALL SCALC(X, Y, S, N)
-    CALL SEGSPL(X, XP, S, N)
-    CALL SEGSPL(Y, YP, S, N)
-    CALL NCALC(X, Y, S, N, NX, NY)
-    CALL LEFIND(SLE, X, XP, Y, YP, S, N)
-    XLE = SEVAL(SLE, X, XP, S, N)
-    YLE = SEVAL(SLE, Y, YP, S, N)
+    call scalc(X, Y, S, N)
+    call segspl(X, XP, S, N)
+    call segspl(Y, YP, S, N)
+    call ncalc(X, Y, S, N, NX, NY)
+    call lefind(SLE, X, XP, Y, YP, S, N)
+    XLE = seval(SLE, X, XP, S, N)
+    YLE = seval(SLE, Y, YP, S, N)
     XTE = 0.5 * (X(1) + X(N))
     YTE = 0.5 * (Y(1) + Y(N))
-    CHORD = SQRT((XTE - XLE)**2 + (YTE - YLE)**2)
-    CALL TECALC
-    CALL APCALC
+    CHOrd = sqrt((XTE - XLE)**2 + (YTE - YLE)**2)
+    call tecalc
+    call apcalc
     !
-    LGAMU = .FALSE.
-    LQINU = .FALSE.
-    LWAKE = .FALSE.
-    LQAIJ = .FALSE.
-    LADIJ = .FALSE.
-    LWDIJ = .FALSE.
-    LIPAN = .FALSE.
-    LVCONV = .FALSE.
-    LSCINI = .FALSE.
-    IF(NOLD.NE.N) LBLINI = .FALSE.
+    LGAmu = .false.
+    LQInu = .false.
+    LWAke = .false.
+    LQAij = .false.
+    LADij = .false.
+    LWDij = .false.
+    LIPan = .false.
+    LVConv = .false.
+    LSCini = .false.
+    if (nold/=N) LBLini = .false.
     !
-    RETURN
-END
+end subroutine apcopy
+!*==PLRINI.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! APCOPY
 
 
 
-SUBROUTINE PLRINI(LU, IP)
+subroutine plrini(Lu, Ip)
+    use i_xfoil
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    integer :: Ip, Lu
+    intent (in) Ip
+    !
+    ! Local variables
+    !
+    logical :: error, namdif
+    integer :: ia1, ia2, k, nfn, nnamep, npf
+    integer, dimension(ISX, IPX) :: nblp
+    character(128) :: prompt
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !--------------------------------------------------------------
     !     Checks or initializes a polar save file.
     !
-    !     If file PFNAME(IP) exists, it is checked for consistency 
+    !     If file PFNAME(IP) exists, it is checked for consistency
     !        with current parameters.  Polar saving is enabled
     !        only if file parameters match current parameters.
     !
-    !     If file PFNAME(IP) doesn't exist, a new one is set up by 
+    !     If file PFNAME(IP) doesn't exist, a new one is set up by
     !        writing a header to it, and polar saving is enabled.
     !--------------------------------------------------------------
-    use i_xfoil
-    CHARACTER*128 LINE, LINEL, PROMPT
     !
-    LOGICAL NAMDIF, ERROR
     !
-    INTEGER NBLP(ISX, IPX)
     !
-    REAL RINP(IPTOT)
     !
-    CALL STRIP(PFNAME(IP), NPF)
-    IF(NPF.EQ.0) THEN
-        PROMPT = 'Enter  polar save filename'&
-                // '  OR  <return> for no file^'
-    ELSE
-        WRITE(*, *) 'Default polar save filename:  ', PFNAME(IP)(1:NPF)
-        PROMPT = 'Enter  new filename'&
-                // '  OR  "none"'&
-                // '  OR  <return> for default^'
-    ENDIF
+    call strip(PFName(Ip), npf)
+    if (npf==0) then
+        prompt = 'Enter  polar save filename' // '  OR  <return> for no file^'
+    else
+        write (*, *) 'Default polar save filename:  ', PFName(Ip)(1:npf)
+        prompt = 'Enter  new filename' // '  OR  "none"' // '  OR  <return> for default^'
+    endif
     !
-    CALL ASKS(PROMPT, FNAME)
-    CALL STRIP(FNAME, NFN)
+    call asks(prompt, FNAme)
+    call strip(FNAme, nfn)
     !
-    IF(NFN.EQ.0) THEN
-        FNAME = PFNAME(IP)
-        NFN = NPF
-    ELSEIF(INDEX('NONEnone', FNAME(1:4)).NE.0) THEN
-        NFN = 0
-    ENDIF
+    if (nfn==0) then
+        FNAme = PFName(Ip)
+        nfn = npf
+    elseif (index('NONEnone', FNAme(1:4))/=0) then
+        nfn = 0
+    endif
     !
-    IF(NFN.EQ.0) THEN
-        LPFILE = .FALSE.
-        WRITE(*, *)
-        WRITE(*, *) 'Polar save file will NOT be written'
-        RETURN
-    ENDIF
+    if (nfn==0) then
+        LPFile = .false.
+        write (*, *)
+        write (*, *) 'Polar save file will NOT be written'
+        return
+    endif
     !
     !---- no valid file yet
-    LPFILE = .FALSE.
+    LPFile = .false.
     !
     !---- try reading the polar file to see if it exists
-    OPEN(LU, FILE = FNAME, STATUS = 'OLD', ERR = 60)
-    CALL POLREAD(LU, ' ', ERROR, &
-            NAX, NAPOL(IP), CPOL(1, 1, IP), &
-            REYNP1(IP), MACHP1(IP), ACRITP(1, IP), XSTRIPP(1, IP), &
-            PTRATP(IP), ETAPP(IP), &
-            NAMEPOL(IP), IRETYP(IP), IMATYP(IP), &
-            ISX, NBLP(1, IP), CPOLSD(1, 1, 1, IP), &
-            CODEPOL(IP), VERSPOL(IP))
-    IF(ERROR) GO TO 90
-    CLOSE(LU)
-    PFNAME(IP) = FNAME
-    !
-    CALL STRIP(NAMEPOL(IP), NNAMEP)
-    !
-    !---- check to see if the names are different
-    IF(NNAME .NE. NNAMEP) THEN
-        NAMDIF = .TRUE.
-    ELSE
-        NAMDIF = .FALSE.
-        DO K = 1, NNAME
-            IF(NAME(K:K).NE.NAMEPOL(IP)(K:K)) NAMDIF = .TRUE.
-        ENDDO
-    ENDIF
-    !
-    !---- check if the polar save file is for the same airfoil and conditions
-    IF(NAMDIF                   .OR.&
-            REYNP1(IP) .NE. REINF1   .OR.&
-            MACHP1(IP) .NE. MINF1    .OR.&
-            IRETYP(IP) .NE. RETYP    .OR.&
-            IMATYP(IP) .NE. MATYP    .OR.&
-            ACRITP(1, IP) .NE. ACRIT(1)    .OR.&
-            ACRITP(2, IP) .NE. ACRIT(2)    .OR.&
-            XSTRIPP(1, IP) .NE. XSTRIP(1)  .OR.&
-            XSTRIPP(2, IP) .NE. XSTRIP(2)) THEN
+    open (Lu, file = FNAme, status = 'OLD', err = 100)
+    call polread(Lu, ' ', error, NAX, NAPol(Ip), &
+            CPOl(1, 1, Ip), REYnp1(Ip), MAChp1(Ip), ACRitp(1, Ip), XSTripp(1, Ip), PTRatp(Ip), &
+            & ETApp(Ip), NAMepol(Ip), IREtyp(Ip), IMAtyp(Ip), &
+            ISX, nblp(1, Ip), CPOlsd(1, 1, 1, Ip), CODepol(Ip), VERspol(Ip))
+    if (error) then
         !
-        WRITE(*, 6600)  NAME, NAMEPOL(IP), &
-                REINF1, REYNP1(IP), &
-                MINF1, MACHP1(IP), &
-                RETYP, IRETYP(IP), &
-                MATYP, IMATYP(IP), &
-                ACRIT(1), ACRITP(1, IP), &
-                ACRIT(2), ACRITP(2, IP), &
-                XSTRIP(1), XSTRIPP(1, IP), &
-                XSTRIP(2), XSTRIPP(2, IP)
+        !---- READ error trap
+        write (*, *) 'Old polar save file READ error'
+        close (Lu)
+        goto 99999
+    else
+        close (Lu)
+        PFName(Ip) = FNAme
         !
-        6600  FORMAT(&
-                /'               Current                         Save file'&
-                /'           ------------------              ------------------'&
-                /' name  :   ', A, A&
-                /' Re    :   ', F12.0, 20X, F12.0&
-                /' Mach  :   ', F12.4, 20X, F12.4&
-                /' Retyp :   ', I7, 25X, I7&
-                /' Matyp :   ', I7, 25X, I7&
-                /' NcritT:   ', F12.4, 20X, F12.4&
-                /' NcritB:   ', F12.4, 20X, F12.4&
-                /' xtr T :   ', F12.4, 20X, F12.4&
-                /' xtr B :   ', F12.4, 20X, F12.4)
+        call strip(NAMepol(Ip), nnamep)
         !
-        WRITE(*, *)
-        WRITE(*, *)&
-                'Current parameters different from old save file values.'
-        CALL ASKL&
-                ('Set current parameters to old save file values ?^', OK)
+        !---- check to see if the names are different
+        if (NNAme/=nnamep) then
+            namdif = .true.
+        else
+            namdif = .false.
+            do k = 1, NNAme
+                if (NAMe(k:k)/=NAMepol(Ip)(k:k)) namdif = .true.
+            enddo
+        endif
         !
-        IF(OK) THEN
-            NAME = NAMEPOL(IP)
-            NNAME = NNAMEP
-            REINF1 = REYNP1(IP)
-            MINF1 = MACHP1(IP)
-            RETYP = IRETYP(IP)
-            MATYP = IMATYP(IP)
-            ACRIT(1) = ACRITP(1, IP)
-            ACRIT(2) = ACRITP(2, IP)
-            XSTRIP(1) = XSTRIPP(1, IP)
-            XSTRIP(2) = XSTRIPP(2, IP)
-        ELSE
-            WRITE(*, *)
-            WRITE(*, *) 'Old polar save file NOT available for appending'
-            RETURN
-        ENDIF
-    ENDIF
-    !
-    !---- display polar save file just read in
-    WRITE(*, *)
-    WRITE(*, *) 'Old polar save file read in ...'
-    CALL POLWRIT(6, ' ', ERROR, .TRUE., &
-            NAX, 1, NAPOL(IP), CPOL(1, 1, IP), IPOL, NIPOL, &
-            REYNP1(IP), MACHP1(IP), ACRITP(1, IP), XSTRIPP(1, IP), &
-            PTRATP(IP), ETAPP(IP), &
-            NAMEPOL(IP), IRETYP(IP), IMATYP(IP), &
-            ISX, 1, CPOLSD(1, 1, 1, IP), JPOL, NJPOL, &
-            CODEPOL(IP), VERSPOL(IP), .FALSE.)
-    !
-    !---- enable writing to the save file
-    LPFILE = .TRUE.
-    WRITE(*, *)
-    WRITE(*, *) 'Old polar save file available for appending'
-    RETURN
+        !---- check if the polar save file is for the same airfoil and conditions
+        if (namdif .or. REYnp1(Ip)/=REInf1 .or. MAChp1(Ip)/=MINf1 .or. &
+                & IREtyp(Ip)/=RETyp .or. IMAtyp(Ip)/=MATyp .or. &
+                & ACRitp(1, Ip)/=ACRit(1) .or. ACRitp(2, Ip)/=ACRit(2) .or.&
+                & XSTripp(1, Ip)/=XSTrip(1) .or. XSTripp(2, Ip)/=XSTrip(2))&
+                & then
+            !
+            write (*, 99001) NAMe, NAMepol(Ip), REInf1, REYnp1(Ip), MINf1, MAChp1(Ip), RETyp, IREtyp(Ip), MATyp, &
+                    & IMAtyp(Ip), ACRit(1), ACRitp(1, Ip), ACRit(2), ACRitp(2, Ip), XSTrip(1), XSTripp(1, Ip), &
+                    & XSTrip(2), XSTripp(2, Ip)
+            !
+            99001  format (&
+                    /'               Current                         Save file'&
+                    /'           ------------------              ------------------'&
+                    /' name  :   ', A, A&
+                    /' Re    :   ', F12.0, 20X, F12.0&
+                    /' Mach  :   ', F12.4, 20X, F12.4&
+                    /' Retyp :   ', I7, 25X, I7&
+                    /' Matyp :   ', I7, 25X, I7&
+                    /' NcritT:   ', F12.4, 20X, F12.4&
+                    /' NcritB:   ', F12.4, 20X, F12.4&
+                    /' xtr T :   ', F12.4, 20X, F12.4&
+                    /' xtr B :   ', F12.4, 20X, F12.4)
+            !
+            write (*, *)
+            write (*, *) 'Current parameters different from old save file values.'
+            call askl('Set current parameters to old save file values ?^', OK)
+            !
+            if (OK) then
+                NAMe = NAMepol(Ip)
+                NNAme = nnamep
+                REInf1 = REYnp1(Ip)
+                MINf1 = MAChp1(Ip)
+                RETyp = IREtyp(Ip)
+                MATyp = IMAtyp(Ip)
+                ACRit(1) = ACRitp(1, Ip)
+                ACRit(2) = ACRitp(2, Ip)
+                XSTrip(1) = XSTripp(1, Ip)
+                XSTrip(2) = XSTripp(2, Ip)
+            else
+                write (*, *)
+                write (*, *) 'Old polar save file NOT available for appending'
+                return
+            endif
+        endif
+        !
+        !---- display polar save file just read in
+        write (*, *)
+        write (*, *) 'Old polar save file read in ...'
+        call polwrit(6, ' ', error, .true., NAX, 1, NAPol(Ip), &
+                CPOl(1, 1, Ip), IPOl, NIPol, REYnp1(Ip), MAChp1(Ip), ACRitp(1, Ip), &
+                & XSTripp(1, Ip), PTRatp(Ip), ETApp(Ip), &
+                NAMepol(Ip), IREtyp(Ip), IMAtyp(Ip), ISX, 1, CPOlsd(1, 1, 1, Ip), JPOl, NJPol, &
+                & CODepol(Ip), VERspol(Ip), .false.)
+        !
+        !---- enable writing to the save file
+        LPFile = .true.
+        write (*, *)
+        write (*, *) 'Old polar save file available for appending'
+        return
+    endif
     !
     !
     !---- the polar save file doesn't exist, so write new header
-    60 CONTINUE
-    NIPOL = NIPOL0
-    IF(LCMINP) THEN
-        NIPOL = NIPOL + 1
-        IPOL(NIPOL) = IMC
-    ENDIF
-    IF(LHMOMP) THEN
-        NIPOL = NIPOL + 1
-        IPOL(NIPOL) = ICH
-    ENDIF
+    100  NIPol = NIPol0
+    if (LCMinp) then
+        NIPol = NIPol + 1
+        IPOl(NIPol) = IMC
+    endif
+    if (LHMomp) then
+        NIPol = NIPol + 1
+        IPOl(NIPol) = ICH
+    endif
     !
-    OPEN(LU, FILE = FNAME, STATUS = 'NEW', ERR = 80)
-    IA1 = 0
-    IA2 = -1
-    CALL POLWRIT(LU, ' ', ERROR, .TRUE., &
-            NAX, IA1, IA2, CPOL(1, 1, IP), IPOL, NIPOL, &
-            REYNP1(IP), MACHP1(IP), ACRITP(1, IP), XSTRIPP(1, IP), &
-            PTRATP(IP), ETAPP(IP), &
-            NAMEPOL(IP), IRETYP(IP), IMATYP(IP), &
-            ISX, 1, CPOLSD(1, 1, 1, IP), JPOL, NJPOL, &
-            'XFOIL', VERSION, .FALSE.)
-    CLOSE(LU)
-    PFNAME(IP) = FNAME
+    open (Lu, file = FNAme, status = 'NEW', err = 200)
+    ia1 = 0
+    ia2 = -1
+    call polwrit(Lu, ' ', error, .true., NAX, ia1, ia2, &
+            CPOl(1, 1, Ip), IPOl, NIPol, REYnp1(Ip), MAChp1(Ip), ACRitp(1, Ip), XSTripp(1, Ip), &
+            & PTRatp(Ip), ETApp(Ip), &
+            NAMepol(Ip), IREtyp(Ip), IMAtyp(Ip), ISX, 1, CPOlsd(1, 1, 1, Ip), JPOl, NJPol, 'XFOIL', VERsion, &
+            & .false.)
+    close (Lu)
+    PFName(Ip) = FNAme
     !
-    NIPOL = NIPOL0
+    NIPol = NIPol0
     !
     !---- enable writing to the save file
-    LPFILE = .TRUE.
-    WRITE(*, *)
-    WRITE(*, *) 'New polar save file available'
-    RETURN
+    LPFile = .true.
+    write (*, *)
+    write (*, *) 'New polar save file available'
+    return
     !
     !---- the polar save file doesn't exist, so write new header
-    80 WRITE(*, *) 'New polar save file OPEN error'
-    RETURN
-    !
-    !---- READ error trap
-    90 WRITE(*, *) 'Old polar save file READ error'
-    CLOSE(LU)
-    RETURN
+    200  write (*, *) 'New polar save file OPEN error'
     !
     !..........................................
-END
+99999 end subroutine plrini
+!*==PLXINI.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! PLRINI
 
 
 
-SUBROUTINE PLXINI(LU, IP)
+subroutine plxini(Lu, Ip)
+    use i_xfoil
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    integer :: Ip, Lu
+    intent (in) Ip, Lu
+    !
+    ! Local variables
+    !
+    real, dimension(ISX) :: acritx
+    real :: dummy, machx, reynx
+    integer :: i, iibx, iix, ilex, itex, k, matypx, nfn, nnamex, npf, retypx
+    logical :: namdif
+    character(32) :: namex
+    character(128) :: prompt
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !--------------------------------------------------------------
     !     Checks or initializes a polar dump file.
     !
-    !     If file PFNAMX(IP) exists, it is checked for consistency 
+    !     If file PFNAMX(IP) exists, it is checked for consistency
     !        with current parameters.  Polar dumping is enabled
     !        only if file parameters match current parameters.
     !
-    !     If file PFNAMX(IP) doesn't exist, a new one is set up by 
+    !     If file PFNAMX(IP) doesn't exist, a new one is set up by
     !        writing a header to it, and polar dumping is enabled.
     !--------------------------------------------------------------
-    use i_xfoil
-    CHARACTER*128 PROMPT
     !
-    CHARACTER*32 NAMEX
-    REAL MACHX
-    REAL ACRITX(ISX)
-    INTEGER RETYPX, MATYPX
-    LOGICAL NAMDIF
     !
-    CALL STRIP(PFNAMX(IP), NPF)
-    IF(NPF.EQ.0) THEN
-        PROMPT = 'Enter  polar dump filename'&
-                // '  OR  <return> for no file^'
-    ELSE
-        WRITE(*, *) 'Default polar dump filename:  ', PFNAMX(IP)(1:NPF)
-        PROMPT = 'Enter  new filename'&
-                // '  OR  "none"'&
-                // '  OR  <return> for default^'
-    ENDIF
+    call strip(PFNamx(Ip), npf)
+    if (npf==0) then
+        prompt = 'Enter  polar dump filename' // '  OR  <return> for no file^'
+    else
+        write (*, *) 'Default polar dump filename:  ', PFNamx(Ip)(1:npf)
+        prompt = 'Enter  new filename' // '  OR  "none"' // '  OR  <return> for default^'
+    endif
     !
-    CALL ASKS(PROMPT, FNAME)
-    CALL STRIP(FNAME, NFN)
+    call asks(prompt, FNAme)
+    call strip(FNAme, nfn)
     !
-    IF(INDEX('NONEnone', FNAME(1:4)).NE.0) NFN = 0
+    if (index('NONEnone', FNAme(1:4))/=0) nfn = 0
     !
-    IF(NFN.EQ.0) THEN
-        LPFILX = .FALSE.
-        WRITE(*, *)
-        WRITE(*, *) 'Polar dump file will NOT be written'
-        RETURN
-    ENDIF
+    if (nfn==0) then
+        LPFilx = .false.
+        write (*, *)
+        write (*, *) 'Polar dump file will NOT be written'
+        return
+    endif
     !
     !---- no valid dump file yet
-    LPFILX = .FALSE.
+    LPFilx = .false.
     !
     !---- try reading the unformatted polar dump file to see if it exists
-    OPEN(LU, FILE = FNAME, &
-            STATUS = 'UNKNOWN', FORM = 'UNFORMATTED', ERR = 80)
-    READ(LU, ERR = 90, END = 60) NAMEX
+    open (Lu, file = FNAme, status = 'UNKNOWN', form = 'UNFORMATTED', err = 300)
+    read (Lu, err = 400, end = 200) namex
     !
     !---- if we got to here, it exists, so read the header
-    READ(LU) MACHX, REYNX, ACRITX(1), ACRITX(2)
-    READ(LU) MATYPX, RETYPX
-    READ(LU) IIX, ILEX, ITEX, IIBX
+    read (Lu) machx, reynx, acritx(1), acritx(2)
+    read (Lu) matypx, retypx
+    read (Lu) iix, ilex, itex, iibx
     !
-    REYNX = REYNX * 1.0E6
+    reynx = reynx * 1.0E6
+    do
+        !
+        !---- set polar dump file pointer at the end
+        read (Lu, end = 100) dummy
+    enddo
     !
-    !---- set polar dump file pointer at the end
-    45 READ(LU, END = 46) DUMMY
-    GO TO 45
+    100  close (Lu)
+    PFNamx(Ip) = FNAme
     !
-    46 CLOSE(LU)
-    PFNAMX(IP) = FNAME
-    !
-    CALL STRIP(NAMEX, NNAMEX)
+    call strip(namex, nnamex)
     !
     !---- check to see if the names are different
-    IF(NNAME .NE. NNAMEX) THEN
-        NAMDIF = .TRUE.
-    ELSE
-        NAMDIF = .FALSE.
-        DO 50 K = 1, NNAME
-            IF(NAME(K:K).NE.NAMEX(K:K)) NAMDIF = .TRUE.
-        50   CONTINUE
-    ENDIF
+    if (NNAme/=nnamex) then
+        namdif = .true.
+    else
+        namdif = .false.
+        do k = 1, NNAme
+            if (NAMe(k:k)/=namex(k:k)) namdif = .true.
+        enddo
+    endif
     !
     !---- check if the polar save file is for the same airfoil and conditions
-    IF(NAMDIF               .OR.&
-            REYNX  .NE. REINF1   .OR.&
-            MACHX  .NE. MINF1    .OR.&
-            RETYPX .NE. RETYP    .OR.&
-            MATYPX .NE. MATYP    .OR.&
-            ACRITX(1) .NE. ACRIT(1) .OR.&
-            ACRITX(2) .NE. ACRIT(2)) THEN
+    if (namdif .or. reynx/=REInf1 .or. machx/=MINf1 .or. retypx/=RETyp .or. matypx/=MATyp .or. acritx(1)/=ACRit(1) .or.&
+            & acritx(2)/=ACRit(2)) then
         !
-        WRITE(*, 6600) NAMEX, NAME, &
-                REYNX, REINF1, &
-                MACHX, MINF1, &
-                RETYPX, RETYP, &
-                MATYPX, MATYP, &
-                ACRITX(1), ACRIT(1), &
-                ACRITX(1), ACRIT(2)
+        write (*, 99001) namex, NAMe, reynx, REInf1, machx, MINf1, retypx, RETyp, matypx, MATyp, acritx(1), &
+                & ACRit(1), acritx(1), ACRit(2)
         !
-        6600  FORMAT(&
+        99001 format (&
                 /'               Dump file                       Current'&
                 /'             ------------                    ------------'&
                 /' name  :   ', A, A&
@@ -484,488 +552,738 @@ SUBROUTINE PLXINI(LU, IP)
                 /' NcritT:   ', F12.4, 20X, F12.4&
                 /' NcritB:   ', F12.4, 20X, F12.4)
         !
-        WRITE(*, *)
-        WRITE(*, *)&
-                'Current parameters different from old dump file values.'
-        CALL ASKL&
-                ('Set current parameters to old dump file values ?^', OK)
+        write (*, *)
+        write (*, *) 'Current parameters different from old dump file values.'
+        call askl('Set current parameters to old dump file values ?^', OK)
         !
-        IF(OK) THEN
-            NAME = NAMEX
-            NNAME = NNAMEX
-            MINF1 = MACHX
-            REINF1 = REYNX
-            RETYP = RETYPX
-            MATYP = MATYPX
-            ACRIT(1) = ACRITX(1)
-            ACRIT(2) = ACRITX(2)
-        ELSE
-            WRITE(*, *)
-            WRITE(*, *) 'Old polar dump file NOT available for appending'
-            RETURN
-        ENDIF
-    ENDIF
+        if (OK) then
+            NAMe = namex
+            NNAme = nnamex
+            MINf1 = machx
+            REInf1 = reynx
+            RETyp = retypx
+            MATyp = matypx
+            ACRit(1) = acritx(1)
+            ACRit(2) = acritx(2)
+        else
+            write (*, *)
+            write (*, *) 'Old polar dump file NOT available for appending'
+            return
+        endif
+    endif
     !
     !---- enable writing to the save file
-    LPFILX = .TRUE.
-    WRITE(*, *)
-    WRITE(*, *) 'Old polar dump file available for appending'
-    RETURN
+    LPFilx = .true.
+    write (*, *)
+    write (*, *) 'Old polar dump file available for appending'
+    return
     !
     !
     !---- the polar dump file doesn't exist, so write new header
-    60 CONTINUE
-    WRITE(LU) NAME, 'XFOIL   ', VERSION
-    WRITE(LU) MINF1, REINF1 / 1.0E6, ACRIT(1), ACRIT(2)
-    WRITE(LU) MATYP, RETYP
-    WRITE(LU) 0, 0, 0, N
-    WRITE(LU) (X(I), Y(I), I = 1, N)
+    200  write (Lu) NAMe, 'XFOIL   ', VERsion
+    write (Lu) MINf1, REInf1 / 1.0E6, ACRit(1), ACRit(2)
+    write (Lu) MATyp, RETyp
+    write (Lu) 0, 0, 0, N
+    write (Lu) (X(i), Y(i), i = 1, N)
     !
     !
-    CLOSE(LU)
-    PFNAMX(IP) = FNAME
+    close (Lu)
+    PFNamx(Ip) = FNAme
     !
     !---- enable writing to the save file
-    LPFILX = .TRUE.
-    WRITE(*, *)
-    WRITE(*, *) 'New polar dump file available'
-    RETURN
+    LPFilx = .true.
+    write (*, *)
+    write (*, *) 'New polar dump file available'
+    return
     !
     !---- OPEN error trap
-    80 WRITE(*, 1080) FNAME
-    RETURN
+    300  write (*, 99002) FNAme
+    !..........................................
+    99002 format (' OPEN error on polar dump file ', a48)
+    return
     !
     !---- READ error trap
-    90 WRITE(*, *) 'Polar dump file READ error'
-    CLOSE(LU)
-    RETURN
-    !..........................................
-    1080 FORMAT(' OPEN error on polar dump file ', A48)
-END
+    400  write (*, *) 'Polar dump file READ error'
+    close (Lu)
+end subroutine plxini
+!*==PLRADD.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! PLXINI
 
 
 
-SUBROUTINE PLRADD(LU, IP)
+subroutine plradd(Lu, Ip)
     use i_xfoil
-    LOGICAL ERROR
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    integer :: Ip, Lu
+    intent (in) Ip
+    !
+    ! Local variables
+    !
+    real :: cdtot, cdv, re, xoct
+    logical :: error
+    integer :: ia, is
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !
     !c      WRITE(*,1000) CL, CD, CM
     !c 1000 FORMAT(/' CL =', F7.3, '    Cd =', F9.5, '    Cm =', F8.4)
     !
     !---- add point to storage arrays
-    IF(IP.EQ.0) THEN
-        WRITE(*, *) 'No active polar is declared. Point not stored.'
+    if (Ip==0) then
+        write (*, *) 'No active polar is declared. Point not stored.'
         !
-    ELSE
-        IF(NAPOL(IP).EQ.NAX) THEN
-            WRITE(*, *) 'Polar storage arrays full. Point not stored'
-            !
-        ELSE
-            NAPOL(IP) = NAPOL(IP) + 1
-            !
-            !------ store current point
-            IF(LVISC) THEN
-                CDTOT = CD
-                CDV = CD
-                RE = REINF
-            ELSE
-                CDTOT = 0.
-                CDV = 0.
-                RE = 0.
-            ENDIF
-            !
-            IA = NAPOL(IP)
-            CPOL(IA, IAL, IP) = ADEG
-            CPOL(IA, ICL, IP) = CL
-            CPOL(IA, ICD, IP) = CDTOT
-            CPOL(IA, ICM, IP) = CM
-            CPOL(IA, ICP, IP) = CDP
-            CPOL(IA, ICV, IP) = CDV
-            CPOL(IA, IMA, IP) = MINF
-            CPOL(IA, IRE, IP) = RE
-            DO IS = 1, 2
-                IF(LVISC) THEN
-                    XOCT = XOCTR(IS)
-                ELSE
-                    XOCT = 0.
-                ENDIF
-                CPOLSD(IA, IS, JNC, IP) = ACRIT(IS)
-                CPOLSD(IA, IS, JTP, IP) = XSTRIP(IS)
-                CPOLSD(IA, IS, JTN, IP) = XOCT
-                CPOLSD(IA, IS, JTI, IP) = TINDEX(IS)
-            ENDDO
-            !
-            IF(LFLAP) THEN
-                CALL MHINGE
-                CPOL(IA, ICH, IP) = HMOM
-            ELSE
-                CPOL(IA, ICH, IP) = 0.
-            ENDIF
-            CPOL(IA, IMC, IP) = CPMN
-            !
-            WRITE(*, 1100) IP
-            1100   FORMAT(/' Point added to stored polar', I3)
-        ENDIF
-    ENDIF
+    elseif (NAPol(Ip)==NAX) then
+        write (*, *) 'Polar storage arrays full. Point not stored'
+        !
+    else
+        NAPol(Ip) = NAPol(Ip) + 1
+        !
+        !------ store current point
+        if (LVIsc) then
+            cdtot = CD
+            cdv = CD
+            re = REInf
+        else
+            cdtot = 0.
+            cdv = 0.
+            re = 0.
+        endif
+        !
+        ia = NAPol(Ip)
+        CPOl(ia, IAL, Ip) = ADEg
+        CPOl(ia, ICL, Ip) = CL
+        CPOl(ia, ICD, Ip) = cdtot
+        CPOl(ia, ICM, Ip) = CM
+        CPOl(ia, ICP, Ip) = CDP
+        CPOl(ia, ICV, Ip) = cdv
+        CPOl(ia, IMA, Ip) = MINf
+        CPOl(ia, IRE, Ip) = re
+        do is = 1, 2
+            if (LVIsc) then
+                xoct = XOCtr(is)
+            else
+                xoct = 0.
+            endif
+            CPOlsd(ia, is, JNC, Ip) = ACRit(is)
+            CPOlsd(ia, is, JTP, Ip) = XSTrip(is)
+            CPOlsd(ia, is, JTN, Ip) = xoct
+            CPOlsd(ia, is, JTI, Ip) = TINdex(is)
+        enddo
+        !
+        if (LFLap) then
+            call mhinge
+            CPOl(ia, ICH, Ip) = HMOm
+        else
+            CPOl(ia, ICH, Ip) = 0.
+        endif
+        CPOl(ia, IMC, Ip) = CPMn
+        !
+        write (*, 99001) Ip
+        99001 format (/' Point added to stored polar', i3)
+    endif
     !
     !---- add point to save file
-    IF(LPFILE) THEN
-        NIPOL = NIPOL0
-        IF(LCMINP) THEN
-            NIPOL = NIPOL + 1
-            IPOL(NIPOL) = IMC
-        ENDIF
-        IF(LHMOMP) THEN
-            NIPOL = NIPOL + 1
-            IPOL(NIPOL) = ICH
-        ENDIF
+    if (LPFile) then
+        NIPol = NIPol0
+        if (LCMinp) then
+            NIPol = NIPol + 1
+            IPOl(NIPol) = IMC
+        endif
+        if (LHMomp) then
+            NIPol = NIPol + 1
+            IPOl(NIPol) = ICH
+        endif
         !
-        OPEN(LU, FILE = PFNAME(IP), STATUS = 'OLD')
-        CALL BOTTOM(LU)
-        IA = NAPOL(IP)
-        CALL POLWRIT(LU, ' ', ERROR, .FALSE., &
-                NAX, IA, IA, CPOL(1, 1, IP), IPOL, NIPOL, &
-                REYNP1(IP), MACHP1(IP), ACRITP(1, IP), XSTRIPP(1, IP), &
-                PTRATP(IP), ETAPP(IP), &
-                NAMEPOL(IP), IRETYP(IP), IMATYP(IP), &
-                ISX, 1, CPOLSD(1, 1, 1, IP), JPOL, NJPOL, &
-                'XFOIL', VERSION, .FALSE.)
-        CLOSE(LU)
-        NIPOL = NIPOL0
-        WRITE(*, 1200) PFNAME(IP)
-        1200  FORMAT(' Point written to save file  ', A48)
-    ELSE
-        WRITE(*, 1300)
-        1300  FORMAT(' Save file unspecified or not available')
-    ENDIF
+        open (Lu, file = PFName(Ip), status = 'OLD')
+        call bottom(Lu)
+        ia = NAPol(Ip)
+        call polwrit(Lu, ' ', error, .false., NAX, ia, ia, &
+                CPOl(1, 1, Ip), IPOl, NIPol, REYnp1(Ip), MAChp1(Ip), ACRitp(1, Ip), XSTripp(1, Ip), &
+                & PTRatp(Ip), ETApp(Ip), &
+                NAMepol(Ip), IREtyp(Ip), IMAtyp(Ip), ISX, 1, CPOlsd(1, 1, 1, Ip), JPOl, NJPol, 'XFOIL', &
+                & VERsion, .false.)
+        close (Lu)
+        NIPol = NIPol0
+        write (*, 99002) PFName(Ip)
+        99002 format (' Point written to save file  ', a48)
+    else
+        write (*, 99003)
+        99003 format (' Save file unspecified or not available')
+    endif
     !
     !ccC---- sort polar in increasing alpha
     !cc      IDSORT = IAL
     !cc      CALL PLRSRT(IP,IDSORT)
     !
-    RETURN
-END
+end subroutine plradd
+!*==PLXADD.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! PLRADD
 
 
-SUBROUTINE PLXADD(LU, IP)
+subroutine plxadd(Lu, Ip)
     use m_spline
     use i_xfoil
-    INTEGER NSIDE(2)
+    implicit none
     !
-    DIMENSION XX(IVX, 2), CP(IVX, 2), CF(IVX, 2)
+    !*** Start of declarations rewritten by SPAG
     !
-    IF(.NOT.LPFILX) THEN
-        WRITE(*, 1050)
-        1050  FORMAT(' Dump file unspecified or not available')
-        RETURN
-    ENDIF
+    ! Dummy arguments
     !
-    BETA = SQRT(1.0 - MINF**2)
-    BFAC = 0.5 * MINF**2 / (1.0 + BETA)
+    integer :: Ip, Lu
+    intent (in) Ip
     !
-    OPEN(LU, FILE = PFNAMX(IP), STATUS = 'OLD', FORM = 'UNFORMATTED')
-    CALL BOTTOMX(LU)
+    ! Local variables
+    !
+    real :: beta, bfac, cdtot, que, xt1, xt2
+    real, dimension(IVX, 2) :: cf, cp, xx
+    integer :: i, ibl, is
+    integer, dimension(2) :: nside
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !
+    if (.not.LPFilx) then
+        write (*, 99001)
+        99001 format (' Dump file unspecified or not available')
+        return
+    endif
+    !
+    beta = sqrt(1.0 - MINf**2)
+    bfac = 0.5 * MINf**2 / (1.0 + beta)
+    !
+    open (Lu, file = PFNamx(Ip), status = 'OLD', form = 'UNFORMATTED')
+    call bottomx(Lu)
     !
     !---- write integrated forces to unformatted dump file
-    IF(LVISC) THEN
-        CDTOT = CD
-        XT1 = XOCTR(1)
-        XT2 = XOCTR(2)
-    ELSE
-        CDTOT = 0.
-        XT1 = 0.
-        XT2 = 0.
-    ENDIF
-    WRITE(LU) ALFA / DTOR, CL, CDTOT, 0.0, CM, XT1, XT2
+    if (LVIsc) then
+        cdtot = CD
+        xt1 = XOCtr(1)
+        xt2 = XOCtr(2)
+    else
+        cdtot = 0.
+        xt1 = 0.
+        xt2 = 0.
+    endif
+    write (Lu) ALFa / DTOr, CL, cdtot, 0.0, CM, xt1, xt2
     !
-    NSIDE(1) = IBLTE(1) + (NBL(2) - IBLTE(2))
-    NSIDE(2) = NBL(2)
+    nside(1) = IBLte(1) + (NBL(2) - IBLte(2))
+    nside(2) = NBL(2)
     !
-    NSIDE(1) = MAX(NSIDE(1), 2)
-    NSIDE(2) = MAX(NSIDE(2), 2)
+    nside(1) = max(nside(1), 2)
+    nside(2) = max(nside(2), 2)
     !
     !---- write indexing info
-    WRITE(LU) NSIDE(1), NSIDE(2), IBLTE(1), IBLTE(2)
+    write (Lu) nside(1), nside(2), IBLte(1), IBLte(2)
     !
-    QUE = 0.5 * QINF**2
+    que = 0.5 * QINf**2
     !
     !---- set stagnation point quantities
-    IBL = 1
-    XX(IBL, 1) = SEVAL(SST, X, XP, S, N)
-    CP(IBL, 1) = 1.0 / (BETA + BFAC)
-    CF(IBL, 1) = 0.0
-    THET(IBL, 1) = 0.5 * (THET(2, 1) + THET(2, 2))
-    DSTR(IBL, 1) = 0.5 * (DSTR(2, 1) + DSTR(2, 2))
-    CTAU(IBL, 1) = 0.0
+    ibl = 1
+    xx(ibl, 1) = seval(SST, X, XP, S, N)
+    cp(ibl, 1) = 1.0 / (beta + bfac)
+    cf(ibl, 1) = 0.0
+    THEt(ibl, 1) = 0.5 * (THEt(2, 1) + THEt(2, 2))
+    DSTr(ibl, 1) = 0.5 * (DSTr(2, 1) + DSTr(2, 2))
+    CTAu(ibl, 1) = 0.0
     !
-    XX(IBL, 2) = XX(IBL, 1)
-    CP(IBL, 2) = CP(IBL, 1)
-    CF(IBL, 2) = CF(IBL, 1)
-    THET(IBL, 2) = THET(IBL, 1)
-    DSTR(IBL, 2) = DSTR(IBL, 1)
-    CTAU(IBL, 2) = CTAU(IBL, 1)
+    xx(ibl, 2) = xx(ibl, 1)
+    cp(ibl, 2) = cp(ibl, 1)
+    cf(ibl, 2) = cf(ibl, 1)
+    THEt(ibl, 2) = THEt(ibl, 1)
+    DSTr(ibl, 2) = DSTr(ibl, 1)
+    CTAu(ibl, 2) = CTAu(ibl, 1)
     !
     !---- set BL and wake quantities
-    DO 10 IS = 1, 2
-        DO IBL = 2, NSIDE(IS)
-            I = IPAN(IBL, IS)
-            XX(IBL, IS) = X(I)
-            CP(IBL, IS) = CPV(I)
-            CF(IBL, IS) = TAU(IBL, IS) / QUE
-        ENDDO
-    10 CONTINUE
+    do is = 1, 2
+        do ibl = 2, nside(is)
+            i = IPAn(ibl, is)
+            xx(ibl, is) = X(i)
+            cp(ibl, is) = CPV(i)
+            cf(ibl, is) = TAU(ibl, is) / que
+        enddo
+    enddo
     !
-    DO IS = 1, 2
-        WRITE(LU) (XX(IBL, IS), CP(IBL, IS), THET(IBL, IS), DSTR(IBL, IS), &
-                CF(IBL, IS), CTAU(IBL, IS), IBL = 1, NSIDE(IS))
-    ENDDO
+    do is = 1, 2
+        write (Lu) (xx(ibl, is), cp(ibl, is), THEt(ibl, is),&
+                DSTr(ibl, is), cf(ibl, is), CTAu(ibl, is), ibl = 1, nside(is))
+    enddo
     !
-    CLOSE(LU)
-    WRITE(*, 1100) PFNAMX(IP)
-    1100 FORMAT(' Point written to dump file ', A48)
-    RETURN
+    close (Lu)
+    write (*, 99002) PFNamx(Ip)
+    99002 format (' Point written to dump file ', a48)
     !
-END
+end subroutine plxadd
+!*==PLRSRT.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! PLXADD
 
 
 
-SUBROUTINE PLRSRT(IP, IDSORT)
+subroutine plrsrt(Ip, Idsort)
     use i_xfoil
-    DIMENSION INDX(NAX), ATMP(NAX)
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    integer :: Idsort, Ip
+    intent (in) Idsort, Ip
+    !
+    ! Local variables
+    !
+    real, dimension(NAX) :: atmp
+    integer :: id, is
+    integer, dimension(NAX) :: indx
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !
     !---- sort polar in increasing variable IDSORT
-    CALL HSORT(NAPOL(IP), CPOL(1, IDSORT, IP), INDX)
+    call hsort(NAPol(Ip), CPOl(1, Idsort, Ip), indx)
     !
     !---- do the actual reordering
-    DO ID = 1, IPTOT
-        CALL ASORT(NAPOL(IP), CPOL(1, ID, IP), INDX, ATMP)
-    ENDDO
-    DO ID = 1, JPTOT
-        DO IS = 1, 2
-            CALL ASORT(NAPOL(IP), CPOLSD(1, IS, ID, IP), INDX, ATMP)
-        ENDDO
-    ENDDO
+    do id = 1, IPTOT
+        call asort(NAPol(Ip), CPOl(1, id, Ip), indx, atmp)
+    enddo
+    do id = 1, JPTOT
+        do is = 1, 2
+            call asort(NAPol(Ip), CPOlsd(1, is, id, Ip), indx, atmp)
+        enddo
+    enddo
     !
-    RETURN
-END
+end subroutine plrsrt
+!*==PLRSUM.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! PLRSRT
 
 
 
-SUBROUTINE PLRSUM(IP1, IP2, IPACTT)
+subroutine plrsum(Ip1, Ip2, Ipactt)
+    use i_xfoil
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    integer :: Ip1, Ip2, Ipactt
+    intent (in) Ip1, Ip2, Ipactt
+    !
+    ! Local variables
+    !
+    character(1) :: cacc, cfil
+    character(5), dimension(3), save :: cltyp
+    integer :: iexp, imat, ip, iret, npf
+    real :: rman
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !---------------------------------------------
     !     Prints summary of polars IP1..IP2
     !---------------------------------------------
-    use i_xfoil
-    CHARACTER*5 CLTYP(3)
-    CHARACTER*1 CACC, CFIL
     !
-    DATA CLTYP / '     ', '/sqCL', '/CL  ' /
-    !
-    1100 FORMAT(1X, A, A)
-    WRITE(*, *)
-    WRITE(*, 1100)&
-            '       airfoil                    Re           Mach     ', &
-            '  NcritT  NcritB  XtripT  XtripB       file'
-    WRITE(*, 1100)&
-            '      ------------------------  ------------  ----------', &
-            '  ------  ------  ------  ------    -------------------'
+    data cltyp/'     ', '/sqCL', '/CL  '/
+    write (*, *)
+    write (*, 99002) '       airfoil                    Re           Mach     ', &
+            &'  NcritT  NcritB  XtripT  XtripB       file'
+    write (*, 99002) '      ------------------------  ------------  ----------', &
+            &'  ------  ------  ------  ------    -------------------'
     !CC     >  10  NACA 0012 (mod)           1.232e6/sqCL  0.781/sqCL
     !CC         9.00    9.00   1.000   1.000
     !CC     1234567890123456789012345678901234567890123456789012345678901234567890
     !
-    DO IP = IP1, IP2
-        IF(IP.EQ.IPACTT) THEN
-            CACC = '>'
-            IF(LPFILE) THEN
-                CFIL = '>'
-            ELSE
-                CFIL = ' '
-            ENDIF
-        ELSE
-            CACC = ' '
-            CFIL = ' '
-        ENDIF
+    do ip = Ip1, Ip2
+        if (ip==Ipactt) then
+            cacc = '>'
+            if (LPFile) then
+                cfil = '>'
+            else
+                cfil = ' '
+            endif
+        else
+            cacc = ' '
+            cfil = ' '
+        endif
         !
-        IRET = IRETYP(IP)
-        IMAT = IMATYP(IP)
+        iret = IREtyp(ip)
+        imat = IMAtyp(ip)
         !
-        IF(REYNP1(IP).GT.0.0) THEN
-            IEXP = INT(LOG10(REYNP1(IP)))
-            IEXP = MAX(MIN(IEXP, 9), 0)
-            RMAN = REYNP1(IP) / 10.0**IEXP
-        ELSE
-            RMAN = 0.0
-        ENDIF
+        if (REYnp1(ip)>0.0) then
+            iexp = int(log10(REYnp1(ip)))
+            iexp = max(min(iexp, 9), 0)
+            rman = REYnp1(ip) / 10.0**iexp
+        else
+            rman = 0.0
+        endif
         !
-        CALL STRIP(PFNAME(IP), NPF)
-        WRITE(*, 1200) CACC, IP, NAMEPOL(IP), &
-                RMAN, IEXP, CLTYP(IRET), MACHP1(IP), CLTYP(IMAT), &
-                ACRITP(1, IP), ACRITP(2, IP), &
-                XSTRIPP(1, IP), XSTRIPP(2, IP), &
-                CFIL, PFNAME(IP)(1:NPF)
-        1200   FORMAT(1X, A1, I3, 2X, A24, F7.3, 'e', I1, A5, F7.3, A5, &
-                2F8.2, 2F8.3, 2X, A1, 1X, A)
-    ENDDO
+        call strip(PFName(ip), npf)
+        write (*, 99001) cacc, ip, NAMepol(ip), rman, iexp, cltyp(iret), MAChp1(ip), cltyp(imat), ACRitp(1, ip), &
+                & ACRitp(2, ip), XSTripp(1, ip), XSTripp(2, ip), cfil, PFName(ip)(1:npf)
+        99001 format (1x, a1, i3, 2x, a24, f7.3, 'e', i1, a5, f7.3, a5, 2F8.2, 2F8.3, 2x, a1, 1x, a)
+    enddo
     !
-    RETURN
-END
+    99002 format (1x, a, a)
+    !
+end subroutine plrsum
+!*==PRFSUM.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! PLRSUM
 
 
 
-SUBROUTINE PRFSUM(IR1, IR2)
+subroutine prfsum(Ir1, Ir2)
+    use i_xfoil
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    integer :: Ir1, Ir2
+    intent (in) Ir1, Ir2
+    !
+    ! Local variables
+    !
+    integer :: ir
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !---------------------------------------------
     !     Prints summary of reference polars IR1..IR2
     !---------------------------------------------
-    use i_xfoil
-    !
-    1100 FORMAT(1X, A, A)
-    WRITE(*, *)
-    WRITE(*, 1100) '       reference polar                          '
-    WRITE(*, 1100) '      ------------------------------------------'
+    write (*, *)
+    write (*, 99002) '       reference polar                          '
+    write (*, 99002) '      ------------------------------------------'
     !CC                  123456789012345678901234567890123456789012345678
     !
-    DO IR = IR1, IR2
-        WRITE(*, 1200) IR, NAMEREF(IR)
-        1200   FORMAT(1X, 1X, I3, 2X, A48)
-    ENDDO
+    do ir = Ir1, Ir2
+        write (*, 99001) ir, NAMeref(ir)
+        99001 format (1x, 1x, i3, 2x, a48)
+    enddo
     !
-    RETURN
-END
+    99002 format (1x, a, a)
+    !
+end subroutine prfsum
+!*==PLRCOP.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! PRFSUM
 
 
 
-SUBROUTINE PLRCOP(IP1, IP2)
+subroutine plrcop(Ip1, Ip2)
+    use i_xfoil
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    integer :: Ip1, Ip2
+    intent (in) Ip1, Ip2
+    !
+    ! Local variables
+    !
+    integer :: i, ia, id
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !---------------------------------------------
     !     Copies polar in slot IP1 into slot IP2
     !---------------------------------------------
-    use i_xfoil
     !
-    NAMEPOL(IP2) = NAMEPOL(IP1)
-    CODEPOL(IP2) = CODEPOL(IP1)
-    VERSPOL(IP2) = VERSPOL(IP1)
-    PFNAME(IP2) = PFNAME(IP1)
-    PFNAMX(IP2) = PFNAMX(IP1)
+    NAMepol(Ip2) = NAMepol(Ip1)
+    CODepol(Ip2) = CODepol(Ip1)
+    VERspol(Ip2) = VERspol(Ip1)
+    PFName(Ip2) = PFName(Ip1)
+    PFNamx(Ip2) = PFNamx(Ip1)
     !
-    MACHP1(IP2) = MACHP1(IP1)
-    REYNP1(IP2) = REYNP1(IP1)
+    MAChp1(Ip2) = MAChp1(Ip1)
+    REYnp1(Ip2) = REYnp1(Ip1)
     !
-    IMATYP(IP2) = IMATYP(IP1)
-    IRETYP(IP2) = IRETYP(IP1)
+    IMAtyp(Ip2) = IMAtyp(Ip1)
+    IREtyp(Ip2) = IREtyp(Ip1)
 
-    ACRITP(1, IP2) = ACRITP(1, IP1)
-    ACRITP(2, IP2) = ACRITP(2, IP1)
+    ACRitp(1, Ip2) = ACRitp(1, Ip1)
+    ACRitp(2, Ip2) = ACRitp(2, Ip1)
     !
-    XSTRIPP(1, IP2) = XSTRIPP(1, IP1)
-    XSTRIPP(2, IP2) = XSTRIPP(2, IP1)
+    XSTripp(1, Ip2) = XSTripp(1, Ip1)
+    XSTripp(2, Ip2) = XSTripp(2, Ip1)
     !
-    NAPOL(IP2) = NAPOL(IP1)
-    DO IA = 1, NAPOL(IP2)
-        DO ID = 1, IPTOT
-            CPOL(IA, ID, IP2) = CPOL(IA, ID, IP1)
-        ENDDO
-        DO ID = 1, JPTOT
-            CPOLSD(IA, 1, ID, IP2) = CPOLSD(IA, 1, ID, IP1)
-            CPOLSD(IA, 2, ID, IP2) = CPOLSD(IA, 2, ID, IP1)
-        ENDDO
-    ENDDO
+    NAPol(Ip2) = NAPol(Ip1)
+    do ia = 1, NAPol(Ip2)
+        do id = 1, IPTOT
+            CPOl(ia, id, Ip2) = CPOl(ia, id, Ip1)
+        enddo
+        do id = 1, JPTOT
+            CPOlsd(ia, 1, id, Ip2) = CPOlsd(ia, 1, id, Ip1)
+            CPOlsd(ia, 2, id, Ip2) = CPOlsd(ia, 2, id, Ip1)
+        enddo
+    enddo
     !
-    NXYPOL(IP2) = NXYPOL(IP1)
-    DO I = 1, NXYPOL(IP1)
-        CPOLXY(I, 1, IP2) = CPOLXY(I, 1, IP1)
-        CPOLXY(I, 2, IP2) = CPOLXY(I, 2, IP1)
-    ENDDO
+    NXYpol(Ip2) = NXYpol(Ip1)
+    do i = 1, NXYpol(Ip1)
+        CPOlxy(i, 1, Ip2) = CPOlxy(i, 1, Ip1)
+        CPOlxy(i, 2, Ip2) = CPOlxy(i, 2, Ip1)
+    enddo
     !
-    RETURN
-END
+end subroutine plrcop
+!*==PRFCOP.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! PLRCOP
 
 
 
 
-SUBROUTINE PRFCOP(IR1, IR2)
+subroutine prfcop(Ir1, Ir2)
+    use i_xfoil
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    integer :: Ir1, Ir2
+    intent (in) Ir1, Ir2
+    !
+    ! Local variables
+    !
+    integer :: ia, is, k
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !---------------------------------------------
     !     Copies reference polar in slot IR1 into slot IR2
     !---------------------------------------------
-    use i_xfoil
     !
-    NAMEREF(IR2) = NAMEREF(IR1)
+    NAMeref(Ir2) = NAMeref(Ir1)
     !
-    DO K = 1, 4
-        NDREF(K, IR2) = NDREF(K, IR1)
-    ENDDO
+    do k = 1, 4
+        NDRef(k, Ir2) = NDRef(k, Ir1)
+    enddo
     !
-    DO IS = 1, 2
-        DO K = 1, 4
-            DO IA = 1, NDREF(K, IR2)
-                CPOLREF(IA, IS, K, IR2) = CPOLREF(IA, IS, K, IR1)
-            ENDDO
-        ENDDO
-    ENDDO
+    do is = 1, 2
+        do k = 1, 4
+            do ia = 1, NDRef(k, Ir2)
+                CPOlref(ia, is, k, Ir2) = CPOlref(ia, is, k, Ir1)
+            enddo
+        enddo
+    enddo
     !
-    RETURN
-END
+end subroutine prfcop
+!*==POLAXI.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! PRFCOP
 
 
-SUBROUTINE POLAXI(CPOLPLF, XCDWID, XALWID, XOCWID)
+subroutine polaxi(Cpolplf, Xcdwid, Xalwid, Xocwid)
+    use i_pindex
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    real :: Xalwid, Xcdwid, Xocwid
+    real, dimension(3, *) :: Cpolplf
+    !
+    ! Local variables
+    !
+    character(5), dimension(4), save :: cvar
+    logical :: error
+    integer :: j, kv
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !-------------------------------------------
     !     Gets polar plot axis limits from user
     !-------------------------------------------
-    use i_pindex
-    DIMENSION CPOLPLF(3, *)
     !
-    LOGICAL ERROR
-    CHARACTER*5 CVAR(4)
-    DATA CVAR / 'Alpha', '  CL ', '  CD ', ' -CM ' /
+    data cvar/'Alpha', '  CL ', '  CD ', ' -CM '/
     !
-    WRITE(*, *) 'Enter new axis annotations,', &
-            ' or <return> to leave unchanged...'
-    WRITE(*, *)
+    write (*, *) 'Enter new axis annotations,', ' or <return> to leave unchanged...'
+    write (*, *)
     !
-    DO KV = 1, 4
-        5      WRITE(*, 1200) CVAR(KV), (CPOLPLF(J, KV), J = 1, 3)
-        1200   FORMAT(3X, A, '  min, max, delta:', 3F11.5)
-        CALL READR(3, CPOLPLF(1, KV), ERROR)
-        IF(ERROR) THEN
-            WRITE(*, *) 'READ error.  Enter again.'
-            GO TO 5
-        ENDIF
-    ENDDO
+    do kv = 1, 4
+        do
+            write (*, 99001) cvar(kv), (Cpolplf(j, kv), j = 1, 3)
+            99001  format (3x, a, '  min, max, delta:', 3F11.5)
+            call readr(3, Cpolplf(1, kv), error)
+            if (error) then
+                write (*, *) 'READ error.  Enter again.'
+                cycle
+            endif
+            exit
+        enddo
+    enddo
     !
     !C---- widths of plot boxes in polar plot page
     !      XCDWID = 0.45
     !      XALWID = 0.25
     !      XOCWID = 0.20
     !
-    RETURN
-END
+end subroutine polaxi
+!*==BOTTOM.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! POLAXI
 
 
 
-SUBROUTINE BOTTOM(LU)
-    CHARACTER*1 DUMMY
+subroutine bottom(Lu)
+    implicit none
     !
-    10   READ(LU, 1000, END = 90, ERR = 90) DUMMY
-    1000 FORMAT(A)
-    GO TO 10
+    !*** Start of declarations rewritten by SPAG
     !
-    90   RETURN
-END
+    ! Dummy arguments
+    !
+    integer :: Lu
+    intent (in) Lu
+    !
+    ! Local variables
+    !
+    character(1) :: dummy
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    do
+        !
+        read (Lu, 99001, end = 99999, err = 99999) dummy
+        99001 format (a)
+    enddo
+    !
+99999 end subroutine bottom
+!*==BOTTOMX.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 
 
-SUBROUTINE BOTTOMX(LU)
-    CHARACTER*1 DUMMY
+subroutine bottomx(Lu)
+    implicit none
     !
-    10   READ(LU, END = 90, ERR = 90) DUMMY
-    GO TO 10
+    !*** Start of declarations rewritten by SPAG
     !
-    90   RETURN
-END
-
+    ! Dummy arguments
+    !
+    integer :: Lu
+    intent (in) Lu
+    !
+    ! Local variables
+    !
+    character(1) :: dummy
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    do
+        !
+        read (Lu, end = 99999, err = 99999) dummy
+    enddo
+    !
+99999 end subroutine bottomx

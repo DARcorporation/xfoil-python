@@ -1,8 +1,11 @@
+!*==XFOIL.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
+
+
 !***********************************************************************
 !    Module:  xfoil.f
-! 
-!    Copyright (C) 2000 Mark Drela 
-! 
+!
+!    Copyright (C) 2000 Mark Drela
+!
 !    This program is free software; you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
 !    the Free Software Foundation; either version 2 of the License, or
@@ -18,68 +21,312 @@
 !    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 !***********************************************************************
 !
-PROGRAM XFOIL
+program xfoil
+    use m_spline
+    use m_xqdes
+    use i_xfoil
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    real :: amax
+    real, save :: angtol
+    character(1) :: ans
+    character(4) :: comand
+    character(128) :: comarg
+    logical :: error
+    integer :: i, imax, itype, kdnew, lu, narg, nfn, ninput
+    integer, dimension(20) :: iinput
+    real, dimension(20) :: rinput
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !--- Uncomment for Win32/Compaq Visual Fortran compiler (needed for GETARG)
     !cc      USE DFLIB
     !
-    use m_spline
-    use i_xfoil
-    CHARACTER*4 COMAND
-    CHARACTER*128 COMARG, PROMPT
-    CHARACTER*1 ANS
     !
-    DIMENSION IINPUT(20)
-    DIMENSION RINPUT(20)
-    LOGICAL ERROR
     !
     !---- max panel angle threshold for warning
-    DATA ANGTOL / 40.0 /
+    data angtol/40.0/
     !
     !---- prepare BL pointers
-    CALL PREPTRS
+    call preptrs
     !
-    VERSION = 6.99
-    WRITE(*, 1005) VERSION
-    1005 FORMAT(&
-            /' ==================================================='&
-            /'  XFOIL Version', F5.2&
-            /'  Copyright (C) 2000   Mark Drela, Harold Youngren'&
-            //'  This software comes with ABSOLUTELY NO WARRANTY,'&
-            /'    subject to the GNU General Public License.'&
-            //'  Caveat computor'&
-            /' ===================================================')
+    VERsion = 6.99
+    write (*, 99001) VERsion
+    99001 format (/' ==================================================='/'  XFOIL Version', &
+            &f5.2/'  Copyright (C) 2000   Mark Drela, Harold Youngren'//                                               &
+            &'  This software comes with ABSOLUTELY NO WARRANTY,'/'    subject to the GNU General Public License.'//   &
+            &'  Caveat computor'/' ===================================================')
     !
-    CALL INIT
-    LU = 8
-    CALL GETDEF(LU, 'xfoil.def', .TRUE.)
+    call init
+    lu = 8
+    call getdef(lu, 'xfoil.def', .true.)
     !
     !---- try to read airfoil from command line argument, if any
-    FNAME = ' '
-    NARG = IARGC()
-    IF(NARG.GT.0) CALL GETARG(NARG, FNAME)
+    FNAme = ' '
+    narg = iargc()
+    if (narg>0) call getarg(narg, FNAme)
     !
-    IF(FNAME(1:1) .NE. ' ') THEN
-        CALL LOAD(FNAME, ITYPE)
+    if (FNAme(1:1)/=' ') then
+        call load(FNAme, itype)
         !
-        IF(ITYPE.GT.0 .AND. NB.GT.0) THEN
+        if (itype>0 .and. NB>0) then
             !cc     CALL PANGEN(.TRUE.)
-            CALL ABCOPY(.TRUE.)
+            call abcopy(.true.)
             !
-            CALL CANG(X, Y, N, 0, IMAX, AMAX)
-            IF(ABS(AMAX).GT.ANGTOL) THEN
-                WRITE(*, 1081) AMAX, IMAX
-                1081    FORMAT(&
-                        /' WARNING: Poor input coordinate distribution'&
-                        /'          Excessive panel angle', F7.1, '  at i =', I4&
-                        /'          Repaneling with PANE and/or PPAR suggested'&
-                        /'           (doing GDES,CADD before repaneling _may_'&
-                        /'            improve excessively coarse LE spacing')
-            ENDIF
-        ENDIF
-    ENDIF
+            call cang(X, Y, N, 0, imax, amax)
+            if (abs(amax)>angtol) write (*, 99007) amax, imax
+        endif
+    endif
     !
-    WRITE(*, 1100) XCMREF, YCMREF, NPAN
-    1100 FORMAT(&
+    write (*, 99008) XCMref, YCMref, NPAn
+    do
+        !
+        !---- start of menu loop
+        call askc(' XFOIL^', comand, comarg)
+        !
+        !---- get command line numeric arguments, if any
+        do i = 1, 20
+            iinput(i) = 0
+            rinput(i) = 0.0
+        enddo
+        ninput = 0
+        call getint(comarg, iinput, ninput, error)
+        ninput = 0
+        call getflt(comarg, rinput, ninput, error)
+        !
+        !===============================================
+        if (comand=='    ') then
+            !
+            !===============================================
+        elseif (comand=='?   ') then
+            write (*, 99008) XCMref, YCMref, NPAn
+            !
+            !===============================================
+        elseif (comand=='QUIT' .or. comand=='Q   ') then
+            stop
+            !
+            !===============================================
+        elseif (comand=='OPER') then
+            call oper
+            !
+            !===============================================
+        elseif (comand=='MDES') then
+            call mdes
+            !
+            !===============================================
+        elseif (comand=='QDES') then
+            call qdes
+            !
+            !===============================================
+        elseif (comand=='SAVE') then
+            call save(1, comarg)
+            !
+            !===============================================
+        elseif (comand=='PSAV') then
+            call save(0, comarg)
+            !
+            !===============================================
+        elseif (comand=='USAV') then
+            call save(-1, comarg)
+            !
+            !===============================================
+        elseif (comand=='ISAV') then
+            call save(2, comarg)
+            !
+            !===============================================
+        elseif (comand=='REVE') then
+            LCLock = .not.LCLock
+            if (LCLock) then
+                write (*, *) 'Airfoil will be written in clockwise order'
+            else
+                write (*, *) 'Airfoil will be written in counterclockwise order'
+            endif
+            !
+            !===============================================
+        elseif (comand=='DELI') then
+            do
+                if (ninput>=1) then
+                    kdnew = iinput(1)
+                else
+                    write (*, 99002) KDElim
+                    99002          format (/'  --------------------------'/'   0  blank'/'   1  comma'/'   2  tab', &
+                            &//'  currently, delimiter =', i2)
+                    call aski('Enter new delimiter', kdnew)
+                endif
+                !
+                if (kdnew<0 .or. kdnew>2) then
+                    ninput = 0
+                    cycle
+                else
+                    KDElim = kdnew
+                endif
+                exit
+            enddo
+            !
+            !===============================================
+        elseif (comand=='LOAD') then
+            call load(comarg, itype)
+            if (itype>0 .and. NB>0) then
+                !cc       CALL PANGEN(.TRUE.)
+                call abcopy(.true.)
+                !
+                call cang(X, Y, N, 0, imax, amax)
+                if (abs(amax)>angtol) write (*, 99007) amax, imax
+            endif
+            !
+            !===============================================
+        elseif (comand=='NACA') then
+            call naca(iinput(1))
+            !
+            !===============================================
+        elseif (comand=='INTE') then
+            call inte
+            !
+            !===============================================
+        elseif (comand=='INTX') then
+            call intx
+            !
+            !===============================================
+        elseif (comand=='NORM') then
+            LNOrm = .not.LNOrm
+            if (LNOrm) then
+                write (*, *) 'Loaded airfoil will  be normalized'
+            else
+                write (*, *) 'Loaded airfoil won''t be normalized'
+            endif
+            !
+            !===============================================
+        elseif (comand=='HALF') then
+            call half(XB, YB, SB, NB)
+            call scalc(XB, YB, SB, NB)
+            call segspl(XB, XBP, SB, NB)
+            call segspl(YB, YBP, SB, NB)
+            !
+            call geopar(XB, XBP, YB, YBP, SB, NB, W1, SBLe, CHOrdb,&
+                    AREab, RADble, ANGbte, EI11ba, EI22ba, APX1ba, APX2ba, EI11bt, EI22bt, &
+                    & APX1bt, APX2bt, THIckb, CAMbrb)
+            !
+            !==========================================
+        elseif (comand=='XYCM') then
+            if (ninput>=2) then
+                XCMref = rinput(1)
+                YCMref = rinput(2)
+            else
+                call askr('Enter new CM reference X^', XCMref)
+                call askr('Enter new CM reference Y^', YCMref)
+            endif
+            !
+            !===============================================
+        elseif (comand=='BEND') then
+            if (N==0) then
+                write (*, *)
+                write (*, *) '***  No airfoil available  ***'
+                cycle
+            endif
+            !
+            call bendump(N, X, Y)
+            !
+            !===============================================
+        elseif (comand=='BENP') then
+            if (N==0) then
+                write (*, *)
+                write (*, *) '***  No airfoil available  ***'
+                cycle
+            endif
+            !
+            do i = 1, N
+                W1(i) = 1.0
+            enddo
+            call bendump2(N, X, Y, W1)
+            !
+            !===============================================
+        elseif (comand=='PCOP') then
+            call abcopy(.true.)
+            !
+            !===============================================
+        elseif (comand=='PANE') then
+            call pangen(.true.)
+            !
+            !===============================================
+        elseif (comand=='PPAR') then
+            call getpan
+            !
+            !===============================================
+        elseif (comand=='WDEF') then
+            lu = 8
+            if (comarg(1:1)==' ') then
+                FNAme = 'xfoil.def'
+            else
+                FNAme = comarg
+            endif
+            call strip(FNAme, nfn)
+            open (lu, file = FNAme, status = 'OLD', err = 20)
+            write (*, 99003) FNAme(1:nfn)
+            99003  format (/'  File  ', a, '  exists.  Overwrite?  Y')
+            read (*, 99004) ans
+            !
+            99004  format (a)
+            if (index('Nn', ans)==0) goto 40
+            write (*, *)
+            write (*, *) 'No action taken'
+            close (lu)
+            !
+            20    open (lu, file = FNAme, status = 'UNKNOWN')
+            40    call wrtdef(lu)
+            write (*, 99005) FNAme(1:nfn)
+            99005  format (/'  File  ', a, '  written')
+            close (lu)
+            !
+            !===============================================
+        elseif (comand=='RDEF') then
+            if (comarg(1:1)==' ') then
+                FNAme = 'xfoil.def'
+            else
+                FNAme = comarg
+            endif
+            !
+            lu = 8
+            call getdef(lu, FNAme, .false.)
+            !
+            !===============================================
+        elseif (comand=='NAME') then
+            if (comarg==' ') then
+                call nammod(NAMe, 0, -1)
+            else
+                NAMe = comarg
+            endif
+            call strip(NAMe, NNAme)
+            !
+            !===============================================
+        elseif (comand=='NINC') then
+            call nammod(NAMe, 1, 1)
+            call strip(NAMe, NNAme)
+            !
+            !===============================================
+        else
+            write (*, 99006) comand
+            99006  format (1x, a4, ' command not recognized.  Type a "?" for list')
+            !
+            !
+            !===============================================
+        endif
+    enddo
+    99007 format (/' WARNING: Poor input coordinate distribution'/'          Excessive panel angle', f7.1, '  at i =', &
+            &i4/'          Repaneling with PANE and/or PPAR suggested'/                                                &
+            &'           (doing GDES,CADD before repaneling _may_'/'            improve excessively coarse LE spacing')
+    99008 format (&
             /'   QUIT    Exit program'&
             //'  .OPER    Direct operating point(s)'&
             /'  .MDES    Complex mapping design routine'&
@@ -105,385 +352,166 @@ PROGRAM XFOIL
             /'   RDEF f  Reread current-settings file'&
             /'   NAME s  Specify new airfoil name'&
             /'   NINC    Increment name version number')
-    !
-    !---- start of menu loop
-    500 CONTINUE
-    CALL ASKC(' XFOIL^', COMAND, COMARG)
-    !
-    !---- get command line numeric arguments, if any
-    DO I = 1, 20
-        IINPUT(I) = 0
-        RINPUT(I) = 0.0
-    ENDDO
-    NINPUT = 0
-    CALL GETINT(COMARG, IINPUT, NINPUT, ERROR)
-    NINPUT = 0
-    CALL GETFLT(COMARG, RINPUT, NINPUT, ERROR)
-    !
-    !===============================================
-    IF(COMAND.EQ.'    ') THEN
-        GO TO 500
-        !
-        !===============================================
-    ELSEIF(COMAND.EQ.'?   ') THEN
-        WRITE(*, 1100) XCMREF, YCMREF, NPAN
-        !
-        !===============================================
-    ELSEIF(COMAND.EQ.'QUIT' .OR.&
-            COMAND.EQ.'Q   ') THEN
-        STOP
-        !
-        !===============================================
-    ELSEIF(COMAND.EQ.'OPER') THEN
-        CALL OPER
-        !
-        !===============================================
-    ELSEIF(COMAND.EQ.'MDES') THEN
-        CALL MDES
-        !
-        !===============================================
-    ELSEIF(COMAND.EQ.'QDES') THEN
-        CALL QDES
-        !
-        !===============================================
-    ELSEIF(COMAND.EQ.'SAVE') THEN
-        CALL SAVE(1, COMARG)
-        !
-        !===============================================
-    ELSEIF(COMAND.EQ.'PSAV') THEN
-        CALL SAVE(0, COMARG)
-        !
-        !===============================================
-    ELSEIF(COMAND.EQ.'USAV') THEN
-        CALL SAVE(-1, COMARG)
-        !
-        !===============================================
-    ELSEIF(COMAND.EQ.'ISAV') THEN
-        CALL SAVE(2, COMARG)
-        !
-        !===============================================
-    ELSEIF(COMAND.EQ.'REVE') THEN
-        LCLOCK = .NOT.LCLOCK
-        IF(LCLOCK) THEN
-            WRITE(*, *) 'Airfoil will be written in clockwise order'
-        ELSE
-            WRITE(*, *) 'Airfoil will be written in counterclockwise order'
-        ENDIF
-        !
-        !===============================================
-    ELSEIF(COMAND.EQ.'DELI') THEN
-        40  CONTINUE
-        IF(NINPUT.GE.1) THEN
-            KDNEW = IINPUT(1)
-        ELSE
-            WRITE(*, 2100) KDELIM
-            2100   FORMAT(/'  --------------------------'&
-                    /'   0  blank'&
-                    /'   1  comma'&
-                    /'   2  tab', &
-                    //'  currently, delimiter =', I2)
-            CALL ASKI('Enter new delimiter', KDNEW)
-        ENDIF
-        !
-        IF(KDNEW.LT.0 .OR. KDNEW.GT.2) THEN
-            NINPUT = 0
-            GO TO 40
-        ELSE
-            KDELIM = KDNEW
-        ENDIF
-        !
-        !===============================================
-    ELSEIF(COMAND.EQ.'LOAD') THEN
-        CALL LOAD(COMARG, ITYPE)
-        IF(ITYPE.GT.0 .AND. NB.GT.0) THEN
-            !cc       CALL PANGEN(.TRUE.)
-            CALL ABCOPY(.TRUE.)
-            !
-            CALL CANG(X, Y, N, 0, IMAX, AMAX)
-            IF(ABS(AMAX).GT.ANGTOL) THEN
-                WRITE(*, 1081) AMAX, IMAX
-            ENDIF
-        ENDIF
-        !
-        !===============================================
-    ELSEIF(COMAND.EQ.'NACA') THEN
-        CALL NACA(IINPUT(1))
-        !
-        !===============================================
-    ELSEIF(COMAND.EQ.'INTE') THEN
-        CALL INTE
-        !
-        !===============================================
-    ELSEIF(COMAND.EQ.'INTX') THEN
-        CALL INTX
-        !
-        !===============================================
-    ELSEIF(COMAND.EQ.'NORM') THEN
-        LNORM = .NOT.LNORM
-        IF(LNORM) THEN
-            WRITE(*, *) 'Loaded airfoil will  be normalized'
-        ELSE
-            WRITE(*, *) 'Loaded airfoil won''t be normalized'
-        ENDIF
-        !
-        !===============================================
-    ELSEIF(COMAND.EQ.'HALF') THEN
-        CALL HALF(XB, YB, SB, NB)
-        CALL SCALC(XB, YB, SB, NB)
-        CALL SEGSPL(XB, XBP, SB, NB)
-        CALL SEGSPL(YB, YBP, SB, NB)
-        !
-        CALL GEOPAR(XB, XBP, YB, YBP, SB, NB, W1, &
-                SBLE, CHORDB, AREAB, RADBLE, ANGBTE, &
-                EI11BA, EI22BA, APX1BA, APX2BA, &
-                EI11BT, EI22BT, APX1BT, APX2BT, &
-                THICKB, CAMBRB)
-        !
-        !==========================================
-    ELSEIF(COMAND.EQ.'XYCM') THEN
-        IF(NINPUT.GE.2) THEN
-            XCMREF = RINPUT(1)
-            YCMREF = RINPUT(2)
-        ELSE
-            CALL ASKR('Enter new CM reference X^', XCMREF)
-            CALL ASKR('Enter new CM reference Y^', YCMREF)
-        ENDIF
-        !
-        !===============================================
-    ELSEIF(COMAND.EQ.'BEND') THEN
-        IF(N.EQ.0) THEN
-            WRITE(*, *)
-            WRITE(*, *) '***  No airfoil available  ***'
-            GO TO 500
-        ENDIF
-        !
-        CALL BENDUMP(N, X, Y)
-        !
-        !===============================================
-    ELSEIF(COMAND.EQ.'BENP') THEN
-        IF(N.EQ.0) THEN
-            WRITE(*, *)
-            WRITE(*, *) '***  No airfoil available  ***'
-            GO TO 500
-        ENDIF
-        !
-        DO I = 1, N
-            W1(I) = 1.0
-        ENDDO
-        CALL BENDUMP2(N, X, Y, W1)
-        !
-        !===============================================
-    ELSEIF(COMAND.EQ.'PCOP') THEN
-        CALL ABCOPY(.TRUE.)
-        !
-        !===============================================
-    ELSEIF(COMAND.EQ.'PANE') THEN
-        CALL PANGEN(.TRUE.)
-        !
-        !===============================================
-    ELSEIF(COMAND.EQ.'PPAR') THEN
-        CALL GETPAN
-        !
-        !===============================================
-    ELSEIF(COMAND.EQ.'WDEF') THEN
-        LU = 8
-        IF(COMARG(1:1).EQ.' ') THEN
-            FNAME = 'xfoil.def'
-        ELSE
-            FNAME = COMARG
-        ENDIF
-        CALL STRIP(FNAME, NFN)
-        OPEN(LU, FILE = FNAME, STATUS = 'OLD', ERR = 703)
-        WRITE(*, 701) FNAME(1:NFN)
-        701   FORMAT(/'  File  ', A, '  exists.  Overwrite?  Y')
-        READ(*, 1000) ANS
-        IF(INDEX('Nn', ANS).EQ.0) GO TO 706
-        WRITE(*, *)
-        WRITE(*, *) 'No action taken'
-        CLOSE(LU)
-        !
-        703   OPEN(LU, FILE = FNAME, STATUS = 'UNKNOWN')
-        706   CALL WRTDEF(LU)
-        WRITE(*, 708) FNAME(1:NFN)
-        708   FORMAT(/'  File  ', A, '  written')
-        CLOSE(LU)
-        !
-        !===============================================
-    ELSEIF(COMAND.EQ.'RDEF') THEN
-        IF(COMARG(1:1).EQ.' ') THEN
-            FNAME = 'xfoil.def'
-        ELSE
-            FNAME = COMARG
-        ENDIF
-        !
-        LU = 8
-        CALL GETDEF(LU, FNAME, .FALSE.)
-        !
-        !===============================================
-    ELSEIF(COMAND.EQ.'NAME') THEN
-        IF(COMARG.EQ.' ') THEN
-            CALL NAMMOD(NAME, 0, -1)
-        ELSE
-            NAME = COMARG
-        ENDIF
-        CALL STRIP(NAME, NNAME)
-        !
-        !===============================================
-    ELSEIF(COMAND.EQ.'NINC') THEN
-        CALL NAMMOD(NAME, 1, 1)
-        CALL STRIP(NAME, NNAME)
-        !
-        !===============================================
-    ELSE
-        WRITE(*, 1050) COMAND
-        1050  FORMAT(1X, A4, ' command not recognized.  Type a "?" for list')
-        !
-    ENDIF
-    !
-    !===============================================
-    GO TO 500
-    !
-    1000 FORMAT(A)
-END
+end program xfoil
+!*==INIT.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! XFOIL
 
 
-SUBROUTINE INIT
+subroutine init
+    use m_spline
+    use i_xfoil
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    real :: ann
+    integer :: i, ip, k, nn
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !---------------------------------------------------
     !     Variable initialization/default routine.
     !     See file XFOIL.INC for variable description.
     !---------------------------------------------------
-    use m_spline
-    use i_xfoil
     !
-    PI = 4.0 * ATAN(1.0)
-    HOPI = 0.50 / PI
-    QOPI = 0.25 / PI
-    DTOR = PI / 180.0
+    PI = 4.0 * atan(1.0)
+    HOPi = 0.50 / PI
+    QOPi = 0.25 / PI
+    DTOr = PI / 180.0
     !
     !---- default Cp/Cv (air)
-    GAMMA = 1.4
-    GAMM1 = GAMMA - 1.0
+    GAMma = 1.4
+    GAMm1 = GAMma - 1.0
     !
     !---- set unity freestream speed
-    QINF = 1.0
+    QINf = 1.0
     !
     !---- initialize freestream Mach number to zero
-    MATYP = 1
-    MINF1 = 0.
+    MATyp = 1
+    MINf1 = 0.
     !
-    ALFA = 0.0
-    COSA = 1.0
-    SINA = 0.0
+    ALFa = 0.0
+    COSa = 1.0
+    SINa = 0.0
     !
-    DO 10 I = 1, IQX
-        GAMU(I, 1) = 0.
-        GAMU(I, 2) = 0.
-        GAM(I) = 0.
-        GAM_A(I) = 0.
-    10 CONTINUE
-    PSIO = 0.
+    do i = 1, IQX
+        GAMu(i, 1) = 0.
+        GAMu(i, 2) = 0.
+        GAM(i) = 0.
+        GAM_a(i) = 0.
+    enddo
+    PSIo = 0.
     !
     CL = 0.
     CM = 0.
     CD = 0.
     !
-    SIGTE = 0.0
-    GAMTE = 0.0
-    SIGTE_A = 0.
-    GAMTE_A = 0.
+    SIGte = 0.0
+    GAMte = 0.0
+    SIGte_a = 0.
+    GAMte_a = 0.
     !
-    DO 20 I = 1, IZX
-        SIG(I) = 0.
-    20 CONTINUE
+    do i = 1, IZX
+        SIG(i) = 0.
+    enddo
     !
-    NQSP = 0
-    DO 30 K = 1, IPX
-        ALQSP(K) = 0.
-        CLQSP(K) = 0.
-        CMQSP(K) = 0.
-        DO 302 I = 1, IBX
-            QSPEC(I, K) = 0.
-        302    CONTINUE
-    30   CONTINUE
+    NQSp = 0
+    do k = 1, IPX
+        ALQsp(k) = 0.
+        CLQsp(k) = 0.
+        CMQsp(k) = 0.
+        do i = 1, IBX
+            QSPec(i, k) = 0.
+        enddo
+    enddo
     !
-    AWAKE = 0.0
-    AVISC = 0.0
+    AWAke = 0.0
+    AVIsc = 0.0
     !
-    KIMAGE = 1
-    YIMAGE = -10.0
-    LIMAGE = .FALSE.
+    KIMage = 1
+    YIMage = -10.0
+    LIMage = .false.
     !
     !---- output coordinate file delimiters
     !-    KDELIM =  0  blanks
     !-           =  1  commas
     !-           =  2  tabs
-    KDELIM = 0
+    KDElim = 0
     !
-    LGAMU = .FALSE.
-    LQINU = .FALSE.
-    LVISC = .FALSE.
-    LWAKE = .FALSE.
-    LPACC = .FALSE.
-    LBLINI = .FALSE.
-    LIPAN = .FALSE.
-    LQAIJ = .FALSE.
-    LADIJ = .FALSE.
-    LWDIJ = .FALSE.
-    LCPXX = .FALSE.
-    LQVDES = .FALSE.
-    LQSPEC = .FALSE.
-    LQREFL = .FALSE.
-    LVCONV = .FALSE.
-    LCPREF = .FALSE.
-    LFOREF = .FALSE.
-    LPFILE = .FALSE.
-    LPFILX = .FALSE.
-    LPPSHO = .FALSE.
-    LBFLAP = .FALSE.
-    LFLAP = .FALSE.
-    LEIW = .FALSE.
-    LSCINI = .FALSE.
-    LPLOT = .FALSE.
-    LCLIP = .FALSE.
-    LVLAB = .TRUE.
-    LCMINP = .FALSE.
-    LHMOMP = .FALSE.
-    LFREQP = .TRUE.
+    LGAmu = .false.
+    LQInu = .false.
+    LVIsc = .false.
+    LWAke = .false.
+    LPAcc = .false.
+    LBLini = .false.
+    LIPan = .false.
+    LQAij = .false.
+    LADij = .false.
+    LWDij = .false.
+    LCPxx = .false.
+    LQVdes = .false.
+    LQSpec = .false.
+    LQRefl = .false.
+    LVConv = .false.
+    LCPref = .false.
+    LFOref = .false.
+    LPFile = .false.
+    LPFilx = .false.
+    LPPsho = .false.
+    LBFlap = .false.
+    LFLap = .false.
+    LEIw = .false.
+    LSCini = .false.
+    LPLot = .false.
+    LCLip = .false.
+    LVLab = .true.
+    LCMinp = .false.
+    LHMomp = .false.
+    LFReqp = .true.
     !
-    LCURS = .TRUE.
-    LLAND = .TRUE.
-    LGSAME = .FALSE.
+    LCUrs = .true.
+    LLAnd = .true.
+    LGSame = .false.
     !
-    LGPARM = .TRUE.
-    LPLCAM = .FALSE.
+    LGParm = .true.
+    LPLcam = .false.
     !
     !---- input airfoil will not be normalized
-    LNORM = .FALSE.
+    LNOrm = .false.
     !
     !---- airfoil will not be forced symmetric
-    LQSYM = .FALSE.
-    LGSYM = .FALSE.
+    LQSym = .false.
+    LGSym = .false.
     !
     !---- endpoint slopes will be matched
-    LQSLOP = .TRUE.
-    LGSLOP = .TRUE.
-    LCSLOP = .TRUE.
+    LQSlop = .true.
+    LGSlop = .true.
+    LCSlop = .true.
     !
     !---- grids on Qspec(s) and buffer airfoil geometry plots will be plotted
-    LQGRID = .TRUE.
-    LGGRID = .TRUE.
-    LGTICK = .TRUE.
+    LQGrid = .true.
+    LGGrid = .true.
+    LGTick = .true.
     !
     !---- no grid on Cp plots
-    LCPGRD = .FALSE.
+    LCPgrd = .false.
     !
     !---- overlay inviscid Cp on viscous Cp(x) plot
-    LCPINV = .TRUE.
+    LCPinv = .true.
 
     !---- grid and no symbols are to be used on BL variable plots
-    LBLGRD = .TRUE.
-    LBLSYM = .FALSE.
+    LBLgrd = .true.
+    LBLsym = .false.
     !
     !---- buffer and current airfoil flap hinge coordinates
     XBF = 0.0
@@ -491,915 +519,1202 @@ SUBROUTINE INIT
     XOF = 0.0
     YOF = 0.0
     !
-    NCPREF = 0
+    NCPref = 0
     !                                               n
     !---- circle plane array size (257, or largest 2  + 1 that will fit array size)
-    ANN = LOG(FLOAT((2 * IQX) - 1)) / LOG(2.0)
-    NN = INT(ANN + 0.00001)
-    NC1 = 2**NN + 1
-    NC1 = MIN(NC1, 257)
+    ann = log(float((2 * IQX) - 1)) / log(2.0)
+    nn = int(ann + 0.00001)
+    NC1 = 2**nn + 1
+    NC1 = min(NC1, 257)
     !
     !---- default paneling parameters
-    NPAN = 160
-    CVPAR = 1.0
-    CTERAT = 0.15
-    CTRRAT = 0.2
+    NPAn = 160
+    CVPar = 1.0
+    CTErat = 0.15
+    CTRrat = 0.2
     !
     !---- default paneling refinement zone x/c endpoints
-    XSREF1 = 1.0
-    XSREF2 = 1.0
-    XPREF1 = 1.0
-    XPREF2 = 1.0
+    XSRef1 = 1.0
+    XSRef2 = 1.0
+    XPRef1 = 1.0
+    XPRef2 = 1.0
     !
     !---- no polars present to begin with
-    NPOL = 0
-    IPACT = 0
-    DO IP = 1, NPX
-        PFNAME(IP) = ' '
-        PFNAMX(IP) = ' '
-    ENDDO
+    NPOl = 0
+    IPAct = 0
+    do ip = 1, NPX
+        PFName(ip) = ' '
+        PFNamx(ip) = ' '
+    enddo
     !
     !---- no reference polars
-    NPOLREF = 0
+    NPOlref = 0
     !
     !---- plot aspect ratio, character size
-    PLOTAR = 0.55
+    PLOtar = 0.55
     CH = 0.015
     !
     !---- airfoil node tick-mark size (as fraction of arc length)
-    GTICK = 0.0005
+    GTIck = 0.0005
     !
     !---- Cp limits in  Cp vs x  plot
-    CPMAX = 1.0
-    CPMIN = -2.0
-    CPDEL = -0.5
-    PFAC = PLOTAR / (CPMAX - CPMIN)
+    CPMax = 1.0
+    CPMin = -2.0
+    CPDel = -0.5
+    PFAc = PLOtar / (CPMax - CPMin)
     !
     !---- Ue limits in  Ue vs x  plot
-    UEMAX = 1.8
-    UEMIN = -1.0
-    UEDEL = 0.2
-    UFAC = PLOTAR / (UEMAX - UEMIN)
+    UEMax = 1.8
+    UEMin = -1.0
+    UEDel = 0.2
+    UFAc = PLOtar / (UEMax - UEMin)
     !
     !---- DCp limits in CAMB loading plot
-    YPMIN = -0.4
-    YPMAX = 0.4
+    YPMin = -0.4
+    YPMax = 0.4
     !
     !---- scaling factor for Cp vector plot
-    VFAC = 0.25
+    VFAc = 0.25
     !
     !---- offsets and scale factor for airfoil in  Cp vs x  plot
-    XOFAIR = 0.09
-    YOFAIR = -.01
-    FACAIR = 0.70
+    XOFair = 0.09
+    YOFair = -.01
+    FACair = 0.70
     !
     !---- u/Qinf scale factor for profile plotting
-    UPRWT = 0.02
+    UPRwt = 0.02
     !
     !---- polar variables to be written to polar save file
-    IPOL(1) = IAL
-    IPOL(2) = ICL
-    IPOL(3) = ICD
-    IPOL(4) = ICP
-    IPOL(5) = ICM
-    NIPOL = 5
-    NIPOL0 = 5
+    IPOl(1) = IAL
+    IPOl(2) = ICL
+    IPOl(3) = ICD
+    IPOl(4) = ICP
+    IPOl(5) = ICM
+    NIPol = 5
+    NIPol0 = 5
     !
-    JPOL(1) = JTN
-    JPOL(2) = JTI
-    NJPOL = 2
+    JPOl(1) = JTN
+    JPOl(2) = JTI
+    NJPol = 2
     !
     !---- default Cm reference location
-    XCMREF = 0.25
-    YCMREF = 0.
+    XCMref = 0.25
+    YCMref = 0.
     !
     !---- default viscous parameters
-    RETYP = 1
-    REINF1 = 0.
-    ACRIT(1) = 9.0
-    ACRIT(2) = 9.0
-    XSTRIP(1) = 1.0
-    XSTRIP(2) = 1.0
-    XOCTR(1) = 1.0
-    XOCTR(2) = 1.0
-    YOCTR(1) = 0.
-    YOCTR(2) = 0.
-    WAKLEN = 1.0
+    RETyp = 1
+    REInf1 = 0.
+    ACRit(1) = 9.0
+    ACRit(2) = 9.0
+    XSTrip(1) = 1.0
+    XSTrip(2) = 1.0
+    XOCtr(1) = 1.0
+    XOCtr(2) = 1.0
+    YOCtr(1) = 0.
+    YOCtr(2) = 0.
+    WAKlen = 1.0
     !
-    IDAMP = 0
+    IDAmp = 0
     !
     !---- select default BL plotting coordinate (can be changed in VPLO)
-    IXBLP = 1   !  x
+    IXBlp = 1       !  x
     !cc   IXBLP = 2   !  s
     !
     !---- set BL calibration parameters
-    CALL BLPINI
+    call blpini
     !
     !---- Newton iteration limit
-    ITMAX = 20
+    ITMax = 20
     !
     !---- max number of unconverged sequence points for early exit
-    NSEQEX = 4
+    NSEqex = 4
     !
     !---- drop tolerance for BL system solver
-    VACCEL = 0.01
+    VACcel = 0.01
     !
     !---- inverse-mapping auto-filter level
-    FFILT = 0.0
+    FFIlt = 0.0
     !
     !---- default overlay airfoil filename
-    ONAME = ' '
+    ONAme = ' '
     !
     !---- default filename prefix
-    PREFIX = ' '
+    PREfix = ' '
     !
     !
-    NNAME = 32
-    NAME = '                                '
+    NNAme = 32
+    NAMe = '                                '
     !CC             12345678901234567890123456789012
     !
     !---- MSES domain parameters (not used in XFOIL)
-    ISPARS = ' -2.0  3.0  -2.5  3.5'
+    ISPars = ' -2.0  3.0  -2.5  3.5'
     !
     !---- set MINF, REINF, based on current CL-dependence
-    CALL MRCL(1.0, MINF_CL, REINF_CL)
+    call mrcl(1.0, MINf_cl, REInf_cl)
     !
     !---- set various compressibility parameters from MINF
-    CALL COMSET
+    call comset
     !
-    RETURN
-END
+end subroutine init
+!*==MRCL.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! INIT
 
 
-SUBROUTINE MRCL(CLS, M_CLS, R_CLS)
+subroutine mrcl(Cls, M_cls, R_cls)
+    use m_spline
+    use i_xfoil
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    real :: Cls, M_cls, R_cls
+    intent (in) Cls
+    intent (out) M_cls, R_cls
+    !
+    ! Local variables
+    !
+    real :: cla, rrat
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !-------------------------------------------
     !     Sets actual Mach, Reynolds numbers
     !     from unit-CL values and specified CLS
     !     depending on MATYP,RETYP flags.
     !-------------------------------------------
-    use m_spline
-    use i_xfoil
-    REAL M_CLS
     !
-    CLA = MAX(CLS, 0.000001)
+    cla = max(Cls, 0.000001)
     !
-    IF(RETYP.LT.1 .OR. RETYP.GT.3) THEN
-        WRITE(*, *) 'MRCL:  Illegal Re(CL) dependence trigger.'
-        WRITE(*, *) '       Setting fixed Re.'
-        RETYP = 1
-    ENDIF
-    IF(MATYP.LT.1 .OR. MATYP.GT.3) THEN
-        WRITE(*, *) 'MRCL:  Illegal Mach(CL) dependence trigger.'
-        WRITE(*, *) '       Setting fixed Mach.'
-        MATYP = 1
-    ENDIF
+    if (RETyp<1 .or. RETyp>3) then
+        write (*, *) 'MRCL:  Illegal Re(CL) dependence trigger.'
+        write (*, *) '       Setting fixed Re.'
+        RETyp = 1
+    endif
+    if (MATyp<1 .or. MATyp>3) then
+        write (*, *) 'MRCL:  Illegal Mach(CL) dependence trigger.'
+        write (*, *) '       Setting fixed Mach.'
+        MATyp = 1
+    endif
     !
     !
-    IF(MATYP.EQ.1) THEN
+    if (MATyp==1) then
         !
-        MINF = MINF1
-        M_CLS = 0.
+        MINf = MINf1
+        M_cls = 0.
         !
-    ELSE IF(MATYP.EQ.2) THEN
+    elseif (MATyp==2) then
         !
-        MINF = MINF1 / SQRT(CLA)
-        M_CLS = -0.5 * MINF / CLA
+        MINf = MINf1 / sqrt(cla)
+        M_cls = -0.5 * MINf / cla
         !
-    ELSE IF(MATYP.EQ.3) THEN
+    elseif (MATyp==3) then
         !
-        MINF = MINF1
-        M_CLS = 0.
+        MINf = MINf1
+        M_cls = 0.
         !
-    ENDIF
+    endif
     !
     !
-    IF(RETYP.EQ.1) THEN
+    if (RETyp==1) then
         !
-        REINF = REINF1
-        R_CLS = 0.
+        REInf = REInf1
+        R_cls = 0.
         !
-    ELSE IF(RETYP.EQ.2) THEN
+    elseif (RETyp==2) then
         !
-        REINF = REINF1 / SQRT(CLA)
-        R_CLS = -0.5 * REINF / CLA
+        REInf = REInf1 / sqrt(cla)
+        R_cls = -0.5 * REInf / cla
         !
-    ELSE IF(RETYP.EQ.3) THEN
+    elseif (RETyp==3) then
         !
-        REINF = REINF1 / CLA
-        R_CLS = -REINF / CLA
+        REInf = REInf1 / cla
+        R_cls = -REInf / cla
         !
-    ENDIF
+    endif
     !
     !
-    IF(MINF .GE. 0.99) THEN
-        WRITE(*, *)
-        WRITE(*, *) 'MRCL: CL too low for chosen Mach(CL) dependence'
-        WRITE(*, *) '      Aritificially limiting Mach to  0.99'
-        MINF = 0.99
-        M_CLS = 0.
-    ENDIF
+    if (MINf>=0.99) then
+        write (*, *)
+        write (*, *) 'MRCL: CL too low for chosen Mach(CL) dependence'
+        write (*, *) '      Aritificially limiting Mach to  0.99'
+        MINf = 0.99
+        M_cls = 0.
+    endif
     !
-    RRAT = 1.0
-    IF(REINF1 .GT. 0.0) RRAT = REINF / REINF1
+    rrat = 1.0
+    if (REInf1>0.0) rrat = REInf / REInf1
     !
-    IF(RRAT .GT. 100.0) THEN
-        WRITE(*, *)
-        WRITE(*, *) 'MRCL: CL too low for chosen Re(CL) dependence'
-        WRITE(*, *) '      Aritificially limiting Re to ', REINF1 * 100.0
-        REINF = REINF1 * 100.0
-        R_CLS = 0.
-    ENDIF
+    if (rrat>100.0) then
+        write (*, *)
+        write (*, *) 'MRCL: CL too low for chosen Re(CL) dependence'
+        write (*, *) '      Aritificially limiting Re to ', REInf1 * 100.0
+        REInf = REInf1 * 100.0
+        R_cls = 0.
+    endif
     !
-    RETURN
-END
+end subroutine mrcl
+!*==GETDEF.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! MRCL
 
 
 
-SUBROUTINE GETDEF(LU, FILNAM, LASK)
+subroutine getdef(Lu, Filnam, Lask)
     use m_spline
     use i_xfoil
-    CHARACTER*(*) FILNAM
-    LOGICAL LASK
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    character(*) :: Filnam
+    logical :: Lask
+    integer :: Lu
+    intent (in) Filnam, Lask, Lu
+    !
+    ! Local variables
+    !
+    real :: aldel, almax, almin, cddel, cdmax, cdmin, cldel, clmax, clmin, cmdel, cmmax, cmmin, rmill
+    character(1) :: ans
+    integer :: k
+    logical :: lcolor
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !-----------------------------------------------------
     !     Reads in default parameters from file xfoil.def
     !     If LASK=t, ask user if file is to be read.
     !-----------------------------------------------------
-    LOGICAL LCOLOR
-    CHARACTER*1 ANS
     !
-    1000 FORMAT(A)
+    open (Lu, file = Filnam, status = 'OLD', err = 200)
+    if (Lask) then
+        write (*, 99001) Filnam
+        99001 format (/'  Read settings from file  ', a, ' ?  Y')
+        read (*, 99002) ans
+        !
+        99002 format (a)
+        if (index('Nn', ans)/=0) then
+            close (Lu)
+            return
+        endif
+    endif
     !
-    OPEN(LU, FILE = FILNAM, STATUS = 'OLD', ERR = 90)
-    IF(LASK) THEN
-        WRITE(*, 1050) FILNAM
-        1050  FORMAT(/'  Read settings from file  ', A, ' ?  Y')
-        READ(*, 1000) ANS
-        IF(INDEX('Nn', ANS).NE.0) THEN
-            CLOSE(LU)
-            RETURN
-        ENDIF
-    ENDIF
+    clmin = CPOlplf(1, ICL)
+    clmax = CPOlplf(2, ICL)
+    cldel = CPOlplf(3, ICL)
     !
-    CLMIN = CPOLPLF(1, ICL)
-    CLMAX = CPOLPLF(2, ICL)
-    CLDEL = CPOLPLF(3, ICL)
-    !                 
-    CDMIN = CPOLPLF(1, ICD)
-    CDMAX = CPOLPLF(2, ICD)
-    CDDEL = CPOLPLF(3, ICD)
-    !                 
-    ALMIN = CPOLPLF(1, IAL)
-    ALMAX = CPOLPLF(2, IAL)
-    ALDEL = CPOLPLF(3, IAL)
+    cdmin = CPOlplf(1, ICD)
+    cdmax = CPOlplf(2, ICD)
+    cddel = CPOlplf(3, ICD)
     !
-    CMMIN = CPOLPLF(1, ICM)
-    CMMAX = CPOLPLF(2, ICM)
-    CMDEL = CPOLPLF(3, ICM)
-    !                 
+    almin = CPOlplf(1, IAL)
+    almax = CPOlplf(2, IAL)
+    aldel = CPOlplf(3, IAL)
+    !
+    cmmin = CPOlplf(1, ICM)
+    cmmax = CPOlplf(2, ICM)
+    cmdel = CPOlplf(3, ICM)
+    !
     !---- default paneling parameters (viscous)
-    READ(LU, *, ERR = 80) NPAN, CVPAR, CTERAT, CTRRAT
-    READ(LU, *, ERR = 80) XSREF1, XSREF2, XPREF1, XPREF2
+    read (Lu, *, err = 100) NPAn, CVPar, CTErat, CTRrat
+    read (Lu, *, err = 100) XSRef1, XSRef2, XPRef1, XPRef2
     !
     !---- plotting parameters
-    READ(LU, *, ERR = 80) SIZE, PLOTAR, CH, SCRNFR
+    read (Lu, *, err = 100) SIZe, PLOtar, CH, SCRnfr
     !
     !---- plot sizes
-    READ(LU, *, ERR = 80) XPAGE, YPAGE, XMARG, YMARG
+    read (Lu, *, err = 100) XPAge, YPAge, XMArg, YMArg
     !
     !---- plot flags
-    READ(LU, *, ERR = 80) LCOLOR, LCURS
+    read (Lu, *, err = 100) lcolor, LCUrs
     !
     !---- Cp limits in  Cp vs x  plot
-    READ(LU, *, ERR = 80) CPMAX, CPMIN, CPDEL
-    PFAC = PLOTAR / (CPMAX - CPMIN)
+    read (Lu, *, err = 100) CPMax, CPMin, CPDel
+    PFAc = PLOtar / (CPMax - CPMin)
     !
     !---- airfoil x-offset and scale factor in Cp vs x plot, BL profile weight
-    READ(LU, *, ERR = 80) XOFAIR, FACAIR, UPRWT
+    read (Lu, *, err = 100) XOFair, FACair, UPRwt
     !
-    !---- polar plot CL,CD,alpha,CM  min,max,delta 
-    READ(LU, *, ERR = 80) (CPOLPLF(K, ICL), K = 1, 3)
-    READ(LU, *, ERR = 80) (CPOLPLF(K, ICD), K = 1, 3)
-    READ(LU, *, ERR = 80) (CPOLPLF(K, IAL), K = 1, 3)
-    READ(LU, *, ERR = 80) (CPOLPLF(K, ICM), K = 1, 3)
+    !---- polar plot CL,CD,alpha,CM  min,max,delta
+    read (Lu, *, err = 100) (CPOlplf(k, ICL), k = 1, 3)
+    read (Lu, *, err = 100) (CPOlplf(k, ICD), k = 1, 3)
+    read (Lu, *, err = 100) (CPOlplf(k, IAL), k = 1, 3)
+    read (Lu, *, err = 100) (CPOlplf(k, ICM), k = 1, 3)
     !
     !---- default Mach and viscous parameters
-    READ(LU, *, ERR = 80) MATYP, MINF1, VACCEL
-    READ(LU, *, ERR = 80) RETYP, RMILL, ACRIT(1), ACRIT(2)
-    READ(LU, *, ERR = 80) XSTRIP(1), XSTRIP(2)
+    read (Lu, *, err = 100) MATyp, MINf1, VACcel
+    read (Lu, *, err = 100) RETyp, rmill, ACRit(1), ACRit(2)
+    read (Lu, *, err = 100) XSTrip(1), XSTrip(2)
     !
-    IF(LCOLOR) IDEVRP = 4
-    IF(.NOT.LCOLOR) IDEVRP = 2
+    if (lcolor) IDEvrp = 4
+    if (.not.lcolor) IDEvrp = 2
     !
-    REINF1 = RMILL * 1.0E6
+    REInf1 = rmill * 1.0E6
     !
     !---- set MINF, REINF
-    CALL MRCL(1.0, MINF_CL, REINF_CL)
+    call mrcl(1.0, MINf_cl, REInf_cl)
     !
     !---- set various compressibility parameters from new MINF
-    CALL COMSET
+    call comset
     !
-    CLOSE(LU)
-    WRITE(*, 1600) FILNAM
-    1600 FORMAT(/' Default parameters read in from file  ', A, ':' /)
-    CALL WRTDEF(6)
-    RETURN
+    close (Lu)
+    write (*, 99003) Filnam
+    99003 format (/' Default parameters read in from file  ', a, ':'/)
+    call wrtdef(6)
+    return
     !
-    80   CONTINUE
-    CLOSE(LU)
-    WRITE(*, 1800) FILNAM
-    1800 FORMAT(/' File  ', A, '  read error'&
-            /' Settings may have been changed')
-    RETURN
+    100  close (Lu)
+    write (*, 99004) Filnam
+    99004 format (/' File  ', a, '  read error'/' Settings may have been changed')
+    return
     !
-    90   CONTINUE
-    WRITE(*, 1900) FILNAM
-    1900 FORMAT(/' File  ', A, '  not found')
-    RETURN
+    200  write (*, 99005) Filnam
+    99005 format (/' File  ', a, '  not found')
     !
-END
+end subroutine getdef
+!*==WRTDEF.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! GETDEF
 
 
 
-SUBROUTINE WRTDEF(LU)
+subroutine wrtdef(Lu)
+    use m_spline
+    use i_xfoil
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    integer :: Lu
+    intent (in) Lu
+    !
+    ! Local variables
+    !
+    integer :: k
+    logical :: lcolor
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !------------------------------------------
     !     Writes default parameters to unit LU
     !------------------------------------------
-    use m_spline
-    use i_xfoil
-    LOGICAL LCOLOR
     !
-    LCOLOR = IDEVRP.EQ.4
+    lcolor = IDEvrp==4
     !
     !---- default paneling parameters (viscous)
-    WRITE(LU, 1010) NPAN, CVPAR, CTERAT, CTRRAT
-    WRITE(LU, 1020) XSREF1, XSREF2, XPREF1, XPREF2
+    write (Lu, 99001) NPAn, CVPar, CTErat, CTRrat
+    !...............................................
+    99001 format (1x, i5, 4x, f9.4, f9.4, f9.4, ' | Npan    PPanel  TErat  REFrat')
+    write (Lu, 99002) XSRef1, XSRef2, XPRef1, XPRef2
+    99002 format (1x, f9.4, f9.4, f9.4, f9.4, ' | XrefS1  XrefS2  XrefP1 XrefP2')
     !
     !---- plotting parameters
-    WRITE(LU, 1030) SIZE, PLOTAR, CH, SCRNFR
+    write (Lu, 99003) SIZe, PLOtar, CH, SCRnfr
+    99003 format (1x, f9.4, f9.4, f9.4, f9.4, ' | Size    plotAR  CHsize ScrnFr')
     !
     !---- plot sizes
-    WRITE(LU, 1032) XPAGE, YPAGE, XMARG, YMARG
+    write (Lu, 99004) XPAge, YPAge, XMArg, YMArg
+    99004 format (1x, f9.4, f9.4, f9.4, f9.4, ' | Xpage   Ypage   Xmargn Ymargn')
     !
     !---- plot flags
-    WRITE(LU, 1034) LCOLOR, LCURS
+    write (Lu, 99005) lcolor, LCUrs
+    99005 format (1x, l2, 7x, l2, 7x, 9x, 9x, ' | Lcolor  Lcursor')
     !
     !---- Cp limits in  Cp vs x  plot
-    WRITE(LU, 1040) CPMAX, CPMIN, CPDEL
+    write (Lu, 99006) CPMax, CPMin, CPDel
+    99006 format (1x, f9.4, f9.4, f9.4, 9x, ' | CPmax   CPmin   CPdel')
     !
     !---- x-offset and scale factor for airfoil on Cp vs x plot
-    WRITE(LU, 1050) XOFAIR, FACAIR, UPRWT
+    write (Lu, 99007) XOFair, FACair, UPRwt
+    99007 format (1x, f9.4, f9.4, f9.4, 9x, ' | XoffAir ScalAir BLUwt')
     !
-    !---- polar plot CL,CD,alpha,CM  min,max,delta 
-    WRITE(LU, 1061) (CPOLPLF(K, ICL), K = 1, 3)
-    WRITE(LU, 1062) (CPOLPLF(K, ICD), K = 1, 3)
-    WRITE(LU, 1063) (CPOLPLF(K, IAL), K = 1, 3)
-    WRITE(LU, 1064) (CPOLPLF(K, ICM), K = 1, 3)
+    !---- polar plot CL,CD,alpha,CM  min,max,delta
+    write (Lu, 99008) (CPOlplf(k, ICL), k = 1, 3)
+    99008 format (1x, f9.4, f9.4, f9.4, 9x, ' | CLmin   CLmax   CLdel')
+    write (Lu, 99009) (CPOlplf(k, ICD), k = 1, 3)
+    99009 format (1x, f9.4, f9.4, f9.4, 9x, ' | CDmin   CDmax   CDdel')
+    write (Lu, 99010) (CPOlplf(k, IAL), k = 1, 3)
+    99010 format (1x, f9.4, f9.4, f9.4, 9x, ' | ALmin   ALmax   ALdel')
+    write (Lu, 99011) (CPOlplf(k, ICM), k = 1, 3)
+    99011 format (1x, f9.4, f9.4, f9.4, 9x, ' | CMmin   CMmax   CMdel')
     !
     !---- default viscous parameters
-    WRITE(LU, 1071) MATYP, MINF1, VACCEL
-    WRITE(LU, 1072) RETYP, REINF1 / 1.0E6, ACRIT(1), ACRIT(2)
-    WRITE(LU, 1080) XSTRIP(1), XSTRIP(2)
+    write (Lu, 99012) MATyp, MINf1, VACcel
+    99012 format (1x, i3, 6x, f9.4, f9.4, 9x, ' | MAtype  Mach    Vaccel')
+    write (Lu, 99013) RETyp, REInf1 / 1.0E6, ACRit(1), ACRit(2)
+    99013 format (1x, i3, 6x, f9.4, f9.4, f9.4, ' | REtype  Re/10^6 Ncrit1 Ncrit2')
+    write (Lu, 99014) XSTrip(1), XSTrip(2)
+    99014 format (1x, f9.4, f9.4, 9x, 9x, ' | XtripT  XtripB')
     !
-    RETURN
-    !...............................................
-    1010 FORMAT(1X, I5, 4X, F9.4, F9.4, F9.4, ' | Npan    PPanel  TErat  REFrat')
-    1020 FORMAT(1X, F9.4, F9.4, F9.4, F9.4, ' | XrefS1  XrefS2  XrefP1 XrefP2')
-    1030 FORMAT(1X, F9.4, F9.4, F9.4, F9.4, ' | Size    plotAR  CHsize ScrnFr')
-    1032 FORMAT(1X, F9.4, F9.4, F9.4, F9.4, ' | Xpage   Ypage   Xmargn Ymargn')
-    1034 FORMAT(1X, L2, 7X, L2, 7X, 9X, 9X, ' | Lcolor  Lcursor')
-    1040 FORMAT(1X, F9.4, F9.4, F9.4, 9X, ' | CPmax   CPmin   CPdel')
-    1050 FORMAT(1X, F9.4, F9.4, F9.4, 9X, ' | XoffAir ScalAir BLUwt')
-    1061 FORMAT(1X, F9.4, F9.4, F9.4, 9X, ' | CLmin   CLmax   CLdel')
-    1062 FORMAT(1X, F9.4, F9.4, F9.4, 9X, ' | CDmin   CDmax   CDdel')
-    1063 FORMAT(1X, F9.4, F9.4, F9.4, 9X, ' | ALmin   ALmax   ALdel')
-    1064 FORMAT(1X, F9.4, F9.4, F9.4, 9X, ' | CMmin   CMmax   CMdel')
-    1071 FORMAT(1X, I3, 6X, F9.4, F9.4, 9X, ' | MAtype  Mach    Vaccel')
-    1072 FORMAT(1X, I3, 6X, F9.4, F9.4, F9.4, ' | REtype  Re/10^6 Ncrit1 Ncrit2')
-    1080 FORMAT(1X, F9.4, F9.4, 9X, 9X, ' | XtripT  XtripB')
-END
+end subroutine wrtdef
+!*==COMSET.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! WRTDEF
 
 
-SUBROUTINE COMSET
+subroutine comset
     use m_spline
     use i_xfoil
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    real :: beta, beta_msq
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !
     !---- set Karman-Tsien parameter TKLAM
-    BETA = SQRT(1.0 - MINF**2)
-    BETA_MSQ = -0.5 / BETA
+    beta = sqrt(1.0 - MINf**2)
+    beta_msq = -0.5 / beta
     !
-    TKLAM = MINF**2 / (1.0 + BETA)**2
-    TKL_MSQ = 1.0 / (1.0 + BETA)**2&
-            - 2.0 * TKLAM / (1.0 + BETA) * BETA_MSQ
+    TKLam = MINf**2 / (1.0 + beta)**2
+    TKL_msq = 1.0 / (1.0 + beta)**2 - 2.0 * TKLam / (1.0 + beta) * beta_msq
     !
     !---- set sonic Pressure coefficient and speed
-    IF(MINF.EQ.0.0) THEN
-        CPSTAR = -999.0
-        QSTAR = 999.0
-    ELSE
-        CPSTAR = 2.0 / (GAMMA * MINF**2)&
-                * (((1.0 + 0.5 * GAMM1 * MINF**2)&
-                        / (1.0 + 0.5 * GAMM1))**(GAMMA / GAMM1) - 1.0)
-        QSTAR = QINF / MINF&
-                * SQRT((1.0 + 0.5 * GAMM1 * MINF**2)&
-                        / (1.0 + 0.5 * GAMM1))
-    ENDIF
+    if (MINf==0.0) then
+        CPStar = -999.0
+        QSTar = 999.0
+    else
+        CPStar = 2.0 / (GAMma * MINf**2) &
+                * (((1.0 + 0.5 * GAMm1 * MINf**2) / (1.0 + 0.5 * GAMm1))**(GAMma / GAMm1) - 1.0)
+        QSTar = QINf / MINf * sqrt((1.0 + 0.5 * GAMm1 * MINf**2) / (1.0 + 0.5 * GAMm1))
+    endif
     !
-    RETURN
-END
+end subroutine comset
+!*==CPCALC.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! COMSET
 
 
-SUBROUTINE CPCALC(N, Q, QINF, MINF, CP)
+subroutine cpcalc(N, Q, Qinf, Minf, Cp)
+    use m_spline
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    real :: Minf, Qinf
+    integer :: N
+    real, dimension(N) :: Cp, Q
+    intent (in) Minf, N, Q, Qinf
+    intent (out) Cp
+    !
+    ! Local variables
+    !
+    real :: beta, bfac, cpinc, den
+    logical :: denneg
+    integer :: i
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !---------------------------------------------
     !     Sets compressible Cp from speed.
     !---------------------------------------------
-    use m_spline
-    DIMENSION Q(N), CP(N)
-    REAL MINF
     !
-    LOGICAL DENNEG
     !
-    BETA = SQRT(1.0 - MINF**2)
-    BFAC = 0.5 * MINF**2 / (1.0 + BETA)
+    beta = sqrt(1.0 - Minf**2)
+    bfac = 0.5 * Minf**2 / (1.0 + beta)
     !
-    DENNEG = .FALSE.
+    denneg = .false.
     !
-    DO 20 I = 1, N
-        CPINC = 1.0 - (Q(I) / QINF)**2
-        DEN = BETA + BFAC * CPINC
-        CP(I) = CPINC / DEN
-        IF(DEN .LE. 0.0) DENNEG = .TRUE.
-    20  CONTINUE
+    do i = 1, N
+        cpinc = 1.0 - (Q(i) / Qinf)**2
+        den = beta + bfac * cpinc
+        Cp(i) = cpinc / den
+        if (den<=0.0) denneg = .true.
+    enddo
     !
-    IF(DENNEG) THEN
-        WRITE(*, *)
-        WRITE(*, *) 'CPCALC: Local speed too large. ', &
-                'Compressibility corrections invalid.'
-    ENDIF
+    if (denneg) then
+        write (*, *)
+        write (*, *) 'CPCALC: Local speed too large. ', 'Compressibility corrections invalid.'
+    endif
     !
-    RETURN
-END
+end subroutine cpcalc
+!*==CLCALC.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! CPCALC
 
 
-SUBROUTINE CLCALC(N, X, Y, GAM, GAM_A, ALFA, MINF, QINF, &
-        XREF, YREF, &
-        CL, CM, CDP, CL_ALF, CL_MSQ)
+subroutine clcalc(N, X, Y, Gam, Gam_a, Alfa, Minf, Qinf, Xref, Yref, Cl, Cm, Cdp, Cl_alf, Cl_msq)
+    use m_spline
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    real :: Alfa, Cdp, Cl, Cl_alf, Cl_msq, Cm, Minf, Qinf, Xref, Yref
+    integer :: N
+    real, dimension(N) :: Gam, Gam_a, X, Y
+    intent (in) Alfa, Gam, Gam_a, Minf, N, Qinf, X, Xref, Y, Yref
+    intent (inout) Cdp, Cl, Cl_alf, Cl_msq, Cm
+    !
+    ! Local variables
+    !
+    real :: ag, ag_alf, ag_msq, ax, ay, beta, beta_msq, bfac, bfac_msq, ca, cginc, cpc_cpi, cpg1, cpg1_alf, &
+            & cpg1_msq, cpg2, cpg2_alf, cpg2_msq, cpi_gam, dg, dx, dx_alf, dy, sa
+    integer :: i, ip
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !-----------------------------------------------------------
     !     Integrates surface pressures to get CL and CM.
     !     Integrates skin friction to get CDF.
     !     Calculates dCL/dAlpha for prescribed-CL routines.
     !-----------------------------------------------------------
-    use m_spline
-    DIMENSION X(N), Y(N), GAM(N), GAM_A(N)
-    REAL MINF
     !
     !cC---- moment-reference coordinates
     !c      XREF = 0.25
     !c      YREF = 0.
     !
-    SA = SIN(ALFA)
-    CA = COS(ALFA)
+    sa = sin(Alfa)
+    ca = cos(Alfa)
     !
-    BETA = SQRT(1.0 - MINF**2)
-    BETA_MSQ = -0.5 / BETA
+    beta = sqrt(1.0 - Minf**2)
+    beta_msq = -0.5 / beta
     !
-    BFAC = 0.5 * MINF**2 / (1.0 + BETA)
-    BFAC_MSQ = 0.5 / (1.0 + BETA)&
-            - BFAC / (1.0 + BETA) * BETA_MSQ
+    bfac = 0.5 * Minf**2 / (1.0 + beta)
+    bfac_msq = 0.5 / (1.0 + beta) - bfac / (1.0 + beta) * beta_msq
     !
-    CL = 0.0
-    CM = 0.0
+    Cl = 0.0
+    Cm = 0.0
 
-    CDP = 0.0
+    Cdp = 0.0
     !
-    CL_ALF = 0.
-    CL_MSQ = 0.
+    Cl_alf = 0.
+    Cl_msq = 0.
     !
-    I = 1
-    CGINC = 1.0 - (GAM(I) / QINF)**2
-    CPG1 = CGINC / (BETA + BFAC * CGINC)
-    CPG1_MSQ = -CPG1 / (BETA + BFAC * CGINC) * (BETA_MSQ + BFAC_MSQ * CGINC)
+    i = 1
+    cginc = 1.0 - (Gam(i) / Qinf)**2
+    cpg1 = cginc / (beta + bfac * cginc)
+    cpg1_msq = -cpg1 / (beta + bfac * cginc) * (beta_msq + bfac_msq * cginc)
     !
-    CPI_GAM = -2.0 * GAM(I) / QINF**2
-    CPC_CPI = (1.0 - BFAC * CPG1) / (BETA + BFAC * CGINC)
-    CPG1_ALF = CPC_CPI * CPI_GAM * GAM_A(I)
+    cpi_gam = -2.0 * Gam(i) / Qinf**2
+    cpc_cpi = (1.0 - bfac * cpg1) / (beta + bfac * cginc)
+    cpg1_alf = cpc_cpi * cpi_gam * Gam_a(i)
     !
-    DO 10 I = 1, N
-        IP = I + 1
-        IF(I.EQ.N) IP = 1
+    do i = 1, N
+        ip = i + 1
+        if (i==N) ip = 1
         !
-        CGINC = 1.0 - (GAM(IP) / QINF)**2
-        CPG2 = CGINC / (BETA + BFAC * CGINC)
-        CPG2_MSQ = -CPG2 / (BETA + BFAC * CGINC) * (BETA_MSQ + BFAC_MSQ * CGINC)
+        cginc = 1.0 - (Gam(ip) / Qinf)**2
+        cpg2 = cginc / (beta + bfac * cginc)
+        cpg2_msq = -cpg2 / (beta + bfac * cginc) * (beta_msq + bfac_msq * cginc)
         !
-        CPI_GAM = -2.0 * GAM(IP) / QINF**2
-        CPC_CPI = (1.0 - BFAC * CPG2) / (BETA + BFAC * CGINC)
-        CPG2_ALF = CPC_CPI * CPI_GAM * GAM_A(IP)
+        cpi_gam = -2.0 * Gam(ip) / Qinf**2
+        cpc_cpi = (1.0 - bfac * cpg2) / (beta + bfac * cginc)
+        cpg2_alf = cpc_cpi * cpi_gam * Gam_a(ip)
         !
-        DX = (X(IP) - X(I)) * CA + (Y(IP) - Y(I)) * SA
-        DY = (Y(IP) - Y(I)) * CA - (X(IP) - X(I)) * SA
-        DG = CPG2 - CPG1
+        dx = (X(ip) - X(i)) * ca + (Y(ip) - Y(i)) * sa
+        dy = (Y(ip) - Y(i)) * ca - (X(ip) - X(i)) * sa
+        dg = cpg2 - cpg1
         !
-        AX = (0.5 * (X(IP) + X(I)) - XREF) * CA + (0.5 * (Y(IP) + Y(I)) - YREF) * SA
-        AY = (0.5 * (Y(IP) + Y(I)) - YREF) * CA - (0.5 * (X(IP) + X(I)) - XREF) * SA
-        AG = 0.5 * (CPG2 + CPG1)
+        ax = (0.5 * (X(ip) + X(i)) - Xref) * ca + (0.5 * (Y(ip) + Y(i)) - Yref) * sa
+        ay = (0.5 * (Y(ip) + Y(i)) - Yref) * ca - (0.5 * (X(ip) + X(i)) - Xref) * sa
+        ag = 0.5 * (cpg2 + cpg1)
         !
-        DX_ALF = -(X(IP) - X(I)) * SA + (Y(IP) - Y(I)) * CA
-        AG_ALF = 0.5 * (CPG2_ALF + CPG1_ALF)
-        AG_MSQ = 0.5 * (CPG2_MSQ + CPG1_MSQ)
+        dx_alf = -(X(ip) - X(i)) * sa + (Y(ip) - Y(i)) * ca
+        ag_alf = 0.5 * (cpg2_alf + cpg1_alf)
+        ag_msq = 0.5 * (cpg2_msq + cpg1_msq)
         !
-        CL = CL + DX * AG
-        CDP = CDP - DY * AG
-        CM = CM - DX * (AG * AX + DG * DX / 12.0)&
-                - DY * (AG * AY + DG * DY / 12.0)
+        Cl = Cl + dx * ag
+        Cdp = Cdp - dy * ag
+        Cm = Cm - dx * (ag * ax + dg * dx / 12.0) - dy * (ag * ay + dg * dy / 12.0)
         !
-        CL_ALF = CL_ALF + DX * AG_ALF + AG * DX_ALF
-        CL_MSQ = CL_MSQ + DX * AG_MSQ
+        Cl_alf = Cl_alf + dx * ag_alf + ag * dx_alf
+        Cl_msq = Cl_msq + dx * ag_msq
         !
-        CPG1 = CPG2
-        CPG1_ALF = CPG2_ALF
-        CPG1_MSQ = CPG2_MSQ
-    10 CONTINUE
+        cpg1 = cpg2
+        cpg1_alf = cpg2_alf
+        cpg1_msq = cpg2_msq
+    enddo
     !
-    RETURN
-END
+end subroutine clcalc
+!*==CDCALC.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! CLCALC
 
 
 
-SUBROUTINE CDCALC
+subroutine cdcalc
     use m_spline
     use i_xfoil
+    implicit none
     !
-    SA = SIN(ALFA)
-    CA = COS(ALFA)
+    !*** Start of declarations rewritten by SPAG
     !
-    IF(LVISC .AND. LBLINI) THEN
+    ! Local variables
+    !
+    real :: ca, dx, sa, shwake, thwake, uewake, urat
+    integer :: i, ibl, im, is
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    sa = sin(ALFa)
+    ca = cos(ALFa)
+    !
+    if (LVIsc .and. LBLini) then
         !
         !----- set variables at the end of the wake
-        THWAKE = THET(NBL(2), 2)
-        URAT = UEDG(NBL(2), 2) / QINF
-        UEWAKE = UEDG(NBL(2), 2) * (1.0 - TKLAM) / (1.0 - TKLAM * URAT**2)
-        SHWAKE = DSTR(NBL(2), 2) / THET(NBL(2), 2)
+        thwake = THEt(NBL(2), 2)
+        urat = UEDg(NBL(2), 2) / QINf
+        uewake = UEDg(NBL(2), 2) * (1.0 - TKLam) / (1.0 - TKLam * urat**2)
+        shwake = DSTr(NBL(2), 2) / THEt(NBL(2), 2)
         !
         !----- extrapolate wake to downstream infinity using Squire-Young relation
         !      (reduces errors of the wake not being long enough)
-        CD = 2.0 * THWAKE * (UEWAKE / QINF)**(0.5 * (5.0 + SHWAKE))
+        CD = 2.0 * thwake * (uewake / QINf)**(0.5 * (5.0 + shwake))
         !
-    ELSE
+    else
         !
         CD = 0.0
         !
-    ENDIF
+    endif
     !
     !---- calculate friction drag coefficient
     CDF = 0.0
-    DO 20 IS = 1, 2
-        DO 205 IBL = 3, IBLTE(IS)
-            I = IPAN(IBL, IS)
-            IM = IPAN(IBL - 1, IS)
-            DX = (X(I) - X(IM)) * CA + (Y(I) - Y(IM)) * SA
-            CDF = CDF + 0.5 * (TAU(IBL, IS) + TAU(IBL - 1, IS)) * DX * 2.0 / QINF**2
-        205    CONTINUE
-    20   CONTINUE
+    do is = 1, 2
+        do ibl = 3, IBLte(is)
+            i = IPAn(ibl, is)
+            im = IPAn(ibl - 1, is)
+            dx = (X(i) - X(im)) * ca + (Y(i) - Y(im)) * sa
+            CDF = CDF + 0.5 * (TAU(ibl, is) + TAU(ibl - 1, is)) * dx * 2.0 / QINf**2
+        enddo
+    enddo
     !
-    RETURN
-END
+end subroutine cdcalc
+!*==LOAD.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! CDCALC
 
 
 
-SUBROUTINE LOAD(FILNAM, ITYPE)
+subroutine load(Filnam, Itype)
+    use m_spline
+    use i_xfoil
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    character(*) :: Filnam
+    integer :: Itype
+    intent (in) Filnam
+    !
+    ! Local variables
+    !
+    real :: area, xble, xbte, xinl, xout, xtmp, yble, ybot, ybte, ytmp, ytop
+    integer :: i, ip, kdot, lu
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !------------------------------------------------------
     !     Reads airfoil file into buffer airfoil
     !     and does various initial processesing on it.
     !------------------------------------------------------
-    use m_spline
-    use i_xfoil
-    CHARACTER*(*) FILNAM
     !
-    FNAME = FILNAM
-    IF(FNAME(1:1) .EQ. ' ') CALL ASKS('Enter filename^', FNAME)
+    FNAme = Filnam
+    if (FNAme(1:1)==' ') call asks('Enter filename^', FNAme)
     !
-    LU = 9
-    CALL AREAD(LU, FNAME, IBX, XB, YB, NB, NAME, ISPARS, ITYPE, 1)
-    IF(ITYPE.EQ.0) RETURN
+    lu = 9
+    call aread(lu, FNAme, IBX, XB, YB, NB, NAMe, ISPars, Itype, 1)
+    if (Itype==0) return
     !
-    IF(ITYPE.EQ.1) CALL ASKS('Enter airfoil name^', NAME)
-    CALL STRIP(NAME, NNAME)
+    if (Itype==1) call asks('Enter airfoil name^', NAMe)
+    call strip(NAMe, NNAme)
     !
     !---- set default prefix for other filenames
-    KDOT = INDEX(FNAME, '.')
-    IF(KDOT.EQ.0) THEN
-        PREFIX = FNAME
-    ELSE
-        PREFIX = FNAME(1:KDOT - 1)
-    ENDIF
-    CALL STRIP(PREFIX, NPREFIX)
+    kdot = index(FNAme, '.')
+    if (kdot==0) then
+        PREfix = FNAme
+    else
+        PREfix = FNAme(1:kdot - 1)
+    endif
+    call strip(PREfix, NPRefix)
     !
     !---- calculate airfoil area assuming counterclockwise ordering
-    AREA = 0.0
-    DO 50 I = 1, NB
-        IP = I + 1
-        IF(I.EQ.NB) IP = 1
-        AREA = AREA + 0.5 * (YB(I) + YB(IP)) * (XB(I) - XB(IP))
-    50 CONTINUE
+    area = 0.0
+    do i = 1, NB
+        ip = i + 1
+        if (i==NB) ip = 1
+        area = area + 0.5 * (YB(i) + YB(ip)) * (XB(i) - XB(ip))
+    enddo
     !
-    IF(AREA.GE.0.0) THEN
-        LCLOCK = .FALSE.
-        WRITE(*, 1010) NB
-    ELSE
+    if (area>=0.0) then
+        LCLock = .false.
+        write (*, 99001) NB
+        !...............................................................
+        99001 format (/' Number of input coordinate points:', i4/' Counterclockwise ordering')
+    else
         !----- if area is negative (clockwise order), reverse coordinate order
-        LCLOCK = .TRUE.
-        WRITE(*, 1011) NB
-        DO 55 I = 1, NB / 2
-            XTMP = XB(NB - I + 1)
-            YTMP = YB(NB - I + 1)
-            XB(NB - I + 1) = XB(I)
-            YB(NB - I + 1) = YB(I)
-            XB(I) = XTMP
-            YB(I) = YTMP
-        55  CONTINUE
-    ENDIF
+        LCLock = .true.
+        write (*, 99002) NB
+        99002 format (/' Number of input coordinate points:', i4/' Clockwise ordering')
+        do i = 1, NB / 2
+            xtmp = XB(NB - i + 1)
+            ytmp = YB(NB - i + 1)
+            XB(NB - i + 1) = XB(i)
+            YB(NB - i + 1) = YB(i)
+            XB(i) = xtmp
+            YB(i) = ytmp
+        enddo
+    endif
     !
-    IF(LNORM) THEN
-        CALL NORM(XB, XBP, YB, YBP, SB, NB)
-        WRITE(*, 1020)
-    ENDIF
+    if (LNOrm) then
+        call norm(XB, XBP, YB, YBP, SB, NB)
+        write (*, 99003)
+        99003 format (/' Airfoil has been normalized')
+    endif
     !
-    CALL SCALC(XB, YB, SB, NB)
-    CALL SEGSPL(XB, XBP, SB, NB)
-    CALL SEGSPL(YB, YBP, SB, NB)
+    call scalc(XB, YB, SB, NB)
+    call segspl(XB, XBP, SB, NB)
+    call segspl(YB, YBP, SB, NB)
     !
-    CALL GEOPAR(XB, XBP, YB, YBP, SB, NB, W1, &
-            SBLE, CHORDB, AREAB, RADBLE, ANGBTE, &
-            EI11BA, EI22BA, APX1BA, APX2BA, &
-            EI11BT, EI22BT, APX1BT, APX2BT, &
-            THICKB, CAMBRB)
+    call geopar(XB, XBP, YB, YBP, SB, NB, W1, SBLe, CHOrdb, AREab,&
+            RADble, ANGbte, EI11ba, EI22ba, APX1ba, APX2ba, EI11bt, EI22bt, APX1bt, &
+            & APX2bt, THIckb, CAMbrb)
     !
-    XBLE = SEVAL(SBLE, XB, XBP, SB, NB)
-    YBLE = SEVAL(SBLE, YB, YBP, SB, NB)
-    XBTE = 0.5 * (XB(1) + XB(NB))
-    YBTE = 0.5 * (YB(1) + YB(NB))
+    xble = seval(SBLe, XB, XBP, SB, NB)
+    yble = seval(SBLe, YB, YBP, SB, NB)
+    xbte = 0.5 * (XB(1) + XB(NB))
+    ybte = 0.5 * (YB(1) + YB(NB))
     !
-    WRITE(*, 1050) XBLE, YBLE, CHORDB, &
-            XBTE, YBTE
+    write (*, 99004) xble, yble, CHOrdb, xbte, ybte
+    99004 format (/'  LE  x,y  =', 2F10.5, '  |   Chord =', f10.5/'  TE  x,y  =', 2F10.5, '  |')
     !
     !---- set reasonable MSES domain parameters for non-MSES coordinate file
-    IF(ITYPE.LE.2 .AND. ISPARS.EQ.' ') THEN
-        XBLE = SEVAL(SBLE, XB, XBP, SB, NB)
-        YBLE = SEVAL(SBLE, YB, YBP, SB, NB)
-        XINL = XBLE - 2.0 * CHORDB
-        XOUT = XBLE + 3.0 * CHORDB
-        YBOT = YBLE - 2.5 * CHORDB
-        YTOP = YBLE + 3.5 * CHORDB
-        XINL = AINT(20.0 * ABS(XINL / CHORDB) + 0.5) / 20.0 * SIGN(CHORDB, XINL)
-        XOUT = AINT(20.0 * ABS(XOUT / CHORDB) + 0.5) / 20.0 * SIGN(CHORDB, XOUT)
-        YBOT = AINT(20.0 * ABS(YBOT / CHORDB) + 0.5) / 20.0 * SIGN(CHORDB, YBOT)
-        YTOP = AINT(20.0 * ABS(YTOP / CHORDB) + 0.5) / 20.0 * SIGN(CHORDB, YTOP)
-        WRITE(ISPARS, 1005) XINL, XOUT, YBOT, YTOP
-        1005   FORMAT(1X, 4F8.2)
-    ENDIF
+    if (Itype<=2 .and. ISPars==' ') then
+        xble = seval(SBLe, XB, XBP, SB, NB)
+        yble = seval(SBLe, YB, YBP, SB, NB)
+        xinl = xble - 2.0 * CHOrdb
+        xout = xble + 3.0 * CHOrdb
+        ybot = yble - 2.5 * CHOrdb
+        ytop = yble + 3.5 * CHOrdb
+        xinl = aint(20.0 * abs(xinl / CHOrdb) + 0.5) / 20.0 * sign(CHOrdb, xinl)
+        xout = aint(20.0 * abs(xout / CHOrdb) + 0.5) / 20.0 * sign(CHOrdb, xout)
+        ybot = aint(20.0 * abs(ybot / CHOrdb) + 0.5) / 20.0 * sign(CHOrdb, ybot)
+        ytop = aint(20.0 * abs(ytop / CHOrdb) + 0.5) / 20.0 * sign(CHOrdb, ytop)
+        write (ISPars, 99005) xinl, xout, ybot, ytop
+        99005 format (1x, 4F8.2)
+    endif
     !
     !---- wipe out old flap hinge location
     XBF = 0.0
     YBF = 0.0
-    LBFLAP = .FALSE.
+    LBFlap = .false.
     !
     !---- wipe out off-design alphas, CLs
     !c      NALOFF = 0
     !c      NCLOFF = 0
     !
-    RETURN
-    !...............................................................
-    1010 FORMAT(/' Number of input coordinate points:', I4&
-            /' Counterclockwise ordering')
-    1011 FORMAT(/' Number of input coordinate points:', I4&
-            /' Clockwise ordering')
-    1020 FORMAT(/' Airfoil has been normalized')
-    1050 FORMAT(/'  LE  x,y  =', 2F10.5, '  |   Chord =', F10.5&
-            /'  TE  x,y  =', 2F10.5, '  |')
-END
+end subroutine load
+!*==SAVE.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! LOAD
 
 
 
-SUBROUTINE SAVE(IFTYP, FNAME1)
-    !--------------------------------
-    !     Writes out current airfoil 
-    !--------------------------------
+subroutine save(Iftyp, Fname1)
     use m_spline
     use i_xfoil
-    CHARACTER*(*) FNAME1
+    implicit none
     !
-    CHARACTER*1 ANS, DELIM
-    CHARACTER*128 LINE
+    !*** Start of declarations rewritten by SPAG
     !
-    IF    (KDELIM.EQ.0) THEN
-        DELIM = ' '
-    ELSEIF(KDELIM.EQ.1) THEN
-        DELIM = ','
-    ELSEIF(KDELIM.EQ.2) THEN
-        DELIM = CHAR(9)
-    ELSE
-        WRITE(*, *) '? Illegal delimiter.  Using blank.'
-        DELIM = ' '
-    ENDIF
+    ! Dummy arguments
+    !
+    character(*) :: Fname1
+    integer :: Iftyp
+    intent (in) Fname1, Iftyp
+    !
+    ! Local variables
+    !
+    character(1) :: ans, delim
+    integer :: i, ibeg, iend, incr, k, lu, nline
+    character(128) :: line
+    !
+    !*** End of declarations rewritten by SPAG
     !
     !
-    LU = 2
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !--------------------------------
+    !     Writes out current airfoil
+    !--------------------------------
+    !
+    !
+    if (KDElim==0) then
+        delim = ' '
+    elseif (KDElim==1) then
+        delim = ','
+    elseif (KDElim==2) then
+        delim = char(9)
+    else
+        write (*, *) '? Illegal delimiter.  Using blank.'
+        delim = ' '
+    endif
+    !
+    !
+    lu = 2
     !
     !---- get output filename if it was not supplied
-    IF(FNAME1(1:1) .NE. ' ') THEN
-        FNAME = FNAME1
-    ELSE
-        CALL ASKS('Enter output filename^', FNAME)
-    ENDIF
+    if (Fname1(1:1)/=' ') then
+        FNAme = Fname1
+    else
+        call asks('Enter output filename^', FNAme)
+    endif
     !
-    OPEN(LU, FILE = FNAME, STATUS = 'OLD', ERR = 5)
-    WRITE(*, *)
-    WRITE(*, *) 'Output file exists.  Overwrite?  Y'
-    READ(*, 1000) ANS
-    IF(INDEX('Nn', ANS).EQ.0) GO TO 6
+    open (lu, file = FNAme, status = 'OLD', err = 100)
+    write (*, *)
+    write (*, *) 'Output file exists.  Overwrite?  Y'
+    read (*, 99004) ans
+    if (index('Nn', ans)==0) goto 200
     !
-    CLOSE(LU)
-    WRITE(*, *) 'Current airfoil not saved.'
-    RETURN
+    close (lu)
+    write (*, *) 'Current airfoil not saved.'
+    return
     !
-    5    OPEN(LU, FILE = FNAME, STATUS = 'NEW', ERR = 90)
-    6    REWIND(LU)
+    100  open (lu, file = FNAme, status = 'NEW', err = 300)
+    200  rewind (lu)
     !
-    IF(IFTYP.GE.1) THEN
-        !----- write name to first line
-        WRITE(LU, 1000) NAME(1:NNAME)
-    ENDIF
+    !----- write name to first line
+    if (Iftyp>=1) write (lu, 99004) NAMe(1:NNAme)
     !
-    IF(IFTYP.GE.2) THEN
+    if (Iftyp>=2) then
         !----- write MSES domain parameters to second line
-        DO K = 80, 1, -1
-            IF(INDEX(ISPARS(K:K), ' ') .NE. 1) GO TO 11
-        ENDDO
-        11    CONTINUE
+        do k = 80, 1, -1
+            if (index(ISPars(k:k), ' ')/=1) exit
+        enddo
         !
-        WRITE(LU, 1000) ISPARS(1:K)
-    ENDIF
+        write (lu, 99004) ISPars(1:k)
+    endif
     !
-    IF(LCLOCK) THEN
+    if (LCLock) then
         !----- write out in clockwise order (reversed from internal XFOIL order)
-        IBEG = N
-        IEND = 1
-        INCR = -1
-    ELSE
+        ibeg = N
+        iend = 1
+        incr = -1
+    else
         !----- write out in counterclockwise order (same as internal XFOIL order)
-        IBEG = 1
-        IEND = N
-        INCR = 1
-    ENDIF
+        ibeg = 1
+        iend = N
+        incr = 1
+    endif
     !
-    IF(IFTYP.EQ.-1) THEN
-        DO I = IBEG, IEND, INCR
-            WRITE(LU, 1400) INT(X(I) + SIGN(0.5, X(I))), &
-                    INT(Y(I) + SIGN(0.5, Y(I)))
-        ENDDO
+    if (Iftyp==-1) then
+        do i = ibeg, iend, incr
+            write (lu, 99001) int(X(i) + sign(0.5, X(i))), int(Y(i) + sign(0.5, Y(i)))
+            99001  format (1x, i12, i12)
+        enddo
         !
-    ELSE
-        DO I = IBEG, IEND, INCR
-            IF(KDELIM .EQ. 0) THEN
-                WRITE(LU, 1100) X(I), Y(I)
+    else
+        do i = ibeg, iend, incr
+            if (KDElim==0) then
+                write (lu, 99002) X(i), Y(i)
+                99002      format (1x, g15.7, g15.7)
                 !
-            ELSE
-                WRITE(LINE, 1200) X(I), DELIM, Y(I)
-                CALL BSTRIP(LINE, NLINE)
-                WRITE(LU, 1000) LINE(1:NLINE)
-            ENDIF
-        ENDDO
-    ENDIF
+            else
+                write (line, 99003) X(i), delim, Y(i)
+                99003      format (1x, f10.6, a, f10.6)
+                call bstrip(line, nline)
+                write (lu, 99004) line(1:nline)
+            endif
+        enddo
+    endif
     !
-    CLOSE(LU)
-    RETURN
+    close (lu)
+    return
     !
-    90   WRITE(*, *) 'Bad filename.'
-    WRITE(*, *) 'Current airfoil not saved.'
-    RETURN
+    300  write (*, *) 'Bad filename.'
+    write (*, *) 'Current airfoil not saved.'
+    return
     !
-    1000 FORMAT(A)
-    1100 FORMAT(1X, G15.7, G15.7)
-    1200 FORMAT(1X, F10.6, A, F10.6)
-    1400 FORMAT(1X, I12, I12)
-END
+    99004 format (a)
+end subroutine save
+!*==ROTATE.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! SAVE
 
 
 
-SUBROUTINE ROTATE(X, Y, N, ALFA)
+subroutine rotate(X, Y, N, Alfa)
     use m_spline
-    DIMENSION X(N), Y(N)
+    implicit none
     !
-    SA = SIN(ALFA)
-    CA = COS(ALFA)
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    real :: Alfa
+    integer :: N
+    real, dimension(N) :: X, Y
+    intent (in) Alfa, N
+    intent (inout) X, Y
+    !
+    ! Local variables
+    !
+    real :: ca, sa, xoff, xt, yoff, yt
+    integer :: i
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    sa = sin(Alfa)
+    ca = cos(Alfa)
     !CC      XOFF = 0.25*(1.0-CA)
     !CC      YOFF = 0.25*SA
-    XOFF = 0.
-    YOFF = 0.
-    DO 8 I = 1, N
-        XT = X(I)
-        YT = Y(I)
-        X(I) = CA * XT + SA * YT + XOFF
-        Y(I) = CA * YT - SA * XT + YOFF
-    8 CONTINUE
+    xoff = 0.
+    yoff = 0.
+    do i = 1, N
+        xt = X(i)
+        yt = Y(i)
+        X(i) = ca * xt + sa * yt + xoff
+        Y(i) = ca * yt - sa * xt + yoff
+    enddo
     !
-    RETURN
-END
+end subroutine rotate
+!*==NACA.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 
 
-SUBROUTINE NACA(IDES1)
+subroutine naca(Ides1)
     use m_spline
     use i_xfoil
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    integer :: Ides1
+    intent (in) Ides1
+    !
+    ! Local variables
+    !
+    integer :: ides, itype, nside
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !
     !---- number of points per side
-    NSIDE = IQX / 3
+    nside = IQX / 3
     !
-    IF(IDES1 .LE. 0) THEN
-        CALL ASKI('Enter NACA 4 or 5-digit airfoil designation^', IDES)
-    ELSE
-        IDES = IDES1
-    ENDIF
+    if (Ides1<=0) then
+        call aski('Enter NACA 4 or 5-digit airfoil designation^', ides)
+    else
+        ides = Ides1
+    endif
     !
-    ITYPE = 0
-    IF(IDES.LE.25099) ITYPE = 5
-    IF(IDES.LE.9999) ITYPE = 4
+    itype = 0
+    if (ides<=25099) itype = 5
+    if (ides<=9999) itype = 4
     !
-    IF(ITYPE.EQ.0) THEN
-        WRITE(*, *) 'This designation not implemented.'
-        RETURN
-    ENDIF
+    if (itype==0) then
+        write (*, *) 'This designation not implemented.'
+        return
+    endif
     !
-    IF(ITYPE.EQ.4) CALL NACA4(IDES, W1, W2, W3, NSIDE, XB, YB, NB, NAME)
-    IF(ITYPE.EQ.5) CALL NACA5(IDES, W1, W2, W3, NSIDE, XB, YB, NB, NAME)
-    CALL STRIP(NAME, NNAME)
+    if (itype==4) call naca4(ides, W1, W2, W3, nside, XB, YB, NB, NAMe)
+    if (itype==5) call naca5(ides, W1, W2, W3, nside, XB, YB, NB, NAMe)
+    call strip(NAMe, NNAme)
     !
     !---- see if routines didn't recognize designator
-    IF(IDES.EQ.0) RETURN
+    if (ides==0) return
     !
-    LCLOCK = .FALSE.
+    LCLock = .false.
     !
     XBF = 0.0
     YBF = 0.0
-    LBFLAP = .FALSE.
+    LBFlap = .false.
     !
-    CALL SCALC(XB, YB, SB, NB)
-    CALL SEGSPL(XB, XBP, SB, NB)
-    CALL SEGSPL(YB, YBP, SB, NB)
+    call scalc(XB, YB, SB, NB)
+    call segspl(XB, XBP, SB, NB)
+    call segspl(YB, YBP, SB, NB)
     !
-    CALL GEOPAR(XB, XBP, YB, YBP, SB, NB, W1, &
-            SBLE, CHORDB, AREAB, RADBLE, ANGBTE, &
-            EI11BA, EI22BA, APX1BA, APX2BA, &
-            EI11BT, EI22BT, APX1BT, APX2BT, &
-            THICKB, CAMBRB)
+    call geopar(XB, XBP, YB, YBP, SB, NB, W1, SBLe, CHOrdb, AREab,&
+            RADble, ANGbte, EI11ba, EI22ba, APX1ba, APX2ba, EI11bt, EI22bt, APX1bt, &
+            & APX2bt, THIckb, CAMbrb)
     !
-    WRITE(*, 1200) NB
-    1200 FORMAT(/' Buffer airfoil set using', I4, ' points')
+    write (*, 99001) NB
+    99001 format (/' Buffer airfoil set using', i4, ' points')
     !
     !---- set paneling
-    CALL PANGEN(.TRUE.)
+    call pangen(.true.)
     !
-    RETURN
-END
+end subroutine naca
+!*==PANGEN.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! NACA
 
 
-SUBROUTINE PANGEN(SHOPAR)
+subroutine pangen(Shopar)
+    use m_spline
+    use i_xfoil
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    logical :: Shopar
+    intent (in) Shopar
+    !
+    ! Local variables
+    !
+    real :: cavm, cavm_s1, cavm_s2, cavp, cavp_s2, cavp_s3, cc, chbsq, cv1, cv2, cv3, cvavg, cvk, cvle, &
+            & cvmax, cvs1, cvs2, cvs3, cvsum, cvte, dds, dmax, ds, dsavg, dsavg1, dsavg2, dsm, dsmax, dsmin, &
+            & dso, dsp, dsrat, fm, fp, frac, gap, rdste, rez, rtf, sbcorn, sbk, sbref, smool, smoosq, &
+            & xbcorn, xble, xbte, xoc, ybcorn, yble, ybte
+    integer :: i, ib, ible, ind, ipfac, iter, j, k, ncorn, nfrac1, nk, nn, nn1, nn2
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Dummy arguments
+    !
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !---------------------------------------------------
     !     Set paneling distribution from buffer airfoil
     !     geometry, thus creating current airfoil.
-    ! 
+    !
     !     If REFINE=True, bunch points at x=XSREF on
     !     top side and at x=XPREF on bottom side
     !     by setting a fictitious local curvature of
     !     CTRRAT*(LE curvature) there.
     !---------------------------------------------------
-    use m_spline
-    use i_xfoil
-    LOGICAL SHOPAR
     !
-    IF(NB.LT.2) THEN
-        WRITE(*, *) 'PANGEN: Buffer airfoil not available.'
+    if (NB<2) then
+        write (*, *) 'PANGEN: Buffer airfoil not available.'
         N = 0
-        RETURN
-    ENDIF
+        return
+    endif
     !
     !---- Number of temporary nodes for panel distribution calculation
     !       exceeds the specified panel number by factor of IPFAC.
-    IPFAC = 3
-    IPFAC = 5
+    ipfac = 3
+    ipfac = 5
     !
     !---- number of airfoil panel points
-    N = NPAN
+    N = NPAn
     !
     !C---- number of wake points
     !      NW = NPAN/8 + 2
@@ -1410,64 +1725,63 @@ SUBROUTINE PANGEN(SHOPAR)
     !      ENDIF
     !
     !---- set arc length spline parameter
-    CALL SCALC(XB, YB, SB, NB)
+    call scalc(XB, YB, SB, NB)
     !
     !---- spline raw airfoil coordinates
-    CALL SEGSPL(XB, XBP, SB, NB)
-    CALL SEGSPL(YB, YBP, SB, NB)
+    call segspl(XB, XBP, SB, NB)
+    call segspl(YB, YBP, SB, NB)
     !
     !---- normalizing length (~ chord)
-    SBREF = 0.5 * (SB(NB) - SB(1))
+    sbref = 0.5 * (SB(NB) - SB(1))
     !
     !---- set up curvature array
-    DO I = 1, NB
-        W5(I) = ABS(CURV(SB(I), XB, XBP, YB, YBP, SB, NB)) * SBREF
-    ENDDO
+    do i = 1, NB
+        W5(i) = abs(curv(SB(i), XB, XBP, YB, YBP, SB, NB)) * sbref
+    enddo
     !
     !---- locate LE point arc length value and the normalized curvature there
-    CALL LEFIND(SBLE, XB, XBP, YB, YBP, SB, NB)
-    CVLE = ABS(CURV(SBLE, XB, XBP, YB, YBP, SB, NB)) * SBREF
+    call lefind(SBLe, XB, XBP, YB, YBP, SB, NB)
+    cvle = abs(curv(SBLe, XB, XBP, YB, YBP, SB, NB)) * sbref
     !
     !---- check for doubled point (sharp corner) at LE
-    IBLE = 0
-    DO I = 1, NB - 1
-        IF(SBLE.EQ.SB(I) .AND. SBLE.EQ.SB(I + 1)) THEN
-            IBLE = I
-            WRITE(*, *)
-            WRITE(*, *) 'Sharp leading edge'
-            GO TO 21
-        ENDIF
-    ENDDO
-    21   CONTINUE
+    ible = 0
+    do i = 1, NB - 1
+        if (SBLe==SB(i) .and. SBLe==SB(i + 1)) then
+            ible = i
+            write (*, *)
+            write (*, *) 'Sharp leading edge'
+            exit
+        endif
+    enddo
     !
     !---- set LE, TE points
-    XBLE = SEVAL(SBLE, XB, XBP, SB, NB)
-    YBLE = SEVAL(SBLE, YB, YBP, SB, NB)
-    XBTE = 0.5 * (XB(1) + XB(NB))
-    YBTE = 0.5 * (YB(1) + YB(NB))
-    CHBSQ = (XBTE - XBLE)**2 + (YBTE - YBLE)**2
+    xble = seval(SBLe, XB, XBP, SB, NB)
+    yble = seval(SBLe, YB, YBP, SB, NB)
+    xbte = 0.5 * (XB(1) + XB(NB))
+    ybte = 0.5 * (YB(1) + YB(NB))
+    chbsq = (xbte - xble)**2 + (ybte - yble)**2
     !
     !---- set average curvature over 2*NK+1 points within Rcurv of LE point
-    NK = 3
-    CVSUM = 0.
-    DO K = -NK, NK
-        FRAC = FLOAT(K) / FLOAT(NK)
-        SBK = SBLE + FRAC * SBREF / MAX(CVLE, 20.0)
-        CVK = ABS(CURV(SBK, XB, XBP, YB, YBP, SB, NB)) * SBREF
-        CVSUM = CVSUM + CVK
-    ENDDO
-    CVAVG = CVSUM / FLOAT(2 * NK + 1)
+    nk = 3
+    cvsum = 0.
+    do k = -nk, nk
+        frac = float(k) / float(nk)
+        sbk = SBLe + frac * sbref / max(cvle, 20.0)
+        cvk = abs(curv(sbk, XB, XBP, YB, YBP, SB, NB)) * sbref
+        cvsum = cvsum + cvk
+    enddo
+    cvavg = cvsum / float(2 * nk + 1)
     !
     !---- dummy curvature for sharp LE
-    IF(IBLE.NE.0) CVAVG = 10.0
+    if (ible/=0) cvavg = 10.0
     !
     !---- set curvature attraction coefficient actually used
-    CC = 6.0 * CVPAR
+    cc = 6.0 * CVPar
     !
     !---- set artificial curvature at TE to bunch panels there
-    CVTE = CVAVG * CTERAT
-    W5(1) = CVTE
-    W5(NB) = CVTE
+    cvte = cvavg * CTErat
+    W5(1) = cvte
+    W5(NB) = cvte
     !
     !
     !**** smooth curvature array for smoother panel size distribution  ****
@@ -1475,856 +1789,890 @@ SUBROUTINE PANGEN(SHOPAR)
     !CC      CALL ASKR('Enter curvature smoothing length/c^',SMOOL)
     !CC      SMOOL = 0.010
     !
-    !---- set smoothing length = 1 / averaged LE curvature, but 
+    !---- set smoothing length = 1 / averaged LE curvature, but
     !-    no more than 5% of chord and no less than 1/4 average panel spacing
-    SMOOL = MAX(1.0 / MAX(CVAVG, 20.0), 0.25 / FLOAT(NPAN / 2))
+    smool = max(1.0 / max(cvavg, 20.0), 0.25 / float(NPAn / 2))
     !
-    SMOOSQ = (SMOOL * SBREF) ** 2
+    smoosq = (smool * sbref)**2
     !
     !---- set up tri-diagonal system for smoothed curvatures
     W2(1) = 1.0
     W3(1) = 0.0
-    DO I = 2, NB - 1
-        DSM = SB(I) - SB(I - 1)
-        DSP = SB(I + 1) - SB(I)
-        DSO = 0.5 * (SB(I + 1) - SB(I - 1))
+    do i = 2, NB - 1
+        dsm = SB(i) - SB(i - 1)
+        dsp = SB(i + 1) - SB(i)
+        dso = 0.5 * (SB(i + 1) - SB(i - 1))
         !
-        IF(DSM.EQ.0.0 .OR. DSP.EQ.0.0) THEN
+        if (dsm==0.0 .or. dsp==0.0) then
             !------- leave curvature at corner point unchanged
-            W1(I) = 0.0
-            W2(I) = 1.0
-            W3(I) = 0.0
-        ELSE
-            W1(I) = SMOOSQ * (- 1.0 / DSM) / DSO
-            W2(I) = SMOOSQ * (1.0 / DSP + 1.0 / DSM) / DSO + 1.0
-            W3(I) = SMOOSQ * (-1.0 / DSP) / DSO
-        ENDIF
-    ENDDO
+            W1(i) = 0.0
+            W2(i) = 1.0
+            W3(i) = 0.0
+        else
+            W1(i) = smoosq * (-1.0 / dsm) / dso
+            W2(i) = smoosq * (1.0 / dsp + 1.0 / dsm) / dso + 1.0
+            W3(i) = smoosq * (-1.0 / dsp) / dso
+        endif
+    enddo
     !
     W1(NB) = 0.0
     W2(NB) = 1.0
     !
     !---- fix curvature at LE point by modifying equations adjacent to LE
-    DO I = 2, NB - 1
-        IF(SB(I).EQ.SBLE .OR. I.EQ.IBLE .OR. I.EQ.IBLE + 1) THEN
+    do i = 2, NB - 1
+        if (SB(i)==SBLe .or. i==ible .or. i==ible + 1) then
             !------- if node falls right on LE point, fix curvature there
-            W1(I) = 0.
-            W2(I) = 1.0
-            W3(I) = 0.
-            W5(I) = CVLE
-        ELSE IF(SB(I - 1).LT.SBLE .AND. SB(I).GT.SBLE) THEN
+            W1(i) = 0.
+            W2(i) = 1.0
+            W3(i) = 0.
+            W5(i) = cvle
+        elseif (SB(i - 1)<SBLe .and. SB(i)>SBLe) then
             !------- modify equation at node just before LE point
-            DSM = SB(I - 1) - SB(I - 2)
-            DSP = SBLE - SB(I - 1)
-            DSO = 0.5 * (SBLE - SB(I - 2))
+            dsm = SB(i - 1) - SB(i - 2)
+            dsp = SBLe - SB(i - 1)
+            dso = 0.5 * (SBLe - SB(i - 2))
             !
-            W1(I - 1) = SMOOSQ * (- 1.0 / DSM) / DSO
-            W2(I - 1) = SMOOSQ * (1.0 / DSP + 1.0 / DSM) / DSO + 1.0
-            W3(I - 1) = 0.
-            W5(I - 1) = W5(I - 1) + SMOOSQ * CVLE / (DSP * DSO)
+            W1(i - 1) = smoosq * (-1.0 / dsm) / dso
+            W2(i - 1) = smoosq * (1.0 / dsp + 1.0 / dsm) / dso + 1.0
+            W3(i - 1) = 0.
+            W5(i - 1) = W5(i - 1) + smoosq * cvle / (dsp * dso)
             !
             !------- modify equation at node just after LE point
-            DSM = SB(I) - SBLE
-            DSP = SB(I + 1) - SB(I)
-            DSO = 0.5 * (SB(I + 1) - SBLE)
-            W1(I) = 0.
-            W2(I) = SMOOSQ * (1.0 / DSP + 1.0 / DSM) / DSO + 1.0
-            W3(I) = SMOOSQ * (-1.0 / DSP) / DSO
-            W5(I) = W5(I) + SMOOSQ * CVLE / (DSM * DSO)
+            dsm = SB(i) - SBLe
+            dsp = SB(i + 1) - SB(i)
+            dso = 0.5 * (SB(i + 1) - SBLe)
+            W1(i) = 0.
+            W2(i) = smoosq * (1.0 / dsp + 1.0 / dsm) / dso + 1.0
+            W3(i) = smoosq * (-1.0 / dsp) / dso
+            W5(i) = W5(i) + smoosq * cvle / (dsm * dso)
             !
-            GO TO 51
-        ENDIF
-    ENDDO
-    51 CONTINUE
+            exit
+        endif
+    enddo
     !
     !---- set artificial curvature at bunching points and fix it there
-    DO I = 2, NB - 1
+    do i = 2, NB - 1
         !------ chord-based x/c coordinate
-        XOC = ((XB(I) - XBLE) * (XBTE - XBLE)&
-                + (YB(I) - YBLE) * (YBTE - YBLE)) / CHBSQ
+        xoc = ((XB(i) - xble) * (xbte - xble) + (YB(i) - yble) * (ybte - yble)) / chbsq
         !
-        IF(SB(I).LT.SBLE) THEN
+        if (SB(i)<SBLe) then
             !------- check if top side point is in refinement area
-            IF(XOC.GT.XSREF1 .AND. XOC.LT.XSREF2) THEN
-                W1(I) = 0.
-                W2(I) = 1.0
-                W3(I) = 0.
-                W5(I) = CVLE * CTRRAT
-            ENDIF
-        ELSE
+            if (xoc>XSRef1 .and. xoc<XSRef2) then
+                W1(i) = 0.
+                W2(i) = 1.0
+                W3(i) = 0.
+                W5(i) = cvle * CTRrat
+            endif
             !------- check if bottom side point is in refinement area
-            IF(XOC.GT.XPREF1 .AND. XOC.LT.XPREF2) THEN
-                W1(I) = 0.
-                W2(I) = 1.0
-                W3(I) = 0.
-                W5(I) = CVLE * CTRRAT
-            ENDIF
-        ENDIF
-    ENDDO
+        elseif (xoc>XPRef1 .and. xoc<XPRef2) then
+            W1(i) = 0.
+            W2(i) = 1.0
+            W3(i) = 0.
+            W5(i) = cvle * CTRrat
+        endif
+    enddo
     !
     !---- solve for smoothed curvature array W5
-    IF(IBLE.EQ.0) THEN
-        CALL TRISOL(W2, W1, W3, W5, NB)
-    ELSE
-        I = 1
-        CALL TRISOL(W2(I), W1(I), W3(I), W5(I), IBLE)
-        I = IBLE + 1
-        CALL TRISOL(W2(I), W1(I), W3(I), W5(I), NB - IBLE)
-    ENDIF
+    if (ible==0) then
+        call trisol(W2, W1, W3, W5, NB)
+    else
+        i = 1
+        call trisol(W2(i), W1(i), W3(i), W5(i), ible)
+        i = ible + 1
+        call trisol(W2(i), W1(i), W3(i), W5(i), NB - ible)
+    endif
     !
     !---- find max curvature
-    CVMAX = 0.
-    DO I = 1, NB
-        CVMAX = MAX(CVMAX, ABS(W5(I)))
-    ENDDO
+    cvmax = 0.
+    do i = 1, NB
+        cvmax = max(cvmax, abs(W5(i)))
+    enddo
     !
     !---- normalize curvature array
-    DO I = 1, NB
-        W5(I) = W5(I) / CVMAX
-    ENDDO
+    do i = 1, NB
+        W5(i) = W5(i) / cvmax
+    enddo
     !
     !---- spline curvature array
-    CALL SEGSPL(W5, W6, SB, NB)
+    call segspl(W5, W6, SB, NB)
     !
     !---- Set initial guess for node positions uniform in s.
-    !     More nodes than specified (by factor of IPFAC) are 
+    !     More nodes than specified (by factor of IPFAC) are
     !     temporarily used  for more reliable convergence.
-    NN = IPFAC * (N - 1) + 1
+    nn = ipfac * (N - 1) + 1
     !
     !---- ratio of lengths of panel at TE to one away from the TE
-    RDSTE = 0.667
-    RTF = (RDSTE - 1.0) * 2.0 + 1.0
+    rdste = 0.667
+    rtf = (rdste - 1.0) * 2.0 + 1.0
     !
-    IF(IBLE.EQ.0) THEN
+    if (ible==0) then
         !
-        DSAVG = (SB(NB) - SB(1)) / (FLOAT(NN - 3) + 2.0 * RTF)
-        SNEW(1) = SB(1)
-        DO I = 2, NN - 1
-            SNEW(I) = SB(1) + DSAVG * (FLOAT(I - 2) + RTF)
-        ENDDO
-        SNEW(NN) = SB(NB)
+        dsavg = (SB(NB) - SB(1)) / (float(nn - 3) + 2.0 * rtf)
+        SNEw(1) = SB(1)
+        do i = 2, nn - 1
+            SNEw(i) = SB(1) + dsavg * (float(i - 2) + rtf)
+        enddo
+        SNEw(nn) = SB(NB)
         !
-    ELSE
+    else
         !
-        NFRAC1 = (N * IBLE) / NB
+        nfrac1 = (N * ible) / NB
         !
-        NN1 = IPFAC * (NFRAC1 - 1) + 1
-        DSAVG1 = (SBLE - SB(1)) / (FLOAT(NN1 - 2) + RTF)
-        SNEW(1) = SB(1)
-        DO I = 2, NN1
-            SNEW(I) = SB(1) + DSAVG1 * (FLOAT(I - 2) + RTF)
-        ENDDO
+        nn1 = ipfac * (nfrac1 - 1) + 1
+        dsavg1 = (SBLe - SB(1)) / (float(nn1 - 2) + rtf)
+        SNEw(1) = SB(1)
+        do i = 2, nn1
+            SNEw(i) = SB(1) + dsavg1 * (float(i - 2) + rtf)
+        enddo
         !
-        NN2 = NN - NN1 + 1
-        DSAVG2 = (SB(NB) - SBLE) / (FLOAT(NN2 - 2) + RTF)
-        DO I = 2, NN2 - 1
-            SNEW(I - 1 + NN1) = SBLE + DSAVG2 * (FLOAT(I - 2) + RTF)
-        ENDDO
-        SNEW(NN) = SB(NB)
+        nn2 = nn - nn1 + 1
+        dsavg2 = (SB(NB) - SBLe) / (float(nn2 - 2) + rtf)
+        do i = 2, nn2 - 1
+            SNEw(i - 1 + nn1) = SBLe + dsavg2 * (float(i - 2) + rtf)
+        enddo
+        SNEw(nn) = SB(NB)
         !
-    ENDIF
+    endif
     !
     !---- Newton iteration loop for new node positions
-    DO 10 ITER = 1, 20
+    do iter = 1, 20
         !
         !------ set up tri-diagonal system for node position deltas
-        CV1 = SEVAL(SNEW(1), W5, W6, SB, NB)
-        CV2 = SEVAL(SNEW(2), W5, W6, SB, NB)
-        CVS1 = DEVAL(SNEW(1), W5, W6, SB, NB)
-        CVS2 = DEVAL(SNEW(2), W5, W6, SB, NB)
+        cv1 = seval(SNEw(1), W5, W6, SB, NB)
+        cv2 = seval(SNEw(2), W5, W6, SB, NB)
+        cvs1 = deval(SNEw(1), W5, W6, SB, NB)
+        cvs2 = deval(SNEw(2), W5, W6, SB, NB)
         !
-        CAVM = SQRT(CV1**2 + CV2**2)
-        IF(CAVM .EQ. 0.0) THEN
-            CAVM_S1 = 0.
-            CAVM_S2 = 0.
-        ELSE
-            CAVM_S1 = CVS1 * CV1 / CAVM
-            CAVM_S2 = CVS2 * CV2 / CAVM
-        ENDIF
+        cavm = sqrt(cv1**2 + cv2**2)
+        if (cavm==0.0) then
+            cavm_s1 = 0.
+            cavm_s2 = 0.
+        else
+            cavm_s1 = cvs1 * cv1 / cavm
+            cavm_s2 = cvs2 * cv2 / cavm
+        endif
         !
-        DO 110 I = 2, NN - 1
-            DSM = SNEW(I) - SNEW(I - 1)
-            DSP = SNEW(I) - SNEW(I + 1)
-            CV3 = SEVAL(SNEW(I + 1), W5, W6, SB, NB)
-            CVS3 = DEVAL(SNEW(I + 1), W5, W6, SB, NB)
+        do i = 2, nn - 1
+            dsm = SNEw(i) - SNEw(i - 1)
+            dsp = SNEw(i) - SNEw(i + 1)
+            cv3 = seval(SNEw(i + 1), W5, W6, SB, NB)
+            cvs3 = deval(SNEw(i + 1), W5, W6, SB, NB)
             !
-            CAVP = SQRT(CV3**2 + CV2**2)
-            IF(CAVP .EQ. 0.0) THEN
-                CAVP_S2 = 0.
-                CAVP_S3 = 0.
-            ELSE
-                CAVP_S2 = CVS2 * CV2 / CAVP
-                CAVP_S3 = CVS3 * CV3 / CAVP
-            ENDIF
+            cavp = sqrt(cv3**2 + cv2**2)
+            if (cavp==0.0) then
+                cavp_s2 = 0.
+                cavp_s3 = 0.
+            else
+                cavp_s2 = cvs2 * cv2 / cavp
+                cavp_s3 = cvs3 * cv3 / cavp
+            endif
             !
-            FM = CC * CAVM + 1.0
-            FP = CC * CAVP + 1.0
+            fm = cc * cavm + 1.0
+            fp = cc * cavp + 1.0
             !
-            REZ = DSP * FP + DSM * FM
+            rez = dsp * fp + dsm * fm
             !
             !-------- lower, main, and upper diagonals
-            W1(I) = -FM + CC * DSM * CAVM_S1
-            W2(I) = FP + FM + CC * (DSP * CAVP_S2 + DSM * CAVM_S2)
-            W3(I) = -FP + CC * DSP * CAVP_S3
+            W1(i) = -fm + cc * dsm * cavm_s1
+            W2(i) = fp + fm + cc * (dsp * cavp_s2 + dsm * cavm_s2)
+            W3(i) = -fp + cc * dsp * cavp_s3
             !
             !-------- residual, requiring that
             !         (1 + C*curv)*deltaS is equal on both sides of node i
-            W4(I) = -REZ
+            W4(i) = -rez
             !
-            CV1 = CV2
-            CV2 = CV3
-            CVS1 = CVS2
-            CVS2 = CVS3
-            CAVM = CAVP
-            CAVM_S1 = CAVP_S2
-            CAVM_S2 = CAVP_S3
-        110   CONTINUE
+            cv1 = cv2
+            cv2 = cv3
+            cvs1 = cvs2
+            cvs2 = cvs3
+            cavm = cavp
+            cavm_s1 = cavp_s2
+            cavm_s2 = cavp_s3
+        enddo
         !
         !------ fix endpoints (at TE)
         W2(1) = 1.0
         W3(1) = 0.0
         W4(1) = 0.0
-        W1(NN) = 0.0
-        W2(NN) = 1.0
-        W4(NN) = 0.0
+        W1(nn) = 0.0
+        W2(nn) = 1.0
+        W4(nn) = 0.0
         !
-        IF(RTF .NE. 1.0) THEN
+        if (rtf/=1.0) then
             !------- fudge equations adjacent to TE to get TE panel length ratio RTF
             !
-            I = 2
-            W4(I) = -((SNEW(I) - SNEW(I - 1)) + RTF * (SNEW(I) - SNEW(I + 1)))
-            W1(I) = -1.0
-            W2(I) = 1.0 + RTF
-            W3(I) = - RTF
+            i = 2
+            W4(i) = -((SNEw(i) - SNEw(i - 1)) + rtf * (SNEw(i) - SNEw(i + 1)))
+            W1(i) = -1.0
+            W2(i) = 1.0 + rtf
+            W3(i) = -rtf
             !
-            I = NN - 1
-            W4(I) = -((SNEW(I) - SNEW(I + 1)) + RTF * (SNEW(I) - SNEW(I - 1)))
-            W3(I) = -1.0
-            W2(I) = 1.0 + RTF
-            W1(I) = - RTF
-        ENDIF
+            i = nn - 1
+            W4(i) = -((SNEw(i) - SNEw(i + 1)) + rtf * (SNEw(i) - SNEw(i - 1)))
+            W3(i) = -1.0
+            W2(i) = 1.0 + rtf
+            W1(i) = -rtf
+        endif
         !
         !
         !------ fix sharp LE point
-        IF(IBLE.NE.0) THEN
-            I = NN1
-            W1(I) = 0.0
-            W2(I) = 1.0
-            W3(I) = 0.0
-            W4(I) = SBLE - SNEW(I)
-        ENDIF
+        if (ible/=0) then
+            i = nn1
+            W1(i) = 0.0
+            W2(i) = 1.0
+            W3(i) = 0.0
+            W4(i) = SBLe - SNEw(i)
+        endif
         !
         !------ solve for changes W4 in node position arc length values
-        CALL TRISOL(W2, W1, W3, W4, NN)
+        call trisol(W2, W1, W3, W4, nn)
         !
         !------ find under-relaxation factor to keep nodes from changing order
         RLX = 1.0
-        DMAX = 0.0
-        DO I = 1, NN - 1
-            DS = SNEW(I + 1) - SNEW(I)
-            DDS = W4(I + 1) - W4(I)
-            DSRAT = 1.0 + RLX * DDS / DS
-            IF(DSRAT.GT.4.0) RLX = (4.0 - 1.0) * DS / DDS
-            IF(DSRAT.LT.0.2) RLX = (0.2 - 1.0) * DS / DDS
-            DMAX = MAX(ABS(W4(I)), DMAX)
-        ENDDO
+        dmax = 0.0
+        do i = 1, nn - 1
+            ds = SNEw(i + 1) - SNEw(i)
+            dds = W4(i + 1) - W4(i)
+            dsrat = 1.0 + RLX * dds / ds
+            if (dsrat>4.0) RLX = (4.0 - 1.0) * ds / dds
+            if (dsrat<0.2) RLX = (0.2 - 1.0) * ds / dds
+            dmax = max(abs(W4(i)), dmax)
+        enddo
         !
         !------ update node position
-        DO I = 2, NN - 1
-            SNEW(I) = SNEW(I) + RLX * W4(I)
-        ENDDO
+        do i = 2, nn - 1
+            SNEw(i) = SNEw(i) + RLX * W4(i)
+        enddo
         !
         !CC        IF(RLX.EQ.1.0) WRITE(*,*) DMAX
         !CC        IF(RLX.NE.1.0) WRITE(*,*) DMAX,'    RLX =',RLX
-        IF(ABS(DMAX).LT.1.E-3) GO TO 11
-    10 CONTINUE
-    WRITE(*, *) 'Paneling convergence failed.  Continuing anyway...'
+        if (abs(dmax)<1.E-3) goto 100
+    enddo
+    write (*, *) 'Paneling convergence failed.  Continuing anyway...'
     !
-    11 CONTINUE
     !
     !---- set new panel node coordinates
-    DO I = 1, N
-        IND = IPFAC * (I - 1) + 1
-        S(I) = SNEW(IND)
-        X(I) = SEVAL(SNEW(IND), XB, XBP, SB, NB)
-        Y(I) = SEVAL(SNEW(IND), YB, YBP, SB, NB)
-    ENDDO
+    100  do i = 1, N
+        ind = ipfac * (i - 1) + 1
+        S(i) = SNEw(ind)
+        X(i) = seval(SNEw(ind), XB, XBP, SB, NB)
+        Y(i) = seval(SNEw(ind), YB, YBP, SB, NB)
+    enddo
     !
     !
     !---- go over buffer airfoil again, checking for corners (double points)
-    NCORN = 0
-    DO 25 IB = 1, NB - 1
-        IF(SB(IB) .EQ. SB(IB + 1)) THEN
+    ncorn = 0
+    do ib = 1, NB - 1
+        if (SB(ib)==SB(ib + 1)) then
             !------- found one !
             !
-            NCORN = NCORN + 1
-            XBCORN = XB(IB)
-            YBCORN = YB(IB)
-            SBCORN = SB(IB)
+            ncorn = ncorn + 1
+            xbcorn = XB(ib)
+            ybcorn = YB(ib)
+            sbcorn = SB(ib)
             !
             !------- find current-airfoil panel which contains corner
-            DO 252 I = 1, N
+            do i = 1, N
                 !
                 !--------- keep stepping until first node past corner
-                IF(S(I) .LE. SBCORN) GO TO 252
+                if (S(i)>sbcorn) then
+                    !
+                    !---------- move remainder of panel nodes to make room for additional node
+                    do j = N, i, -1
+                        X(j + 1) = X(j)
+                        Y(j + 1) = Y(j)
+                        S(j + 1) = S(j)
+                    enddo
+                    N = N + 1
+                    !
+                    if (N>IQX - 1) stop 'PANEL: Too many panels. Increase IQX in XFOIL.INC'
+                    !
+                    X(i) = xbcorn
+                    Y(i) = ybcorn
+                    S(i) = sbcorn
+                    !
+                    !---------- shift nodes adjacent to corner to keep panel sizes comparable
+                    if (i - 2>=1) then
+                        S(i - 1) = 0.5 * (S(i) + S(i - 2))
+                        X(i - 1) = seval(S(i - 1), XB, XBP, SB, NB)
+                        Y(i - 1) = seval(S(i - 1), YB, YBP, SB, NB)
+                    endif
+                    !
+                    if (i + 2<=N) then
+                        S(i + 1) = 0.5 * (S(i) + S(i + 2))
+                        X(i + 1) = seval(S(i + 1), XB, XBP, SB, NB)
+                        Y(i + 1) = seval(S(i + 1), YB, YBP, SB, NB)
+                    endif
+                    !
+                    !---------- go on to next input geometry point to check for corner
+                    exit
+                endif
                 !
-                !---------- move remainder of panel nodes to make room for additional node
-                DO 2522 J = N, I, -1
-                    X(J + 1) = X(J)
-                    Y(J + 1) = Y(J)
-                    S(J + 1) = S(J)
-                2522       CONTINUE
-                N = N + 1
-                !
-                IF(N .GT. IQX - 1)&
-                        STOP 'PANEL: Too many panels. Increase IQX in XFOIL.INC'
-                !
-                X(I) = XBCORN
-                Y(I) = YBCORN
-                S(I) = SBCORN
-                !
-                !---------- shift nodes adjacent to corner to keep panel sizes comparable
-                IF(I - 2 .GE. 1) THEN
-                    S(I - 1) = 0.5 * (S(I) + S(I - 2))
-                    X(I - 1) = SEVAL(S(I - 1), XB, XBP, SB, NB)
-                    Y(I - 1) = SEVAL(S(I - 1), YB, YBP, SB, NB)
-                ENDIF
-                !
-                IF(I + 2 .LE. N) THEN
-                    S(I + 1) = 0.5 * (S(I) + S(I + 2))
-                    X(I + 1) = SEVAL(S(I + 1), XB, XBP, SB, NB)
-                    Y(I + 1) = SEVAL(S(I + 1), YB, YBP, SB, NB)
-                ENDIF
-                !
-                !---------- go on to next input geometry point to check for corner
-                GO TO 25
-                !
-            252    CONTINUE
-        ENDIF
-    25 CONTINUE
+            enddo
+        endif
+    enddo
     !
-    CALL SCALC(X, Y, S, N)
-    CALL SEGSPL(X, XP, S, N)
-    CALL SEGSPL(Y, YP, S, N)
-    CALL LEFIND(SLE, X, XP, Y, YP, S, N)
+    call scalc(X, Y, S, N)
+    call segspl(X, XP, S, N)
+    call segspl(Y, YP, S, N)
+    call lefind(SLE, X, XP, Y, YP, S, N)
     !
-    XLE = SEVAL(SLE, X, XP, S, N)
-    YLE = SEVAL(SLE, Y, YP, S, N)
+    XLE = seval(SLE, X, XP, S, N)
+    YLE = seval(SLE, Y, YP, S, N)
     XTE = 0.5 * (X(1) + X(N))
     YTE = 0.5 * (Y(1) + Y(N))
-    CHORD = SQRT((XTE - XLE)**2 + (YTE - YLE)**2)
+    CHOrd = sqrt((XTE - XLE)**2 + (YTE - YLE)**2)
     !
     !---- calculate panel size ratios (user info)
-    DSMIN = 1000.0
-    DSMAX = -1000.0
-    DO 40 I = 1, N - 1
-        DS = S(I + 1) - S(I)
-        IF(DS .EQ. 0.0) GO TO 40
-        DSMIN = MIN(DSMIN, DS)
-        DSMAX = MAX(DSMAX, DS)
-    40 CONTINUE
+    dsmin = 1000.0
+    dsmax = -1000.0
+    do i = 1, N - 1
+        ds = S(i + 1) - S(i)
+        if (ds/=0.0) then
+            dsmin = min(dsmin, ds)
+            dsmax = max(dsmax, ds)
+        endif
+    enddo
     !
-    DSMIN = DSMIN * FLOAT(N - 1) / S(N)
-    DSMAX = DSMAX * FLOAT(N - 1) / S(N)
+    dsmin = dsmin * float(N - 1) / S(N)
+    dsmax = dsmax * float(N - 1) / S(N)
     !cc      WRITE(*,*) 'DSmin/DSavg = ',DSMIN,'     DSmax/DSavg = ',DSMAX
     !
     !---- set various flags for new airfoil
-    LGAMU = .FALSE.
-    LQINU = .FALSE.
-    LWAKE = .FALSE.
-    LQAIJ = .FALSE.
-    LADIJ = .FALSE.
-    LWDIJ = .FALSE.
-    LIPAN = .FALSE.
-    LBLINI = .FALSE.
-    LVCONV = .FALSE.
-    LSCINI = .FALSE.
-    LQSPEC = .FALSE.
-    LGSAME = .FALSE.
+    LGAmu = .false.
+    LQInu = .false.
+    LWAke = .false.
+    LQAij = .false.
+    LADij = .false.
+    LWDij = .false.
+    LIPan = .false.
+    LBLini = .false.
+    LVConv = .false.
+    LSCini = .false.
+    LQSpec = .false.
+    LGSame = .false.
     !
-    IF(LBFLAP) THEN
+    if (LBFlap) then
         XOF = XBF
         YOF = YBF
-        LFLAP = .TRUE.
-    ENDIF
+        LFLap = .true.
+    endif
     !
     !---- determine if TE is blunt or sharp, calculate TE geometry parameters
-    CALL TECALC
+    call tecalc
     !
     !---- calculate normal vectors
-    CALL NCALC(X, Y, S, N, NX, NY)
+    call ncalc(X, Y, S, N, NX, NY)
     !
     !---- calculate panel angles for panel routines
-    CALL APCALC
+    call apcalc
     !
-    IF(SHARP) THEN
-        WRITE(*, 1090) 'Sharp trailing edge'
-    ELSE
-        GAP = SQRT((X(1) - X(N))**2 + (Y(1) - Y(N))**2)
-        WRITE(*, 1090) 'Blunt trailing edge.  Gap =', GAP
-    ENDIF
-    1090 FORMAT(/1X, A, F9.5)
+    if (SHArp) then
+        write (*, 99002) 'Sharp trailing edge'
+    else
+        gap = sqrt((X(1) - X(N))**2 + (Y(1) - Y(N))**2)
+        write (*, 99002) 'Blunt trailing edge.  Gap =', gap
+    endif
     !
-    IF(SHOPAR) WRITE(*, 1100) NPAN, CVPAR, CTERAT, CTRRAT, &
-            XSREF1, XSREF2, XPREF1, XPREF2
-    1100 FORMAT(/' Paneling parameters used...'&
-            /'   Number of panel nodes      ', I4&
-            /'   Panel bunching parameter   ', F6.3&
-            /'   TE/LE panel density ratio  ', F6.3&
-            /'   Refined-area/LE panel density ratio   ', F6.3&
-            /'   Top    side refined area x/c limits ', 2F6.3&
-            /'   Bottom side refined area x/c limits ', 2F6.3)
+    if (Shopar) write (*, 99001) NPAn, CVPar, CTErat, CTRrat, XSRef1, XSRef2, XPRef1, XPRef2
+    99001 format (/' Paneling parameters used...'/&
+            '   Number of panel nodes      ', i4/'   Panel bunching parameter   ', &
+            &f6.3/'   TE/LE panel density ratio  ', f6.3/'   Refined-area/LE panel density ratio   ', &
+            &f6.3/'   Top    side refined area x/c limits ', 2F6.3/'   Bottom side refined area x/c limits ', 2F6.3)
+    99002 format (/1x, a, f9.5)
     !
-    RETURN
-END
+end subroutine pangen
+!*==GETPAN.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! PANGEN
 
 
 
-SUBROUTINE GETPAN
-        use m_spline
+subroutine getpan
+    use m_spline
     use i_xfoil
-    LOGICAL LCHANGE
-    CHARACTER*4 VAR
-    CHARACTER*128 COMARG
+    implicit none
     !
-    DIMENSION IINPUT(20)
-    DIMENSION RINPUT(20)
-    LOGICAL ERROR
+    !*** Start of declarations rewritten by SPAG
     !
-    IF(NB.LE.1) THEN
-        WRITE(*, *) 'GETPAN: Buffer airfoil not available.'
-        RETURN
-    ENDIF
+    ! Local variables
     !
-    5    CONTINUE
-    LCHANGE = .FALSE.
+    real :: amax
+    character(128) :: comarg
+    logical :: error, lchange
+    integer :: i, imax, ninput
+    integer, dimension(20) :: iinput
+    real, dimension(20) :: rinput
+    character(4) :: var
     !
-    10 WRITE(*, 1000) NPAN, CVPAR, CTERAT, CTRRAT, &
-            XSREF1, XSREF2, XPREF1, XPREF2
-    1000 FORMAT(&
-            /'    Present paneling parameters...'&
-            /'  N  i   Number of panel nodes      ', I4&
-            /'  P  r   Panel bunching parameter   ', F6.3&
-            /'  T  r   TE/LE panel density ratio  ', F6.3&
-            /'  R  r   Refined area/LE  panel density ratio  ', F6.3&
-            /'  XT rr  Top    side refined area x/c limits   ', 2F6.3&
-            /'  XB rr  Bottom side refined area x/c limits   ', 2F6.3)
+    !*** End of declarations rewritten by SPAG
     !
-    12 CALL ASKC('Change what ? (<cr> if nothing else)^', VAR, COMARG)
     !
-    DO I = 1, 20
-        IINPUT(I) = 0
-        RINPUT(I) = 0.0
-    ENDDO
-    NINPUT = 0
-    CALL GETINT(COMARG, IINPUT, NINPUT, ERROR)
-    NINPUT = 0
-    CALL GETFLT(COMARG, RINPUT, NINPUT, ERROR)
+    !*** Start of declarations rewritten by SPAG
     !
-    IF     (VAR.EQ.'    ') THEN
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !
+    if (NB<=1) then
+        write (*, *) 'GETPAN: Buffer airfoil not available.'
+        return
+    endif
+    !
+    100  lchange = .false.
+    do
         !
-        IF(LCHANGE) THEN
+        write (*, 99001) NPAn, CVPar, CTErat, CTRrat, XSRef1, XSRef2, XPRef1, XPRef2
+        99001 format (/'    Present paneling parameters...'/'  N  i   Number of panel nodes      ', &
+                &i4/'  P  r   Panel bunching parameter   ', f6.3/'  T  r   TE/LE panel density ratio  ', &
+                &f6.3/'  R  r   Refined area/LE  panel density ratio  ', &
+                &f6.3/'  XT rr  Top    side refined area x/c limits   ', &
+                &2F6.3/'  XB rr  Bottom side refined area x/c limits   ', 2F6.3)
+        do
             !
-            !-------- set new panel distribution, and display max panel corner angle
-            CALL PANGEN(.FALSE.)
-            IF(N.GT.0) CALL CANG(X, Y, N, 1, IMAX, AMAX)
+            call askc('Change what ? (<cr> if nothing else)^', var, comarg)
             !
-            !-------- go back to paneling menu
-            GO TO 5
-        ENDIF
-        RETURN
-        !
-    ELSE IF(VAR.EQ.'N   ' .OR. VAR.EQ.'n   ') THEN
-        !
-        IF(NINPUT.GE.1) THEN
-            NPAN = IINPUT(1)
-        ELSE
-            CALL ASKI('Enter number of panel nodes^', NPAN)
-        ENDIF
-        IF(NPAN .GT. IQX - 6) THEN
-            NPAN = IQX - 6
-            WRITE(*, 1200) NPAN
-            1200     FORMAT(1X, ' Number of panel nodes reduced to array limit:', I4)
-        ENDIF
-        LCHANGE = .TRUE.
-        !
-    ELSE IF(VAR.EQ.'P   ' .OR. VAR.EQ.'p   ') THEN
-        !
-        IF(NINPUT.GE.1) THEN
-            CVPAR = RINPUT(1)
-        ELSE
-            CALL ASKR('Enter panel bunching parameter (0 to ~1)^', CVPAR)
-        ENDIF
-        LCHANGE = .TRUE.
-        !
-    ELSE IF(VAR.EQ.'T   ' .OR. VAR.EQ.'t   ') THEN
-        !
-        IF(NINPUT.GE.1) THEN
-            CTERAT = RINPUT(1)
-        ELSE
-            CALL ASKR('Enter TE/LE panel density ratio^', CTERAT)
-        ENDIF
-        LCHANGE = .TRUE.
-        !
-    ELSE IF(VAR.EQ.'R   ' .OR. VAR.EQ.'r   ') THEN
-        !
-        IF(NINPUT.GE.1) THEN
-            CTRRAT = RINPUT(1)
-        ELSE
-            CALL ASKR('Enter refined-area panel density ratio^', CTRRAT)
-        ENDIF
-        LCHANGE = .TRUE.
-        !
-    ELSE IF(VAR.EQ.'XT  ' .OR. VAR.EQ.'xt  ') THEN
-        !
-        IF(NINPUT.GE.2) THEN
-            XSREF1 = RINPUT(1)
-            XSREF2 = RINPUT(2)
-        ELSE
-            CALL ASKR('Enter left   top   side refinement limit^', XSREF1)
-            CALL ASKR('Enter right  top   side refinement limit^', XSREF2)
-        ENDIF
-        LCHANGE = .TRUE.
-        !
-    ELSE IF(VAR.EQ.'XB  ' .OR. VAR.EQ.'xb  ') THEN
-        !
-        IF(NINPUT.GE.2) THEN
-            XPREF1 = RINPUT(1)
-            XPREF2 = RINPUT(2)
-        ELSE
-            CALL ASKR('Enter left  bottom side refinement limit^', XPREF1)
-            CALL ASKR('Enter right bottom side refinement limit^', XPREF2)
-        ENDIF
-        LCHANGE = .TRUE.
-        !
-    ELSE
-        !
-        WRITE(*, *)
-        WRITE(*, *) '***  Input not recognized  ***'
-        GO TO 10
-        !
-    ENDIF
+            do i = 1, 20
+                iinput(i) = 0
+                rinput(i) = 0.0
+            enddo
+            ninput = 0
+            call getint(comarg, iinput, ninput, error)
+            ninput = 0
+            call getflt(comarg, rinput, ninput, error)
+            !
+            if (var=='    ') then
+                !
+                if (lchange) then
+                    !
+                    !-------- set new panel distribution, and display max panel corner angle
+                    call pangen(.false.)
+                    if (N>0) call cang(X, Y, N, 1, imax, amax)
+                    !
+                    !-------- go back to paneling menu
+                    goto 100
+                endif
+                return
+                !
+            elseif (var=='N   ' .or. var=='n   ') then
+                !
+                if (ninput>=1) then
+                    NPAn = iinput(1)
+                else
+                    call aski('Enter number of panel nodes^', NPAn)
+                endif
+                if (NPAn>IQX - 6) then
+                    NPAn = IQX - 6
+                    write (*, 99002) NPAn
+                    99002          format (1x, ' Number of panel nodes reduced to array limit:', i4)
+                endif
+                lchange = .true.
+                !
+            elseif (var=='P   ' .or. var=='p   ') then
+                !
+                if (ninput>=1) then
+                    CVPar = rinput(1)
+                else
+                    call askr('Enter panel bunching parameter (0 to ~1)^', CVPar)
+                endif
+                lchange = .true.
+                !
+            elseif (var=='T   ' .or. var=='t   ') then
+                !
+                if (ninput>=1) then
+                    CTErat = rinput(1)
+                else
+                    call askr('Enter TE/LE panel density ratio^', CTErat)
+                endif
+                lchange = .true.
+                !
+            elseif (var=='R   ' .or. var=='r   ') then
+                !
+                if (ninput>=1) then
+                    CTRrat = rinput(1)
+                else
+                    call askr('Enter refined-area panel density ratio^', CTRrat)
+                endif
+                lchange = .true.
+                !
+            elseif (var=='XT  ' .or. var=='xt  ') then
+                !
+                if (ninput>=2) then
+                    XSRef1 = rinput(1)
+                    XSRef2 = rinput(2)
+                else
+                    call askr('Enter left   top   side refinement limit^', XSRef1)
+                    call askr('Enter right  top   side refinement limit^', XSRef2)
+                endif
+                lchange = .true.
+                !
+            elseif (var=='XB  ' .or. var=='xb  ') then
+                !
+                if (ninput>=2) then
+                    XPRef1 = rinput(1)
+                    XPRef2 = rinput(2)
+                else
+                    call askr('Enter left  bottom side refinement limit^', XPRef1)
+                    call askr('Enter right bottom side refinement limit^', XPRef2)
+                endif
+                lchange = .true.
+                !
+            else
+                !
+                write (*, *)
+                write (*, *) '***  Input not recognized  ***'
+                goto 200
+                !
+                !
+            endif
+        enddo
+        exit
+    200  enddo
     !
-    GO TO 12
-    !
-END
+end subroutine getpan
+!*==TECALC.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! GETPAN
 
 
-SUBROUTINE TECALC
+subroutine tecalc
+    use m_spline
+    use i_xfoil
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    real :: dxs, dxte, dys, dyte, scs, sds
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !-------------------------------------------
-    !     Calculates total and projected TE gap 
+    !     Calculates total and projected TE gap
     !     areas and TE panel strengths.
     !-------------------------------------------
-        use m_spline
-    use i_xfoil
     !
     !---- set TE base vector and TE bisector components
-    DXTE = X(1) - X(N)
-    DYTE = Y(1) - Y(N)
-    DXS = 0.5 * (-XP(1) + XP(N))
-    DYS = 0.5 * (-YP(1) + YP(N))
+    dxte = X(1) - X(N)
+    dyte = Y(1) - Y(N)
+    dxs = 0.5 * (-XP(1) + XP(N))
+    dys = 0.5 * (-YP(1) + YP(N))
     !
     !---- normal and streamwise projected TE gap areas
-    ANTE = DXS * DYTE - DYS * DXTE
-    ASTE = DXS * DXTE + DYS * DYTE
+    ANTe = dxs * dyte - dys * dxte
+    ASTe = dxs * dxte + dys * dyte
     !
     !---- total TE gap area
-    DSTE = SQRT(DXTE**2 + DYTE**2)
+    DSTe = sqrt(dxte**2 + dyte**2)
     !
-    SHARP = DSTE .LT. 0.0001 * CHORD
+    SHArp = DSTe<0.0001 * CHOrd
     !
-    IF(SHARP) THEN
-        SCS = 1.0
-        SDS = 0.0
-    ELSE
-        SCS = ANTE / DSTE
-        SDS = ASTE / DSTE
-    ENDIF
+    if (SHArp) then
+        scs = 1.0
+        sds = 0.0
+    else
+        scs = ANTe / DSTe
+        sds = ASTe / DSTe
+    endif
     !
     !---- TE panel source and vorticity strengths
-    SIGTE = 0.5 * (GAM(1) - GAM(N)) * SCS
-    GAMTE = -.5 * (GAM(1) - GAM(N)) * SDS
+    SIGte = 0.5 * (GAM(1) - GAM(N)) * scs
+    GAMte = -.5 * (GAM(1) - GAM(N)) * sds
     !
-    SIGTE_A = 0.5 * (GAM_A(1) - GAM_A(N)) * SCS
-    GAMTE_A = -.5 * (GAM_A(1) - GAM_A(N)) * SDS
+    SIGte_a = 0.5 * (GAM_a(1) - GAM_a(N)) * scs
+    GAMte_a = -.5 * (GAM_a(1) - GAM_a(N)) * sds
     !
-    RETURN
-END
+end subroutine tecalc
+!*==INTE.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! TECALC
 
 
 
-SUBROUTINE INTE
+subroutine inte
+    use m_spline
+    use i_xfoil
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    character(2) :: cair
+    real :: frac
+    integer :: i, iair, ip, itype, k, lu, npr
+    character(80) :: isparst
+    character(48), dimension(2) :: nameint
+    integer, dimension(2) :: nint
+    character(20) :: promptn
+    real, dimension(IBX, 2) :: sint, xint, xpint, yint, ypint
+    real, dimension(2) :: sleint
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !-----------------------------------------------------------
     !     Interpolates two airfoils into an intermediate shape.
     !     Extrapolation is also possible to a reasonable extent.
     !-----------------------------------------------------------
-        use m_spline
-    use i_xfoil
-    CHARACTER*2 CAIR
-    INTEGER NINT(2)
-    REAL SINT(IBX, 2), &
-            XINT(IBX, 2), XPINT(IBX, 2), &
-            YINT(IBX, 2), YPINT(IBX, 2), &
-            SLEINT(2)
-    CHARACTER*20 PROMPTN
-    CHARACTER*48 NAMEINT(2)
-    CHARACTER*80 ISPARST
     !
-    LU = 21
+    lu = 21
     !
-    1000 FORMAT(A)
+    write (*, 99001) NAMe
     !
-    WRITE(*, 1100) NAME
-    DO IP = 1, NPOL
-        IF(NXYPOL(IP).GT.0) THEN
-            WRITE(*, 1200) IP, NAMEPOL(IP)
-        ENDIF
-    ENDDO
-    IF    (NPOL.EQ.0) THEN
-        PROMPTN = '" ( F C ):  '
-        NPR = 12
-    ELSEIF(NPOL.EQ.1) THEN
-        PROMPTN = '" ( F C 1 ):  '
-        NPR = 14
-    ELSEIF(NPOL.EQ.2) THEN
-        PROMPTN = '" ( F C 1 2 ):  '
-        NPR = 16
-    ELSE
-        PROMPTN = '" ( F C 1 2.. ):  '
-        NPR = 18
-    ENDIF
+    99001 format (/'  F  disk file'/'  C  current airfoil  ', a)
+    do ip = 1, NPOl
+        if (NXYpol(ip)>0) then
+            write (*, 99002) ip, NAMepol(ip)
+            99002  format (1x, i2, '  polar airfoil    ', a)
+        endif
+    enddo
+    if (NPOl==0) then
+        promptn = '" ( F C ):  '
+        npr = 12
+    elseif (NPOl==1) then
+        promptn = '" ( F C 1 ):  '
+        npr = 14
+    elseif (NPOl==2) then
+        promptn = '" ( F C 1 2 ):  '
+        npr = 16
+    else
+        promptn = '" ( F C 1 2.. ):  '
+        npr = 18
+    endif
     !
-    1100 FORMAT(/   '  F  disk file'&
-            /   '  C  current airfoil  ', A)
-    1200 FORMAT(1X, I2, '  polar airfoil    ', A)
-    !
-    2100 FORMAT(/'  Select source of airfoil "', I1, A, $)
-    !
-    DO 40 K = 1, 2
-        IAIR = K - 1
-        20     WRITE(*, 2100) IAIR, PROMPTN(1:NPR)
-        READ(*, 1000) CAIR
-        !
-        IF    (INDEX('Ff', CAIR(1:1)).NE.0) THEN
-            CALL ASKS('Enter filename^', FNAME)
-            CALL AREAD(LU, FNAME, IBX, &
-                    XINT(1, K), YINT(1, K), NINT(K), &
-                    NAMEINT(K), ISPARST, ITYPE, 0)
-            IF(ITYPE.EQ.0) RETURN
+    do k = 1, 2
+        iair = k - 1
+        do
+            write (*, 99003) iair, promptn(1:npr)
             !
-        ELSEIF(INDEX('Cc', CAIR(1:1)).NE.0) THEN
-            IF(N.LE.1) THEN
-                WRITE(*, *) 'No current airfoil available'
-                GO TO 20
-            ENDIF
+            99003  format (/'  Select source of airfoil "', i1, a, $)
+            read (*, 99004) cair
             !
-            NINT(K) = N
-            DO I = 1, N
-                XINT(I, K) = X(I)
-                YINT(I, K) = Y(I)
-            ENDDO
-            NAMEINT(K) = NAME
+            99004  format (a)
             !
-        ELSE
-            READ(CAIR, *, ERR = 90) IP
-            IF(IP.LT.1 .OR. IP.GT.NPOL) THEN
-                GO TO 90
-            ELSEIF(NXYPOL(IP).LE.0) THEN
-                GO TO 90
-            ELSE
-                NINT(K) = NXYPOL(IP)
-                DO I = 1, NINT(K)
-                    XINT(I, K) = CPOLXY(I, 1, IP)
-                    YINT(I, K) = CPOLXY(I, 2, IP)
-                ENDDO
-            ENDIF
-            NAMEINT(K) = NAMEPOL(IP)
+            if (index('Ff', cair(1:1))/=0) then
+                call asks('Enter filename^', FNAme)
+                call aread(lu, FNAme, IBX, xint(1, k), yint(1, k), nint(k), nameint(k), isparst, itype, 0)
+                if (itype==0) return
+                !
+            elseif (index('Cc', cair(1:1))/=0) then
+                if (N<=1) then
+                    write (*, *) 'No current airfoil available'
+                    cycle
+                endif
+                !
+                nint(k) = N
+                do i = 1, N
+                    xint(i, k) = X(i)
+                    yint(i, k) = Y(i)
+                enddo
+                nameint(k) = NAMe
+                !
+            else
+                read (cair, *, err = 100) ip
+                if (ip<1 .or. ip>NPOl) goto 100
+                if (NXYpol(ip)<=0) goto 100
+                nint(k) = NXYpol(ip)
+                do i = 1, nint(k)
+                    xint(i, k) = CPOlxy(i, 1, ip)
+                    yint(i, k) = CPOlxy(i, 2, ip)
+                enddo
+                nameint(k) = NAMepol(ip)
+                !
+            endif
             !
-        ENDIF
-        !
-        CALL SCALC(XINT(1, K), YINT(1, K), SINT(1, K), NINT(K))
-        CALL SEGSPLD(XINT(1, K), XPINT(1, K), SINT(1, K), NINT(K), -999., -999.)
-        CALL SEGSPLD(YINT(1, K), YPINT(1, K), SINT(1, K), NINT(K), -999., -999.)
-        CALL LEFIND(SLEINT(K), &
-                XINT(1, K), XPINT(1, K), &
-                YINT(1, K), YPINT(1, K), SINT(1, K), NINT(K))
-    40   CONTINUE
+            call scalc(xint(1, k), yint(1, k), sint(1, k), nint(k))
+            call segspld(xint(1, k), xpint(1, k), sint(1, k), nint(k), -999., -999.)
+            call segspld(yint(1, k), ypint(1, k), sint(1, k), nint(k), -999., -999.)
+            call lefind(sleint(k), xint(1, k), xpint(1, k), yint(1, k), ypint(1, k), sint(1, k), nint(k))
+            exit
+        enddo
+    enddo
     !
-    WRITE(*, *)
-    WRITE(*, *) 'airfoil "0":  ', NAMEINT(1)
-    WRITE(*, *) 'airfoil "1":  ', NAMEINT(2)
-    FRAC = 0.5
-    CALL ASKR('Specify interpolating fraction  0...1^', FRAC)
+    write (*, *)
+    write (*, *) 'airfoil "0":  ', nameint(1)
+    write (*, *) 'airfoil "1":  ', nameint(2)
+    frac = 0.5
+    call askr('Specify interpolating fraction  0...1^', frac)
     !
-    CALL INTER(XINT(1, 1), XPINT(1, 1), &
-            YINT(1, 1), YPINT(1, 1), SINT(1, 1), NINT(1), SLEINT(1), &
-            XINT(1, 2), XPINT(1, 2), &
-            YINT(1, 2), YPINT(1, 2), SINT(1, 2), NINT(2), SLEINT(2), &
-            XB, YB, NB, FRAC)
+    call inter(xint(1, 1), xpint(1, 1), yint(1, 1), ypint(1, 1), sint(1, 1), &
+            nint(1), sleint(1), xint(1, 2), xpint(1, 2), yint(1, 2), &
+            & ypint(1, 2), sint(1, 2), nint(2), sleint(2), XB, YB, NB, frac)
     !
-    CALL SCALC(XB, YB, SB, NB)
-    CALL SEGSPL(XB, XBP, SB, NB)
-    CALL SEGSPL(YB, YBP, SB, NB)
+    call scalc(XB, YB, SB, NB)
+    call segspl(XB, XBP, SB, NB)
+    call segspl(YB, YBP, SB, NB)
     !
-    CALL GEOPAR(XB, XBP, YB, YBP, SB, NB, W1, &
-            SBLE, CHORDB, AREAB, RADBLE, ANGBTE, &
-            EI11BA, EI22BA, APX1BA, APX2BA, &
-            EI11BT, EI22BT, APX1BT, APX2BT, &
-            THICKB, CAMBRB)
+    call geopar(XB, XBP, YB, YBP, SB, NB, W1, SBLe, CHOrdb, AREab,&
+            RADble, ANGbte, EI11ba, EI22ba, APX1ba, APX2ba, EI11bt, EI22bt, APX1bt, &
+            & APX2bt, THIckb, CAMbrb)
     !
-    CALL ASKS('Enter new airfoil name^', NAME)
-    CALL STRIP(NAME, NNAME)
-    WRITE(*, *)
-    WRITE(*, *) 'Result has been placed in buffer airfoil'
-    WRITE(*, *) 'Execute PCOP or PANE to set new current airfoil'
-    RETURN
+    call asks('Enter new airfoil name^', NAMe)
+    call strip(NAMe, NNAme)
+    write (*, *)
+    write (*, *) 'Result has been placed in buffer airfoil'
+    write (*, *) 'Execute PCOP or PANE to set new current airfoil'
+    return
     !
-    90   CONTINUE
-    WRITE(*, *)
-    WRITE(*, *) 'Invalid response'
-    RETURN
-END
+    100  write (*, *)
+    write (*, *) 'Invalid response'
+end subroutine inte
+!*==INTX.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! INTE
 
 
-SUBROUTINE INTX
+subroutine intx
+    use m_spline
+    use i_xfoil
+    implicit none
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    character(2) :: cair
+    real :: frac
+    integer :: i, iair, ip, itype, k, lu, npr
+    character(80) :: isparst
+    character(48), dimension(2) :: nameint
+    integer, dimension(2) :: nint
+    character(20) :: promptn
+    real, dimension(IBX, 2) :: sint, xint, xpint, yint, ypint
+    real, dimension(2) :: sleint
+    !
+    !*** End of declarations rewritten by SPAG
+    !
+    !
+    !*** Start of declarations rewritten by SPAG
+    !
+    ! Local variables
+    !
+    !
+    !*** End of declarations rewritten by SPAG
+    !
     !-----------------------------------------------------------
     !     Interpolates two airfoils into an intermediate shape.
     !     Extrapolation is also possible to a reasonable extent.
     !-----------------------------------------------------------
-        use m_spline
-    use i_xfoil
-    CHARACTER*2 CAIR
-    INTEGER NINT(2)
-    REAL SINT(IBX, 2), &
-            XINT(IBX, 2), XPINT(IBX, 2), &
-            YINT(IBX, 2), YPINT(IBX, 2), &
-            SLEINT(2)
-    CHARACTER*20 PROMPTN
-    CHARACTER*48 NAMEINT(2)
-    CHARACTER*80 ISPARST
     !
-    LU = 21
+    lu = 21
     !
-    1000 FORMAT(A)
+    write (*, 99001) NAMe
     !
-    WRITE(*, 1100) NAME
-    DO IP = 1, NPOL
-        IF(NXYPOL(IP).GT.0) THEN
-            WRITE(*, 1200) IP, NAMEPOL(IP)
-        ENDIF
-    ENDDO
-    IF    (NPOL.EQ.0) THEN
-        PROMPTN = '" ( F C ):  '
-        NPR = 12
-    ELSEIF(NPOL.EQ.1) THEN
-        PROMPTN = '" ( F C 1 ):  '
-        NPR = 14
-    ELSEIF(NPOL.EQ.2) THEN
-        PROMPTN = '" ( F C 1 2 ):  '
-        NPR = 16
-    ELSE
-        PROMPTN = '" ( F C 1 2.. ):  '
-        NPR = 18
-    ENDIF
+    99001 format (/'  F  disk file'/'  C  current airfoil  ', a)
+    do ip = 1, NPOl
+        if (NXYpol(ip)>0) then
+            write (*, 99002) ip, NAMepol(ip)
+            99002  format (1x, i2, '  polar airfoil    ', a)
+        endif
+    enddo
+    if (NPOl==0) then
+        promptn = '" ( F C ):  '
+        npr = 12
+    elseif (NPOl==1) then
+        promptn = '" ( F C 1 ):  '
+        npr = 14
+    elseif (NPOl==2) then
+        promptn = '" ( F C 1 2 ):  '
+        npr = 16
+    else
+        promptn = '" ( F C 1 2.. ):  '
+        npr = 18
+    endif
     !
-    1100 FORMAT(/   '  F  disk file'&
-            /   '  C  current airfoil  ', A)
-    1200 FORMAT(1X, I2, '  polar airfoil    ', A)
-    !
-    2100 FORMAT(/'  Select source of airfoil "', I1, A, $)
-    !
-    DO 40 K = 1, 2
-        IAIR = K - 1
-        20     WRITE(*, 2100) IAIR, PROMPTN(1:NPR)
-        READ(*, 1000, ERR = 90, END = 90) CAIR
-        !
-        IF(CAIR .EQ. ' ') THEN
-            GO TO 90
+    do k = 1, 2
+        iair = k - 1
+        do
+            write (*, 99003) iair, promptn(1:npr)
             !
-        ELSEIF(INDEX('Ff', CAIR(1:1)).NE.0) THEN
-            CALL ASKS('Enter filename^', FNAME)
-            CALL AREAD(LU, FNAME, IBX, &
-                    XINT(1, K), YINT(1, K), NINT(K), &
-                    NAMEINT(K), ISPARST, ITYPE, 0)
-            IF(ITYPE.EQ.0) RETURN
+            99003  format (/'  Select source of airfoil "', i1, a, $)
+            read (*, 99004, err = 100, end = 100) cair
             !
-        ELSEIF(INDEX('Cc', CAIR(1:1)).NE.0) THEN
-            IF(N.LE.1) THEN
-                WRITE(*, *) 'No current airfoil available'
-                GO TO 20
-            ENDIF
+            99004  format (a)
             !
-            NINT(K) = N
-            DO I = 1, N
-                XINT(I, K) = X(I)
-                YINT(I, K) = Y(I)
-            ENDDO
-            NAMEINT(K) = NAME
+            if (cair==' ') goto 100
             !
-        ELSE
-            READ(CAIR, *, ERR = 90) IP
-            IF(IP.LT.1 .OR. IP.GT.NPOL) THEN
-                GO TO 90
-            ELSEIF(NXYPOL(IP).LE.0) THEN
-                GO TO 90
-            ELSE
-                NINT(K) = NXYPOL(IP)
-                DO I = 1, N
-                    XINT(I, K) = CPOLXY(I, 1, IP)
-                    YINT(I, K) = CPOLXY(I, 2, IP)
-                ENDDO
-            ENDIF
-            NAMEINT(K) = NAMEPOL(IP)
+            if (index('Ff', cair(1:1))/=0) then
+                call asks('Enter filename^', FNAme)
+                call aread(lu, FNAme, IBX, xint(1, k), yint(1, k), nint(k), nameint(k), isparst, itype, 0)
+                if (itype==0) return
+                !
+            elseif (index('Cc', cair(1:1))/=0) then
+                if (N<=1) then
+                    write (*, *) 'No current airfoil available'
+                    cycle
+                endif
+                !
+                nint(k) = N
+                do i = 1, N
+                    xint(i, k) = X(i)
+                    yint(i, k) = Y(i)
+                enddo
+                nameint(k) = NAMe
+                !
+            else
+                read (cair, *, err = 100) ip
+                if (ip<1 .or. ip>NPOl) goto 100
+                if (NXYpol(ip)<=0) goto 100
+                nint(k) = NXYpol(ip)
+                do i = 1, N
+                    xint(i, k) = CPOlxy(i, 1, ip)
+                    yint(i, k) = CPOlxy(i, 2, ip)
+                enddo
+                nameint(k) = NAMepol(ip)
+                !
+            endif
             !
-        ENDIF
-        !
-        CALL SCALC(XINT(1, K), YINT(1, K), SINT(1, K), NINT(K))
-        CALL SEGSPLD(XINT(1, K), XPINT(1, K), SINT(1, K), NINT(K), -999., -999.)
-        CALL SEGSPLD(YINT(1, K), YPINT(1, K), SINT(1, K), NINT(K), -999., -999.)
-        CALL LEFIND(SLEINT(K), &
-                XINT(1, K), XPINT(1, K), &
-                YINT(1, K), YPINT(1, K), SINT(1, K), NINT(K))
-    40   CONTINUE
+            call scalc(xint(1, k), yint(1, k), sint(1, k), nint(k))
+            call segspld(xint(1, k), xpint(1, k), sint(1, k), nint(k), -999., -999.)
+            call segspld(yint(1, k), ypint(1, k), sint(1, k), nint(k), -999., -999.)
+            call lefind(sleint(k), xint(1, k), xpint(1, k), yint(1, k), ypint(1, k), sint(1, k), nint(k))
+            exit
+        enddo
+    enddo
     !
-    WRITE(*, *)
-    WRITE(*, *) 'airfoil "0":  ', NAMEINT(1)
-    WRITE(*, *) 'airfoil "1":  ', NAMEINT(2)
-    FRAC = 0.5
-    CALL ASKR('Specify interpolating fraction  0...1^', FRAC)
+    write (*, *)
+    write (*, *) 'airfoil "0":  ', nameint(1)
+    write (*, *) 'airfoil "1":  ', nameint(2)
+    frac = 0.5
+    call askr('Specify interpolating fraction  0...1^', frac)
     !
-    CALL INTERX(XINT(1, 1), XPINT(1, 1), &
-            YINT(1, 1), YPINT(1, 1), SINT(1, 1), NINT(1), SLEINT(1), &
-            XINT(1, 2), XPINT(1, 2), &
-            YINT(1, 2), YPINT(1, 2), SINT(1, 2), NINT(2), SLEINT(2), &
-            XB, YB, NB, FRAC)
+    call interx(xint(1, 1), xpint(1, 1), yint(1, 1), ypint(1, 1),&
+            sint(1, 1), nint(1), sleint(1), xint(1, 2), xpint(1, 2), yint(1, 2), &
+            & ypint(1, 2), sint(1, 2), nint(2), sleint(2), XB, YB, NB, frac)
     !
-    CALL SCALC(XB, YB, SB, NB)
-    CALL SEGSPL(XB, XBP, SB, NB)
-    CALL SEGSPL(YB, YBP, SB, NB)
+    call scalc(XB, YB, SB, NB)
+    call segspl(XB, XBP, SB, NB)
+    call segspl(YB, YBP, SB, NB)
     !
-    CALL GEOPAR(XB, XBP, YB, YBP, SB, NB, W1, &
-            SBLE, CHORDB, AREAB, RADBLE, ANGBTE, &
-            EI11BA, EI22BA, APX1BA, APX2BA, &
-            EI11BT, EI22BT, APX1BT, APX2BT, &
-            THICKB, CAMBRB)
+    call geopar(XB, XBP, YB, YBP, SB, NB, W1, SBLe, CHOrdb, AREab,&
+            RADble, ANGbte, EI11ba, EI22ba, APX1ba, APX2ba, EI11bt, EI22bt, APX1bt, &
+            & APX2bt, THIckb, CAMbrb)
     !
-    CALL ASKS('Enter new airfoil name^', NAME)
-    CALL STRIP(NAME, NNAME)
-    WRITE(*, *)
-    WRITE(*, *) 'Result has been placed in buffer airfoil'
-    WRITE(*, *) 'Execute PCOP or PANE to set new current airfoil'
-    RETURN
+    call asks('Enter new airfoil name^', NAMe)
+    call strip(NAMe, NNAme)
+    write (*, *)
+    write (*, *) 'Result has been placed in buffer airfoil'
+    write (*, *) 'Execute PCOP or PANE to set new current airfoil'
+    return
     !
-    90   CONTINUE
-    WRITE(*, *)
-    WRITE(*, *) 'Invalid response.  No action taken.'
-    RETURN
-END
-! INTX
-
-
-
+    100  write (*, *)
+    write (*, *) 'Invalid response.  No action taken.'
+end subroutine intx
