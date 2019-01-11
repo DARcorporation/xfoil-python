@@ -191,6 +191,7 @@ contains
         use m_spline, only: seval
         use i_xfoil
         use i_xbl
+        use s_xfoil, only: mrcl, comset
         implicit none
         !
         !*** Start of declarations rewritten by SPAG

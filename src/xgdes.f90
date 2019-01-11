@@ -27,6 +27,7 @@
 module m_xgdes
 contains
     subroutine abcopy(Lconf)
+        use m_xfoil, only: tecalc
         use m_xpanel, only: apcalc, ncalc
         use m_xgeom, only: lefind
         use m_spline, only: seval, segspl, scalc
