@@ -22,10 +22,6 @@
 module m_xbl
 contains
     subroutine preptrs
-        use m_xpanel
-        use m_xblsys
-        use m_xsolve
-        use m_spline
         use i_xbl
         implicit none
         !
@@ -192,7 +188,6 @@ contains
     subroutine setbl
         use m_xpanel
         use m_xblsys
-        use m_xsolve
         use m_spline
         use i_xfoil
         use i_xbl
@@ -690,9 +685,6 @@ contains
 
 
     subroutine iblsys
-        use m_xblsys
-        use m_xsolve
-        use m_spline
         use i_xfoil
         use i_xbl
         implicit none
@@ -735,7 +727,6 @@ contains
     subroutine mrchue
         use m_xblsys
         use m_xsolve
-        use m_spline
         use i_xfoil
         use i_xbl
         implicit none
@@ -1081,7 +1072,6 @@ contains
     subroutine mrchdu
         use m_xblsys
         use m_xsolve
-        use m_spline
         use i_xfoil
         use i_xbl
         implicit none
@@ -1419,7 +1409,6 @@ contains
 
 
     subroutine xifset(Is)
-        use m_xblsys
         use m_spline
         use i_xfoil
         use i_xbl
@@ -1503,7 +1492,6 @@ contains
 
 
     subroutine update
-        use m_xblsys
         use i_xfoil
         implicit none
         !

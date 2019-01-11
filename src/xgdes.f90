@@ -29,7 +29,6 @@ contains
     subroutine abcopy(Lconf)
         use m_xpanel
         use m_xgeom
-        use m_userio
         use m_spline
         use i_xfoil
         implicit none

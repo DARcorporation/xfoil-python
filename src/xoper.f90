@@ -25,12 +25,8 @@ contains
     subroutine oper
         use m_xpol
         use m_xpanel
-        use m_xgdes
-        use m_xblsys
-        use m_xbl
         use m_userio
         use m_iopol
-        use m_xsolve
         use m_spline
         use i_xfoil
         implicit none
@@ -1327,13 +1323,6 @@ contains
 
 
     subroutine fcpmin
-        use m_xpanel
-        use m_xgdes
-        use m_xblsys
-        use m_xbl
-        use m_userio
-        use m_xsolve
-        use m_spline
         use i_xfoil
         implicit none
         !
@@ -1390,13 +1379,6 @@ contains
 
 
     subroutine mrshow(Lm, Lr)
-        use m_xpanel
-        use m_xgdes
-        use m_xblsys
-        use m_xbl
-        use m_userio
-        use m_xsolve
-        use m_spline
         use i_xfoil
         implicit none
         !
@@ -1443,13 +1425,7 @@ contains
 
 
     subroutine nammod(Name, Kdel, Kmod0)
-        use m_xpanel
-        use m_xgdes
-        use m_xblsys
-        use m_xbl
         use m_userio
-        use m_xsolve
-        use m_spline
         implicit none
         !
         !*** Start of declarations rewritten by SPAG
@@ -1538,13 +1514,8 @@ contains
 
 
     subroutine bldump(Fname1)
-        use m_xpanel
-        use m_xgdes
         use m_xblsys
-        use m_xbl
         use m_userio
-        use m_xsolve
-        use m_spline
         use i_xfoil
         implicit none
         !
@@ -1706,13 +1677,8 @@ contains
 
 
     subroutine bldump2(Fname1)
-        use m_xpanel
-        use m_xgdes
         use m_xblsys
-        use m_xbl
         use m_userio
-        use m_xsolve
-        use m_spline
         use i_xfoil
         implicit none
         !
@@ -1914,12 +1880,7 @@ contains
 
 
     subroutine cpdump(Fname1)
-        use m_xpanel
-        use m_xgdes
-        use m_xbl
         use m_userio
-        use m_xsolve
-        use m_spline
         use i_xfoil
         implicit none
         !
@@ -2025,11 +1986,7 @@ contains
 
 
     subroutine mhinge
-        use m_xpanel
         use m_xgdes
-        use m_xbl
-        use m_userio
-        use m_xsolve
         use m_spline
         use i_xfoil
         implicit none
@@ -2190,11 +2147,8 @@ contains
 
 
     subroutine vpar
-        use m_xpanel
         use m_xbl
         use m_userio
-        use m_xsolve
-        use m_spline
         use i_xfoil
         use i_blpar
         implicit none
@@ -2450,9 +2404,6 @@ contains
 
     subroutine specal
         use m_xpanel
-        use m_xbl
-        use m_xsolve
-        use m_spline
         use i_xfoil
         implicit none
         !
@@ -2555,9 +2506,6 @@ contains
 
     subroutine speccl
         use m_xpanel
-        use m_xbl
-        use m_xsolve
-        use m_spline
         use i_xfoil
         implicit none
         !
@@ -2645,8 +2593,6 @@ contains
         use m_xpanel
         use m_xbl
         use m_xsolve
-        use m_spline
-        use m_userio
         use i_xfoil
         implicit none
         !

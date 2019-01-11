@@ -26,8 +26,6 @@ contains
     subroutine mdes
         use m_xgeom
         use m_userio
-        use m_sort
-        use m_xsolve
         use m_xqdes
         use m_spline
         use i_xfoil
@@ -426,10 +424,6 @@ contains
 
     subroutine dztset(Rinput, Ninput)
         use m_userio
-        use m_sort
-        use m_xsolve
-        use m_xqdes
-        use m_spline
         use i_circle
         implicit none
         !
@@ -476,10 +470,6 @@ contains
 
     subroutine agtset(Rinput, Ninput)
         use m_userio
-        use m_sort
-        use m_xsolve
-        use m_xqdes
-        use m_spline
         use i_circle
         implicit none
         !
@@ -523,10 +513,6 @@ contains
 
 
     subroutine mapgam(Iac, Alg, Clg, Cmg)
-        use m_userio
-        use m_sort
-        use m_xsolve
-        use m_xqdes
         use m_spline
         use i_xfoil
         implicit none
@@ -587,11 +573,7 @@ contains
 
 
     subroutine qspcir
-        use m_userio
-        use m_sort
-        use m_xsolve
         use m_xqdes
-        use m_spline
         use i_xfoil
         implicit none
         !
@@ -626,11 +608,7 @@ contains
 
 
     subroutine mapgen(Ffilt, N, X, Y)
-        use m_userio
-        use m_sort
         use m_xsolve
-        use m_xqdes
-        use m_spline
         use i_circle
         implicit none
         !
@@ -746,10 +724,6 @@ contains
 
 
     subroutine scinit(N, X, Xp, Y, Yp, S, Sle)
-        use m_userio
-        use m_sort
-        use m_xsolve
-        use m_xqdes
         use m_spline
         use i_circle
         implicit none
@@ -934,10 +908,6 @@ contains
 
 
     subroutine cncalc(Qc, Lsymm)
-        use m_userio
-        use m_sort
-        use m_xsolve
-        use m_xqdes
         use m_spline
         use i_circle
         implicit none
@@ -1091,11 +1061,6 @@ contains
 
 
     subroutine cnsymm
-        use m_userio
-        use m_sort
-        use m_xsolve
-        use m_xqdes
-        use m_spline
         use i_circle
         implicit none
         !
@@ -1128,11 +1093,6 @@ contains
 
 
     subroutine piqsum
-        use m_userio
-        use m_sort
-        use m_xsolve
-        use m_xqdes
-        use m_spline
         use i_circle
         implicit none
         !
@@ -1172,11 +1132,6 @@ contains
 
 
     subroutine cnfilt(Ffilt)
-        use m_userio
-        use m_sort
-        use m_xsolve
-        use m_xqdes
-        use m_spline
         use i_circle
         implicit none
         !
@@ -1226,11 +1181,6 @@ contains
 
 
     subroutine zccalc(Mtest)
-        use m_userio
-        use m_sort
-        use m_xsolve
-        use m_xqdes
-        use m_spline
         use i_circle
         implicit none
         !
@@ -1318,11 +1268,6 @@ contains
 
 
     subroutine zcnorm(Mtest)
-        use m_userio
-        use m_sort
-        use m_xsolve
-        use m_xqdes
-        use m_spline
         use i_circle
         implicit none
         !
@@ -1399,11 +1344,6 @@ contains
 
 
     subroutine qccalc(Ispec, Alfa, Cl, Cm, Minf, Qinf, Ncir, Xcir, Ycir, Scir, Qcir)
-        use m_userio
-        use m_sort
-        use m_xsolve
-        use m_xqdes
-        use m_spline
         use i_circle
         implicit none
         !
@@ -1548,11 +1488,6 @@ contains
 
 
     subroutine qspint(Alqsp, Qspec, Qinf, Minf, Clqsp, Cmqsp)
-        use m_userio
-        use m_sort
-        use m_xsolve
-        use m_xqdes
-        use m_spline
         use i_circle
         implicit none
         !
@@ -1628,11 +1563,6 @@ contains
 
 
     subroutine ftp
-        use m_userio
-        use m_sort
-        use m_xsolve
-        use m_xqdes
-        use m_spline
         use i_circle
         implicit none
         !
@@ -1672,11 +1602,6 @@ contains
 
 
     subroutine eiwset(Nc1)
-        use m_userio
-        use m_sort
-        use m_xsolve
-        use m_xqdes
-        use m_spline
         use i_circle
         implicit none
         !
@@ -1752,11 +1677,7 @@ contains
 
 
     subroutine pert(Qspec)
-        use m_userio
-        use m_sort
         use m_xsolve
-        use m_xqdes
-        use m_spline
         use i_circle
         implicit none
         !
@@ -1877,10 +1798,6 @@ contains
 
 
     subroutine cndump(Lu)
-        use m_userio
-        use m_sort
-        use m_xqdes
-        use m_spline
         use i_circle
         implicit none
         !

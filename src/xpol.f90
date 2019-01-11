@@ -23,13 +23,8 @@
 module m_xpol
 contains
     subroutine plrset(Ip)
-        use m_xpanel
-        use m_xoper
-        use m_xgeom
         use m_userio
-        use m_sort
         use m_iopol
-        use m_spline
         use i_xfoil
         implicit none
         !
@@ -172,11 +167,7 @@ contains
 
     subroutine apcopy(Ip)
         use m_xpanel
-        use m_xoper
         use m_xgeom
-        use m_userio
-        use m_sort
-        use m_iopol
         use m_spline
         use i_xfoil
         implicit none
@@ -246,9 +237,7 @@ contains
 
 
     subroutine plrini(Lu, Ip)
-        use m_xoper
         use m_userio
-        use m_sort
         use m_iopol
         use i_xfoil
         implicit none
@@ -454,10 +443,7 @@ contains
 
 
     subroutine plxini(Lu, Ip)
-        use m_xoper
         use m_userio
-        use m_sort
-        use m_iopol
         use i_xfoil
         implicit none
         !
@@ -635,8 +621,6 @@ contains
 
     subroutine plradd(Lu, Ip)
         use m_xoper
-        use m_userio
-        use m_sort
         use m_iopol
         use i_xfoil
         implicit none
@@ -764,8 +748,6 @@ contains
 
 
     subroutine plxadd(Lu, Ip)
-        use m_userio
-        use m_sort
         use m_spline
         use i_xfoil
         implicit none
@@ -876,7 +858,6 @@ contains
 
 
     subroutine plrsrt(Ip, Idsort)
-        use m_userio
         use m_sort
         use i_xfoil
         implicit none
@@ -1012,7 +993,6 @@ contains
 
 
     subroutine prfsum(Ir1, Ir2)
-        use m_userio
         use i_xfoil
         implicit none
         !
@@ -1062,7 +1042,6 @@ contains
 
 
     subroutine plrcop(Ip1, Ip2)
-        use m_userio
         use i_xfoil
         implicit none
         !
@@ -1137,7 +1116,6 @@ contains
 
 
     subroutine prfcop(Ir1, Ir2)
-        use m_userio
         use i_xfoil
         implicit none
         !

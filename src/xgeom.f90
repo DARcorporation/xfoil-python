@@ -370,7 +370,6 @@ contains
 
 
     subroutine aecalc(N, X, Y, T, Itype, Area, Xcen, Ycen, Ei11, Ei22, Apx1, Apx2)
-        use m_spline
         implicit none
         !
         !*** Start of declarations rewritten by SPAG
@@ -631,7 +630,6 @@ contains
 
 
     subroutine cang(X, Y, N, Iprint, Imax, Amax)
-        use m_spline
         implicit none
         !
         !*** Start of declarations rewritten by SPAG

@@ -23,10 +23,6 @@
 module m_xpanel
 contains
     subroutine apcalc
-        use m_xbl
-        use m_xsolve
-        use m_xutils
-        use m_spline
         use i_xfoil
         implicit none
         !
@@ -75,9 +71,6 @@ contains
 
 
     subroutine ncalc(X, Y, S, N, Xn, Yn)
-        use m_xbl
-        use m_xsolve
-        use m_xutils
         use m_spline
         implicit none
         !
@@ -154,9 +147,6 @@ contains
 
 
     subroutine psilin(I, Xi, Yi, Nxi, Nyi, Psi, Psi_ni, Geolin, Siglin)
-        use m_xbl
-        use m_xsolve
-        use m_xutils
         use i_xfoil
         implicit none
         !
@@ -869,9 +859,6 @@ contains
 
 
     subroutine pswlin(I, Xi, Yi, Nxi, Nyi, Psi, Psi_ni)
-        use m_xbl
-        use m_xsolve
-        use m_xutils
         use i_xfoil
         implicit none
         !
@@ -1079,7 +1066,6 @@ contains
 
 
     subroutine ggcalc
-        use m_xbl
         use m_xsolve
         use m_xutils
         use i_xfoil
@@ -1240,9 +1226,6 @@ contains
 
 
     subroutine qwcalc
-        use m_xbl
-        use m_xsolve
-        use m_xutils
         use i_xfoil
         implicit none
         !
@@ -1284,9 +1267,7 @@ contains
 
 
     subroutine qdcalc
-        use m_xbl
         use m_xsolve
-        use m_xutils
         use i_xfoil
         implicit none
         !
@@ -1427,7 +1408,6 @@ contains
 
 
     subroutine xywake
-        use m_xbl
         use m_xutils
         use i_xfoil
         implicit none
@@ -1534,7 +1514,6 @@ contains
 
 
     subroutine stfind
-        use m_xbl
         use i_xfoil
         implicit none
         !
@@ -1591,7 +1570,6 @@ contains
 
 
     subroutine iblpan
-        use m_xbl
         use i_xfoil
         implicit none
         !
@@ -1670,7 +1648,6 @@ contains
 
 
     subroutine xicalc
-        use m_xbl
         use i_xfoil
         implicit none
         !
@@ -1776,7 +1753,6 @@ contains
 
 
     subroutine uicalc
-        use m_xbl
         use i_xfoil
         implicit none
         !
@@ -1815,7 +1791,6 @@ contains
 
 
     subroutine uecalc
-        use m_xbl
         use i_xfoil
         implicit none
         !
@@ -1852,7 +1827,6 @@ contains
 
 
     subroutine qvfue
-        use m_xbl
         use i_xfoil
         implicit none
         !
@@ -1888,7 +1862,6 @@ contains
 
 
     subroutine qiset
-        use m_xbl
         use i_xfoil
         implicit none
         !
@@ -1926,7 +1899,6 @@ contains
 
 
     subroutine gamqv
-        use m_xbl
         use i_xfoil
         implicit none
         !
