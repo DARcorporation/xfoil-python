@@ -22,6 +22,7 @@
 module m_xbl
 contains
     subroutine preptrs
+        use m_xpanel
         use m_xblsys
         use m_xsolve
         use m_spline
@@ -189,6 +190,7 @@ contains
 
 
     subroutine setbl
+        use m_xpanel
         use m_xblsys
         use m_xsolve
         use m_spline

@@ -21,6 +21,7 @@
 
 
 subroutine plrset(Ip)
+    use m_xpanel
     use m_xoper
     use m_xgeom
     use m_userio
@@ -168,6 +169,7 @@ end subroutine plrset
 
 
 subroutine apcopy(Ip)
+    use m_xpanel
     use m_xoper
     use m_xgeom
     use m_userio

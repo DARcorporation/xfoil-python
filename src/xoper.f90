@@ -23,6 +23,7 @@
 module m_xoper
 contains
     subroutine oper
+        use m_xpanel
         use m_xgdes
         use m_xblsys
         use m_xbl
@@ -1325,6 +1326,7 @@ contains
 
 
     subroutine fcpmin
+        use m_xpanel
         use m_xgdes
         use m_xblsys
         use m_xbl
@@ -1387,6 +1389,7 @@ contains
 
 
     subroutine mrshow(Lm, Lr)
+        use m_xpanel
         use m_xgdes
         use m_xblsys
         use m_xbl
@@ -1439,6 +1442,7 @@ contains
 
 
     subroutine nammod(Name, Kdel, Kmod0)
+        use m_xpanel
         use m_xgdes
         use m_xblsys
         use m_xbl
@@ -1533,6 +1537,7 @@ contains
 
 
     subroutine bldump(Fname1)
+        use m_xpanel
         use m_xgdes
         use m_xblsys
         use m_xbl
@@ -1700,6 +1705,7 @@ contains
 
 
     subroutine bldump2(Fname1)
+        use m_xpanel
         use m_xgdes
         use m_xblsys
         use m_xbl
@@ -1907,6 +1913,7 @@ contains
 
 
     subroutine cpdump(Fname1)
+        use m_xpanel
         use m_xgdes
         use m_xbl
         use m_userio
@@ -2017,6 +2024,7 @@ contains
 
 
     subroutine mhinge
+        use m_xpanel
         use m_xgdes
         use m_xbl
         use m_userio
@@ -2181,6 +2189,7 @@ contains
 
 
     subroutine vpar
+        use m_xpanel
         use m_xbl
         use m_userio
         use m_xsolve
@@ -2439,6 +2448,7 @@ contains
 
 
     subroutine specal
+        use m_xpanel
         use m_xbl
         use m_xsolve
         use m_spline
@@ -2543,6 +2553,7 @@ contains
 
 
     subroutine speccl
+        use m_xpanel
         use m_xbl
         use m_xsolve
         use m_spline
@@ -2630,6 +2641,7 @@ contains
 
 
     subroutine viscal(Niter1)
+        use m_xpanel
         use m_xbl
         use m_xsolve
         use m_spline

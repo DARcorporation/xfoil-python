@@ -2,7 +2,7 @@ import regex as re
 import glob
 import os
 
-new_module = 'xoper'
+new_module = 'xpanel'
 with open('{}.f90'.format(new_module), 'r') as f:
     lines = f.readlines()
 
