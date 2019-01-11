@@ -1592,6 +1592,7 @@ end subroutine rotate
 
 subroutine naca(Ides1)
     use m_aread
+    use m_naca
     use m_spline
     use i_xfoil
     implicit none
