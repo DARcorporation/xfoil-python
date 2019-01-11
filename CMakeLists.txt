@@ -5,6 +5,7 @@ enable_language(Fortran)
 set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -O -fbounds-check -finit-real=inf -ffpe-trap=invalid,zero -fdefault-real-8")
 add_executable(xfoil
         src/aread.f90
+        src/i_iopol.f90
         src/iopol.f90
         src/naca.f90
         src/sort.f90
