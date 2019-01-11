@@ -358,6 +358,7 @@ end program xfoil
 
 
 subroutine init
+    use m_aread
     use m_spline
     use i_xfoil
     implicit none
@@ -661,6 +662,7 @@ end subroutine init
 
 
 subroutine mrcl(Cls, M_cls, R_cls)
+    use m_aread
     use m_spline
     use i_xfoil
     implicit none
@@ -772,6 +774,7 @@ end subroutine mrcl
 
 
 subroutine getdef(Lu, Filnam, Lask)
+    use m_aread
     use m_spline
     use i_xfoil
     implicit none
@@ -902,6 +905,7 @@ end subroutine getdef
 
 
 subroutine wrtdef(Lu)
+    use m_aread
     use m_spline
     use i_xfoil
     implicit none
@@ -988,6 +992,7 @@ end subroutine wrtdef
 
 
 subroutine comset
+    use m_aread
     use m_spline
     use i_xfoil
     implicit none
@@ -1032,6 +1037,7 @@ end subroutine comset
 
 
 subroutine cpcalc(N, Q, Qinf, Minf, Cp)
+    use m_aread
     use m_spline
     implicit none
     !
@@ -1092,6 +1098,7 @@ end subroutine cpcalc
 
 
 subroutine clcalc(N, X, Y, Gam, Gam_a, Alfa, Minf, Qinf, Xref, Yref, Cl, Cm, Cdp, Cl_alf, Cl_msq)
+    use m_aread
     use m_spline
     implicit none
     !
@@ -1203,6 +1210,7 @@ end subroutine clcalc
 
 
 subroutine cdcalc
+    use m_aread
     use m_spline
     use i_xfoil
     implicit none
@@ -1264,6 +1272,7 @@ end subroutine cdcalc
 
 
 subroutine load(Filnam, Itype)
+    use m_aread
     use m_spline
     use i_xfoil
     implicit none
@@ -1400,6 +1409,7 @@ end subroutine load
 
 
 subroutine save(Iftyp, Fname1)
+    use m_aread
     use m_spline
     use i_xfoil
     implicit none
@@ -1530,6 +1540,7 @@ end subroutine save
 
 
 subroutine rotate(X, Y, N, Alfa)
+    use m_aread
     use m_spline
     implicit none
     !
@@ -1580,6 +1591,7 @@ end subroutine rotate
 
 
 subroutine naca(Ides1)
+    use m_aread
     use m_spline
     use i_xfoil
     implicit none
@@ -1660,6 +1672,7 @@ end subroutine naca
 
 
 subroutine pangen(Shopar)
+    use m_aread
     use m_spline
     use i_xfoil
     implicit none
@@ -2188,6 +2201,7 @@ end subroutine pangen
 
 
 subroutine getpan
+    use m_aread
     use m_spline
     use i_xfoil
     implicit none
@@ -2337,6 +2351,7 @@ end subroutine getpan
 
 
 subroutine tecalc
+    use m_aread
     use m_spline
     use i_xfoil
     implicit none
@@ -2399,6 +2414,7 @@ end subroutine tecalc
 
 
 subroutine inte
+    use m_aread
     use m_spline
     use i_xfoil
     implicit none
@@ -2539,6 +2555,7 @@ end subroutine inte
 
 
 subroutine intx
+    use m_aread
     use m_spline
     use i_xfoil
     implicit none
