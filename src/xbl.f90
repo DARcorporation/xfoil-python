@@ -1299,13 +1299,16 @@ SUBROUTINE UPDATE
     !        If LALFA=.FALSE., "AC" is alpha
     !------------------------------------------------------------------
     INCLUDE 'XFOIL.INC'
+    REAL, DIMENSION(3, 2, IZX) :: VA_COPY, VB_COPY
     REAL UNEW(IVX, 2), U_AC(IVX, 2)
     REAL QNEW(IQX), Q_AC(IQX)
-    EQUIVALENCE (VA(1, 1, 1), UNEW(1, 1)), &
-            (VB(1, 1, 1), QNEW(1))
-    EQUIVALENCE (VA(1, 1, IVX), U_AC(1, 1)), &
-            (VB(1, 1, IVX), Q_AC(1))
+    EQUIVALENCE (VA_COPY(1, 1, 1), UNEW(1, 1)), &
+            (VB_COPY(1, 1, 1), QNEW(1))
+    EQUIVALENCE (VA_COPY(1, 1, IVX), U_AC(1, 1)), &
+            (VB_COPY(1, 1, IVX), Q_AC(1))
     REAL MSQ
+    VA_COPY = VA
+    VB_COPY = VB
     !
     !---- max allowable alpha changes per iteration
     DALMAX = 0.5 * DTOR
@@ -1595,6 +1598,8 @@ SUBROUTINE UPDATE
         TSTR(IBLTE(1) + KBL, 1) = TSTR(IBLTE(2) + KBL, 2)
     6 CONTINUE
     !
+    VA = VA_COPY
+    VB = VB_COPY
     RETURN
 END
 
