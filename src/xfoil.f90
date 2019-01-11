@@ -365,7 +365,7 @@ end program xfoil
 
 
 subroutine init
-    use m_xbl
+    use m_xbl, only: blpini
     use i_xfoil
     implicit none
     !
@@ -1264,10 +1264,10 @@ end subroutine cdcalc
 
 
 subroutine load(Filnam, Itype)
-    use m_xgeom
-    use m_userio
-    use m_aread
-    use m_spline
+    use m_xgeom, only: geopar, norm
+    use m_userio, only: strip
+    use m_aread, only: aread
+    use m_spline, only: seval, segspl, scalc
     use i_xfoil
     implicit none
     !
@@ -1403,7 +1403,7 @@ end subroutine load
 
 
 subroutine save(Iftyp, Fname1)
-    use m_userio
+    use m_userio, only: asks, bstrip
     use i_xfoil
     implicit none
     !
@@ -1582,9 +1582,9 @@ end subroutine rotate
 
 
 subroutine naca(Ides1)
-    use m_xgeom
-    use m_userio
-    use m_spline
+    use m_xgeom, only: geopar
+    use m_userio, only: aski, strip
+    use m_spline, only: segspl, scalc
     use i_xfoil
     implicit none
     !
@@ -1664,9 +1664,9 @@ end subroutine naca
 
 
 subroutine pangen(Shopar)
-    use m_xpanel
-    use m_xgeom
-    use m_spline
+    use m_xpanel, only: apcalc, ncalc
+    use m_xgeom, only: lefind
+    use m_spline, only: seval, scalc, trisol, segspl, deval
     use i_xfoil
     implicit none
     !
@@ -2194,7 +2194,7 @@ end subroutine pangen
 
 
 subroutine getpan
-    use m_userio
+    use m_userio, only: getflt, askc, askr, aski, getint
     use i_xfoil
     implicit none
     !
@@ -2404,10 +2404,10 @@ end subroutine tecalc
 
 
 subroutine inte
-    use m_xgeom
-    use m_userio
-    use m_aread
-    use m_spline
+    use m_xgeom, only: geopar, inter, lefind
+    use m_userio, only: asks, askr, strip
+    use m_aread, only: aread
+    use m_spline, only: segspld, segspl, scalc
     use i_xfoil
     implicit none
     !
@@ -2547,10 +2547,10 @@ end subroutine inte
 
 
 subroutine intx
-    use m_xgeom
-    use m_userio
-    use m_aread
-    use m_spline
+    use m_xgeom, only: geopar, interx, lefind
+    use m_userio, only: asks, askr, strip
+    use m_aread, only: aread
+    use m_spline, only: segspld, segspl, scalc
     use i_xfoil
     implicit none
     !

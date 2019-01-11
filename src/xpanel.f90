@@ -71,7 +71,7 @@ contains
 
 
     subroutine ncalc(X, Y, S, N, Xn, Yn)
-        use m_spline
+        use m_spline, only: segspl
         implicit none
         !
         !*** Start of declarations rewritten by SPAG
@@ -1066,8 +1066,8 @@ contains
 
 
     subroutine ggcalc
-        use m_xsolve
-        use m_xutils
+        use m_xsolve, only: ludcmp, baksub
+        use m_xutils, only: atanc
         use i_xfoil
         implicit none
         !
@@ -1267,7 +1267,7 @@ contains
 
 
     subroutine qdcalc
-        use m_xsolve
+        use m_xsolve, only: baksub
         use i_xfoil
         implicit none
         !
@@ -1408,7 +1408,7 @@ contains
 
 
     subroutine xywake
-        use m_xutils
+        use m_xutils, only: setexp
         use i_xfoil
         implicit none
         !
@@ -1929,7 +1929,7 @@ contains
 
 
     subroutine stmove
-        use m_xbl
+        use m_xbl, only: iblsys
         use i_xfoil
         implicit none
         !

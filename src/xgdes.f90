@@ -27,9 +27,9 @@
 module m_xgdes
 contains
     subroutine abcopy(Lconf)
-        use m_xpanel
-        use m_xgeom
-        use m_spline
+        use m_xpanel, only: apcalc, ncalc
+        use m_xgeom, only: lefind
+        use m_spline, only: seval, segspl, scalc
         use i_xfoil
         implicit none
         !
@@ -135,8 +135,8 @@ contains
 
 
     subroutine getxyf(X, Xp, Y, Yp, S, N, Tops, Bots, Xf, Yf)
-        use m_userio
-        use m_spline
+        use m_userio, only: askr
+        use m_spline, only: seval, sinvrt
         implicit none
         !
         !*** Start of declarations rewritten by SPAG

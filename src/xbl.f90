@@ -186,9 +186,9 @@ contains
 
 
     subroutine setbl
-        use m_xpanel
-        use m_xblsys
-        use m_spline
+        use m_xpanel, only: ueset
+        use m_xblsys, only: tesys, trchek, blprv, blmid, blkin, blsys, blvar
+        use m_spline, only: seval
         use i_xfoil
         use i_xbl
         implicit none
@@ -725,8 +725,8 @@ contains
 
 
     subroutine mrchue
-        use m_xblsys
-        use m_xsolve
+        use m_xblsys, only: hkin, tesys, trchek, blprv, blkin, blsys
+        use m_xsolve, only: gauss
         use i_xfoil
         use i_xbl
         implicit none
@@ -1070,8 +1070,8 @@ contains
 
 
     subroutine mrchdu
-        use m_xblsys
-        use m_xsolve
+        use m_xblsys, only: hkin, tesys, trchek, blprv, blkin, blsys
+        use m_xsolve, only: gauss
         use i_xfoil
         use i_xbl
         implicit none
@@ -1409,7 +1409,7 @@ contains
 
 
     subroutine xifset(Is)
-        use m_spline
+        use m_spline, only: splind, sinvrt
         use i_xfoil
         use i_xbl
         implicit none
@@ -1824,7 +1824,7 @@ contains
 
 
     subroutine dslim(Dstr, Thet, Uedg, Msq, Hklim)
-        use m_xblsys
+        use m_xblsys, only: hkin
         implicit none
         !
         !*** Start of declarations rewritten by SPAG

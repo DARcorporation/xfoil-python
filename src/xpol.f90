@@ -23,8 +23,8 @@
 module m_xpol
 contains
     subroutine plrset(Ip)
-        use m_userio
-        use m_iopol
+        use m_userio, only: aski, strip
+        use m_iopol, only: polwrit
         use i_xfoil
         implicit none
         !
@@ -166,9 +166,9 @@ contains
 
 
     subroutine apcopy(Ip)
-        use m_xpanel
-        use m_xgeom
-        use m_spline
+        use m_xpanel, only: apcalc, ncalc
+        use m_xgeom, only: lefind
+        use m_spline, only: seval, segspl, scalc
         use i_xfoil
         implicit none
         !
@@ -237,8 +237,8 @@ contains
 
 
     subroutine plrini(Lu, Ip)
-        use m_userio
-        use m_iopol
+        use m_userio, only: asks, askl, strip
+        use m_iopol, only: polread, polwrit
         use i_xfoil
         implicit none
         !
@@ -443,7 +443,7 @@ contains
 
 
     subroutine plxini(Lu, Ip)
-        use m_userio
+        use m_userio, only: asks, askl, strip
         use i_xfoil
         implicit none
         !
@@ -620,8 +620,8 @@ contains
 
 
     subroutine plradd(Lu, Ip)
-        use m_xoper
-        use m_iopol
+        use m_xoper, only: mhinge
+        use m_iopol, only: polwrit
         use i_xfoil
         implicit none
         !
@@ -748,7 +748,7 @@ contains
 
 
     subroutine plxadd(Lu, Ip)
-        use m_spline
+        use m_spline, only: seval
         use i_xfoil
         implicit none
         !
@@ -858,7 +858,7 @@ contains
 
 
     subroutine plrsrt(Ip, Idsort)
-        use m_sort
+        use m_sort, only: hsort, asort
         use i_xfoil
         implicit none
         !
@@ -909,7 +909,7 @@ contains
 
 
     subroutine plrsum(Ip1, Ip2, Ipactt)
-        use m_userio
+        use m_userio, only: strip
         use i_xfoil
         implicit none
         !
@@ -1167,7 +1167,7 @@ contains
 
 
     subroutine polaxi(Cpolplf, Xcdwid, Xalwid, Xocwid)
-        use m_userio
+        use m_userio, only: readr
         use i_pindex
         implicit none
         !

@@ -24,10 +24,10 @@
 module m_xmdes
 contains
     subroutine mdes
-        use m_xgeom
-        use m_userio
-        use m_xqdes
-        use m_spline
+        use m_xgeom, only: geopar
+        use m_userio, only: getflt, askc, getint
+        use m_xqdes, only: smooq
+        use m_spline, only: splind, scalc
         use i_xfoil
         implicit none
         !
@@ -423,7 +423,7 @@ contains
 
 
     subroutine dztset(Rinput, Ninput)
-        use m_userio
+        use m_userio, only: askr
         use i_circle
         implicit none
         !
@@ -469,7 +469,7 @@ contains
 
 
     subroutine agtset(Rinput, Ninput)
-        use m_userio
+        use m_userio, only: askr
         use i_circle
         implicit none
         !
@@ -513,7 +513,7 @@ contains
 
 
     subroutine mapgam(Iac, Alg, Clg, Cmg)
-        use m_spline
+        use m_spline, only: seval
         use i_xfoil
         implicit none
         !
@@ -573,7 +573,7 @@ contains
 
 
     subroutine qspcir
-        use m_xqdes
+        use m_xqdes, only: splqsp
         use i_xfoil
         implicit none
         !
@@ -608,7 +608,7 @@ contains
 
 
     subroutine mapgen(Ffilt, N, X, Y)
-        use m_xsolve
+        use m_xsolve, only: cgauss
         use i_circle
         implicit none
         !
@@ -724,7 +724,7 @@ contains
 
 
     subroutine scinit(N, X, Xp, Y, Yp, S, Sle)
-        use m_spline
+        use m_spline, only: curv, seval, deval
         use i_circle
         implicit none
         !
@@ -908,7 +908,7 @@ contains
 
 
     subroutine cncalc(Qc, Lsymm)
-        use m_spline
+        use m_spline, only: splind, sinvrt
         use i_circle
         implicit none
         !
@@ -1677,7 +1677,7 @@ contains
 
 
     subroutine pert(Qspec)
-        use m_xsolve
+        use m_xsolve, only: cgauss
         use i_circle
         implicit none
         !
@@ -1844,10 +1844,10 @@ contains
 
 
     subroutine getvov(Kqsp)
-        use m_userio
-        use m_sort
-        use m_xqdes
-        use m_spline
+        use m_userio, only: asks
+        use m_sort, only: sort
+        use m_xqdes, only: splqsp, qincom
+        use m_spline, only: seval, splind
         use i_xfoil
         implicit none
         !
@@ -1938,7 +1938,7 @@ contains
 
 
     subroutine zlefind(Zle, Zc, Wc, Nc, Piq, Agte)
-        use m_spline
+        use m_spline, only: d2val, seval, splind, deval
         implicit none
         !
         !*** Start of declarations rewritten by SPAG

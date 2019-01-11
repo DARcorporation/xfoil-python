@@ -23,7 +23,7 @@
 module m_xgeom
 contains
     subroutine lefind(Sle, X, Xp, Y, Yp, S, N)
-        use m_spline
+        use m_spline, only: d2val, seval, deval
         implicit none
         !
         !*** Start of declarations rewritten by SPAG
@@ -120,7 +120,7 @@ contains
 
 
     subroutine sopps(Sopp, Si, X, Xp, Y, Yp, S, N, Sle)
-        use m_spline
+        use m_spline, only: seval, deval
         implicit none
         !
         !*** Start of declarations rewritten by SPAG
@@ -220,7 +220,7 @@ contains
 
 
     subroutine norm(X, Xp, Y, Yp, S, N)
-        use m_spline
+        use m_spline, only: seval, segspl, scalc
         implicit none
         !
         !*** Start of declarations rewritten by SPAG
@@ -277,8 +277,8 @@ contains
     subroutine geopar(X, Xp, Y, Yp, S, N, T, &
             Sle, Chord, Area, Radle, Angte, Ei11a, Ei22a, Apx1a, Apx2a, Ei11t, Ei22t, Apx1t, Apx2t, Thick, &
             & Cambr)
-        use m_spline
-        use m_xutils
+        use m_spline, only: curv, seval
+        use m_xutils, only: atanc
         implicit none
         !
         !*** Start of declarations rewritten by SPAG
@@ -535,7 +535,7 @@ contains
 
 
     subroutine tccalc(X, Xp, Y, Yp, S, N, Thick, Xthick, Cambr, Xcambr)
-        use m_spline
+        use m_spline, only: seval
         implicit none
         !
         !*** Start of declarations rewritten by SPAG
@@ -710,7 +710,7 @@ contains
 
 
     subroutine inter(X0, Xp0, Y0, Yp0, S0, N0, Sle0, X1, Xp1, Y1, Yp1, S1, N1, Sle1, X, Y, N, Frac)
-        use m_spline
+        use m_spline, only: seval
         implicit none
         !
         !*** Start of declarations rewritten by SPAG
@@ -803,7 +803,7 @@ contains
 
 
     subroutine interx(X0, Xp0, Y0, Yp0, S0, N0, Sle0, X1, Xp1, Y1, Yp1, S1, N1, Sle1, X, Y, N, Frac)
-        use m_spline
+        use m_spline, only: seval, sinvrt
         implicit none
         !
         !*** Start of declarations rewritten by SPAG

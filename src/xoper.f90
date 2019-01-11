@@ -23,11 +23,11 @@
 module m_xoper
 contains
     subroutine oper
-        use m_xpol
-        use m_xpanel
-        use m_userio
-        use m_iopol
-        use m_spline
+        use m_xpol, only: plxini, plradd, prfsum, plxadd, plrsrt, plrini, apcopy, plrsum, plrset, prfcop, plrcop
+        use m_xpanel, only: psilin
+        use m_userio, only: getflt, askc, askr, strip, aski, asks
+        use m_iopol, only: polread, polref, polwrit
+        use m_spline, only: seval
         use i_xfoil
         implicit none
         !
@@ -1425,7 +1425,7 @@ contains
 
 
     subroutine nammod(Name, Kdel, Kmod0)
-        use m_userio
+        use m_userio, only: strip
         implicit none
         !
         !*** Start of declarations rewritten by SPAG
@@ -1514,8 +1514,8 @@ contains
 
 
     subroutine bldump(Fname1)
-        use m_xblsys
-        use m_userio
+        use m_xblsys, only: hkin
+        use m_userio, only: bstrip, asks, strip
         use i_xfoil
         implicit none
         !
@@ -1677,8 +1677,8 @@ contains
 
 
     subroutine bldump2(Fname1)
-        use m_xblsys
-        use m_userio
+        use m_xblsys, only: hkin
+        use m_userio, only: asks, strip
         use i_xfoil
         implicit none
         !
@@ -1880,7 +1880,7 @@ contains
 
 
     subroutine cpdump(Fname1)
-        use m_userio
+        use m_userio, only: bstrip, asks, strip
         use i_xfoil
         implicit none
         !
@@ -1986,8 +1986,8 @@ contains
 
 
     subroutine mhinge
-        use m_xgdes
-        use m_spline
+        use m_xgdes, only: getxyf
+        use m_spline, only: seval, sinvrt
         use i_xfoil
         implicit none
         !
@@ -2147,8 +2147,8 @@ contains
 
 
     subroutine vpar
-        use m_xbl
-        use m_userio
+        use m_xbl, only: blpini
+        use m_userio, only: getflt, askc, askr, getint
         use i_xfoil
         use i_blpar
         implicit none
@@ -2403,7 +2403,7 @@ contains
 
 
     subroutine specal
-        use m_xpanel
+        use m_xpanel, only: qiset
         use i_xfoil
         implicit none
         !
@@ -2505,7 +2505,7 @@ contains
 
 
     subroutine speccl
-        use m_xpanel
+        use m_xpanel, only: qiset
         use i_xfoil
         implicit none
         !
@@ -2590,9 +2590,9 @@ contains
 
 
     subroutine viscal(Niter1)
-        use m_xpanel
-        use m_xbl
-        use m_xsolve
+        use m_xpanel, only: qiset, qvfue, iblpan, qwcalc, uicalc, xicalc, gamqv, stfind, stmove
+        use m_xbl, only: iblsys, update, setbl
+        use m_xsolve, only: blsolv
         use i_xfoil
         implicit none
         !
@@ -2821,7 +2821,7 @@ contains
 
 
     subroutine dcpout
-        use m_spline
+        use m_spline, only: seval, sinvrt
         use i_xfoil
         implicit none
         !

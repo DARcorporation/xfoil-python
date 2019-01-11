@@ -29,11 +29,11 @@ module m_xqdes
     !
 contains
     subroutine qdes
-        use m_xpanel
-        use m_xoper
-        use m_xgeom
-        use m_userio
-        use m_spline
+        use m_xpanel, only: apcalc, ncalc
+        use m_xoper, only: specal
+        use m_xgeom, only: lefind
+        use m_userio, only: getflt, askc, getint
+        use m_spline, only: seval, splind, scalc
         use i_xfoil
         implicit none
         !
@@ -260,7 +260,7 @@ contains
 
 
     subroutine splqsp(Kqsp)
-        use m_spline
+        use m_spline, only: splind
         use i_xfoil
         implicit none
         !
@@ -313,7 +313,7 @@ contains
 
 
     subroutine smooq(Kq1, Kq2, Kqsp)
-        use m_spline
+        use m_spline, only: trisol
         use i_xfoil
         implicit none
         !
