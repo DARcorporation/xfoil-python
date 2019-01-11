@@ -21,6 +21,7 @@
 
 
 subroutine plrset(Ip)
+    use m_xoper
     use m_xgeom
     use m_userio
     use m_sort
@@ -167,6 +168,7 @@ end subroutine plrset
 
 
 subroutine apcopy(Ip)
+    use m_xoper
     use m_xgeom
     use m_userio
     use m_sort
@@ -240,6 +242,7 @@ end subroutine apcopy
 
 
 subroutine plrini(Lu, Ip)
+    use m_xoper
     use m_userio
     use m_sort
     use m_iopol
@@ -447,6 +450,7 @@ subroutine plrini(Lu, Ip)
 
 
 subroutine plxini(Lu, Ip)
+    use m_xoper
     use m_userio
     use m_sort
     use m_iopol
@@ -626,6 +630,7 @@ end subroutine plxini
 
 
 subroutine plradd(Lu, Ip)
+    use m_xoper
     use m_userio
     use m_sort
     use m_iopol

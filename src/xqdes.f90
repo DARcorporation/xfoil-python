@@ -29,6 +29,7 @@ module m_xqdes
     !
 contains
     subroutine qdes
+        use m_xoper
         use m_xgeom
         use m_userio
         use m_spline

@@ -22,6 +22,7 @@
 !***********************************************************************
 !
 program xfoil
+    use m_xoper
     use m_xmdes
     use m_xgeom
     use m_xgdes
