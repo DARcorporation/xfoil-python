@@ -29,7 +29,7 @@ module m_xqdes
     !
 contains
     subroutine qdes
-        use m_xfoil, only: clcalc, tecalc
+        use s_xfoil, only: clcalc, tecalc
         use m_xpanel, only: apcalc, ncalc
         use m_xoper, only: specal
         use m_xgeom, only: lefind

@@ -23,7 +23,6 @@
 module m_xpol
 contains
     subroutine plrset(Ip)
-use m_xfoil
         use m_userio, only: aski, strip
         use m_iopol, only: polwrit
         use i_xfoil
@@ -167,7 +166,7 @@ use m_xfoil
 
 
     subroutine apcopy(Ip)
-        use m_xfoil, only: tecalc
+        use s_xfoil, only: tecalc
         use m_xpanel, only: apcalc, ncalc
         use m_xgeom, only: lefind
         use m_spline, only: seval, segspl, scalc

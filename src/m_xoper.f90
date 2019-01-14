@@ -24,14 +24,13 @@ module m_xoper
     use s_xoper
 contains
     subroutine oper
-        use m_xfoil, only: cdcalc, cpcalc, clcalc
         use m_xpol, only: plxini, plradd, prfsum, plxadd, plrsrt, plrini, apcopy, plrsum, plrset, prfcop, plrcop
         use m_xpanel, only: psilin
         use m_userio, only: getflt, askc, askr, strip, aski, asks
         use m_iopol, only: polread, polref, polwrit
         use m_spline, only: seval, deval
         use i_xfoil
-        use s_xfoil, only: mrcl, comset
+        use s_xfoil, only: mrcl, comset, cdcalc, cpcalc, clcalc
         implicit none
         !
         !*** Start of declarations rewritten by SPAG
@@ -2248,10 +2247,9 @@ contains
 
 
     subroutine specal
-        use m_xfoil, only: cpcalc, clcalc, tecalc
         use m_xpanel, only: qiset, ggcalc
         use i_xfoil
-        use s_xfoil, only: mrcl, comset
+        use s_xfoil, only: mrcl, comset, cpcalc, clcalc, tecalc
         implicit none
         !
         !*** Start of declarations rewritten by SPAG
@@ -2352,10 +2350,9 @@ contains
 
 
     subroutine speccl
-        use m_xfoil, only: clcalc, cpcalc, tecalc
         use m_xpanel, only: qiset, ggcalc
         use i_xfoil
-        use s_xfoil, only: mrcl, comset
+        use s_xfoil, only: mrcl, comset, clcalc, cpcalc, tecalc
         implicit none
         !
         !*** Start of declarations rewritten by SPAG
@@ -2439,14 +2436,13 @@ contains
 
 
     subroutine viscal(Niter1)
-        use m_xfoil, only: cdcalc, cpcalc, clcalc
         use m_xpanel, only: qiset, qvfue, iblpan, qwcalc, uicalc, xicalc, gamqv, stfind, stmove, xywake, qdcalc
         use m_xbl, only: update, setbl
         use m_xsolve, only: blsolv
         use m_userio, only: aski
         use i_xfoil
         use s_xbl, only: iblsys
-        use s_xfoil, only: mrcl, comset
+        use s_xfoil, only: mrcl, comset, cdcalc, cpcalc, clcalc
         implicit none
         !
         !*** Start of declarations rewritten by SPAG
