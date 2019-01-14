@@ -31,7 +31,6 @@ subroutine xfoil
     use m_xmdes, only: mdes
     use m_xgeom, only: bendump2, half, geopar, cang, bendump
     use m_xgdes, only: abcopy
-    use m_xbl, only: preptrs
     use m_userio, only: aski, askr, getflt, getint, strip, askc
     use m_spline, only: scalc, segspl
     use m_xqdes, only: qdes
@@ -70,8 +69,6 @@ subroutine xfoil
     !---- max panel angle threshold for warning
     data angtol/40.0/
     !
-    !---- prepare BL pointers
-    call preptrs
     !
     VERsion = 6.99
     write (*, 99001) VERsion
@@ -369,7 +366,7 @@ end subroutine xfoil
 
 subroutine init
     use s_xfoil, only: mrcl, comset
-    use m_xbl, only: blpini
+    use m_xbl, only: blpini, preptrs
     use i_xfoil
     implicit none
     !
@@ -389,6 +386,8 @@ subroutine init
     !
     !
     !*** End of declarations rewritten by SPAG
+    !---- prepare BL pointers
+    call preptrs
     !
     !---------------------------------------------------
     !     Variable initialization/default routine.
