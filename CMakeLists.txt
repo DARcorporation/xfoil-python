@@ -2,7 +2,12 @@ cmake_minimum_required(VERSION 3.12)
 project(xfoil Fortran)
 
 enable_language(Fortran)
-set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -O -fbounds-check -finit-real=inf -ffpe-trap=invalid,zero -fdefault-real-8")
+set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} \
+-O \
+-fbounds-check \
+-finit-real=inf \
+-ffpe-trap=invalid,zero \
+-fdefault-real-8")
 set(SRC_DIR "src")
 add_executable(xfoil
         # Include modules
