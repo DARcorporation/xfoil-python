@@ -25,7 +25,7 @@
 
 module m_xfoil
 contains
-subroutine xfoil
+subroutine xfoil() bind(c, name='xfoil')
 !    use m_xfoil, only: getpan, save, intx, pangen, load, init, naca, inte, getdef, wrtdef
     use m_xoper, only: nammod, oper
     use m_xmdes, only: mdes
@@ -364,7 +364,7 @@ end subroutine xfoil
 !*==INIT.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! XFOIL
 
-subroutine init
+subroutine init() bind(c, name='init')
     use s_xfoil, only: mrcl, comset
     use m_xbl, only: blpini, preptrs
     use i_xfoil
