@@ -8,8 +8,9 @@ set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} \
 -finit-real=inf \
 -ffpe-trap=invalid,zero \
 -fdefault-real-8")
-set(SRC_DIR "src")
-add_executable(xfoil
+set(SRC_DIR "src/fortran")
+
+add_library(xfoil SHARED
         # Include modules
         ${SRC_DIR}/i_pindex.f90
         ${SRC_DIR}/i_xfoil.f90
@@ -39,6 +40,5 @@ add_executable(xfoil
         ${SRC_DIR}/m_xqdes.f90
         ${SRC_DIR}/m_xsolve.f90
         ${SRC_DIR}/m_xutils.f90
-        # Program
-        ${SRC_DIR}/p_xfoil.f90
-        )
+        # API
+        ${SRC_DIR}/api.f90)
