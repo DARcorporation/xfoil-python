@@ -1,0 +1,1 @@
+from .xfoil import XFoil
