@@ -5,8 +5,15 @@ This is a stripped down version of XFOIL. All graphical functionality has been r
 
 Building and Installing the Python Module
 -----------------------------------------
-To successfully build and install the Python module a few prerequisites have to be present on your system. First of all,
-a working installation of Python is required, of course. The module targets Python 3, and does NOT support Python 2. 
+If you are on a Windows machine (64bit) with Python 3.6, installing XFoil is a simple matter of running:
+
+```bash
+pip install xfoil
+```
+
+If you are using a different type of machine, or a different version of Python, you will have to make sure some
+software is installed on your system in order for the package to be successfully built. First of all, the module targets 
+Python 3, and does NOT support Python 2. So make sure a Python 3 environment is installed and available.
 Furthermore, working compilers for C and Fortran have to be installed and on the PATH. On Windows, the build and
 installation have ONLY been tested with MinGW, using gcc and gfortran. 
 
@@ -45,6 +52,8 @@ instance of this class:
 ```
 
 If this does not produce any errors, the installation should be functioning properly. 
+
+
 The symmetric NACA 0012 airfoil is included as a test case. It can be loaded into the XFoil library like this:
 
 ```pycon
