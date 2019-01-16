@@ -59,7 +59,7 @@ class TestXFoil(unittest.TestCase):
     def test_a(self):
         xf = XFoil()
         xf.airfoil = naca0012
-        xf.conditions = (1000000., 0.)
+        xf.conditions = (1e6, 0)
         xf.max_iter = 100
         cl, cd, cm = xf.a(10)
 
@@ -70,7 +70,7 @@ class TestXFoil(unittest.TestCase):
     def test_cl(self):
         xf = XFoil()
         xf.airfoil = naca0012
-        xf.conditions = (1000000., 0.)
+        xf.conditions = (1e6, 0)
         a, cd, cm = xf.cl(1)
 
         self.assertAlmostEqual(a, 9.0617, 4)
@@ -80,7 +80,7 @@ class TestXFoil(unittest.TestCase):
     def test_aseq(self):
         xf = XFoil()
         xf.airfoil = naca0012
-        xf.conditions = (1000000., 0.)
+        xf.conditions = (1e6, 0)
         xf.max_iter = 40
         a, cl, cd, cm = xf.aseq(-20, 20, 0.5)
 
@@ -116,7 +116,7 @@ class TestXFoil(unittest.TestCase):
     def test_cseq(self):
         xf = XFoil()
         xf.airfoil = naca0012
-        xf.conditions = (1000000., 0.)
+        xf.conditions = (1e6, 0.)
         xf.max_iter = 40
         a, cl, cd, cm = xf.cseq(-0.5, 0.5, 0.05)
 
