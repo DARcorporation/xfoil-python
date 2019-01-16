@@ -82,6 +82,39 @@ class XFoil(object):
         """Reset the boundary layers to be reinitialized on the next analysis."""
         self._lib.reset_bls()
 
+    def repanel(self, n_nodes=160, cv_par=1, cte_ratio=0.15, ctr_ratio=0.2, xt_ref=(1, 1), xb_ref=(1, 1)):
+        """Re-panel airfoil.
+
+        Parameters
+        ----------
+        n_nodes : int
+            Number of panel nodes
+        cv_par : float
+            Panel bunching parameter
+        cte_ratio : float
+            TE/LE panel density ratio
+        ctr_ratio : float
+            Refined-area/LE panel density ratio
+        xt_ref : tuple of two floats
+            Top side refined area x/c limits
+        xb_ref : tuple of two floats
+            Bottom side refined area x/c limits
+        """
+        self._lib.repanel(byref(c_int(n_nodes)), byref(c_float(cv_par)),
+                          byref(c_float(cte_ratio)), byref(c_float(ctr_ratio)),
+                          byref(c_float(xt_ref[0])), byref(c_float(xt_ref[1])),
+                          byref(c_float(xb_ref[0])), byref(c_float(xb_ref[1])))
+
+    def filter(self, factor=0.2):
+        """Filter surface speed distribution using modified Hanning filter.
+
+        Parameters
+        ----------
+        factor : float
+            Filter parameter. If set to 1, the standard, full Hanning filter is applied. Default is 0.2.
+        """
+        self._lib.filter(byref(c_float(factor)))
+
     def a(self, a):
         """Analyze airfoil at a fixed angle of attack.
 

@@ -18,7 +18,7 @@
 !***********************************************************************
 
 module api
-    use, intrinsic :: iso_c_binding, only: c_float, c_int
+    use, intrinsic :: iso_c_binding, only: c_float, c_int, c_bool
     implicit none
 contains
 
@@ -191,6 +191,52 @@ contains
             LIPan = .false.
         endif
     end subroutine reset_bls
+
+    subroutine repanel(n_panel, cv_par, cte_ratio, ctr_ratio, &
+                       xs_ref1, xs_ref2, xp_ref1, xp_ref2) bind(c, name='repanel')
+        use m_xfoil, only: pangen
+        use m_xgeom, only: cang
+        use i_xfoil
+
+        integer :: imax
+        real :: amax
+        integer(c_int), intent(in) :: n_panel
+        real(c_float), intent(in) :: cv_par, cte_ratio, ctr_ratio, xs_ref1, xs_ref2, xp_ref1, xp_ref2
+
+        NPAn = min(n_panel, IQX - 6)
+        CVPar = cv_par
+        CTErat = cte_ratio
+        CTRrat = ctr_ratio
+        XSRef1 = xs_ref1
+        XSRef2 = xs_ref2
+        XPRef1 = xp_ref1
+        XPRef2 = xp_ref2
+
+        call pangen(.true.)
+        if (N>0) call cang(X, Y, N, 1, imax, amax)
+    end subroutine repanel
+
+    subroutine filter(factor) bind(c, name='filter')
+        use m_xmdes, only: cnfilt, piqsum, qspcir, qspint
+        use i_xfoil
+
+        real(c_float), intent(in) :: factor
+
+        real :: cfilt, clq
+        integer :: kqsp
+
+        !----- apply modified Hanning filter to Cn coefficients
+        cfilt = factor
+        call cnfilt(cfilt)
+        call piqsum
+        call qspcir
+
+        do kqsp = 1, NQSp
+            call qspint(ALQsp(kqsp), QSPec(1, kqsp), QINf, MINf, clq, CMQsp(kqsp))
+            if (IACqsp==1) CLQsp(kqsp) = clq
+        enddo
+        LQSppl = .false.
+    end subroutine filter
 
     subroutine alfa_(a_input, cl_out, cd_out, cm_out) bind(c, name='alfa')
         use m_xoper, only: specal, viscal, fcpmin
