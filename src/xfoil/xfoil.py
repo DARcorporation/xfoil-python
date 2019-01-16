@@ -57,7 +57,7 @@ class XFoil(object):
 
         self._lib.alfa(byref(c_float(a)), byref(cl), byref(cd), byref(cm))
 
-        return cl, cd, cm
+        return cl.value, cd.value, cm.value
 
     def cl(self, cl):
         a = c_float()
@@ -66,7 +66,7 @@ class XFoil(object):
 
         self._lib.cl(byref(c_float(cl)), byref(a), byref(cd), byref(cm))
 
-        return a, cd, cm
+        return a.value, cd.value, cm.value
 
     def aseq(self, a_start, a_end, a_step):
         n = abs(int((a_end - a_start) / a_step))
