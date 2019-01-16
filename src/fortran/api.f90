@@ -125,15 +125,17 @@ contains
         !
         call cang(X, Y, N, 0, imax, amax)
         if (abs(amax)>angtol) write (*, 99007) amax, imax
-        99007 format (/' WARNING: Poor input coordinate distribution'/'          Excessive panel angle', f7.1, '  at i =', &
-                &i4/'          Repaneling with PANE and/or PPAR suggested'/                                                &
-                &'           (doing GDES,CADD before repaneling _may_'/'            improve excessively coarse LE spacing')
+        99007 format (/&
+                ' WARNING: Poor input coordinate distribution'/&
+                '          Excessive panel angle', f7.1, '  at i =', i4/&
+                '          Repaneling with PANE and/or PPAR suggested'/&
+                '           (doing GDES,CADD before repaneling _may_'/&
+                '            improve excessively coarse LE spacing')
     end subroutine set_airfoil
 
-    subroutine set_conditions(Re, M) bind(c, name='set_conditions')
-        use s_xfoil, only: comset, cpcalc, clcalc, cdcalc
+    subroutine set_reynolds(Re) bind(c, name='set_reynolds')
         use i_xfoil
-        real(c_float), intent(in) :: Re, M
+        real(c_float), intent(in) :: Re
 
         if (Re == 0.) then
             LVIsc = .false.
@@ -145,6 +147,21 @@ contains
 
         LBLini = .false.
         LIPan = .false.
+
+        LVConv = .false.
+    end subroutine set_reynolds
+
+    function get_reynolds() bind(c, name='get_reynolds')
+        use i_xfoil, only: REInf1
+        real(c_float) :: get_reynolds
+        get_reynolds = REInf1
+    end function get_reynolds
+
+    subroutine set_mach(M) bind(c, name='set_mach')
+        use s_xfoil, only: comset, cpcalc, clcalc, cdcalc
+        use i_xfoil
+
+        real(c_float), intent(in) :: M
 
         if (M /= MINf) then
             MINf = M
@@ -160,14 +177,42 @@ contains
         end if
 
         LVConv = .false.
-    end subroutine set_conditions
+    end subroutine set_mach
 
-    subroutine get_conditions(Re, M) bind(c, name='get_conditions')
-        use i_xfoil, only: REInf1, MINf
-        real(c_float), intent(out) :: Re, M
-        Re = REInf1
-        M = MINf
-    end subroutine get_conditions
+    function get_mach() bind(c, name='get_mach')
+        use i_xfoil, only: MINf
+        real(c_float) :: get_mach
+        get_mach = MINf
+    end function get_mach
+
+    subroutine set_xtr(xtr_top, xtr_bot) bind(c, name='set_xtr')
+        use i_xfoil, only: XSTrip, LVConv
+        real(c_float), intent(in) :: xtr_top, xtr_bot
+        XSTrip(1) = xtr_top
+        XSTrip(2) = xtr_bot
+        LVConv = .false.
+    end subroutine set_xtr
+
+    subroutine get_xtr(xtr_top, xtr_bot) bind(c, name='get_xtr')
+        use i_xfoil, only: XSTrip
+        real(c_float) :: xtr_top, xtr_bot
+        xtr_top = XSTrip(1)
+        xtr_bot = XSTrip(2)
+    end subroutine get_xtr
+
+    subroutine set_n_crit(n_crit) bind(c, name='set_n_crit')
+        use i_xfoil, only: ACRit, LVConv
+        real(c_float), intent(in) :: n_crit
+        ACRit(1) = n_crit
+        ACRit(2) = n_crit
+        LVConv = .false.
+    end subroutine set_n_crit
+
+    function get_n_crit() bind(c, name='get_n_crit')
+        use i_xfoil, only: ACRit
+        real(c_float) :: get_n_crit
+        get_n_crit = ACRit(1)
+    end function get_n_crit
 
     subroutine set_max_iter(max_iter) bind(c, name='set_max_iter')
         use i_xfoil, only: ITMax

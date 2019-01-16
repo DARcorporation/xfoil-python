@@ -30,7 +30,10 @@ class XFoil(object):
     Attributes
     ----------
     airfoil
-    conditions
+    Re
+    M
+    xtr
+    n_crit
     max_iter
     """
 
@@ -55,24 +58,48 @@ class XFoil(object):
         )
 
     @property
-    def conditions(self):
-        """tuple of two floats: Reynolds number and Mach number.
+    def Re(self):
+        """float: Reynolds number."""
+        return float(self._lib.get_reynolds())
 
-        If Re = 0, XFOIL is run in inviscid mode.
-        """
-        re = c_float()
-        m = c_float()
-        self._lib.get_conditions(byref(re), byref(m))
-        return float(re), float(m)
+    @Re.setter
+    def Re(self, value):
+        self._lib.set_reynolds(byref(c_float(value)))
 
-    @conditions.setter
-    def conditions(self, conditions):
-        self._lib.set_conditions(byref(c_float(conditions[0])), byref(c_float(conditions[1])))
+    @property
+    def M(self):
+        """float: Mach number."""
+        return float(self._lib.get_mach())
+
+    @M.setter
+    def M(self, value):
+        self._lib.set_mach(byref(c_float(value)))
+
+    @property
+    def xtr(self):
+        """tuple(float, float): Top and bottom flow trip x/c locations."""
+        xtr_top = c_float()
+        xtr_bot = c_float()
+        self._lib.get_xtr(byref(xtr_top), byref(xtr_bot))
+        return float(xtr_top), float(xtr_bot)
+
+    @xtr.setter
+    def xtr(self, value):
+        self._lib.set_xtr(byref(c_float(value[0])), byref(c_float(value[1])))
+
+    @property
+    def n_crit(self):
+        """float: Critical amplification ratio."""
+        return float(self._lib.get_n_crit())
+
+    @n_crit.setter
+    def n_crit(self, value):
+        self._lib.set_n_crit(byref(c_float(value)))
 
     @property
     def max_iter(self):
         """int: Maximum number of iterations."""
-        return self._lib.get_max_iter()
+        return int(self._lib.get_max_iter())
 
     @max_iter.setter
     def max_iter(self, max_iter):

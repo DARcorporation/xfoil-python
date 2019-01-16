@@ -76,11 +76,11 @@ The symmetric NACA 0012 airfoil is included as a test case. It can be loaded int
 ```
 
 Once the airfoil has been loaded successfully it can be analyzed. Let's analyze it for a range of angles of attack, at a
-Reynolds number of one million and a Mach number of 0. Let's limit the maximum number of iterations to 40 (the default 
-is 20) as well. For the range of angles of attack, we will go from -20 degrees to 20 degrees with steps of 0.5 degrees:
+Reynolds number of one million. Let's limit the maximum number of iterations to 40 (the default is 20) as well. 
+For the range of angles of attack, we will go from -20 degrees to 20 degrees with steps of 0.5 degrees:
 
 ```pycon
->>>  xf.conditions = (1e6, 0)
+>>>  xf.Re = 1e6
 >>>  xf.max_iter = 40
 >>>  a, cl, cd, cm = xf.aseq(-20, 20, 0.5)
 ```
@@ -110,4 +110,6 @@ coefficient, or a range of lift coefficients. The commands for these operations 
 
 to analyze for an angle of attack of 10 degrees, a lift coefficient of 1.0, and for a range of lift coefficients from
 -0.5 to 0.5 with steps of 0.05.
+
+For other features and specifics, see the documentation in the Python source files.
  
