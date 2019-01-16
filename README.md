@@ -1,7 +1,11 @@
 
 General
 -------
-This is a stripped down version of XFOIL. All graphical functionality has been removed.
+This is a stripped down version of XFOIL, presented in the form of a Python module. What's unique about this package
+ w.r.t. many others out there allowing an interface to XFOIL, is the fact that the Python code talks directly to a 
+ compiled Fortran library. This approach avoids having to read/write in-/output files to the disk and communicating with
+ the XFOIl executable. Eliminating the need for constant disk I/O operations can significantly speed up parallel 
+ frameworks in particular, giving this approach a clear advantage.
 
 Building and Installing the Python Module
 -----------------------------------------
