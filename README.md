@@ -87,5 +87,5 @@ drag coefficients, `cd`, and moment coefficients, `cm`. We can now, for example,
 
 This should produce the following figure:
 
-![NACA 0012 Lift Curve](https://github.com/daniel-de-vries/xfoil-python/naca0012-lift-curve.png)
+![NACA 0012 Lift Curve](https://github.com/daniel-de-vries/xfoil-python/blob/master/naca0012-lift-curve.png)
  
