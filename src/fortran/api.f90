@@ -286,11 +286,12 @@ contains
         iseqex = 0
 
         do i=1, n_step
+            CLSpec = cl0 + dcl * float(i - 1)
             call speccl
             if (abs(ALFa - AWAke)>1.0E-5) LWAke = .false.
             if (abs(ALFa - AVIsc)>1.0E-5) LVConv = .false.
             if (abs(MINf - MVIsc)>1.0E-5) LVConv = .false.
-            call specal
+
             itmaxs = ITMax + 5
             if (LVIsc) call viscal(itmaxs)
             ADEg = ALFa / DTOr
