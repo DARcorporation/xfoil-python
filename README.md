@@ -81,7 +81,7 @@ drag coefficients, `cd`, and moment coefficients, `cm`. We can now, for example,
 
 ```pycon
 >>>  import matplotlib.pyplot as plt
->>>  plt.plot(a, cl, 'k*')
+>>>  plt.plot(a, cl)
 >>>  plt.show()
 ```
 
