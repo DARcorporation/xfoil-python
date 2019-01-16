@@ -181,8 +181,9 @@ contains
         real(c_float), intent(out) :: cl_out, cd_out, cm_out
         ADEg = a_input
 
-        ALFa = DTOr * ADEg
+        ALFa = a_input * DTOr
         QINf = 1.0
+        LALfa = .true.
         call specal
         if (abs(ALFa - AWAke)>1.0E-5) LWAke = .false.
         if (abs(ALFa - AVIsc)>1.0E-5) LVConv = .false.
@@ -205,6 +206,7 @@ contains
         CLSpec = cl_input
         ALFa = 0.0
         QINf = 1.0
+        LALfa = .false.
         call speccl
         ADEg = ALFa / DTOr
         if (abs(ALFa - AWAke)>1.0E-5) LWAke = .false.
@@ -278,6 +280,7 @@ contains
 
         cl0 = cl_start
         dcl = (cl_end - cl_start) / float(n_step)
+        LALfa = .false.
 
         !----- initialize unconverged-point counter
         iseqex = 0

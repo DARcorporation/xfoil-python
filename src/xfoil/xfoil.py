@@ -55,7 +55,7 @@ class XFoil(object):
         cd = c_float()
         cm = c_float()
 
-        self._lib.cl(byref(c_float(a)), byref(cl), byref(cd), byref(cm))
+        self._lib.alfa(byref(c_float(a)), byref(cl), byref(cd), byref(cm))
 
         return cl, cd, cm
 
