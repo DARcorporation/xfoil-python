@@ -68,12 +68,14 @@ naca0012 = Airfoil(
 
 
 class TestXFoil(unittest.TestCase):
+    """Test whether the XFOIL module functions properly."""
 
     def assertNumpyArraysAlmostEqual(self, first, second, decimal, msg=''):
         for i in range(first.size):
             self.assertAlmostEqual(first[i], second[i], decimal, msg)
 
     def test_a(self):
+        """Analyse the NACA 0012 at Re = 1e6, M = 0, α = 10 degrees and verify the results."""
         xf = XFoil()
         xf.airfoil = naca0012
         xf.conditions = (1e6, 0)
@@ -85,6 +87,7 @@ class TestXFoil(unittest.TestCase):
         self.assertAlmostEqual(cm, 0.0053, 4)
 
     def test_cl(self):
+        """Analyse the NACA 0012 at Re = 1e6, M = 0, C_l = 1 and verify the results."""
         xf = XFoil()
         xf.airfoil = naca0012
         xf.conditions = (1e6, 0)
@@ -95,6 +98,7 @@ class TestXFoil(unittest.TestCase):
         self.assertAlmostEqual(cm, 0.0013, 4)
 
     def test_aseq(self):
+        """Analyse the NACA 0012 at Re = 1e6, M = 0, α = -20, -19.5, ..., 19.5 and verify the results."""
         xf = XFoil()
         xf.airfoil = naca0012
         xf.conditions = (1e6, 0)
@@ -131,6 +135,7 @@ class TestXFoil(unittest.TestCase):
             +0.0310, +0.0315, +0.0302, +0.0264, +0.0208, +0.0149, +0.0082, +0.0008, -0.0070, -0.0152]), 4)
 
     def test_cseq(self):
+        """Analyse the NACA 0012 at Re = 1e6, M = 0, C_l = -0.5, -0.45, ..., 0.45 and verify the results."""
         xf = XFoil()
         xf.airfoil = naca0012
         xf.conditions = (1e6, 0.)

@@ -25,6 +25,14 @@ fptr = POINTER(c_float)
 
 
 class XFoil(object):
+    """Interface to the XFoil Fortran routines.
+
+    Attributes
+    ----------
+    airfoil
+    conditions
+    max_iter
+    """
 
     def __init__(self):
         super().__init__()
@@ -34,6 +42,7 @@ class XFoil(object):
 
     @property
     def airfoil(self):
+        """Airfoil: Instance of the Airfoil class."""
         return self._airfoil
 
     @airfoil.setter
@@ -47,6 +56,10 @@ class XFoil(object):
 
     @property
     def conditions(self):
+        """tuple of two floats: Reynolds number and Mach number.
+
+        If Re = 0, XFOIL is run in inviscid mode.
+        """
         re = c_float()
         m = c_float()
         self._lib.get_conditions(byref(re), byref(m))
@@ -58,6 +71,7 @@ class XFoil(object):
 
     @property
     def max_iter(self):
+        """int: Maximum number of iterations."""
         return self._lib.get_max_iter()
 
     @max_iter.setter
@@ -65,9 +79,22 @@ class XFoil(object):
         self._lib.set_max_iter(byref(c_int(max_iter)))
 
     def reset_bls(self):
+        """Reset the boundary layers to be reinitialized on the next analysis."""
         self._lib.reset_bls()
 
     def a(self, a):
+        """Analyze airfoil at a fixed angle of attack.
+
+        Parameters
+        ----------
+        a : float
+            Angle of attack in degrees
+
+        Returns
+        -------
+        cl, cd, cm : float
+            Corresponding values of the lift, drag, and moment coefficients.
+        """
         cl = c_float()
         cd = c_float()
         cm = c_float()
@@ -77,6 +104,18 @@ class XFoil(object):
         return cl.value, cd.value, cm.value
 
     def cl(self, cl):
+        """"Analyze airfoil at a fixed lift coefficient.
+
+        Parameters
+        ----------
+        cl : float
+            Lift coefficient
+
+        Returns
+        -------
+        a, cd, cm : float
+            Corresponding angle of attack, drag coefficient, and moment coefficient.
+        """
         a = c_float()
         cd = c_float()
         cm = c_float()
@@ -86,6 +125,20 @@ class XFoil(object):
         return a.value, cd.value, cm.value
 
     def aseq(self, a_start, a_end, a_step):
+        """Analyze airfoil at a sequence of angles of attack.
+
+        The analysis is done for the angles of attack given by range(a_start, a_end, a_step).
+
+        Parameters
+        ----------
+        a_start, a_end, a_step : float
+            Start, end, and increment angles for the range.
+
+        Returns
+        -------
+        a, cl, cd, cm : np.ndarray
+            Lists of angles of attack and their corresponding lift, drag, and moment coefficients.
+        """
         n = abs(int((a_end - a_start) / a_step))
 
         a = np.zeros(n, dtype=c_float)
@@ -99,6 +152,20 @@ class XFoil(object):
         return a, cl, cd, cm
 
     def cseq(self, cl_start, cl_end, cl_step):
+        """Analyze airfoil at a sequence of lift coefficients.
+
+        The analysis is done for the lift coefficients given by range(cl_start, cl_end, cl_step).
+
+        Parameters
+        ----------
+        cl_start, cl_end, cl_step : float
+            Start, end, and increment lift coefficients for the range.
+
+        Returns
+        -------
+        a, cl, cd, cm : np.ndarray
+            Lists of angles of attack and their corresponding lift, drag, and moment coefficients.
+        """
         n = abs(int((cl_end - cl_start) / cl_step))
 
         a = np.zeros(n, dtype=c_float)

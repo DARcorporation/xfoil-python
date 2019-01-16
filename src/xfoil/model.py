@@ -19,6 +19,14 @@ import numpy as np
 
 
 class Airfoil(object):
+    """Airfoil
+
+    Attributes
+    ----------
+    n_coords
+    x
+    y
+    """
 
     def __init__(self, x, y):
         super().__init__()
@@ -28,10 +36,12 @@ class Airfoil(object):
 
     @property
     def n_coords(self):
+        """int: Number of coordinates which define the airfoil surface."""
         return self.coords.shape[0]
 
     @property
     def x(self):
+        """np.ndarray: List of x-coordinates of the airfoil surface."""
         return self.coords[:, 0]
 
     @x.setter
@@ -42,6 +52,7 @@ class Airfoil(object):
 
     @property
     def y(self):
+        """np.ndarray: List of y-coordinates of the airfoil surface."""
         return self.coords[:, 1]
 
     @y.setter
