@@ -10,7 +10,7 @@ a working installation of Python is required, of course. The module targets Pyth
 Furthermore, working compilers for C and Fortran have to be installed and on the PATH. On Windows, the build and
 installation have ONLY been tested with MinGW, using gcc and gfortran. 
 
-Then, installing XRotor should be as simple as running:
+Then, installing XFoil should be as simple as running:
 
 ```bash
 pip install xfoil
@@ -43,7 +43,7 @@ All XFoil operations are performed using the `XFoil` class. So the first step wh
 instance of this class:
 
 ```pycon
->>>  from xrotor import XFoil
+>>>  from xfoil import XFoil
 >>>  xf = XFoil()
 ```
 
