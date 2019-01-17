@@ -21,8 +21,9 @@
 !*==TRCHEK.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 module m_xblsys
 contains
-    subroutine trchek
+    function trchek()
         implicit none
+        logical :: trchek
         !
         !*** Start of declarations rewritten by SPAG
         !
@@ -38,9 +39,9 @@ contains
         !c      CALL TRCHEK1
         !
         !---- 2nd-order amplification equation
-        call trchek2
+        trchek = trchek2()
         !
-    end subroutine trchek
+    end function trchek
     !*==AXSET.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 
 
@@ -268,9 +269,11 @@ contains
     !      END
 
 
-    subroutine trchek2
+    function trchek2()
         use i_xbl
         implicit none
+
+        logical :: trchek2
         !
         !*** Start of declarations rewritten by SPAG
         !
@@ -325,6 +328,8 @@ contains
         !----------------------------------------------------------------
         data daeps/5.0E-5/
         !CC   DATA DAEPS / 1.0D-12 /
+
+        trchek2 = .true.
         !
         !---- save variables and sensitivities at IBL ("2") for future restoration
         do icom = 1, NCOM
@@ -483,6 +488,13 @@ contains
         write (*, *) 'TRCHEK2: N2 convergence failed.'
         write (*, 99001) X1, XT, X2, AMPl1, amplt, AMPl2, ax, da2
         99001 format (1x, 'x:', 3F9.5, '  N:', 3F7.3, '  Nx:', f8.3, '   dN:', e10.3)
+
+        ! Check if ANY of these printed variables contain NaN's. If they do, convergence will never be reached.
+        if (X1 /= X1 .or. XT /= XT .or. X2 /= X2 .or. AMPl1 /= AMPl1 .or. &
+            amplt /= amplt .or. AMPl2 /= AMPl2 .or. ax /= ax .or. da2 /= da2) then
+            trchek2 = .false.
+            return
+        end if
         !
         !
         !
@@ -623,7 +635,7 @@ contains
         XT_re = -(xt_a2 / z_a2) * z_re
         XT_xf = 0.0
         !
-    end subroutine trchek2
+    end function trchek2
     !*==BLSYS.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 
 

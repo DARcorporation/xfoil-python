@@ -18,7 +18,7 @@
 !***********************************************************************
 
 module api
-    use, intrinsic :: iso_c_binding, only: c_float, c_int, c_bool
+    use, intrinsic :: iso_c_binding, only: c_float, c_int, c_bool, c_null_ptr
     implicit none
 contains
 
@@ -283,12 +283,13 @@ contains
         LQSppl = .false.
     end subroutine filter
 
-    subroutine alfa_(a_input, cl_out, cd_out, cm_out) bind(c, name='alfa')
+    subroutine alfa_(a_input, cl_out, cd_out, cm_out, conv) bind(c, name='alfa')
         use m_xoper, only: specal, viscal, fcpmin
         use i_xfoil
 
         real(c_float), intent(in) :: a_input
         real(c_float), intent(out) :: cl_out, cd_out, cm_out
+        logical(c_bool), intent(out) :: conv
         ADEg = a_input
 
         ALFa = a_input * DTOr
@@ -299,19 +300,25 @@ contains
         if (abs(ALFa - AVIsc)>1.0E-5) LVConv = .false.
         if (abs(MINf - MVIsc)>1.0E-5) LVConv = .false.
         !
-        if (LVIsc) call viscal(ITMax)
+        if (LVIsc) then
+            conv = viscal(ITMax)
+            conv = LVConv .and. conv
+        else
+            conv = .true.
+        end if
 
         cl_out = CL
         cd_out = CD
         cm_out = CM
     end subroutine alfa_
 
-    subroutine cl_(cl_input, a_out, cd_out, cm_out) bind(c, name='cl')
+    subroutine cl_(cl_input, a_out, cd_out, cm_out, conv) bind(c, name='cl')
         use m_xoper, only: speccl, viscal
         use i_xfoil
 
         real(c_float), intent(in) :: cl_input
         real(c_float), intent(out) :: a_out, cd_out, cm_out
+        logical(c_bool), intent(out) :: conv
 
         CLSpec = cl_input
         ALFa = 0.0
@@ -323,7 +330,12 @@ contains
         if (abs(ALFa - AVIsc)>1.0E-5) LVConv = .false.
         if (abs(MINf - MVIsc)>1.0E-5) LVConv = .false.
 
-        if (LVIsc) call viscal(ITMax)
+        if (LVIsc) then
+            conv = viscal(ITMax)
+            conv = LVConv .and. conv
+        else
+            conv = .true.
+        end if
 
         a_out = ALFa / DTOr
         cd_out = CD
@@ -331,14 +343,18 @@ contains
     end subroutine cl_
 
     subroutine aseq(a_start, a_end, n_step, &
-                    a_arr, cl_arr, cd_arr, cm_arr) bind(c, name='aseq')
+                    a_arr, cl_arr, cd_arr, cm_arr, conv_arr) bind(c, name='aseq')
         use m_xoper, only: specal, viscal
         use i_xfoil
         real(c_float), intent(in) :: a_start, a_end
         integer(c_int), intent(in) :: n_step
         real(c_float), dimension(n_step), intent(inout) :: a_arr, cl_arr, cd_arr, cm_arr
-        integer :: i, iseqex, itmaxs
-        real :: a0, da
+        logical(c_bool), dimension(n_step), intent(inout) :: conv_arr
+        integer :: i, j, iseqex, itmaxs
+        real :: a0, da, nan
+
+        nan = 0
+        nan = 0/nan
 
         a0 = a_start * DTOr
         da = (a_end - a_start) / float(n_step) * DTOr
@@ -355,21 +371,29 @@ contains
             if (abs(MINf - MVIsc)>1.0E-5) LVConv = .false.
             call specal
             itmaxs = ITMax + 5
-            if (LVIsc) call viscal(itmaxs)
+            if (LVIsc) then
+                conv_arr(i) = viscal(itmaxs)
+            end if
             ADEg = ALFa / DTOr
 
-            if (LVConv .or. .not.LVIsc) then
-                a_arr(i) = ADEg
-                cl_arr(i) = CL
-                cd_arr(i) = CD
-                cm_arr(i) = CM
-            elseif (LVIsc .and. .not.LVConv) then
+            a_arr(i) = ADEg
+            cl_arr(i) = CL
+            cd_arr(i) = CD
+            cm_arr(i) = CM
+
+            if ((LVConv .and. conv_arr(i)) .or. .not.LVIsc) then
+                conv_arr(i) = .true.
+            elseif (LVIsc .and. .not. (LVConv .and. conv_arr(i))) then
+                conv_arr(i) = .false.
                 !-------- increment unconverged-point counter
                 iseqex = iseqex + 1
                 if (iseqex>=NSEqex) then
                     write (*, 99005) iseqex, a_arr(max(i-1, 0)), cl_arr(max(i-1, 0))
                     99005 format (/' Sequence halted since previous', i3, ' points did not converge'/&
                             ' Last-converged  alpha =', f8.3, '    CL =', f10.5)
+                    do j=i, n_step
+                        conv_arr(j) = .false.
+                    end do
                     exit
                 endif
             else
@@ -379,13 +403,14 @@ contains
     end subroutine aseq
 
     subroutine cseq(cl_start, cl_end, n_step, &
-            a_arr, cl_arr, cd_arr, cm_arr) bind(c, name='cseq')
+            a_arr, cl_arr, cd_arr, cm_arr, conv_arr) bind(c, name='cseq')
         use m_xoper, only: specal, viscal, speccl
         use i_xfoil
         real(c_float), intent(in) :: cl_start, cl_end
         integer(c_int), intent(in) :: n_step
         real(c_float), dimension(n_step), intent(inout) :: a_arr, cl_arr, cd_arr, cm_arr
-        integer :: i, iseqex, itmaxs
+        logical(c_bool), dimension(n_step), intent(inout) :: conv_arr
+        integer :: i, j, iseqex, itmaxs
         real :: cl0, dcl
 
         cl0 = cl_start
@@ -403,23 +428,33 @@ contains
             if (abs(MINf - MVIsc)>1.0E-5) LVConv = .false.
 
             itmaxs = ITMax + 5
-            if (LVIsc) call viscal(itmaxs)
+            if (LVIsc) then
+                conv_arr(i) = viscal(itmaxs)
+            end if
             ADEg = ALFa / DTOr
 
-            if (LVConv) then
-                a_arr(i) = ADEg
-                cl_arr(i) = CL
-                cd_arr(i) = CD
-                cm_arr(i) = CM
-            else
+            a_arr(i) = ADEg
+            cl_arr(i) = CL
+            cd_arr(i) = CD
+            cm_arr(i) = CM
+
+            if ((LVConv .and. conv_arr(i)) .or. .not.LVIsc) then
+                conv_arr(i) = .true.
+            elseif (LVIsc .and. .not. (LVConv .and. conv_arr(i))) then
+                conv_arr(i) = .false.
                 !-------- increment unconverged-point counter
                 iseqex = iseqex + 1
                 if (iseqex>=NSEqex) then
                     write (*, 99005) iseqex, a_arr(max(i-1, 0)), cl_arr(max(i-1, 0))
                     99005 format (/' Sequence halted since previous', i3, ' points did not converge'/&
                             ' Last-converged  alpha =', f8.3, '    CL =', f10.5)
+                    do j=i, n_step
+                        conv_arr(j) = .false.
+                    end do
                     exit
                 endif
+            else
+                iseqex = 0
             endif
         end do
     end subroutine cseq

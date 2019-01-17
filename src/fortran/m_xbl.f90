@@ -186,7 +186,7 @@ contains
     !*==SETBL.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 
 
-    subroutine setbl
+    function setbl()
         use m_xpanel, only: ueset
         use m_xblsys, only: tesys, trchek, blprv, blmid, blkin, blsys, blvar
         use m_spline, only: seval
@@ -194,6 +194,8 @@ contains
         use i_xbl
         use s_xfoil, only: mrcl, comset
         implicit none
+
+        logical :: setbl
         !
         !*** Start of declarations rewritten by SPAG
         !
@@ -216,6 +218,8 @@ contains
         !
         !
         !*** End of declarations rewritten by SPAG
+
+        setbl = .true.
         !
         !-------------------------------------------------
         !     Sets up the BL Newton system coefficients
@@ -273,14 +277,19 @@ contains
             !----- initialize BL by marching with Ue (fudge at separation)
             write (*, *)
             write (*, *) 'Initializing BL ...'
-            call mrchue
-            LBLini = .true.
+            setbl = mrchue()
+            if (setbl) then
+                LBLini = .true.
+            else
+                return
+            end if
         endif
         !
         write (*, *)
         !
         !---- march BL with current Ue and Ds to establish transition
-        call mrchdu
+        setbl = mrchdu()
+        if (.not. setbl) return
         !
         do is = 1, 2
             do ibl = 2, NBL(is)
@@ -411,7 +420,8 @@ contains
                 !
                 !---- check for transition and set TRAN, XT, etc. if found
                 if (TRAn) then
-                    call trchek
+                    setbl = trchek()
+                    if (.not. setbl) return
                     ami = AMPl2
                 endif
                 if (ibl==ITRan(is) .and. .not.TRAn) write (*, *) 'SETBL: Xtr???  n1 n2: ', AMPl1, AMPl2
@@ -682,16 +692,18 @@ contains
             !---- next airfoil side
         enddo
         !
-    end subroutine setbl
+    end function setbl
     !*==IBLSYS.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 
 
-    subroutine mrchue
+    function mrchue()
         use m_xblsys, only: hkin, tesys, trchek, blprv, blkin, blsys, blvar, blmid
         use m_xsolve, only: gauss
         use i_xfoil
         use i_xbl
         implicit none
+
+        logical :: mrchue
         !
         !*** Start of declarations rewritten by SPAG
         !
@@ -720,6 +732,8 @@ contains
         !     checking of transition onset is performed.
         !----------------------------------------------------
         !
+        mrchue = .true.
+
         !---- shape parameters for separation criteria
         hlmax = 3.8
         htmax = 2.5
@@ -788,7 +802,8 @@ contains
                     !
                     !-------- check for transition and set appropriate flags and things
                     if ((.not.SIMi) .and. (.not.TURb)) then
-                        call trchek
+                        mrchue = trchek()
+                        if (.not. mrchue) return
                         ami = AMPl2
                         !
                         if (TRAn) then
@@ -971,7 +986,8 @@ contains
                 !
                 !------- check for transition and set appropriate flags and things
                 if ((.not.SIMi) .and. (.not.TURb)) then
-                    call trchek
+                    mrchue = trchek()
+                    if (.not. mrchue) return
                     ami = AMPl2
                     if (TRAn) ITRan(is) = ibl
                     if (.not.TRAn) ITRan(is) = ibl + 2
@@ -1027,16 +1043,18 @@ contains
             enddo
         enddo
         !
-    end subroutine mrchue
+    end function mrchue
     !*==MRCHDU.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 
 
-    subroutine mrchdu
+    function mrchdu()
         use m_xblsys, only: hkin, tesys, trchek, blprv, blkin, blsys, blvar, blmid
         use m_xsolve, only: gauss
         use i_xfoil
         use i_xbl
         implicit none
+
+        logical :: mrchdu
         !
         !*** Start of declarations rewritten by SPAG
         !
@@ -1071,6 +1089,7 @@ contains
         !cc   REAL MDI
         !
         data deps/5.0E-6/
+        mrchdu = .true.
         !
         !---- constant controlling how far Hk is allowed to deviate
         !-    from the specified value.
@@ -1146,7 +1165,8 @@ contains
                     !
                     !-------- check for transition and set appropriate flags and things
                     if ((.not.SIMi) .and. (.not.TURb)) then
-                        call trchek
+                        mrchdu = trchek()
+                        if (.not. mrchdu) return
                         ami = AMPl2
                         if (TRAn) ITRan(is) = ibl
                         if (.not.TRAn) ITRan(is) = ibl + 2
@@ -1279,6 +1299,7 @@ contains
                 !
                 write (*, 99001) ibl, is, dmax
                 99001  format (' MRCHDU: Convergence failed at', i4, '  side', i2, '    Res =', e12.4)
+                mrchdu = .false.
                 !
                 !------ the current unconverged solution might still be reasonable...
                 !CC        IF(DMAX .LE. 0.1) GO TO 110
@@ -1311,7 +1332,8 @@ contains
                 !
                 !------- check for transition and set appropriate flags and things
                 if ((.not.SIMi) .and. (.not.TURb)) then
-                    call trchek
+                    mrchdu = trchek()
+                    if (.not. mrchdu) return
                     ami = AMPl2
                     if (TRAn) ITRan(is) = ibl
                     if (.not.TRAn) ITRan(is) = ibl + 2
@@ -1366,7 +1388,7 @@ contains
             !
         enddo
         !
-    end subroutine mrchdu
+    end function mrchdu
     !*==XIFSET.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 
 

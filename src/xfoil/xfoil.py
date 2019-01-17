@@ -18,10 +18,16 @@
 import numpy as np
 import os
 
-from ctypes import c_int, c_float, byref, POINTER
+from ctypes import c_bool, c_int, c_float, byref, POINTER
 
 here = os.path.abspath(os.path.dirname(__file__))
 fptr = POINTER(c_float)
+bptr = POINTER(c_bool)
+
+
+def subs_nan(arrays, condition):
+    for array in arrays:
+        array[condition] = np.nan
 
 
 class XFoil(object):
@@ -158,10 +164,11 @@ class XFoil(object):
         cl = c_float()
         cd = c_float()
         cm = c_float()
+        conv = c_bool()
 
-        self._lib.alfa(byref(c_float(a)), byref(cl), byref(cd), byref(cm))
+        self._lib.alfa(byref(c_float(a)), byref(cl), byref(cd), byref(cm), byref(conv))
 
-        return cl.value, cd.value, cm.value
+        return (cl.value, cd.value, cm.value) if conv else np.nan, np.nan, np.nan
 
     def cl(self, cl):
         """"Analyze airfoil at a fixed lift coefficient.
@@ -179,10 +186,11 @@ class XFoil(object):
         a = c_float()
         cd = c_float()
         cm = c_float()
+        conv = c_bool()
 
-        self._lib.cl(byref(c_float(cl)), byref(a), byref(cd), byref(cm))
+        self._lib.cl(byref(c_float(cl)), byref(a), byref(cd), byref(cm), byref(conv))
 
-        return a.value, cd.value, cm.value
+        return (a.value, cd.value, cm.value) if conv else np.nan, np.nan, np.nan
 
     def aseq(self, a_start, a_end, a_step):
         """Analyze airfoil at a sequence of angles of attack.
@@ -205,10 +213,13 @@ class XFoil(object):
         cl = np.zeros(n, dtype=c_float)
         cd = np.zeros(n, dtype=c_float)
         cm = np.zeros(n, dtype=c_float)
+        conv = np.zeros(n, dtype=c_bool)
 
         self._lib.aseq(byref(c_float(a_start)), byref(c_float(a_end)), byref(c_int(n)),
-                       a.ctypes.data_as(fptr), cl.ctypes.data_as(fptr), cd.ctypes.data_as(fptr), cm.ctypes.data_as(fptr))
+                       a.ctypes.data_as(fptr), cl.ctypes.data_as(fptr),
+                       cd.ctypes.data_as(fptr), cm.ctypes.data_as(fptr), conv.ctypes.data_as(bptr))
 
+        subs_nan([a, cl, cd, cm], np.logical_not(conv))
         return a, cl, cd, cm
 
     def cseq(self, cl_start, cl_end, cl_step):
@@ -232,11 +243,11 @@ class XFoil(object):
         cl = np.zeros(n, dtype=c_float)
         cd = np.zeros(n, dtype=c_float)
         cm = np.zeros(n, dtype=c_float)
+        conv = np.zeros(n, dtype=c_bool)
 
         self._lib.cseq(byref(c_float(cl_start)), byref(c_float(cl_end)), byref(c_int(n)),
-                       a.ctypes.data_as(fptr), cl.ctypes.data_as(fptr), cd.ctypes.data_as(fptr), cm.ctypes.data_as(fptr))
+                       a.ctypes.data_as(fptr), cl.ctypes.data_as(fptr),
+                       cd.ctypes.data_as(fptr), cm.ctypes.data_as(fptr), conv.ctypes.data_as(bptr))
 
+        subs_nan([a, cl, cd, cm], np.logical_not(conv))
         return a, cl, cd, cm
-
-
-

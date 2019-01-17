@@ -377,7 +377,9 @@ contains
                     if (abs(MINf - MVIsc)>1.0E-5) LVConv = .false.
                 endif
                 !
-                if (LVIsc) call viscal(ITMax)
+                if (LVIsc) then
+                    LVConv = viscal(ITMax)
+                end if
                 call fcpmin
                 !
                 !cc    IF( LVISC .AND. LPACC .AND. LVCONV ) THEN
@@ -410,7 +412,9 @@ contains
                     if (abs(MINf - MVIsc)>1.0E-5) LVConv = .false.
                 endif
                 !
-                if (LVIsc) call viscal(ITMax)
+                if (LVIsc) then
+                    LVConv = viscal(ITMax)
+                end if
                 call fcpmin
                 !
                 !cc    IF( LVISC .AND. LPACC .AND. LVCONV ) THEN
@@ -441,7 +445,9 @@ contains
                     if (abs(ALFa - AVIsc)>1.0E-5) LVConv = .false.
                     if (abs(MINf - MVIsc)>1.0E-5) LVConv = .false.
                 endif
-                if (LVIsc) call viscal(ITMax)
+                if (LVIsc) then
+                    LVConv = viscal(ITMax)
+                end if
                 call fcpmin
                 !
                 !cc    IF( LVISC .AND. LPACC .AND. LVCONV ) THEN
@@ -544,7 +550,9 @@ contains
                     if (abs(MINf - MVIsc)>1.0E-5) LVConv = .false.
                     call specal
                     itmaxs = ITMax + 5
-                    if (LVIsc) call viscal(itmaxs)
+                    if (LVIsc) then
+                        LVConv = viscal(itmaxs)
+                    end if
                     !
                     ADEg = ALFa / DTOr
                     !
@@ -2436,7 +2444,7 @@ contains
     ! SPECCL
 
 
-    subroutine viscal(Niter1)
+    function viscal(Niter1)
         use m_xpanel, only: qiset, qvfue, iblpan, qwcalc, uicalc, xicalc, gamqv, stfind, stmove, xywake, qdcalc
         use m_xbl, only: update, setbl
         use m_xsolve, only: blsolv
@@ -2445,6 +2453,8 @@ contains
         use s_xbl, only: iblsys
         use s_xfoil, only: mrcl, comset, cdcalc, cpcalc, clcalc
         implicit none
+
+        logical :: viscal
         !
         !*** Start of declarations rewritten by SPAG
         !
@@ -2479,6 +2489,7 @@ contains
         !
         !---- convergence tolerance
         data eps1/1.0E-4/
+        viscal = .true.
         !
         niter = Niter1
         !
@@ -2549,7 +2560,8 @@ contains
         do iter = 1, niter
             !
             !------ fill Newton system for BL variables
-            call setbl
+            viscal = setbl()
+            if (.not. viscal) return
             !
             !------ solve Newton system with custom solver
             call blsolv
@@ -2665,7 +2677,7 @@ contains
         enddo
         close (lu)
 
-    end subroutine viscal
+    end function viscal
     !*==DCPOUT.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
     ! VISCAL
 
