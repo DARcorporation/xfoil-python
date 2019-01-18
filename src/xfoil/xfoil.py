@@ -67,6 +67,15 @@ class XFoil(object):
             os.remove(self._lib_path)
 
     @property
+    def print(self):
+        """bool: True if console output should be shown."""
+        return self._lib.get_print().value
+
+    @print.setter
+    def print(self, value):
+        self._lib.set_print(byref(c_bool(value)))
+
+    @property
     def airfoil(self):
         """Airfoil: Instance of the Airfoil class."""
         return self._airfoil

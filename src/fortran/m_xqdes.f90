@@ -81,8 +81,8 @@ contains
         lrecalc = .false.
         !
         if (N==0) then
-            write (*, *)
-            write (*, *) '***  No airfoil available  ***'
+            write (LU_OUT, *)
+            write (LU_OUT, *) '***  No airfoil available  ***'
             return
         endif
         !
@@ -119,7 +119,7 @@ contains
         enddo
         SSPle = SLE / S(N)
         !
-        write (*, 99001) ALGam / DTOr, CLGam
+        write (LU_OUT, 99001) ALGam / DTOr, CLGam
         99001 format (/' Current Q operating condition:'/' alpha = ', f8.3, ' deg.      CL = ', f8.4/)
         !
         if (.not.LQSpec) then
@@ -127,7 +127,7 @@ contains
             NQSp = 1
             KQTarg = 1
             call gamqsp(1)
-            write (*, 99002)
+            write (LU_OUT, 99002)
             !
             !....................................................
             !
@@ -150,7 +150,7 @@ contains
                 if (comand(1:1)/='!') then
                     lrecalc = .false.
                 elseif (comold=='****') then
-                    write (*, *) 'Previous .QDES command not valid'
+                    write (LU_OUT, *) 'Previous .QDES command not valid'
                     cycle
                 else
                     comand = comold
@@ -173,7 +173,7 @@ contains
                 !
                 !--------------------------------------------------------
                 if (comand=='?   ') then
-                    write (*, 99003)
+                    write (LU_OUT, 99003)
                     99003      format (&
                             /'   <cr>   Return to Top Level'&
                             //'   QSET   Reset Qspec <== Q'&
@@ -197,7 +197,7 @@ contains
                     !
                     call clcalc(N, X, Y, QSPec(1, kqsp), W1, ALFa, MINf, QINf, &
                             XCMref, YCMref, CLQsp(kqsp), CMQsp(kqsp), cdpq, clq_alf, clq_msq)
-                    write (*, 99004) CL, CM, CLQsp(kqsp), CMQsp(kqsp)
+                    write (LU_OUT, 99004) CL, CM, CLQsp(kqsp), CMQsp(kqsp)
                     99004      format (/' Q    :   CL =', f11.6, '    CM =', f11.6/&
                             ' Qspec:   CL =', f11.6, '    CM =', f11.6)
                     !
@@ -206,9 +206,9 @@ contains
                 elseif (comand=='SLOP') then
                     LQSlop = .not.LQSlop
                     if (LQSlop) then
-                        write (*, *) 'Modified Qspec piece will be made tangent at endpoints'
+                        write (LU_OUT, *) 'Modified Qspec piece will be made tangent at endpoints'
                     else
-                        write (*, *) 'Modified Qspec piece will not be made tangent at endpoints'
+                        write (LU_OUT, *) 'Modified Qspec piece will not be made tangent at endpoints'
                     endif
                     !
                     !--------------------------------------------------------
@@ -216,9 +216,9 @@ contains
                 elseif (comand=='CPXX') then
                     LCPxx = .not.LCPxx
                     if (LCPxx) then
-                        write (*, *) 'CPxx will be constrained'
+                        write (LU_OUT, *) 'CPxx will be constrained'
                     else
-                        write (*, *) 'CPxx will not be constrained'
+                        write (LU_OUT, *) 'CPxx will not be constrained'
                     endif
                     !
                     !--------------------------------------------------------
@@ -247,7 +247,7 @@ contains
                     !
                     !--------------------------------------------------------
                 else
-                    write (*, 99005) comand
+                    write (LU_OUT, 99005) comand
                     99005      format (' Command ', a4, ' not recognized.  Type a " ? " for list.')
                     !
                     comand = '****'
@@ -379,7 +379,7 @@ contains
         !
         !
         if (Kq2 - Kq1<2) then
-            write (*, *) 'Segment is too short.  No smoothing possible.'
+            write (LU_OUT, *) 'Segment is too short.  No smoothing possible.'
             return
         endif
         !

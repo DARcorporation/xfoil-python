@@ -21,6 +21,25 @@ module api
     use, intrinsic :: iso_c_binding, only: c_float, c_int, c_bool, c_null_ptr
     implicit none
 contains
+    subroutine set_print(setting) bind(c, name='set_print')
+        use i_xfoil, only: LU_OUT
+        logical(c_bool), intent(in) :: setting
+        if (setting) then
+            LU_OUT = 6
+        else
+            LU_OUT = 999
+        end if
+    end subroutine set_print
+
+    function get_print() bind(c, name='get_print')
+        use i_xfoil, only: LU_OUT
+        logical(c_bool) :: get_print
+        if (LU_OUT == 6) then
+            get_print = .true.
+        else
+            get_print = .false.
+        end if
+    end function get_print
 
     subroutine set_airfoil(x_in, y_in, n_in) bind(c, name='set_airfoil')
         use m_xgeom, only: geopar, norm
@@ -55,13 +74,13 @@ contains
         !
         if (area>=0.0) then
             LCLock = .false.
-            write (*, 99001) NB
+            write (LU_OUT, 99001) NB
             !...............................................................
             99001 format (/' Number of input coordinate points:', i4/' Counterclockwise ordering')
         else
             !----- if area is negative (clockwise order), reverse coordinate order
             LCLock = .true.
-            write (*, 99002) NB
+            write (LU_OUT, 99002) NB
             99002 format (/' Number of input coordinate points:', i4/' Clockwise ordering')
             do i = 1, NB / 2
                 xtmp = XB(NB - i + 1)
@@ -75,7 +94,7 @@ contains
         !
         if (LNOrm) then
             call norm(XB, XBP, YB, YBP, SB, NB)
-            write (*, 99003)
+            write (LU_OUT, 99003)
             99003 format (/' Airfoil has been normalized')
         endif
         !
@@ -92,7 +111,7 @@ contains
         xbte = 0.5 * (XB(1) + XB(NB))
         ybte = 0.5 * (YB(1) + YB(NB))
         !
-        write (*, 99004) xble, yble, CHOrdb, xbte, ybte
+        write (LU_OUT, 99004) xble, yble, CHOrdb, xbte, ybte
         99004 format (/'  LE  x,y  =', 2F10.5, '  |   Chord =', f10.5/'  TE  x,y  =', 2F10.5, '  |')
         !
         !---- set reasonable MSES domain parameters for non-MSES coordinate file
@@ -124,7 +143,7 @@ contains
         call abcopy(.true.)
         !
         call cang(X, Y, N, 0, imax, amax)
-        if (abs(amax)>angtol) write (*, 99007) amax, imax
+        if (abs(amax)>angtol) write (LU_OUT, 99007) amax, imax
         99007 format (/&
                 ' WARNING: Poor input coordinate distribution'/&
                 '          Excessive panel angle', f7.1, '  at i =', i4/&
@@ -167,7 +186,7 @@ contains
             MINf = M
 
             call comset
-            if (MINf>0.0) write (*, 99003) CPStar, QSTar / QINf
+            if (MINf>0.0) write (LU_OUT, 99003) CPStar, QSTar / QINf
             99003      format (/' Sonic Cp =', f10.2, '      Sonic Q/Qinf =', f10.3/)
 
             call cpcalc(N, QINv, QINf, MINf, CPI)
@@ -227,12 +246,12 @@ contains
     end function get_max_iter
 
     subroutine reset_bls() bind(c, name='reset_bls')
-        use i_xfoil, only: LBLini, LIPan
+        use i_xfoil, only: LBLini, LIPan, LU_OUT
         LBLini = .not.LBLini
         if (LBLini) then
-            write (*, *) 'BLs are assumed to be initialized'
+            write (LU_OUT, *) 'BLs are assumed to be initialized'
         else
-            write (*, *) 'BLs will be initialized on next point'
+            write (LU_OUT, *) 'BLs will be initialized on next point'
             LIPan = .false.
         endif
     end subroutine reset_bls
@@ -388,7 +407,7 @@ contains
                 !-------- increment unconverged-point counter
                 iseqex = iseqex + 1
                 if (iseqex>=NSEqex) then
-                    write (*, 99005) iseqex, a_arr(max(i-1, 0)), cl_arr(max(i-1, 0))
+                    write (LU_OUT, 99005) iseqex, a_arr(max(i-1, 0)), cl_arr(max(i-1, 0))
                     99005 format (/' Sequence halted since previous', i3, ' points did not converge'/&
                             ' Last-converged  alpha =', f8.3, '    CL =', f10.5)
                     do j=i, n_step
@@ -445,7 +464,7 @@ contains
                 !-------- increment unconverged-point counter
                 iseqex = iseqex + 1
                 if (iseqex>=NSEqex) then
-                    write (*, 99005) iseqex, a_arr(max(i-1, 0)), cl_arr(max(i-1, 0))
+                    write (LU_OUT, 99005) iseqex, a_arr(max(i-1, 0)), cl_arr(max(i-1, 0))
                     99005 format (/' Sequence halted since previous', i3, ' points did not converge'/&
                             ' Last-converged  alpha =', f8.3, '    CL =', f10.5)
                     do j=i, n_step

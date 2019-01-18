@@ -212,6 +212,7 @@ contains
 
 
     subroutine sortdup(Kk, S, W)
+        use i_xfoil, only: LU_OUT
         implicit none
         !
         !*** Start of declarations rewritten by SPAG
@@ -261,7 +262,7 @@ contains
             enddo
             if (done) goto 99999
         enddo
-        write (*, *) 'Sort failed'
+        write (LU_OUT, *) 'Sort failed'
         !
     99999 end subroutine sortdup
     !*==FIXDUP.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
@@ -346,6 +347,7 @@ contains
 
 
     subroutine sort(Kk, S, W)
+        use i_xfoil, only: LU_OUT
         implicit none
         !
         !*** Start of declarations rewritten by SPAG
@@ -393,7 +395,7 @@ contains
             enddo
             if (done) goto 100
         enddo
-        write (*, *) 'Sort failed'
+        write (LU_OUT, *) 'Sort failed'
         !
         !---- search for duplicate pairs and eliminate each one
         100  kks = Kk
@@ -414,6 +416,7 @@ contains
 
 
     subroutine sortol(Tol, Kk, S, W)
+        use i_xfoil, only: LU_OUT
         implicit none
         !
         !*** Start of declarations rewritten by SPAG
@@ -463,7 +466,7 @@ contains
             enddo
             if (done) goto 100
         enddo
-        write (*, *) 'Sort failed'
+        write (LU_OUT, *) 'Sort failed'
         100  do
             !
             !---- search for near-duplicate pairs and eliminate extra points

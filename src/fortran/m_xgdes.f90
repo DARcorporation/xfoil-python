@@ -57,13 +57,13 @@ contains
         !
         !
         if (NB<=1) then
-            write (*, *) 'ABCOPY: Buffer airfoil not available.'
+            write (LU_OUT, *) 'ABCOPY: Buffer airfoil not available.'
             return
         elseif (NB>IQX - 5) then
-            write (*, *) 'Maximum number of panel nodes  : ', IQX - 5
-            write (*, *) 'Number of buffer airfoil points: ', NB
-            write (*, *) 'Current airfoil cannot be set.'
-            write (*, *) 'Try executing PANE at Top Level instead.'
+            write (LU_OUT, *) 'Maximum number of panel nodes  : ', IQX - 5
+            write (LU_OUT, *) 'Number of buffer airfoil points: ', NB
+            write (LU_OUT, *) 'Current airfoil cannot be set.'
+            write (LU_OUT, *) 'Try executing PANE at Top Level instead.'
             return
         endif
         if (N/=NB) LBLini = .false.
@@ -121,7 +121,7 @@ contains
                 LSCini = .false.
                 !CC      LBLINI = .FALSE.
                 !
-                if (Lconf) write (*, 99001) N
+                if (Lconf) write (LU_OUT, 99001) N
                 99001  format (/' Current airfoil nodes set from buffer airfoil nodes (', i4, ' )')
                 exit
             endif
@@ -133,6 +133,7 @@ contains
 
 
     subroutine getxyf(X, Xp, Y, Yp, S, N, Tops, Bots, Xf, Yf)
+        use i_xfoil, only: LU_OUT
         use m_userio, only: askr
         use m_spline, only: seval, sinvrt
         implicit none
@@ -175,7 +176,7 @@ contains
         topy = seval(Tops, Y, Yp, S, N)
         boty = seval(Bots, Y, Yp, S, N)
         !
-        write (*, 99001) topy, boty
+        write (LU_OUT, 99001) topy, boty
         99001 format (/'  Top    surface:  y =', f8.4, '     y/t = 1.0'/'  Bottom surface:  y =', f8.4, '     y/t = 0.0')
         !
         if (Yf==-999.0) call askr('Enter flap hinge y location (or 999 to specify y/t)^', Yf)

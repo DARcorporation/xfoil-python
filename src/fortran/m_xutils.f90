@@ -33,6 +33,7 @@ module m_xutils
     !
 contains
     subroutine setexp(S, Ds1, Smax, Nn)
+        use i_xfoil, only: LU_OUT
         implicit none
         !
         !*** Start of declarations rewritten by SPAG
@@ -109,7 +110,7 @@ contains
                 if (abs(dratio)<1.0E-5) goto 100
                 !
             enddo
-            write (*, *) 'SETEXP: Convergence failed.  Continuing anyway ...'
+            write (LU_OUT, *) 'SETEXP: Convergence failed.  Continuing anyway ...'
         endif
         !
         !---- set up stretched array using converged geometric ratio

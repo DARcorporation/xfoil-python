@@ -67,7 +67,7 @@ subroutine xfoil() bind(c, name='xfoil')
     !
     !
     VERsion = 6.99
-    write (*, 99001) VERsion
+    write (LU_OUT, 99001) VERsion
     99001 format (/' ==================================================='/'  XFOIL Version', &
         &f5.2/'  Copyright (C) 2000   Mark Drela, Harold Youngren'//                                               &
         &'  This software comes with ABSOLUTELY NO WARRANTY,'/'    subject to the GNU General Public License.'//   &
@@ -90,11 +90,11 @@ subroutine xfoil() bind(c, name='xfoil')
     call abcopy(.true.)
     !
     call cang(X, Y, N, 0, imax, amax)
-    if (abs(amax)>angtol) write (*, 99007) amax, imax
+    if (abs(amax)>angtol) write (LU_OUT, 99007) amax, imax
     endif
     endif
     !
-    write (*, 99008) XCMref, YCMref, NPAn
+    write (LU_OUT, 99008) XCMref, YCMref, NPAn
     do
     !
     !---- start of menu loop
@@ -115,7 +115,7 @@ subroutine xfoil() bind(c, name='xfoil')
     !
     !===============================================
     elseif (comand=='?   ') then
-    write (*, 99008) XCMref, YCMref, NPAn
+    write (LU_OUT, 99008) XCMref, YCMref, NPAn
     !
     !===============================================
     elseif (comand=='QUIT' .or. comand=='Q   ') then
@@ -153,9 +153,9 @@ subroutine xfoil() bind(c, name='xfoil')
     elseif (comand=='REVE') then
     LCLock = .not.LCLock
     if (LCLock) then
-    write (*, *) 'Airfoil will be written in clockwise order'
+    write (LU_OUT, *) 'Airfoil will be written in clockwise order'
     else
-    write (*, *) 'Airfoil will be written in counterclockwise order'
+    write (LU_OUT, *) 'Airfoil will be written in counterclockwise order'
     endif
     !
     !===============================================
@@ -164,7 +164,7 @@ subroutine xfoil() bind(c, name='xfoil')
     if (ninput>=1) then
     kdnew = iinput(1)
     else
-    write (*, 99002) KDElim
+    write (LU_OUT, 99002) KDElim
     99002          format (/'  --------------------------'/'   0  blank'/'   1  comma'/'   2  tab', &
         &//'  currently, delimiter =', i2)
     call aski('Enter new delimiter', kdnew)
@@ -187,7 +187,7 @@ subroutine xfoil() bind(c, name='xfoil')
     call abcopy(.true.)
     !
     call cang(X, Y, N, 0, imax, amax)
-    if (abs(amax)>angtol) write (*, 99007) amax, imax
+    if (abs(amax)>angtol) write (LU_OUT, 99007) amax, imax
     endif
     !
     !===============================================
@@ -206,9 +206,9 @@ subroutine xfoil() bind(c, name='xfoil')
     elseif (comand=='NORM') then
     LNOrm = .not.LNOrm
     if (LNOrm) then
-    write (*, *) 'Loaded airfoil will  be normalized'
+    write (LU_OUT, *) 'Loaded airfoil will  be normalized'
     else
-    write (*, *) 'Loaded airfoil won''t be normalized'
+    write (LU_OUT, *) 'Loaded airfoil won''t be normalized'
     endif
     !
     !===============================================
@@ -235,8 +235,8 @@ subroutine xfoil() bind(c, name='xfoil')
     !===============================================
     elseif (comand=='BEND') then
     if (N==0) then
-    write (*, *)
-    write (*, *) '***  No airfoil available  ***'
+    write (LU_OUT, *)
+    write (LU_OUT, *) '***  No airfoil available  ***'
     cycle
     endif
     !
@@ -245,8 +245,8 @@ subroutine xfoil() bind(c, name='xfoil')
     !===============================================
     elseif (comand=='BENP') then
     if (N==0) then
-    write (*, *)
-    write (*, *) '***  No airfoil available  ***'
+    write (LU_OUT, *)
+    write (LU_OUT, *) '***  No airfoil available  ***'
     cycle
     endif
     !
@@ -277,19 +277,19 @@ subroutine xfoil() bind(c, name='xfoil')
     endif
     call strip(FNAme, nfn)
     open (lu, file = FNAme, status = 'OLD', err = 20)
-    write (*, 99003) FNAme(1:nfn)
+    write (LU_OUT, 99003) FNAme(1:nfn)
     99003  format (/'  File  ', a, '  exists.  Overwrite?  Y')
     read (*, 99004) ans
     !
     99004  format (a)
     if (index('Nn', ans)==0) goto 40
-    write (*, *)
-    write (*, *) 'No action taken'
+    write (LU_OUT, *)
+    write (LU_OUT, *) 'No action taken'
     close (lu)
     !
     20    open (lu, file = FNAme, status = 'UNKNOWN')
     40    call wrtdef(lu)
-    write (*, 99005) FNAme(1:nfn)
+    write (LU_OUT, 99005) FNAme(1:nfn)
     99005  format (/'  File  ', a, '  written')
     close (lu)
     !
@@ -320,7 +320,7 @@ subroutine xfoil() bind(c, name='xfoil')
     !
     !===============================================
     else
-    write (*, 99006) comand
+    write (LU_OUT, 99006) comand
     99006  format (1x, a4, ' command not recognized.  Type a "?" for list')
     !
     !
@@ -711,7 +711,7 @@ subroutine getdef(Lu, Filnam, Lask)
     !
     open (Lu, file = Filnam, status = 'OLD', err = 200)
     if (Lask) then
-        write (*, 99001) Filnam
+        write (LU_OUT, 99001) Filnam
         99001 format (/'  Read settings from file  ', a, ' ?  Y')
         read (*, 99002) ans
         !
@@ -781,17 +781,17 @@ subroutine getdef(Lu, Filnam, Lask)
     call comset
     !
     close (Lu)
-    write (*, 99003) Filnam
+    write (LU_OUT, 99003) Filnam
     99003 format (/' Default parameters read in from file  ', a, ':'/)
     call wrtdef(6)
     return
     !
     100  close (Lu)
-    write (*, 99004) Filnam
+    write (LU_OUT, 99004) Filnam
     99004 format (/' File  ', a, '  read error'/' Settings may have been changed')
     return
     !
-    200  write (*, 99005) Filnam
+    200  write (LU_OUT, 99005) Filnam
     99005 format (/' File  ', a, '  not found')
     !
 end subroutine getdef
@@ -955,13 +955,13 @@ subroutine load(Filnam, Itype)
     !
     if (area>=0.0) then
         LCLock = .false.
-        write (*, 99001) NB
+        write (LU_OUT, 99001) NB
         !...............................................................
         99001 format (/' Number of input coordinate points:', i4/' Counterclockwise ordering')
     else
         !----- if area is negative (clockwise order), reverse coordinate order
         LCLock = .true.
-        write (*, 99002) NB
+        write (LU_OUT, 99002) NB
         99002 format (/' Number of input coordinate points:', i4/' Clockwise ordering')
         do i = 1, NB / 2
             xtmp = XB(NB - i + 1)
@@ -975,7 +975,7 @@ subroutine load(Filnam, Itype)
     !
     if (LNOrm) then
         call norm(XB, XBP, YB, YBP, SB, NB)
-        write (*, 99003)
+        write (LU_OUT, 99003)
         99003 format (/' Airfoil has been normalized')
     endif
     !
@@ -992,7 +992,7 @@ subroutine load(Filnam, Itype)
     xbte = 0.5 * (XB(1) + XB(NB))
     ybte = 0.5 * (YB(1) + YB(NB))
     !
-    write (*, 99004) xble, yble, CHOrdb, xbte, ybte
+    write (LU_OUT, 99004) xble, yble, CHOrdb, xbte, ybte
     99004 format (/'  LE  x,y  =', 2F10.5, '  |   Chord =', f10.5/'  TE  x,y  =', 2F10.5, '  |')
     !
     !---- set reasonable MSES domain parameters for non-MSES coordinate file
@@ -1070,7 +1070,7 @@ subroutine save(Iftyp, Fname1)
     elseif (KDElim==2) then
         delim = char(9)
     else
-        write (*, *) '? Illegal delimiter.  Using blank.'
+        write (LU_OUT, *) '? Illegal delimiter.  Using blank.'
         delim = ' '
     endif
     !
@@ -1085,13 +1085,13 @@ subroutine save(Iftyp, Fname1)
     endif
     !
     open (lu, file = FNAme, status = 'OLD', err = 100)
-    write (*, *)
-    write (*, *) 'Output file exists.  Overwrite?  Y'
+    write (LU_OUT, *)
+    write (LU_OUT, *) 'Output file exists.  Overwrite?  Y'
     read (*, 99004) ans
     if (index('Nn', ans)==0) goto 200
     !
     close (lu)
-    write (*, *) 'Current airfoil not saved.'
+    write (LU_OUT, *) 'Current airfoil not saved.'
     return
     !
     100  open (lu, file = FNAme, status = 'NEW', err = 300)
@@ -1145,8 +1145,8 @@ subroutine save(Iftyp, Fname1)
     close (lu)
     return
     !
-    300  write (*, *) 'Bad filename.'
-    write (*, *) 'Current airfoil not saved.'
+    300  write (LU_OUT, *) 'Bad filename.'
+    write (LU_OUT, *) 'Current airfoil not saved.'
     return
     !
     99004 format (a)
@@ -1252,7 +1252,7 @@ subroutine naca(Ides1)
     if (ides<=9999) itype = 4
     !
     if (itype==0) then
-        write (*, *) 'This designation not implemented.'
+        write (LU_OUT, *) 'This designation not implemented.'
         return
     endif
     !
@@ -1277,7 +1277,7 @@ subroutine naca(Ides1)
             RADble, ANGbte, EI11ba, EI22ba, APX1ba, APX2ba, EI11bt, EI22bt, APX1bt, &
             & APX2bt, THIckb, CAMbrb)
     !
-    write (*, 99001) NB
+    write (LU_OUT, 99001) NB
     99001 format (/' Buffer airfoil set using', i4, ' points')
     !
     !---- set paneling
@@ -1335,7 +1335,7 @@ subroutine pangen(Shopar)
     !---------------------------------------------------
     !
     if (NB<2) then
-        write (*, *) 'PANGEN: Buffer airfoil not available.'
+        write (LU_OUT, *) 'PANGEN: Buffer airfoil not available.'
         N = 0
         return
     endif
@@ -1380,8 +1380,8 @@ subroutine pangen(Shopar)
     do i = 1, NB - 1
         if (SBLe==SB(i) .and. SBLe==SB(i + 1)) then
             ible = i
-            write (*, *)
-            write (*, *) 'Sharp leading edge'
+            write (LU_OUT, *)
+            write (LU_OUT, *) 'Sharp leading edge'
             exit
         endif
     enddo
@@ -1680,7 +1680,7 @@ subroutine pangen(Shopar)
         !CC        IF(RLX.NE.1.0) WRITE(*,*) DMAX,'    RLX =',RLX
         if (abs(dmax)<1.E-3) goto 100
     enddo
-    write (*, *) 'Paneling convergence failed.  Continuing anyway...'
+    write (LU_OUT, *) 'Paneling convergence failed.  Continuing anyway...'
     !
     !
     !---- set new panel node coordinates
@@ -1800,13 +1800,13 @@ subroutine pangen(Shopar)
     call apcalc
     !
     if (SHArp) then
-        write (*, 99002) 'Sharp trailing edge'
+        write (LU_OUT, 99002) 'Sharp trailing edge'
     else
         gap = sqrt((X(1) - X(N))**2 + (Y(1) - Y(N))**2)
-        write (*, 99002) 'Blunt trailing edge.  Gap =', gap
+        write (LU_OUT, 99002) 'Blunt trailing edge.  Gap =', gap
     endif
     !
-    if (Shopar) write (*, 99001) NPAn, CVPar, CTErat, CTRrat, XSRef1, XSRef2, XPRef1, XPRef2
+    if (Shopar) write (LU_OUT, 99001) NPAn, CVPar, CTErat, CTRrat, XSRef1, XSRef2, XPRef1, XPRef2
     99001 format (/' Paneling parameters used...'/&
             '   Number of panel nodes      ', i4/'   Panel bunching parameter   ', &
             &f6.3/'   TE/LE panel density ratio  ', f6.3/'   Refined-area/LE panel density ratio   ', &
@@ -1850,14 +1850,14 @@ subroutine getpan
     !
     !
     if (NB<=1) then
-        write (*, *) 'GETPAN: Buffer airfoil not available.'
+        write (LU_OUT, *) 'GETPAN: Buffer airfoil not available.'
         return
     endif
     !
     100  lchange = .false.
     do
         !
-        write (*, 99001) NPAn, CVPar, CTErat, CTRrat, XSRef1, XSRef2, XPRef1, XPRef2
+        write (LU_OUT, 99001) NPAn, CVPar, CTErat, CTRrat, XSRef1, XSRef2, XPRef1, XPRef2
         99001 format (/'    Present paneling parameters...'/'  N  i   Number of panel nodes      ', &
                 &i4/'  P  r   Panel bunching parameter   ', f6.3/'  T  r   TE/LE panel density ratio  ', &
                 &f6.3/'  R  r   Refined area/LE  panel density ratio  ', &
@@ -1898,7 +1898,7 @@ subroutine getpan
                 endif
                 if (NPAn>IQX - 6) then
                     NPAn = IQX - 6
-                    write (*, 99002) NPAn
+                    write (LU_OUT, 99002) NPAn
                     99002          format (1x, ' Number of panel nodes reduced to array limit:', i4)
                 endif
                 lchange = .true.
@@ -1954,8 +1954,8 @@ subroutine getpan
                 !
             else
                 !
-                write (*, *)
-                write (*, *) '***  Input not recognized  ***'
+                write (LU_OUT, *)
+                write (LU_OUT, *) '***  Input not recognized  ***'
                 goto 200
                 !
                 !
@@ -2011,12 +2011,12 @@ subroutine inte
     !
     lu = 21
     !
-    write (*, 99001) NAMe
+    write (LU_OUT, 99001) NAMe
     !
     99001 format (/'  F  disk file'/'  C  current airfoil  ', a)
     do ip = 1, NPOl
         if (NXYpol(ip)>0) then
-            write (*, 99002) ip, NAMepol(ip)
+            write (LU_OUT, 99002) ip, NAMepol(ip)
             99002  format (1x, i2, '  polar airfoil    ', a)
         endif
     enddo
@@ -2037,7 +2037,7 @@ subroutine inte
     do k = 1, 2
         iair = k - 1
         do
-            write (*, 99003) iair, promptn(1:npr)
+            write (LU_OUT, 99003) iair, promptn(1:npr)
             !
             99003  format (/'  Select source of airfoil "', i1, a, $)
             read (*, 99004) cair
@@ -2051,7 +2051,7 @@ subroutine inte
                 !
             elseif (index('Cc', cair(1:1))/=0) then
                 if (N<=1) then
-                    write (*, *) 'No current airfoil available'
+                    write (LU_OUT, *) 'No current airfoil available'
                     cycle
                 endif
                 !
@@ -2083,9 +2083,9 @@ subroutine inte
         enddo
     enddo
     !
-    write (*, *)
-    write (*, *) 'airfoil "0":  ', nameint(1)
-    write (*, *) 'airfoil "1":  ', nameint(2)
+    write (LU_OUT, *)
+    write (LU_OUT, *) 'airfoil "0":  ', nameint(1)
+    write (LU_OUT, *) 'airfoil "1":  ', nameint(2)
     frac = 0.5
     call askr('Specify interpolating fraction  0...1^', frac)
     !
@@ -2103,13 +2103,13 @@ subroutine inte
     !
     call asks('Enter new airfoil name^', NAMe)
     call strip(NAMe, NNAme)
-    write (*, *)
-    write (*, *) 'Result has been placed in buffer airfoil'
-    write (*, *) 'Execute PCOP or PANE to set new current airfoil'
+    write (LU_OUT, *)
+    write (LU_OUT, *) 'Result has been placed in buffer airfoil'
+    write (LU_OUT, *) 'Execute PCOP or PANE to set new current airfoil'
     return
     !
-    100  write (*, *)
-    write (*, *) 'Invalid response'
+    100  write (LU_OUT, *)
+    write (LU_OUT, *) 'Invalid response'
 end subroutine inte
 !*==INTX.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 ! INTE
@@ -2154,12 +2154,12 @@ subroutine intx
     !
     lu = 21
     !
-    write (*, 99001) NAMe
+    write (LU_OUT, 99001) NAMe
     !
     99001 format (/'  F  disk file'/'  C  current airfoil  ', a)
     do ip = 1, NPOl
         if (NXYpol(ip)>0) then
-            write (*, 99002) ip, NAMepol(ip)
+            write (LU_OUT, 99002) ip, NAMepol(ip)
             99002  format (1x, i2, '  polar airfoil    ', a)
         endif
     enddo
@@ -2180,7 +2180,7 @@ subroutine intx
     do k = 1, 2
         iair = k - 1
         do
-            write (*, 99003) iair, promptn(1:npr)
+            write (LU_OUT, 99003) iair, promptn(1:npr)
             !
             99003  format (/'  Select source of airfoil "', i1, a, $)
             read (*, 99004, err = 100, end = 100) cair
@@ -2196,7 +2196,7 @@ subroutine intx
                 !
             elseif (index('Cc', cair(1:1))/=0) then
                 if (N<=1) then
-                    write (*, *) 'No current airfoil available'
+                    write (LU_OUT, *) 'No current airfoil available'
                     cycle
                 endif
                 !
@@ -2228,9 +2228,9 @@ subroutine intx
         enddo
     enddo
     !
-    write (*, *)
-    write (*, *) 'airfoil "0":  ', nameint(1)
-    write (*, *) 'airfoil "1":  ', nameint(2)
+    write (LU_OUT, *)
+    write (LU_OUT, *) 'airfoil "0":  ', nameint(1)
+    write (LU_OUT, *) 'airfoil "1":  ', nameint(2)
     frac = 0.5
     call askr('Specify interpolating fraction  0...1^', frac)
     !
@@ -2248,13 +2248,13 @@ subroutine intx
     !
     call asks('Enter new airfoil name^', NAMe)
     call strip(NAMe, NNAme)
-    write (*, *)
-    write (*, *) 'Result has been placed in buffer airfoil'
-    write (*, *) 'Execute PCOP or PANE to set new current airfoil'
+    write (LU_OUT, *)
+    write (LU_OUT, *) 'Result has been placed in buffer airfoil'
+    write (LU_OUT, *) 'Execute PCOP or PANE to set new current airfoil'
     return
     !
-    100  write (*, *)
-    write (*, *) 'Invalid response.  No action taken.'
+    100  write (LU_OUT, *)
+    write (LU_OUT, *) 'Invalid response.  No action taken.'
 end subroutine intx
 
 end module m_xfoil

@@ -75,8 +75,8 @@ contains
         lrecalc = .false.
         !
         if (N==0) then
-            write (*, *)
-            write (*, *) '***  No airfoil available  ***'
+            write (LU_OUT, *)
+            write (LU_OUT, *) '***  No airfoil available  ***'
             return
         endif
         !
@@ -117,7 +117,7 @@ contains
         !---- set initial Q for current alpha
         ALGam = ALFa
         call mapgam(1, ALGam, CLGam, CMGam)
-        write (*, 99009) ALGam / DTOr, CLGam
+        write (LU_OUT, 99009) ALGam / DTOr, CLGam
         !
         if (.not.LQSpec) then
             !------ set Cn coefficients from current Q
@@ -125,7 +125,7 @@ contains
             !
             !------ set Qspec from Cn coefficients
             call qspcir
-            write (*, 99001)
+            write (LU_OUT, 99001)
             99001 format (/' Qspec initialized to current Q')
         endif
         !
@@ -147,7 +147,7 @@ contains
                 if (comand(1:1)/='!') then
                     lrecalc = .false.
                 elseif (comold=='****') then
-                    write (*, *) 'Previous .MDES command not valid'
+                    write (LU_OUT, *) 'Previous .MDES command not valid'
                     goto 300
                 else
                     comand = comold
@@ -170,7 +170,7 @@ contains
                 !
                 !--------------------------------------------------------
                 if (comand=='?   ') then
-                    write (*, 99002)
+                    write (LU_OUT, 99002)
                     99002      format (&
                             /'   <cr>   Return to Top Level'&
                             /'   !      Redo previous command'&
@@ -210,11 +210,11 @@ contains
                             ALQsp(k) = rinput(k) * DTOr
                         enddo
                     else
-                        write (*, 99009) ALGam / DTOr, CLGam
-                        write (*, 99003) (ALQsp(k) / DTOr, k=1, NQSp)
+                        write (LU_OUT, 99009) ALGam / DTOr, CLGam
+                        write (LU_OUT, 99003) (ALQsp(k) / DTOr, k=1, NQSp)
                         99003          format (/' Current Qspec alphas  =', 20F9.3)
                         do
-                            write (*, 99004)
+                            write (LU_OUT, 99004)
                             99004              format (' New alphas or <return>:  ', $)
                             read (*, 99012) line
                             ntmp = IPX
@@ -248,11 +248,11 @@ contains
                             CLQsp(k) = rinput(k)
                         enddo
                     else
-                        write (*, 99009) ALGam / DTOr, CLGam
-                        write (*, 99005) (CLQsp(k), k = 1, NQSp)
+                        write (LU_OUT, 99009) ALGam / DTOr, CLGam
+                        write (LU_OUT, 99005) (CLQsp(k), k = 1, NQSp)
                         99005          format (/' Current Qspec CLs  =', 20F8.4)
                         do
-                            write (*, 99006)
+                            write (LU_OUT, 99006)
                             99006              format (' New CLs or <return>:  ', $)
                             read (*, 99012) line
                             ntmp = IPX
@@ -281,7 +281,7 @@ contains
                 elseif (comand=='SYMM' .or. comand=='S   ') then
                     LQSym = .not.LQSym
                     if (LQSym) then
-                        write (*, *) 'Qspec symmetry forcing enabled.'
+                        write (LU_OUT, *) 'Qspec symmetry forcing enabled.'
                         !cc       KQSP = 1
                         !cc       CALL SYMQSP(KQSP)
                         !cc       CALL CNCALC(QSPEC(1,KQSP),.FALSE.)
@@ -290,7 +290,7 @@ contains
                         !
                         lcnpl = .false.
                     else
-                        write (*, *) 'Qspec symmetry forcing disabled.'
+                        write (LU_OUT, *) 'Qspec symmetry forcing disabled.'
                     endif
                     !
                     !--------------------------------------------------------
@@ -312,8 +312,8 @@ contains
                     !
                     kqsp = 1
                     call qspint(ALQsp(kqsp), QSPec(1, kqsp), QINf, MINf, CLQsp(kqsp), CMQsp(kqsp))
-                    write (*, 99010) ALGam / DTOr, CLGam, CMGam
-                    write (*, 99011) kqsp, ALQsp(kqsp) / DTOr, CLQsp(kqsp), CMQsp(kqsp)
+                    write (LU_OUT, 99010) ALGam / DTOr, CLGam, CMGam
+                    write (LU_OUT, 99011) kqsp, ALQsp(kqsp) / DTOr, CLQsp(kqsp), CMQsp(kqsp)
                     !
                     !--------------------------------------------------------
                 elseif (comand=='SMOO') then
@@ -323,7 +323,7 @@ contains
                     call cncalc(QSPec(1, kqsp), LQSym)
                     call qspcir
                     !
-                    write (*, 99010) ALGam / DTOr, CLGam, CMGam
+                    write (LU_OUT, 99010) ALGam / DTOr, CLGam, CMGam
                     !
                     do kqsp = 1, NQSp
                         call qspint(ALQsp(kqsp), QSPec(1, kqsp), QINf, MINf, clq, CMQsp(kqsp))
@@ -331,7 +331,7 @@ contains
                         !------- set new CL only if alpha is prescribed
                         if (IACqsp==1) CLQsp(kqsp) = clq
                         !
-                        write (*, 99011) kqsp, ALQsp(kqsp) / DTOr, CLQsp(kqsp), CMQsp(kqsp)
+                        write (LU_OUT, 99011) kqsp, ALQsp(kqsp) / DTOr, CLQsp(kqsp), CMQsp(kqsp)
                     enddo
                     LQSppl = .false.
                     !
@@ -343,7 +343,7 @@ contains
                     call piqsum
                     call qspcir
                     !
-                    write (*, 99010) ALGam / DTOr, CLGam, CMGam
+                    write (LU_OUT, 99010) ALGam / DTOr, CLGam, CMGam
                     !
                     do kqsp = 1, NQSp
                         call qspint(ALQsp(kqsp), QSPec(1, kqsp), QINf, MINf, clq, CMQsp(kqsp))
@@ -351,7 +351,7 @@ contains
                         !------- set new CL only if alpha is prescribed
                         if (IACqsp==1) CLQsp(kqsp) = clq
                         !
-                        write (*, 99011) kqsp, ALQsp(kqsp) / DTOr, CLQsp(kqsp), CMQsp(kqsp)
+                        write (LU_OUT, 99011) kqsp, ALQsp(kqsp) / DTOr, CLQsp(kqsp), CMQsp(kqsp)
                     enddo
                     LQSppl = .false.
                     !
@@ -384,7 +384,7 @@ contains
                     LGSame = .false.
                     lcnpl = .false.
                     !
-                    write (*, 99007)
+                    write (LU_OUT, 99007)
                     99007      format (//' New buffer airfoil generated'/&
                             ' Execute PANE at Top Level to set new current airfoil'/)
                     !
@@ -400,7 +400,7 @@ contains
                     !
                     !--------------------------------------------------------
                 else
-                    write (*, 99008) comand
+                    write (LU_OUT, 99008) comand
                     99008      format (' Command ', a4, ' not recognized.  Type a " ? " for list.')
                     comand = '****'
                     !
@@ -423,6 +423,7 @@ contains
 
 
     subroutine dztset(Rinput, Ninput)
+        use i_xfoil, only: LU_OUT
         use m_userio, only: askr
         use i_circle
         implicit none
@@ -457,7 +458,7 @@ contains
             dxnew = Rinput(1)
             dynew = Rinput(2)
         else
-            write (*, 99001) real(DZTe), imag(DZTe)
+            write (LU_OUT, 99001) real(DZTe), imag(DZTe)
             99001 format (/' Current TE gap  dx/c dy/c =', 2F7.4)
             call askr('Enter new TE gap dx/c^', dxnew)
             call askr('Enter new TE gap dy/c^', dynew)
@@ -469,6 +470,7 @@ contains
 
 
     subroutine agtset(Rinput, Ninput)
+        use i_xfoil, only: LU_OUT
         use m_userio, only: askr
         use i_circle
         implicit none
@@ -502,7 +504,7 @@ contains
         if (Ninput>=2) then
             agted = Rinput(1)
         else
-            write (*, 99001) AGTe * 180.0
+            write (LU_OUT, 99001) AGTe * 180.0
             99001 format (/' Current TE angle =', f7.3, ' deg.')
             call askr('Enter new TE angle (deg)^', agted)
         endif
@@ -608,6 +610,7 @@ contains
 
 
     subroutine mapgen(Ffilt, N, X, Y)
+        use i_xfoil, only: LU_OUT
         use m_xsolve, only: cgauss
         use i_circle
         implicit none
@@ -704,11 +707,11 @@ contains
             call zccalc(MCT)
             call zcnorm(MCT)
             !
-            write (*, *) itercn, dcnmax
+            write (LU_OUT, *) itercn, dcnmax
             if (dcnmax<=5.0E-5) goto 100
         enddo
-        write (*, *)
-        write (*, *) 'MAPGEN: Geometric constraints not fully converged'
+        write (LU_OUT, *)
+        write (LU_OUT, *) 'MAPGEN: Geometric constraints not fully converged'
         !
         !
         !---- return new airfoil coordinates
@@ -724,6 +727,7 @@ contains
 
 
     subroutine scinit(N, X, Xp, Y, Yp, S, Sle)
+        use i_xfoil, only: LU_OUT
         use m_spline, only: curv, seval, deval
         use i_circle
         implicit none
@@ -791,9 +795,9 @@ contains
         CHOrdz = cmplx(chordx, chordy)
         ZLEold = cmplx(xle, yle)
         !
-        write (*, 99001) real(DZTe), imag(DZTe), AGTe * 180.0
+        write (LU_OUT, 99001) real(DZTe), imag(DZTe), AGTe * 180.0
         99001 format (/' Current TE gap  dx dy =', 2F7.4, '    TE angle =', f7.3, ' deg.'/)
-        write (*, *) 'Initializing mapping coordinate ...'
+        write (LU_OUT, *) 'Initializing mapping coordinate ...'
         !
         !---- set approximate slope ds/dw at airfoil nose
         cvle = curv(Sle, X, Xp, Y, Yp, S, N) * S(N)
@@ -867,7 +871,7 @@ contains
                 dscmax = max(dscmax, abs(SC(ic) - SCOld(ic)))
             enddo
             !
-            write (*, *) ipass, '     max(dw) =', dscmax
+            write (LU_OUT, *) ipass, '     max(dw) =', dscmax
             if (dscmax<seps) exit
             !
         enddo
@@ -1344,6 +1348,7 @@ contains
 
 
     subroutine qccalc(Ispec, Alfa, Cl, Cm, Minf, Qinf, Ncir, Xcir, Ycir, Scir, Qcir)
+        use i_xfoil, only: LU_OUT
         use i_circle
         implicit none
         !
@@ -1479,7 +1484,7 @@ contains
             endif
             !
         enddo
-        write (*, *) 'QCCALC: CL convergence failed.  dAlpha =', dalfa
+        write (LU_OUT, *) 'QCCALC: CL convergence failed.  dAlpha =', dalfa
         !
     end subroutine qccalc
     !*==QSPINT.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
@@ -1677,6 +1682,7 @@ contains
 
 
     subroutine pert(Qspec)
+        use i_xfoil, only: LU_OUT
         use m_xsolve, only: cgauss
         use i_circle
         implicit none
@@ -1724,22 +1730,22 @@ contains
         qimoff = QIM0 - imag(CN(0))
         CN(0) = CN(0) + cmplx(0.0, qimoff)
         !
-        write (*, *)
-        write (*, *) 'Current mapping coefficients...'
-        write (*, *) '      n    Re(Cn)      Im(Cn)'
+        write (LU_OUT, *)
+        write (LU_OUT, *) 'Current mapping coefficients...'
+        write (LU_OUT, *) '      n    Re(Cn)      Im(Cn)'
         !cc   DO M = 1, NC
         do m = 1, min(NC, 32)
-            write (*, 99001) m, real(CN(m)), imag(CN(m))
+            write (LU_OUT, 99001) m, real(CN(m)), imag(CN(m))
             99001 format (4x, i4, 2F12.6)
         enddo
         100  do
             !
-            write (*, 99002)
+            write (LU_OUT, 99002)
             99002 format (/4x, 'Enter  n, delta(Cnr), delta(Cni):  ', $)
             read (*, *, err = 100) m, dcnr, dcni
             if (m<=0) cycle
             if (m>NC) then
-                write (*, *) 'Max number of modes is', NC
+                write (LU_OUT, *) 'Max number of modes is', NC
                 cycle
             endif
             CN(m) = CN(m) + cmplx(dcnr, dcni)
@@ -1785,10 +1791,10 @@ contains
                 call zccalc(MCT)
                 call zcnorm(MCT)
                 !
-                write (*, *) itercn, dcnmax
+                write (LU_OUT, *) itercn, dcnmax
                 if (dcnmax<=5.0E-5) goto 99999
             enddo
-            write (*, *) 'TE gap,chord did not converge'
+            write (LU_OUT, *) 'TE gap,chord did not converge'
             exit
         enddo
     99999 end subroutine pert
@@ -1926,10 +1932,10 @@ contains
         !
         return
         !
-        200  write (*, *) 'GETVOV: File OPEN error.'
+        200  write (LU_OUT, *) 'GETVOV: File OPEN error.'
         return
         !
-        300  write (*, *) 'GETVOV: File READ error.'
+        300  write (LU_OUT, *) 'GETVOV: File READ error.'
         close (lu)
         !
     end subroutine getvov
@@ -1938,6 +1944,7 @@ contains
 
 
     subroutine zlefind(Zle, Zc, Wc, Nc, Piq, Agte)
+        use i_xfoil, only: LU_OUT
         use m_spline, only: d2val, seval, splind, deval
         implicit none
         !
@@ -2055,7 +2062,7 @@ contains
             !
             if (abs(dwcle)<1.0E-5) goto 100
         enddo
-        write (*, *) 'ZLEFIND: LE location failed.'
+        write (LU_OUT, *) 'ZLEFIND: LE location failed.'
         wcle = Wc(icle)
         !
         !---- set final leading edge point complex coordinate

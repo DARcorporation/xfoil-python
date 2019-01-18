@@ -98,6 +98,8 @@ module i_xfoil
     real, dimension(6 * IQX) :: w1, w2, w3, w4, w5, w6, w7, w8
     real, dimension(IWX) :: wgap
     real :: ysfp, yte, ywind, z_alfa, z_qdof0, z_qdof1, z_qdof2, z_qdof3, z_qinf
+
+    integer :: LU_OUT = 6
     !
     !*** End of declarations rewritten by SPAG
     !

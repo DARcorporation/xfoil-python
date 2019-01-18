@@ -682,6 +682,7 @@ contains
 
 
     subroutine sinvrt(Si, Xi, X, Xs, S, N)
+        use i_xfoil, only: LU_OUT
         implicit none
         !
         !*** Start of declarations rewritten by SPAG
@@ -734,7 +735,7 @@ contains
             Si = Si + ds
             if (abs(ds / (S(N) - S(1)))<1.0E-5) return
         enddo
-        write (*, *) 'SINVRT: spline inversion failed. Input value returned.'
+        write (LU_OUT, *) 'SINVRT: spline inversion failed. Input value returned.'
         Si = sisav
         !
     end subroutine sinvrt
@@ -785,6 +786,7 @@ contains
 
 
     subroutine splnxy(X, Xs, Y, Ys, S, N)
+        use i_xfoil, only: LU_OUT
         implicit none
         !
         !*** Start of declarations rewritten by SPAG
@@ -881,7 +883,7 @@ contains
             enddo
             !
             serr = serr / (S(N) - S(1))
-            write (*, *) ipass, serr
+            write (LU_OUT, *) ipass, serr
             !
             !------ re-spline X(S) and Y(S)
             call segspl(X, Xs, S, N)
