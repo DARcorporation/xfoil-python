@@ -60,6 +60,9 @@ class XFoil(object):
         self._lib.init()
         self._airfoil = None
 
+        self._lib.get_reynolds.restype = c_float
+        self._lib.get_mach.restype = c_float
+
     def __del__(self):
         handle = self._lib._handle
         del self._lib
