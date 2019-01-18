@@ -32,11 +32,6 @@ fptr = POINTER(c_float)
 bptr = POINTER(c_bool)
 
 
-def subs_nan(arrays, condition):
-    for array in arrays:
-        array[condition] = np.nan
-
-
 class XFoil(object):
     """Interface to the XFoil Fortran routines.
 
@@ -190,7 +185,7 @@ class XFoil(object):
 
         self._lib.alfa(byref(c_float(a)), byref(cl), byref(cd), byref(cm), byref(conv))
 
-        return (cl.value, cd.value, cm.value) if conv else np.nan, np.nan, np.nan
+        return (cl.value, cd.value, cm.value) if conv else (np.nan, np.nan, np.nan)
 
     def cl(self, cl):
         """"Analyze airfoil at a fixed lift coefficient.
@@ -212,7 +207,7 @@ class XFoil(object):
 
         self._lib.cl(byref(c_float(cl)), byref(a), byref(cd), byref(cm), byref(conv))
 
-        return (a.value, cd.value, cm.value) if conv else np.nan, np.nan, np.nan
+        return (a.value, cd.value, cm.value) if conv else (np.nan, np.nan, np.nan)
 
     def aseq(self, a_start, a_end, a_step):
         """Analyze airfoil at a sequence of angles of attack.
@@ -241,7 +236,11 @@ class XFoil(object):
                        a.ctypes.data_as(fptr), cl.ctypes.data_as(fptr),
                        cd.ctypes.data_as(fptr), cm.ctypes.data_as(fptr), conv.ctypes.data_as(bptr))
 
-        subs_nan([a, cl, cd, cm], np.logical_not(conv))
+        isnan = np.logical_not(conv)
+        a[isnan] = np.nan
+        cl[isnan] = np.nan
+        cd[isnan] = np.nan
+        cm[isnan] = np.nan
         return a, cl, cd, cm
 
     def cseq(self, cl_start, cl_end, cl_step):
@@ -271,5 +270,9 @@ class XFoil(object):
                        a.ctypes.data_as(fptr), cl.ctypes.data_as(fptr),
                        cd.ctypes.data_as(fptr), cm.ctypes.data_as(fptr), conv.ctypes.data_as(bptr))
 
-        subs_nan([a, cl, cd, cm], np.logical_not(conv))
+        isnan = np.logical_not(conv)
+        a[isnan] = np.nan
+        cl[isnan] = np.nan
+        cd[isnan] = np.nan
+        cm[isnan] = np.nan
         return a, cl, cd, cm
