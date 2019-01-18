@@ -16,11 +16,18 @@
 #   You should have received a copy of the GNU General Public License
 #   along with XFoil.  If not, see <https://www.gnu.org/licenses/>.
 import numpy as np
+import ctypes
 import os
+import glob
 
-from ctypes import c_bool, c_int, c_float, byref, POINTER
+from ctypes import c_bool, c_int, c_float, byref, POINTER, cdll
+from shutil import copy2
+from tempfile import TemporaryFile
 
 here = os.path.abspath(os.path.dirname(__file__))
+lib_path = glob.glob(os.path.join(here, 'libxfoil.*'))[0]
+lib_ext = lib_path[lib_path.find('.'):]
+
 fptr = POINTER(c_float)
 bptr = POINTER(c_bool)
 
@@ -45,9 +52,21 @@ class XFoil(object):
 
     def __init__(self):
         super().__init__()
-        self._lib = np.ctypeslib.load_library('libxfoil', here)
+        tmp = TemporaryFile(mode='wb', delete=False, suffix=lib_ext)
+        tmp.close()
+        self._lib_path = tmp.name
+        copy2(lib_path, self._lib_path)
+        self._lib = cdll.LoadLibrary(self._lib_path)
         self._lib.init()
         self._airfoil = None
+
+    def __del__(self):
+        handle = self._lib._handle
+        del self._lib
+        try:
+            ctypes.windll.kernel32.FreeLibrary(handle)
+        finally:
+            os.remove(self._lib_path)
 
     @property
     def airfoil(self):
