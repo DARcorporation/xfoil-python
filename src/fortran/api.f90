@@ -169,6 +169,17 @@ contains
         end do
     end subroutine get_airfoil
 
+    subroutine set_naca(spec) bind(c, name='set_naca')
+        use m_xfoil, only: naca
+        integer(c_int), intent(in) :: spec
+        if (spec <= 0) then
+            write(0, *) 'Invalid NACA specifier. Specify a NACA 4 or 5 series airfoil code.'
+        else
+            write(*, *) 'Gonna call naca now...'
+            call naca(spec)
+        end if
+    end subroutine set_naca
+
     subroutine set_reynolds(Re) bind(c, name='set_reynolds')
         use i_xfoil
         real(c_float), intent(in) :: Re

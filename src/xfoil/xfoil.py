@@ -143,6 +143,16 @@ class XFoil(object):
     def max_iter(self, max_iter):
         self._lib.set_max_iter(byref(c_int(max_iter)))
 
+    def naca(self, specifier):
+        """Set a NACA 4 or 5 series airfoil.
+
+        Parameters
+        ----------
+        specifier : string
+            A NACA 4 or 5 series identifier, such as '2412'.
+        """
+        self._lib.set_naca(byref(c_int(int(specifier))))
+
     def reset_bls(self):
         """Reset the boundary layers to be reinitialized on the next analysis."""
         self._lib.reset_bls()
