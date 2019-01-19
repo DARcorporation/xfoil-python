@@ -22,11 +22,13 @@ import glob
 
 from ctypes import c_bool, c_int, c_float, byref, POINTER, cdll
 from shutil import copy2
-from tempfile import TemporaryFile
+from tempfile import NamedTemporaryFile
+
+from .model import Airfoil
 
 here = os.path.abspath(os.path.dirname(__file__))
 lib_path = glob.glob(os.path.join(here, 'libxfoil.*'))[0]
-lib_ext = lib_path[lib_path.find('.'):]
+lib_ext = lib_path[lib_path.rfind('.'):]
 
 fptr = POINTER(c_float)
 bptr = POINTER(c_bool)
@@ -47,7 +49,7 @@ class XFoil(object):
 
     def __init__(self):
         super().__init__()
-        tmp = TemporaryFile(mode='wb', delete=False, suffix=lib_ext)
+        tmp = NamedTemporaryFile(mode='wb', delete=False, suffix=lib_ext)
         tmp.close()
         self._lib_path = tmp.name
         copy2(lib_path, self._lib_path)
