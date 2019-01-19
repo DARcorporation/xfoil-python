@@ -432,19 +432,6 @@ contains
                 conv_arr(i) = .true.
             elseif (LVIsc .and. .not. (LVConv .and. conv_arr(i))) then
                 conv_arr(i) = .false.
-                !-------- increment unconverged-point counter
-                iseqex = iseqex + 1
-                if (iseqex>=NSEqex) then
-                    write (LU_OUT, 99005) iseqex, a_arr(max(i-1, 0)), cl_arr(max(i-1, 0))
-                    99005 format (/' Sequence halted since previous', i3, ' points did not converge'/&
-                            ' Last-converged  alpha =', f8.3, '    CL =', f10.5)
-                    do j=i, n_step
-                        conv_arr(j) = .false.
-                    end do
-                    exit
-                endif
-            else
-                iseqex = 0
             endif
         end do
     end subroutine aseq
@@ -489,19 +476,6 @@ contains
                 conv_arr(i) = .true.
             elseif (LVIsc .and. .not. (LVConv .and. conv_arr(i))) then
                 conv_arr(i) = .false.
-                !-------- increment unconverged-point counter
-                iseqex = iseqex + 1
-                if (iseqex>=NSEqex) then
-                    write (LU_OUT, 99005) iseqex, a_arr(max(i-1, 0)), cl_arr(max(i-1, 0))
-                    99005 format (/' Sequence halted since previous', i3, ' points did not converge'/&
-                            ' Last-converged  alpha =', f8.3, '    CL =', f10.5)
-                    do j=i, n_step
-                        conv_arr(j) = .false.
-                    end do
-                    exit
-                endif
-            else
-                iseqex = 0
             endif
         end do
     end subroutine cseq
