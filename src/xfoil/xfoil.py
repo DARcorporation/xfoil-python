@@ -80,7 +80,11 @@ class XFoil(object):
     @property
     def airfoil(self):
         """Airfoil: Instance of the Airfoil class."""
-        return self._airfoil
+        n = self._lib.get_n_coords()
+        x = np.asfortranarray(np.zeros(n), dtype=c_float)
+        y = np.asfortranarray(np.zeros(n), dtype=c_float)
+        self._lib.get_airfoil(x.ctypes.data_as(fptr), y.ctypes.data_as(fptr), byref(c_int(n)))
+        return Airfoil(x, y)
 
     @airfoil.setter
     def airfoil(self, airfoil):

@@ -152,6 +152,23 @@ contains
                 '            improve excessively coarse LE spacing')
     end subroutine set_airfoil
 
+    function get_n_coords() bind(c, name='get_n_coords')
+        use i_xfoil, only: NB
+        integer(c_int) :: get_n_coords
+        get_n_coords = NB
+    end function get_n_coords
+
+    subroutine get_airfoil(x, y, n) bind(c, name='get_airfoil')
+        use i_xfoil, only: XB, YB
+        integer(c_int), intent(in) :: n
+        real(c_float), intent(inout) :: x(n), y(n)
+        integer :: i
+        do i=1, n
+            x(i) = XB(i)
+            y(i) = YB(i)
+        end do
+    end subroutine get_airfoil
+
     subroutine set_reynolds(Re) bind(c, name='set_reynolds')
         use i_xfoil
         real(c_float), intent(in) :: Re
