@@ -58,13 +58,17 @@ contains
         cla = max(Cls, 0.000001)
         !
         if (RETyp<1 .or. RETyp>3) then
-            write (LU_OUT, *) 'MRCL:  Illegal Re(CL) dependence trigger.'
-            write (LU_OUT, *) '       Setting fixed Re.'
+            if (show_output) then
+                write (*, *) 'MRCL:  Illegal Re(CL) dependence trigger.'
+                write (*, *) '       Setting fixed Re.'
+            endif
             RETyp = 1
         endif
         if (MATyp<1 .or. MATyp>3) then
-            write (LU_OUT, *) 'MRCL:  Illegal Mach(CL) dependence trigger.'
-            write (LU_OUT, *) '       Setting fixed Mach.'
+            if (show_output) then
+                write (*, *) 'MRCL:  Illegal Mach(CL) dependence trigger.'
+                write (*, *) '       Setting fixed Mach.'
+            endif
             MATyp = 1
         endif
         !
@@ -106,9 +110,11 @@ contains
         !
         !
         if (MINf>=0.99) then
-            write (LU_OUT, *)
-            write (LU_OUT, *) 'MRCL: CL too low for chosen Mach(CL) dependence'
-            write (LU_OUT, *) '      Aritificially limiting Mach to  0.99'
+            if (show_output) then
+                write (*, *)
+                write (*, *) 'MRCL: CL too low for chosen Mach(CL) dependence'
+                write (*, *) '      Aritificially limiting Mach to  0.99'
+            endif
             MINf = 0.99
             M_cls = 0.
         endif
@@ -117,9 +123,11 @@ contains
         if (REInf1>0.0) rrat = REInf / REInf1
         !
         if (rrat>100.0) then
-            write (LU_OUT, *)
-            write (LU_OUT, *) 'MRCL: CL too low for chosen Re(CL) dependence'
-            write (LU_OUT, *) '      Aritificially limiting Re to ', REInf1 * 100.0
+            if (show_output) then
+                write (*, *)
+                write (*, *) 'MRCL: CL too low for chosen Re(CL) dependence'
+                write (*, *) '      Aritificially limiting Re to ', REInf1 * 100.0
+            endif
             REInf = REInf1 * 100.0
             R_cls = 0.
         endif
@@ -172,7 +180,7 @@ contains
     ! COMSET
 
     subroutine cpcalc(N, Q, Qinf, Minf, Cp)
-        use i_xfoil, only: LU_OUT
+        use i_xfoil, only: show_output
         implicit none
         !
         !*** Start of declarations rewritten by SPAG
@@ -222,8 +230,10 @@ contains
         enddo
         !
         if (denneg) then
-            write (LU_OUT, *)
-            write (LU_OUT, *) 'CPCALC: Local speed too large. ', 'Compressibility corrections invalid.'
+            if (show_output) then
+                write (*, *)
+                write (*, *) 'CPCALC: Local speed too large. ', 'Compressibility corrections invalid.'
+            endif
         endif
         !
     end subroutine cpcalc

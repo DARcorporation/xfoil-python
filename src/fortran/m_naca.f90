@@ -110,7 +110,7 @@ contains
 
 
     subroutine naca5(Ides, Xx, Yt, Yc, Nside, Xb, Yb, Nb, Name)
-        use i_xfoil, only: LU_OUT
+        use i_xfoil, only: show_output
         implicit none
         !
         !*** Start of declarations rewritten by SPAG
@@ -181,8 +181,10 @@ contains
             m = 0.3910
             c = 3.230
         else
-            write (LU_OUT, *) 'Illegal 5-digit designation'
-            write (LU_OUT, *) 'First three digits must be 210, 220, ... 250'
+            if (show_output) then
+                write (*, *) 'Illegal 5-digit designation'
+                write (*, *) 'First three digits must be 210, 220, ... 250'
+            endif
             Ides = 0
             return
         endif

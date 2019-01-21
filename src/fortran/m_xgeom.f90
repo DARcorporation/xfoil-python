@@ -24,7 +24,7 @@
 module m_xgeom
 contains
     subroutine lefind(Sle, X, Xp, Y, Yp, S, N)
-        use i_xfoil, only: LU_OUT
+        use i_xfoil, only: show_output
         use m_spline, only: d2val, seval, deval
         implicit none
         !
@@ -115,14 +115,14 @@ contains
             Sle = Sle + dsle
             if (abs(dsle)<dseps) return
         enddo
-        write (LU_OUT, *) 'LEFIND:  LE point not found.  Continuing...'
+        if (show_output) write (*, *) 'LEFIND:  LE point not found.  Continuing...'
         Sle = S(i)
     end subroutine lefind
     !*==SOPPS.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
 
 
     subroutine sopps(Sopp, Si, X, Xp, Y, Yp, S, N, Sle)
-        use i_xfoil, only: LU_OUT
+        use i_xfoil, only: show_output
         use m_spline, only: seval, deval
         implicit none
         !
@@ -213,7 +213,7 @@ contains
             !
             if (abs(dsopp) / slen<1.0E-5) goto 99999
         enddo
-        write (LU_OUT, *) 'SOPPS: Opposite-point location failed. Continuing...'
+        if (show_output) write (*, *) 'SOPPS: Opposite-point location failed. Continuing...'
         Sopp = Sle + sfrac * (S(inopp) - Sle)
         !
     99999 end subroutine sopps
@@ -280,7 +280,7 @@ contains
     subroutine geopar(X, Xp, Y, Yp, S, N, T, &
             Sle, Chord, Area, Radle, Angte, Ei11a, Ei22a, Apx1a, Apx2a, Ei11t, Ei22t, Apx1t, Apx2t, Thick, &
             & Cambr)
-        use i_xfoil, only: LU_OUT
+        use i_xfoil, only: show_output
         use m_spline, only: curv, seval
         use m_xutils, only: atanc
         implicit none
@@ -363,7 +363,7 @@ contains
         !c      CALL GETMAX(XTHK,YTHK,YTHKP,NTHK,XTHICK,THICK)
         !c      THICK = 2.0*THICK
         !
-        write (LU_OUT, 99001) Thick, xthick, Cambr, xcambr
+        if (show_output) write (*, 99001) Thick, xthick, Cambr, xcambr
         99001 format (' Max thickness = ', f12.6, '  at x = ', f7.3, /' Max camber    = ', f12.6, '  at x = ', f7.3)
 
 
@@ -634,7 +634,7 @@ contains
 
 
     subroutine cang(X, Y, N, Iprint, Imax, Amax)
-        use i_xfoil, only: LU_OUT
+        use i_xfoil, only: show_output
         implicit none
         !
         !*** Start of declarations rewritten by SPAG
@@ -675,7 +675,7 @@ contains
         Imax = 1
         !
         !---- go over each point, calculating corner angle
-        if (Iprint==2) write (LU_OUT, 99001)
+        if (Iprint==2 .and. show_output) write (*, 99001)
         !
         99001 format (/'  i       x        y      angle')
         do i = 2, N - 1
@@ -696,7 +696,7 @@ contains
             !
             crossp = (dx2 * dy1 - dy2 * dx1) / sqrt((dx1**2 + dy1**2) * (dx2**2 + dy2**2))
             angl = asin(crossp) * (180.0 / 3.1415926)
-            if (Iprint==2) write (LU_OUT, 99002) i, X(i), Y(i), angl
+            if (Iprint==2 .and. show_output) write (*, 99002) i, X(i), Y(i), angl
             !CC             120   0.2134  -0.0234   25.322
             99002 format (1x, i3, 2F9.4, f9.3)
             if (abs(angl)>abs(Amax)) then
@@ -705,7 +705,7 @@ contains
             endif
         enddo
         !
-        if (Iprint>=1) write (LU_OUT, 99003) Amax, Imax, X(Imax), Y(Imax)
+        if (Iprint>=1 .and. show_output) write (*, 99003) Amax, Imax, X(Imax), Y(Imax)
         99003 format (/' Maximum panel corner angle =', f7.3, '   at  i,x,y  = ', i3, 2F9.4)
         !
     end subroutine cang
@@ -907,7 +907,7 @@ contains
 
 
     subroutine bendump(N, X, Y)
-        use i_xfoil, only: LU_OUT
+        use i_xfoil, only: show_output
         implicit none
         !
         !*** Start of declarations rewritten by SPAG
@@ -947,47 +947,57 @@ contains
         !     &    AIYY, AIYYT,
         !     &    AJ  , AJT   )
         !
-        write (LU_OUT, *)
-        write (LU_OUT, 99001) 'Area =', area
-        write (LU_OUT, 99001) 'Slen =', slen
-        write (LU_OUT, *)
-        write (LU_OUT, 99001) 'X-bending parameters(solid):'
-        write (LU_OUT, 99001) '        Xc =', xc
-        write (LU_OUT, 99001) '  max X-Xc =', xmax - xc
-        write (LU_OUT, 99001) '  min X-Xc =', xmin - xc
-        write (LU_OUT, 99001) '       Iyy =', aiyy
+        if (show_output) then
+            write (*, *)
+            write (*, 99001) 'Area =', area
+            write (*, 99001) 'Slen =', slen
+            write (*, *)
+            write (*, 99001) 'X-bending parameters(solid):'
+            write (*, 99001) '        Xc =', xc
+            write (*, 99001) '  max X-Xc =', xmax - xc
+            write (*, 99001) '  min X-Xc =', xmin - xc
+            write (*, 99001) '       Iyy =', aiyy
+        endif
         xbar = max(abs(xmax - xc), abs(xmin - xc))
-        write (LU_OUT, 99001) ' Iyy/(X-Xc)=', aiyy / xbar
-        write (LU_OUT, *)
-        write (LU_OUT, 99001) 'Y-bending parameters(solid):'
-        write (LU_OUT, 99001) '        Yc =', yc
-        write (LU_OUT, 99001) '  max Y-Yc =', ymax - yc
-        write (LU_OUT, 99001) '  min Y-Yc =', ymin - yc
-        write (LU_OUT, 99001) '       Ixx =', aixx
+        if (show_output) then
+            write (*, 99001) ' Iyy/(X-Xc)=', aiyy / xbar
+            write (*, *)
+            write (*, 99001) 'Y-bending parameters(solid):'
+            write (*, 99001) '        Yc =', yc
+            write (*, 99001) '  max Y-Yc =', ymax - yc
+            write (*, 99001) '  min Y-Yc =', ymin - yc
+            write (*, 99001) '       Ixx =', aixx
+        endif
         ybar = max(abs(ymax - yc), abs(ymin - yc))
-        write (LU_OUT, 99001) ' Ixx/(Y-Yc)=', aixx / ybar
-        write (LU_OUT, *)
-        write (LU_OUT, 99001) '       J   =', aj
-        !
-        write (LU_OUT, *)
-        write (LU_OUT, *)
-        write (LU_OUT, 99001) 'X-bending parameters(skin):'
-        write (LU_OUT, 99001) '         Xc =', xct
-        write (LU_OUT, 99001) '   max X-Xc =', xmax - xct
-        write (LU_OUT, 99001) '   min X-Xc =', xmin - xct
-        write (LU_OUT, 99001) '      Iyy/t =', aiyyt
+        if (show_output) then
+            write (*, 99001) ' Ixx/(Y-Yc)=', aixx / ybar
+            write (*, *)
+            write (*, 99001) '       J   =', aj
+            !
+            write (*, *)
+            write (*, *)
+            write (*, 99001) 'X-bending parameters(skin):'
+            write (*, 99001) '         Xc =', xct
+            write (*, 99001) '   max X-Xc =', xmax - xct
+            write (*, 99001) '   min X-Xc =', xmin - xct
+            write (*, 99001) '      Iyy/t =', aiyyt
+        endif
         xbart = max(abs(xmax - xct), abs(xmin - xct))
-        write (LU_OUT, 99001) ' Iyy/t(X-Xc)=', aiyyt / xbart
-        write (LU_OUT, *)
-        write (LU_OUT, 99001) 'Y-bending parameters(skin):'
-        write (LU_OUT, 99001) '         Yc =', yct
-        write (LU_OUT, 99001) '   max Y-Yc =', ymax - yct
-        write (LU_OUT, 99001) '   min Y-Yc =', ymin - yct
-        write (LU_OUT, 99001) '      Ixx/t =', aixxt
+        if (show_output) then
+            write (*, 99001) ' Iyy/t(X-Xc)=', aiyyt / xbart
+            write (*, *)
+            write (*, 99001) 'Y-bending parameters(skin):'
+            write (*, 99001) '         Yc =', yct
+            write (*, 99001) '   max Y-Yc =', ymax - yct
+            write (*, 99001) '   min Y-Yc =', ymin - yct
+            write (*, 99001) '      Ixx/t =', aixxt
+        endif
         ybart = max(abs(ymax - yct), abs(ymin - yct))
-        write (LU_OUT, 99001) ' Ixx/t(Y-Yc)=', aixxt / ybart
-        write (LU_OUT, *)
-        write (LU_OUT, 99001) '      J/t   =', ajt
+        if (show_output) then
+            write (*, 99001) ' Ixx/t(Y-Yc)=', aixxt / ybart
+            write (*, *)
+            write (*, 99001) '      J/t   =', ajt
+        endif
         !
         !      WRITE(*,*)
         !      WRITE(*,1200) '  power-avg X-Xc =', XEXINT
@@ -1003,7 +1013,7 @@ contains
 
 
     subroutine bendump2(N, X, Y, T)
-        use i_xfoil, only: LU_OUT
+        use i_xfoil, only: show_output
         implicit none
         !
         !*** Start of declarations rewritten by SPAG
@@ -1052,50 +1062,58 @@ contains
         call aecalc(N, X, Y, T, 2, slen, xcent, ycent, ei11t, ei22t, apx1t, apx2t)
         !
 
-        write (LU_OUT, *)
-        write (LU_OUT, 99001) 'Area =', area
-        write (LU_OUT, 99001) 'Slen =', slen
-        write (LU_OUT, *)
-        write (LU_OUT, 99001) 'X-bending parameters:'
-        write (LU_OUT, 99001) 'solid centroid Xc=', xcena
-        write (LU_OUT, 99001) 'skin  centroid Xc=', xcent
-        write (LU_OUT, 99001) ' solid max X-Xc  =', xmax - xcena
-        write (LU_OUT, 99001) ' solid min X-Xc  =', xmin - xcena
-        write (LU_OUT, 99001) ' skin  max X-Xc  =', xmax - xcent
-        write (LU_OUT, 99001) ' skin  min X-Xc  =', xmin - xcent
-        write (LU_OUT, 99001) '     solid Iyy   =', ei22a
-        write (LU_OUT, 99001) '     skin  Iyy/t =', ei22t
+        if (show_output) then
+            write (*, *)
+            write (*, 99001) 'Area =', area
+            write (*, 99001) 'Slen =', slen
+            write (*, *)
+            write (*, 99001) 'X-bending parameters:'
+            write (*, 99001) 'solid centroid Xc=', xcena
+            write (*, 99001) 'skin  centroid Xc=', xcent
+            write (*, 99001) ' solid max X-Xc  =', xmax - xcena
+            write (*, 99001) ' solid min X-Xc  =', xmin - xcena
+            write (*, 99001) ' skin  max X-Xc  =', xmax - xcent
+            write (*, 99001) ' skin  min X-Xc  =', xmin - xcent
+            write (*, 99001) '     solid Iyy   =', ei22a
+            write (*, 99001) '     skin  Iyy/t =', ei22t
+        endif
         xbara = max(abs(xmax - xcena), abs(xmin - xcena))
         xbart = max(abs(xmax - xcent), abs(xmin - xcent))
-        write (LU_OUT, 99001) ' solid Iyy/(X-Xc)=', ei22a / xbara
-        write (LU_OUT, 99001) ' skin Iyy/t(X-Xc)=', ei22t / xbart
-        !
-        write (LU_OUT, *)
-        write (LU_OUT, 99001) 'Y-bending parameters:'
-        write (LU_OUT, 99001) 'solid centroid Yc=', ycena
-        write (LU_OUT, 99001) 'skin  centroid Yc=', ycent
-        write (LU_OUT, 99001) ' solid max Y-Yc  =', ymax - ycena
-        write (LU_OUT, 99001) ' solid min Y-Yc  =', ymin - ycena
-        write (LU_OUT, 99001) ' skin  max Y-Yc  =', ymax - ycent
-        write (LU_OUT, 99001) ' skin  min Y-Yc  =', ymin - ycent
-        write (LU_OUT, 99001) '     solid Ixx   =', ei11a
-        write (LU_OUT, 99001) '     skin  Ixx/t =', ei11t
+        if (show_output) then
+            write (*, 99001) ' solid Iyy/(X-Xc)=', ei22a / xbara
+            write (*, 99001) ' skin Iyy/t(X-Xc)=', ei22t / xbart
+            !
+            write (*, *)
+            write (*, 99001) 'Y-bending parameters:'
+            write (*, 99001) 'solid centroid Yc=', ycena
+            write (*, 99001) 'skin  centroid Yc=', ycent
+            write (*, 99001) ' solid max Y-Yc  =', ymax - ycena
+            write (*, 99001) ' solid min Y-Yc  =', ymin - ycena
+            write (*, 99001) ' skin  max Y-Yc  =', ymax - ycent
+            write (*, 99001) ' skin  min Y-Yc  =', ymin - ycent
+            write (*, 99001) '     solid Ixx   =', ei11a
+            write (*, 99001) '     skin  Ixx/t =', ei11t
+        endif
         ybara = max(abs(ymax - ycena), abs(ymin - ycena))
         ybart = max(abs(ymax - ycent), abs(ymin - ycent))
-        write (LU_OUT, 99001) ' solid Ixx/(Y-Yc)=', ei11a / ybara
-        write (LU_OUT, 99001) ' skin Ixx/t(Y-Yc)=', ei11t / ybart
-        !
-        write (LU_OUT, *)
-        write (LU_OUT, 99001) ' solid principal axis angle (deg ccw) =', apx1a / dtr
-        write (LU_OUT, 99001) ' skin  principal axis angle (deg ccw) =', apx1t / dtr
+        if (show_output) then
+            write (*, 99001) ' solid Ixx/(Y-Yc)=', ei11a / ybara
+            write (*, 99001) ' skin Ixx/t(Y-Yc)=', ei11t / ybart
+            !
+            write (*, *)
+            write (*, 99001) ' solid principal axis angle (deg ccw) =', apx1a / dtr
+            write (*, 99001) ' skin  principal axis angle (deg ccw) =', apx1t / dtr
+        endif
 
         !      WRITE(*,*)
         !      WRITE(*,1200) '  power-avg X-Xc =', XEXINT
         !      WRITE(*,1200) '  power-avg Y-Yc =', YEXINT
         !
-        write (LU_OUT, *)
-        write (LU_OUT, 99001) '    solid J     =', aj
-        write (LU_OUT, 99001) '    skin  J/t   =', ajt
+        if (show_output) then
+            write (*, *)
+            write (*, 99001) '    solid J     =', aj
+            write (*, 99001) '    skin  J/t   =', ajt
+        endif
         return
         !
         99001 format (1x, a, g14.6)

@@ -87,13 +87,15 @@ contains
         lcpx = .false.
         !
         if (N==0) then
-            write (LU_OUT, *)
-            write (LU_OUT, *) '***  No airfoil available  ***'
+            if (show_output) then
+                write (*, *)
+                write (*, *) '***  No airfoil available  ***'
+            endif
             return
         endif
         !
         if (IPAct/=0) then
-            write (LU_OUT, 99001) IPAct
+            if (show_output) write (*, 99001) IPAct
             99001 format (/'  Polar', i3, '  is active')
         endif
         !
@@ -121,7 +123,7 @@ contains
             if (comand(1:1)/='!') then
                 lrecalc = .false.
             elseif (comold=='****') then
-                write (LU_OUT, *) 'Previous .OPER command not valid'
+                if (show_output) write (*, *) 'Previous .OPER command not valid'
                 cycle
             else
                 comand = comold
@@ -155,7 +157,7 @@ contains
             !
             !--------------------------------------------------------
             if (comand=='?   ') then
-                write (LU_OUT, 99002)
+                if (show_output) write (*, 99002)
                 99002  format (&
                         /'   <cr>     Return to Top Level'&
                         /'   !        Redo last ALFA,CLI,CL,ASEQ,CSEQ,VELS'&
@@ -197,7 +199,7 @@ contains
                 !--------------------------------------------------------
             elseif (comand=='VISC' .or. comand=='V   ') then
                 if (LPAcc) then
-                    write (LU_OUT, 99019)
+                    if (show_output) write (*, 99019)
                     cycle
                 endif
                 !
@@ -221,15 +223,17 @@ contains
                 !--------------------------------------------------------
             elseif (comand=='RE  ' .or. comand=='R   ') then
                 if (LPAcc .and. LVIsc) then
-                    write (LU_OUT, 99019)
+                    if (show_output) write (*, 99019)
                     cycle
                 endif
                 !
                 if (ninput>=1) then
                     REInf1 = rinput(1)
                 else
-                    write (LU_OUT, *)
-                    write (LU_OUT, *) 'Currently...'
+                    if (show_output) then
+                        write (*, *)
+                        write (*, *) 'Currently...'
+                    endif
                     call mrshow(.false., .true.)
                     call askr('Enter new Reynolds number^', REInf1)
                 endif
@@ -241,7 +245,7 @@ contains
                 !--------------------------------------------------------
             elseif (comand=='MACH' .or. comand=='M   ') then
                 if (LPAcc) then
-                    write (LU_OUT, 99019)
+                    if (show_output) write (*, 99019)
                     cycle
                 endif
                 do
@@ -249,14 +253,16 @@ contains
                     if (ninput>=1) then
                         MINf1 = rinput(1)
                     else
-                        write (LU_OUT, *)
-                        write (LU_OUT, *) 'Currently...'
+                        if (show_output) then
+                            write (*, *)
+                            write (*, *) 'Currently...'
+                        endif
                         call mrshow(.true., .false.)
                         call askr('Enter Mach number^', MINf1)
                     endif
                     !
                     if (MINf1>=1.0) then
-                        write (LU_OUT, *) 'Supersonic freestream not allowed'
+                        if (show_output) write (*, *) 'Supersonic freestream not allowed'
                         ninput = 0
                         cycle
                     endif
@@ -264,7 +270,7 @@ contains
                     call mrcl(1.0, MINf_cl, REInf_cl)
                     call comset
                     !
-                    if (MINf>0.0) write (LU_OUT, 99003) CPStar, QSTar / QINf
+                    if (MINf>0.0 .and. show_output) write (*, 99003) CPStar, QSTar / QINf
                     99003      format (/' Sonic Cp =', f10.2, '      Sonic Q/Qinf =', f10.3/)
                     !
                     call cpcalc(N, QINv, QINf, MINf, CPI)
@@ -278,7 +284,7 @@ contains
                 !--------------------------------------------------------
             elseif (comand=='TYPE' .or. comand=='T') then
                 if (LPAcc) then
-                    write (LU_OUT, 99019)
+                    if (show_output) write (*, 99019)
                     cycle
                 endif
                 do
@@ -286,7 +292,7 @@ contains
                     if (ninput>=1) then
                         ityp = iinput(1)
                     else
-                        write (LU_OUT, 99004)
+                        if (show_output) write (*, 99004)
                         99004          format (&
                                 /' Type   parameters held constant       varying      fixed   '&
                                 /' ----   ------------------------       -------   -----------'&
@@ -325,7 +331,7 @@ contains
                     if (ninput>=1) then
                         ITMax = iinput(1)
                     else
-                        write (LU_OUT, *) 'Current iteration limit:', ITMax
+                        if (show_output) write (*, *) 'Current iteration limit:', ITMax
                         call aski('Enter new iteration limit^', ITMax)
                     endif
                     !
@@ -340,9 +346,9 @@ contains
             elseif (comand=='INIT') then
                 LBLini = .not.LBLini
                 if (LBLini) then
-                    write (LU_OUT, *) 'BLs are assumed to be initialized'
+                    if (show_output) write (*, *) 'BLs are assumed to be initialized'
                 else
-                    write (LU_OUT, *) 'BLs will be initialized on next point'
+                    if (show_output) write (*, *) 'BLs will be initialized on next point'
                     LIPan = .false.
                 endif
                 !
@@ -388,7 +394,7 @@ contains
                     call plxadd(luplx, IPAct)
                 endif
                 !
-                if (LVIsc .and. .not.LPAcc .and. .not.LVConv) write (LU_OUT, *) 'Type "!" to continue iterating'
+                if (LVIsc .and. .not.LPAcc .and. .not.LVConv .and. show_output) write (*, *) 'Type "!" to continue iterating'
                 !
                 !
                 comold = comand
@@ -423,7 +429,7 @@ contains
                     call plxadd(luplx, IPAct)
                 endif
                 !
-                if (LVIsc .and. .not.LPAcc .and. .not.LVConv) write (LU_OUT, *) 'Type "!" to continue iterating'
+                if (LVIsc .and. .not.LPAcc .and. .not.LVConv .and. show_output) write (*, *) 'Type "!" to continue iterating'
                 !
                 comold = comand
                 argold = comarg
@@ -456,7 +462,7 @@ contains
                     call plxadd(luplx, IPAct)
                 endif
                 !
-                if (LVIsc .and. .not.LPAcc .and. .not.LVConv) write (LU_OUT, *) 'Type "!" to continue iterating'
+                if (LVIsc .and. .not.LPAcc .and. .not.LVConv .and. show_output) write (*, *) 'Type "!" to continue iterating'
                 !
                 comold = comand
                 argold = comarg
@@ -571,7 +577,7 @@ contains
                         !-------- increment unconverged-point counter
                         iseqex = iseqex + 1
                         if (iseqex>=NSEqex) then
-                            write (LU_OUT, 99005) iseqex, alast, clast
+                            if (show_output) write (*, 99005) iseqex, alast, clast
                             99005 format (/' Sequence halted since previous', i3, ' points did not converge'/&
                                     ' Last-converged  alpha =', f8.3, '    CL =', f10.5)
                             exit
@@ -607,9 +613,11 @@ contains
                     if (ip<=NPOl) then
                         IPAct = ip
                     elseif (NPOl==NPX) then
-                        write (LU_OUT, *)
-                        write (LU_OUT, *) 'Number of polars is at array limit'
-                        write (LU_OUT, *) 'New polar will not be stored'
+                        if (show_output) then
+                            write (*, *)
+                            write (*, *) 'Number of polars is at array limit'
+                            write (*, *) 'New polar will not be stored'
+                        endif
                         IPAct = 0
                     else
                         IPAct = NPOl + 1
@@ -630,12 +638,16 @@ contains
                     !
                     call plrini(luplr, IPAct)
                     call plxini(luplx, IPAct)
-                    write (LU_OUT, *)
-                    write (LU_OUT, *) 'Polar accumulation enabled'
+                    if (show_output) then
+                        write (*, *)
+                        write (*, *) 'Polar accumulation enabled'
+                    endif
                     !
                 else
-                    write (LU_OUT, *)
-                    write (LU_OUT, *) 'Polar accumulation disabled'
+                    if (show_output) then
+                        write (*, *)
+                        write (*, *) 'Polar accumulation disabled'
+                    endif
                     IPAct = 0
                     !
                 endif
@@ -643,9 +655,11 @@ contains
                 !--------------------------------------------------------
             elseif (comand=='PGET') then
                 if (NPOl>=NPX) then
-                    write (LU_OUT, *)
-                    write (LU_OUT, *) 'Number of polars is at array limit'
-                    write (LU_OUT, *) 'Delete with PDEL if necessary'
+                    if (show_output) then
+                        write (*, *)
+                        write (*, *) 'Number of polars is at array limit'
+                        write (*, *) 'Delete with PDEL if necessary'
+                    endif
                     cycle
                 endif
                 !
@@ -664,7 +678,7 @@ contains
                         ISX, nblp(ip), CPOlsd(1, 1, 1, ip), CODepol(ip), &
                         & VERspol(ip))
                 if (error) then
-                    write (LU_OUT, *) 'Polar file READ error'
+                    if (show_output) write (*, *) 'Polar file READ error'
                 else
                     NPOl = ip
                     NXYpol(ip) = 0
@@ -676,7 +690,7 @@ contains
                             IMAtyp(ip), ISX, nel, CPOlsd(1, 1, 1, ip), &
                             & JPOl, NJPol, CODepol(ip), VERspol(ip), .false.)
                     PFName(ip) = FNAme
-                    write (LU_OUT, 99006) ip
+                    if (show_output) write (*, 99006) ip
                     99006      format (/' Stored as  Polar', i4)
                 endif
                 !
@@ -733,7 +747,7 @@ contains
                                 NAMepol(ip), IREtyp(ip), IMAtyp(ip), ISX, nel, &
                                 & CPOlsd(1, 1, 1, ip), JPOl, NJPol, 'XFOIL', VERsion, .true.)
                         if (error) then
-                            write (LU_OUT, 99007) ip
+                            if (show_output) write (*, 99007) ip
                             99007              format (' Polar', i3, '  not written')
                         else
                             PFName(ip) = FNAme
@@ -745,9 +759,11 @@ contains
                 !--------------------------------------------------------
             elseif (comand=='RGET') then
                 if (NPOlref>=NPX) then
-                    write (LU_OUT, *)
-                    write (LU_OUT, *) 'Number of reference polars is at array limit'
-                    write (LU_OUT, *) 'Delete with RDEL if necessary'
+                    if (show_output) then
+                        write (*, *)
+                        write (*, *) 'Number of reference polars is at array limit'
+                        write (*, *) 'Delete with RDEL if necessary'
+                    endif
                     cycle
                 endif
                 !
@@ -772,8 +788,10 @@ contains
                         call asks('Enter label for reference polar^', NAMeref(ir))
                         call strip(NAMeref(ir), nnref)
                     else
-                        write (LU_OUT, *)
-                        write (LU_OUT, *) NAMeref(ir)
+                        if (show_output) then
+                            write (*, *)
+                            write (*, *) NAMeref(ir)
+                        endif
                     endif
                     !
                     !cc     ICOLR(IR) = NCOLOR - IR + 1
@@ -782,12 +800,12 @@ contains
                     cycle
                 endif
                 !
-                20    write (LU_OUT, *) 'File OPEN error'
+                20    if (show_output) write (*, *) 'File OPEN error'
                 !
                 !--------------------------------------------------------
             elseif (comand=='RDEL') then
                 if (NPOlref==0) then
-                    write (LU_OUT, *) 'No reference polars are stored'
+                    if (show_output) write (*, *) 'No reference polars are stored'
                     cycle
                 endif
                 !
@@ -815,7 +833,7 @@ contains
                         !------- delete ref. polar IR
                         do jr = ir + 1, NPOlref
                             call prfcop(jr, jr - 1)
-                            write (LU_OUT, 99016) jr, jr - 1
+                            if (show_output) write (*, 99016) jr, jr - 1
                         enddo
                         NPOlref = NPOlref - 1
                     endif
@@ -825,8 +843,10 @@ contains
                 !--------------------------------------------------------
             elseif (comand=='PSUM') then
                 if (NPOl==0) then
-                    write (LU_OUT, *)
-                    write (LU_OUT, *) 'No polars are stored'
+                    if (show_output) then
+                        write (*, *)
+                        write (*, *) 'No polars are stored'
+                    endif
                     cycle
                 endif
                 !
@@ -835,8 +855,10 @@ contains
                 !--------------------------------------------------------
             elseif (comand=='PLIS') then
                 if (NPOl==0) then
-                    write (LU_OUT, *)
-                    write (LU_OUT, *) 'No polars are stored'
+                    if (show_output) then
+                        write (*, *)
+                        write (*, *) 'No polars are stored'
+                    endif
                     cycle
                 endif
                 !
@@ -852,8 +874,10 @@ contains
                         ip1 = ip
                         ip2 = ip
                     else
-                        write (LU_OUT, *)
-                        write (LU_OUT, *) 'Specified stored polar does not exist'
+                        if (show_output) then
+                            write (*, *)
+                            write (*, *) 'Specified stored polar does not exist'
+                        endif
                         cycle
                     endif
                 endif
@@ -870,7 +894,7 @@ contains
                 !
                 nel = 1
                 do ip = ip1, ip2
-                    write (LU_OUT, 99015) ip
+                    if (show_output) write (*, 99015) ip
                     ia1 = 1
                     ia2 = NAPol(ip)
                     call polwrit(6, ' ', error, .true., NAX, ia1, ia2, &
@@ -884,7 +908,7 @@ contains
                 !--------------------------------------------------------
             elseif (comand=='PDEL') then
                 if (NPOl==0) then
-                    write (LU_OUT, *) 'No polars are stored'
+                    if (show_output) write (*, *) 'No polars are stored'
                     cycle
                 endif
                 !
@@ -915,28 +939,28 @@ contains
                     else
                         !------- delete polar IP
                         if (IPAct==ip) then
-                            write (LU_OUT, *) 'Active polar deleted.  Accumulation turned off'
+                            if (show_output) write (*, *) 'Active polar deleted.  Accumulation turned off'
                             IPAct = 0
                             LPAcc = .false.
                         endif
                         !
                         do jp = ip + 1, NPOl
                             call plrcop(jp, jp - 1)
-                            write (LU_OUT, 99016) jp, jp - 1
+                            if (show_output) write (*, 99016) jp, jp - 1
                             if (IPAct==jp) IPAct = jp - 1
                         enddo
                         NPOl = NPOl - 1
                         !
                     endif
                     !
-                    if (IPAct>0) write (LU_OUT, 99017) IPAct
+                    if (IPAct>0 .and. show_output) write (*, 99017) IPAct
                     exit
                 enddo
                 !
                 !--------------------------------------------------------
             elseif (comand=='PSOR') then
                 if (NPOl==0) then
-                    write (LU_OUT, *) 'No polars are stored'
+                    if (show_output) write (*, *) 'No polars are stored'
                     cycle
                 endif
                 !
@@ -979,8 +1003,10 @@ contains
                 !--------------------------------------------------------
             elseif (comand=='ASET') then
                 if (NPOl==0) then
-                    write (LU_OUT, *)
-                    write (LU_OUT, *) 'No polar airfoils are stored'
+                    if (show_output) then
+                        write (*, *)
+                        write (*, *) 'No polar airfoils are stored'
+                    endif
                     cycle
                 endif
                 do
@@ -996,18 +1022,22 @@ contains
                     !
                     if (ip==0) exit
                     if (ip<1 .or. ip>NPOl) then
-                        write (LU_OUT, *)
-                        write (LU_OUT, *) 'Specified polar airfoil does not exist'
+                        if (show_output) then
+                            write (*, *)
+                            write (*, *) 'Specified polar airfoil does not exist'
+                        endif
                         ninput = 0
                         cycle
                     endif
                     !
-                    write (LU_OUT, *)
-                    write (LU_OUT, *) 'Current airfoil will be overwritten.  Proceed?  Y'
+                    if (show_output) then
+                        write (*, *)
+                        write (*, *) 'Current airfoil will be overwritten.  Proceed?  Y'
+                    endif
                     read (*, 99018) ans
                     !
                     if (index('Nn', ans)/=0) then
-                        write (LU_OUT, *) 'No action taken'
+                        if (show_output) write (*, *) 'No action taken'
                     else
                         call apcopy(ip)
                     endif
@@ -1017,8 +1047,10 @@ contains
                 !--------------------------------------------------------
             elseif (comand=='PREM') then
                 if (NPOl==0) then
-                    write (LU_OUT, *)
-                    write (LU_OUT, *) 'No polars are stored'
+                    if (show_output) then
+                        write (*, *)
+                        write (*, *) 'No polars are stored'
+                    endif
                     cycle
                 endif
                 do
@@ -1034,8 +1066,10 @@ contains
                     !
                     if (ip==0) goto 100
                     if (ip<1 .or. ip>NPOl) then
-                        write (LU_OUT, *)
-                        write (LU_OUT, *) 'Specified polar airfoil does not exist'
+                        if (show_output) then
+                            write (*, *)
+                            write (*, *) 'Specified polar airfoil does not exist'
+                        endif
                         ninput = 0
                         cycle
                     endif
@@ -1053,7 +1087,7 @@ contains
                             IPOl(ICH) = NIPol
                         endif
                         !
-                        write (LU_OUT, 99015) ip
+                        if (show_output) write (*, 99015) ip
                         ia1 = 1
                         ia2 = NAPol(ip)
                         call polwrit(6, ' ', error, .true., NAX, ia1, ia2, &
@@ -1062,7 +1096,7 @@ contains
                                 NAMepol(ip), IREtyp(ip), IMAtyp(ip), ISX, 1, CPOlsd(1, 1, 1, ip), &
                                 & JPOl, NJPol, 'XFOIL', VERsion, .false.)
                         do
-                            write (LU_OUT, 99008)
+                            if (show_output) write (*, 99008)
                             99008              format (/' Enter alpha(s) of points to be removed:  ', $)
                             read (*, 99018) line
                             nrem = 19
@@ -1098,11 +1132,11 @@ contains
                                 do jp = ip + 1, NPOl
                                     call plrcop(jp, jp - 1)
                                     if (IPAct==jp) IPAct = jp - 1
-                                    write (LU_OUT, 99016) jp, jp - 1
+                                    if (show_output) write (*, 99016) jp, jp - 1
                                 enddo
                                 NPOl = NPOl - 1
                                 !
-                                if (IPAct>0) write (LU_OUT, 99017) IPAct
+                                if (IPAct>0 .and. show_output) write (*, 99017) IPAct
                                 !
                                 goto 100
                             endif
@@ -1116,8 +1150,10 @@ contains
                 !--------------------------------------------------------
             elseif (comand=='PNAM') then
                 if (NPOl==0) then
-                    write (LU_OUT, *)
-                    write (LU_OUT, *) 'No polars are stored'
+                    if (show_output) then
+                        write (*, *)
+                        write (*, *) 'No polars are stored'
+                    endif
                     cycle
                 endif
                 do
@@ -1133,8 +1169,10 @@ contains
                     !
                     if (ip==0) exit
                     if (ip<1 .or. ip>NPOl) then
-                        write (LU_OUT, *)
-                        write (LU_OUT, *) 'Specified polar airfoil does not exist'
+                        if (show_output) then
+                            write (*, *)
+                            write (*, *) 'Specified polar airfoil does not exist'
+                        endif
                         ninput = 0
                         cycle
                     endif
@@ -1149,7 +1187,7 @@ contains
                         IPOl(ICH) = NIPol
                     endif
                     !
-                    write (LU_OUT, 99015) ip
+                    if (show_output) write (*, 99015) ip
                     ia1 = 0
                     ia2 = -1
                     call polwrit(6, ' ', error, .true., NAX, ia1, ia2, &
@@ -1158,7 +1196,7 @@ contains
                             NAMepol(ip), IREtyp(ip), IMAtyp(ip), ISX, 1, CPOlsd(1, 1, 1, ip), &
                             & JPOl, NJPol, 'XFOIL', VERsion, .false.)
                     NIPol = NIPol0
-                    write (LU_OUT, 99009)
+                    if (show_output) write (*, 99009)
                     99009      format (/' Enter new airfoil name of polar:  ', $)
                     read (*, 99018) NAMepol(ip)
                     call strip(NAMepol(ip), nnp)
@@ -1168,7 +1206,7 @@ contains
                 !--------------------------------------------------------
             elseif (comand=='BL  ') then
                 if (.not.LVConv) then
-                    write (LU_OUT, *) 'Compute valid viscous solution first'
+                    if (show_output) write (*, *) 'Compute valid viscous solution first'
                     cycle
                 endif
                 !
@@ -1176,7 +1214,7 @@ contains
                     npr = min(iinput(1), NPRX)
                 else
                     npr = 21
-                    write (LU_OUT, *) 'Using default number of profiles:', npr
+                    if (show_output) write (*, *) 'Using default number of profiles:', npr
                 endif
                 !
                 if (npr>1) then
@@ -1193,7 +1231,7 @@ contains
                 !--------------------------------------------------------
             elseif (comand=='FMOM') then
                 call mhinge
-                write (LU_OUT, 99010) XOF, YOF, HMOm, HFX, HFY
+                if (show_output) write (*, 99010) XOF, YOF, HMOm, HFX, HFY
                 99010  format (/' Flap hinge x,y :', 2F8.4/&
                         '                                           2  2'/&
                         ' Hinge moment/span = ', f8.6, '  x  1/2 rho V  c '/&
@@ -1232,7 +1270,7 @@ contains
                 call psilin(0, xxx, yyy, 0.0, 1.0, psi, uuu, .false., .true.)
                 qqq = sqrt(uuu**2 + vvv**2)
                 cpp = 1.0 - (uuu**2 + vvv**2)
-                write (LU_OUT, 99011) uuu, vvv, qqq, cpp
+                if (show_output) write (*, 99011) uuu, vvv, qqq, cpp
                 99011  format (/' u/Uinf = ', f8.4, '   v/Uinf = ', f8.4/' q/Uinf = ', f8.4, '   Cp     = ', f8.4/)
                 !
                 comold = comand
@@ -1253,11 +1291,11 @@ contains
                 !--------------------------------------------------------
             elseif (comand=='CPMN') then
                 if (LVIsc) then
-                    write (LU_OUT, 99012) CPMni, XCPmni, CPMnv, XCPmnv
+                    if (show_output) write (*, 99012) CPMni, XCPmni, CPMnv, XCPmnv
                     99012      format ('  Minimum Inviscid Cp =', f8.4, '   at x =', f8.4/&
                             '  Minimum Viscous  Cp =', f8.4, '   at x =', f8.4)
                 else
-                    write (LU_OUT, 99013) CPMni, XCPmni
+                    if (show_output) write (*, 99013) CPMni, XCPmni
                     99013      format ('  Minimum Inviscid Cp =', f8.4, '   at x =', f8.4)
                 endif
                 !
@@ -1265,24 +1303,26 @@ contains
             elseif (comand=='CINC') then
                 LCMinp = .not.LCMinp
                 if (LCMinp) then
-                    write (LU_OUT, *) 'Min Cp will be written to polar save file'
+                    if (show_output) write (*, *) 'Min Cp will be written to polar save file'
                 else
-                    write (LU_OUT, *) 'Min Cp won''t be written to polar save file'
+                    if (show_output) write (*, *) 'Min Cp won''t be written to polar save file'
                 endif
                 !
                 !--------------------------------------------------------
             elseif (comand=='HINC') then
                 LHMomp = .not.LHMomp
-                if (LHMomp) then
-                    write (LU_OUT, *) 'Hinge moment will be written to polar save file'
-                    if (.not.LFLap) then
-                        write (LU_OUT, *)
-                        write (LU_OUT, *) 'Note: Flap hinge location not defined'
-                        write (LU_OUT, *) '      Set it with FNEW,FMOM commands'
+                if (show_output) then
+                    if (LHMomp) then
+                        write (*, *) 'Hinge moment will be written to polar save file'
+                        if (.not.LFLap) then
+                            write (*, *)
+                            write (*, *) 'Note: Flap hinge location not defined'
+                            write (*, *) '      Set it with FNEW,FMOM commands'
+                        endif
+                    else
+                        write (*, *) 'Hinge moment won''t be written to polar save file'
                     endif
-                else
-                    write (LU_OUT, *) 'Hinge moment won''t be written to polar save file'
-                endif
+                end if
                 !
                 !--------------------------------------------------------
             elseif (comand=='NAME') then
@@ -1307,14 +1347,14 @@ contains
             elseif (comand=='DAMP') then
                 if (IDAmp==0) then
                     IDAmp = 1
-                    write (LU_OUT, *) 'Modified amplification used'
+                    if (show_output) write (*, *) 'Modified amplification used'
                 else
                     IDAmp = 0
-                    write (LU_OUT, *) 'Original amplification used'
+                    if (show_output) write (*, *) 'Original amplification used'
                 endif
                 !--------------------------------------------------------
             else
-                write (LU_OUT, 99014) comand
+                if (show_output) write (*, 99014) comand
                 99014  format (1x, a4, ' command not recognized.  Type a "?" for list')
 
                 !
@@ -1411,18 +1451,22 @@ contains
         !*** End of declarations rewritten by SPAG
         !
         !
-        if (Lm .or. Lr) write (LU_OUT, *)
+        if (Lm .or. Lr .and. show_output) write (*, *)
         !
         if (Lm) then
-            if (MATyp==1) write (LU_OUT, 99001) MINf1
-            if (MATyp==2) write (LU_OUT, 99001) MINf1, ' / sqrt(CL)'
-            if (MATyp==3) write (LU_OUT, 99001) MINf1, ' / CL'
+            if (show_output) then
+                write (*, 99001) MINf1
+                write (*, 99001) MINf1, ' / sqrt(CL)'
+                if (MATyp==3) write (*, 99001) MINf1, ' / CL'
+            endif
         endif
         !
         if (Lr) then
-            if (RETyp==1) write (LU_OUT, 99002) REInf1
-            if (RETyp==2) write (LU_OUT, 99002) REInf1, ' / sqrt(CL)'
-            if (RETyp==3) write (LU_OUT, 99002) REInf1, ' / CL'
+            if (show_output) then
+                write (*, 99002) REInf1
+                write (*, 99002) REInf1, ' / sqrt(CL)'
+                if (RETyp==3) write (*, 99002) REInf1, ' / CL'
+            endif
         endif
         !
         return
@@ -1436,7 +1480,7 @@ contains
 
 
     subroutine nammod(Name, Kdel, Kmod0)
-        use i_xfoil, only: LU_OUT
+        use i_xfoil, only: show_output
         use m_userio, only: strip
         implicit none
         !
@@ -1513,7 +1557,7 @@ contains
             99002 format (i1)
         endif
         !
-        100  write (LU_OUT, 99003) namdef
+        100  if (show_output) write (*, 99003) namdef
         99003 format (/' Enter airfoil name or <return> for default:  ', a)
         read (*, 99004) Name
         99004 format (a)
@@ -1570,7 +1614,7 @@ contains
         elseif (KDElim==2) then
             delim = char(9)
         else
-            write (LU_OUT, *) '? Illegal delimiter.  Using blank.'
+            if (show_output) write (*, *) '? Illegal delimiter.  Using blank.'
             delim = ' '
         endif
         !
@@ -1580,7 +1624,7 @@ contains
         elseif (NPRefix>0) then
             !------ offer default using existing prefix
             fildef = PREfix(1:NPRefix) // '.bl'
-            write (LU_OUT, 99001) fildef
+            if (show_output) write (*, 99001) fildef
             99001 format (/' Enter filename:  ', a)
             read (*, 99002) FNAme
             call strip(FNAme, nfn)
@@ -1736,7 +1780,7 @@ contains
         elseif (KDElim==2) then
             delim = char(9)
         else
-            write (LU_OUT, *) '? Illegal delimiter.  Using blank.'
+            if (show_output) write (*, *) '? Illegal delimiter.  Using blank.'
             delim = ' '
         endif
         !
@@ -1746,7 +1790,7 @@ contains
         elseif (NPRefix>0) then
             !------ offer default using existing prefix
             fildef = PREfix(1:NPRefix) // '.bl'
-            write (LU_OUT, 99001) fildef
+            if (show_output) write (*, 99001) fildef
             99001 format (/' Enter filename:  ', a)
             read (*, 99003) FNAme
             call strip(FNAme, nfn)
@@ -1937,7 +1981,7 @@ contains
         elseif (KDElim==2) then
             delim = char(9)
         else
-            write (LU_OUT, *) '? Illegal delimiter.  Using blank.'
+            if (show_output) write (*, *) '? Illegal delimiter.  Using blank.'
             delim = ' '
         endif
         !
@@ -1947,7 +1991,7 @@ contains
         elseif (NPRefix>0) then
             !------ offer default using existing prefix
             fildef = PREfix(1:NPRefix) // '.cp'
-            write (LU_OUT, 99001) fildef
+            if (show_output) write (*, 99001) fildef
             99001 format (/' Enter filename:  ', a)
             read (*, 99004) FNAme
             call strip(FNAme, nfn)
@@ -2039,18 +2083,20 @@ contains
             !
             turb(1) = 100.0 * exp(-(ACRit(1) + 8.43) / 2.4)
             turb(2) = 100.0 * exp(-(ACRit(2) + 8.43) / 2.4)
-            write (LU_OUT, 99001) XSTrip(1), XSTrip(2), ACRit(1), turb(1), ACRit(2), turb(2), VACcel, WAKlen, SCCon, DUXcon, &
-                    & DLCon, GACon, GBCon, CTCon, CTRcon, CTRcex
-            99001 format (&
-                    /' Xtr/c     =', F8.4, '    top    side'&
-                    /' Xtr/c     =', F8.4, '    bottom side'&
-                    /' NcritT    =', F8.2, '   (', F6.3, ' % turb. level )'&
-                    /' NcritB    =', F8.2, '   (', F6.3, ' % turb. level )'&
-                    /' Vacc      =', F8.4, &
-                    /' WakeL/c   =', F8.3, &
-                    //' Klag  =', F8.4, '     Uxwt  =', F8.2, '       Kdl =', F8.4&
-                    /' A     =', F8.4, '     B     =', F8.4, '       KCt =', F8.5&
-                    /' CtiniK=', F8.4, '     CtiniX=', F8.4)
+            if (show_output) then
+                write (*, 99001) XSTrip(1), XSTrip(2), ACRit(1), turb(1), ACRit(2), turb(2), VACcel, WAKlen, SCCon, DUXcon, &
+                        & DLCon, GACon, GBCon, CTCon, CTRcon, CTRcex
+                99001 format (&
+                        /' Xtr/c     =', F8.4, '    top    side'&
+                        /' Xtr/c     =', F8.4, '    bottom side'&
+                        /' NcritT    =', F8.2, '   (', F6.3, ' % turb. level )'&
+                        /' NcritB    =', F8.2, '   (', F6.3, ' % turb. level )'&
+                        /' Vacc      =', F8.4, &
+                        /' WakeL/c   =', F8.3, &
+                        //' Klag  =', F8.4, '     Uxwt  =', F8.2, '       Kdl =', F8.4&
+                        /' A     =', F8.4, '     B     =', F8.4, '       KCt =', F8.5&
+                        /' CtiniK=', F8.4, '     CtiniX=', F8.4)
+            end if
             do
                 !
                 !======================================================================
@@ -2072,7 +2118,7 @@ contains
                     !
                     !--------------------------------------------------------------
                 elseif (comand=='?   ') then
-                    write (LU_OUT, 99002)
+                    if (show_output) write (*, 99002)
                     99002      format (&
                             /'   <cr>    Return to OPER menu'&
                             /'   SHOW    Display viscous parameters'&
@@ -2095,7 +2141,7 @@ contains
                     !--------------------------------------------------------------
                 elseif (comand=='XTR ' .or. comand=='X   ') then
                     if (LPAcc .and. LVIsc) then
-                        write (LU_OUT, 99004)
+                        if (show_output) write (*, 99004)
                         cycle
                     endif
                     if (ninput>=2) then
@@ -2110,7 +2156,7 @@ contains
                     !--------------------------------------------------------------
                 elseif (comand=='N   ') then
                     if (LPAcc .and. LVIsc) then
-                        write (LU_OUT, 99004)
+                        if (show_output) write (*, 99004)
                         cycle
                     endif
                     if (ninput>=1) then
@@ -2125,7 +2171,7 @@ contains
                     !--------------------------------------------------------------
                 elseif (comand=='NT  ') then
                     if (LPAcc .and. LVIsc) then
-                        write (LU_OUT, 99004)
+                        if (show_output) write (*, 99004)
                         cycle
                     endif
                     if (ninput>=1) then
@@ -2138,7 +2184,7 @@ contains
                     !--------------------------------------------------------------
                 elseif (comand=='NB  ') then
                     if (LPAcc .and. LVIsc) then
-                        write (LU_OUT, 99004)
+                        if (show_output) write (*, 99004)
                         cycle
                     endif
                     if (ninput>=1) then
@@ -2172,14 +2218,16 @@ contains
                     !--------------------------------------------------------------
                 elseif (comand=='INIT') then
                     LBLini = .not.LBLini
-                    if (.not.LBLini) write (LU_OUT, *) 'BLs will be initialized on next point'
-                    if (LBLini) write (LU_OUT, *) 'BLs are assumed to be initialized'
+                    if (show_output) then
+                        write (*, *) 'BLs will be initialized on next point'
+                        write (*, *) 'BLs are assumed to be initialized'
+                    endif
                     if (.not.LBLini) LIPan = .false.
                     !
                     !--------------------------------------------------------------
                 elseif (comand=='LAG ') then
                     if (LPAcc .and. LVIsc) then
-                        write (LU_OUT, 99004)
+                        if (show_output) write (*, 99004)
                         cycle
                     endif
                     if (ninput>=3) then
@@ -2195,7 +2243,7 @@ contains
                     !--------------------------------------------------------------
                 elseif (comand=='GB  ') then
                     if (LPAcc .and. LVIsc) then
-                        write (LU_OUT, 99004)
+                        if (show_output) write (*, 99004)
                         cycle
                     endif
                     if (ninput>=2) then
@@ -2210,7 +2258,7 @@ contains
                     !--------------------------------------------------------------
                 elseif (comand=='CTR ') then
                     if (LPAcc .and. LVIsc) then
-                        write (LU_OUT, 99004)
+                        if (show_output) write (*, 99004)
                         cycle
                     endif
                     if (ninput>=2) then
@@ -2232,14 +2280,14 @@ contains
                     !--------------------------------------------------------------
                 elseif (comand=='REST') then
                     if (LPAcc .and. LVIsc) then
-                        write (LU_OUT, 99004)
+                        if (show_output) write (*, 99004)
                         cycle
                     endif
                     call blpini
                     !
                     !--------------------------------------------------------------
                 else
-                    write (LU_OUT, 99003) comand
+                    if (show_output) write (*, 99003) comand
                     99003      format (1x, a4, ' command not recognized.  Type a "?" for list')
                     !
                     !
@@ -2339,7 +2387,7 @@ contains
             if (abs(dclm)<=1.0E-6) goto 100
             !
         enddo
-        write (LU_OUT, *) 'SPECAL:  Minf convergence failed'
+        if (show_output) write (*, *) 'SPECAL:  Minf convergence failed'
         !
         !---- set final Mach, CL, Cp distributions, and hinge moment
         100  call mrcl(CL, MINf_cl, REInf_cl)
@@ -2427,7 +2475,7 @@ contains
             !
             if (abs(dalfa)<=1.0E-6) goto 100
         enddo
-        write (LU_OUT, *) 'SPECCL:  CL convergence failed'
+        if (show_output) write (*, *) 'SPECCL:  CL convergence failed'
         !
         !---- set final surface speed and Cp distributions
         100  call tecalc
@@ -2556,8 +2604,10 @@ contains
         !
         !---- Newton iteration for entire BL solution
         if (niter==0) call aski('Enter number of iterations^', niter)
-        write (LU_OUT, *)
-        write (LU_OUT, *) 'Solving BL system ...'
+        if (show_output) then
+            write (*, *)
+            write (*, *) 'Solving BL system ...'
+        endif
         do iter = 1, niter
             !
             !------ fill Newton system for BL variables
@@ -2594,13 +2644,13 @@ contains
             call cdcalc
             !
             !------ display changes and test for convergence
-            if (RLX<1.0) write (LU_OUT, 99001) iter, RMSbl, RMXbl, VMXbl, IMXbl, ISMxbl, RLX
+            if (RLX<1.0 .and. show_output) write (*, 99001) iter, RMSbl, RMXbl, VMXbl, IMXbl, ISMxbl, RLX
             !....................................................................
             99001 format (/1x, i3, '   rms: ', e10.4, '   max: ', e10.4, 3x, a1, ' at ', i4, i3, '   RLX:', f6.3)
-            if (RLX==1.0) write (LU_OUT, 99002) iter, RMSbl, RMXbl, VMXbl, IMXbl, ISMxbl
+            if (RLX==1.0 .and. show_output) write (*, 99002) iter, RMSbl, RMXbl, VMXbl, IMXbl, ISMxbl
             99002 format (/1x, i3, '   rms: ', e10.4, '   max: ', e10.4, 3x, a1, ' at ', i4, i3)
             cdpdif = CD - CDF
-            write (LU_OUT, 99003) ALFa / DTOr, CL, CM, CD, CDF, cdpdif
+            if (show_output) write (*, 99003) ALFa / DTOr, CL, CM, CD, CDF, cdpdif
             99003 format (1x, 3x, '   a =', f7.3, '      CL =', f8.4/1x, 3x, '  Cm =', f8.4, &
                     '     CD =', f9.5, '   =>   CDf =', f9.5, &
                     &'    CDp =', f9.5)
@@ -2615,7 +2665,7 @@ contains
             endif
             !
         enddo
-        write (LU_OUT, *) 'VISCAL:  Convergence failed'
+        if (show_output) write (*, *) 'VISCAL:  Convergence failed'
         !
         100  call cpcalc(N + NW, QINv, QINf, MINf, CPI)
         call cpcalc(N + NW, QVIs, QINf, MINf, CPV)
@@ -2645,7 +2695,7 @@ contains
         enddo
         delp = patt - psep
 
-        write (LU_OUT, 99004) ACRit(is), hkmax, CD, 2.0 * psep, 2.0 * patt, 2.0 * delp, XOCtr(is)
+        if (show_output) write (*, 99004) ACRit(is), hkmax, CD, 2.0 * psep, 2.0 * patt, 2.0 * delp, XOCtr(is)
         99004 format (1x, f10.3, f10.4, f11.6, 3F11.6, f10.4, '     #')
 
         izero = ichar('0')

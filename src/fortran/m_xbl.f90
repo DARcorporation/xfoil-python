@@ -275,8 +275,10 @@ contains
         !
         if (.not.LBLini) then
             !----- initialize BL by marching with Ue (fudge at separation)
-            write (LU_OUT, *)
-            write (LU_OUT, *) 'Initializing BL ...'
+            if (show_output) then
+                write (*, *)
+                write (*, *) 'Initializing BL ...'
+            endif
             setbl = mrchue()
             if (setbl) then
                 LBLini = .true.
@@ -285,7 +287,7 @@ contains
             end if
         endif
         !
-        write (LU_OUT, *)
+        if (show_output) write (*, *)
         !
         !---- march BL with current Ue and Ds to establish transition
         setbl = mrchdu()
@@ -424,7 +426,7 @@ contains
                     if (abort_on_nan .and. .not. setbl) return
                     ami = AMPl2
                 endif
-                if (ibl==ITRan(is) .and. .not.TRAn) write (LU_OUT, *) 'SETBL: Xtr???  n1 n2: ', AMPl1, AMPl2
+                if (ibl==ITRan(is) .and. .not.TRAn .and. show_output) write (*, *) 'SETBL: Xtr???  n1 n2: ', AMPl1, AMPl2
                 !
                 !---- assemble 10x4 linearized system for dCtau, dTh, dDs, dUe, dXi
                 !     at the previous "1" station and the current "2" station
@@ -682,10 +684,10 @@ contains
             enddo
             !
             if (TFOrce(is)) then
-                write (LU_OUT, 99001) is, XOCtr(is), ITRan(is)
+                if (show_output) write (*, 99001) is, XOCtr(is), ITRan(is)
                 99001  format (1x, 'Side', i2, ' forced transition at x/c = ', f7.4, i5)
             else
-                write (LU_OUT, 99002) is, XOCtr(is), ITRan(is)
+                if (show_output) write (*, 99002) is, XOCtr(is), ITRan(is)
                 99002  format (1x, 'Side', i2, '  free  transition at x/c = ', f7.4, i5)
             endif
             !
@@ -740,7 +742,7 @@ contains
         !
         do is = 1, 2
             !
-            write (LU_OUT, *) '   side ', is, ' ...'
+            if (show_output) write (*, *) '   side ', is, ' ...'
             !
             AMCrit = ACRit(is)
             !
@@ -898,7 +900,7 @@ contains
                                 htarg = max(htarg, hmax)
                             endif
                             !
-                            write (LU_OUT, 99001) ibl, htarg
+                            if (show_output) write (*, 99001) ibl, htarg
                             99001              format (' MRCHUE: Inverse mode at', i4, '     Hk =', f8.3)
                             !
                             !---------- try again with prescribed Hk
@@ -952,7 +954,7 @@ contains
                     if (dmax<=1.0E-5) goto 20
                     !
                 enddo
-                write (LU_OUT, 99002) ibl, is, dmax
+                if (show_output) write (*, 99002) ibl, is, dmax
                 99002  format (' MRCHUE: Convergence failed at', i4, '  side', i2, '    Res =', e12.4)
                 !
                 !------ the current unconverged solution might still be reasonable...
@@ -1297,7 +1299,7 @@ contains
                     !
                 enddo
                 !
-                write (LU_OUT, 99001) ibl, is, dmax
+                if (show_output) write (*, 99001) ibl, is, dmax
                 99001  format (' MRCHDU: Convergence failed at', i4, '  side', i2, '    Res =', e12.4)
                 mrchdu = .false.
                 !
@@ -1466,7 +1468,7 @@ contains
         endif
         !
         if (XIForc<0.0) then
-            write (LU_OUT, 99001) Is
+            if (show_output) write (*, 99001) Is
             99001 format (/' ***  Stagnation point is past trip on side', i2, '  ***')
             XIForc = XSSi(IBLte(Is), Is)
         endif

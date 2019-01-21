@@ -28,7 +28,7 @@ contains
             Name, Iretyp, Imatyp, &
             Isx, Nbl, Cpolsd, &
             Code, Version)
-        use i_xfoil, only: LU_OUT
+        use i_xfoil, only: show_output
         use m_userio, only: getflt, strip
         use i_pindex
         implicit none
@@ -181,7 +181,7 @@ contains
                         !
                         if (2 * Nbl>Isx) then
                             Nbl = Isx / 2
-                            write (LU_OUT, *) 'POLREAD: Number of elements set to array limit', Nbl
+                            if (show_output) write (*, *) 'POLREAD: Number of elements set to array limit', Nbl
                         endif
                         ldlab = .false.
                     endif
@@ -460,7 +460,7 @@ contains
             Name, Iretyp, Imatyp, &
             Isx, Nbl, Cpolsd, Jpol, Njpol, &
             Code, Version, Lquery)
-        use i_xfoil, only: LU_OUT
+        use i_xfoil, only: show_output
         use m_userio, only: strip
         use i_pindex
         implicit none
@@ -548,14 +548,16 @@ contains
             open (Lu, file = Fnpol, status = 'OLD', err = 50)
             !
             if (Lquery) then
-                write (LU_OUT, *)
-                write (LU_OUT, *) 'Output file exists.  Overwrite?  Y'
+                if (show_output) then
+                    write (*, *)
+                    write (*, *) 'Output file exists.  Overwrite?  Y'
+                endif
                 read (*, 99010) ans
                 !
                 if (index('Nn', ans)==0) goto 100
                 !
                 close (Lu)
-                write (LU_OUT, *) 'Polar file not saved'
+                if (show_output) write (*, *) 'Polar file not saved'
                 return
             endif
             !
@@ -735,7 +737,7 @@ contains
         200  Error = .true.
         return
         !
-        300  write (LU_OUT, *) '? Bad CPOLFORM set up in PINDEX.INC'
+        300  if (show_output) write (*, *) '? Bad CPOLFORM set up in PINDEX.INC'
         stop
         !
         !......................................................................

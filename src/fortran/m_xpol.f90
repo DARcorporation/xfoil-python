@@ -63,8 +63,10 @@ contains
             return
             !
         elseif (Ip>=1 .and. Ip<=NPOl) then
-            write (LU_OUT, *)
-            write (LU_OUT, *) 'Existing stored polar is chosen for appending...'
+            if (show_output) then
+                write (*, *)
+                write (*, *) 'Existing stored polar is chosen for appending...'
+            endif
             NIPol = NIPol0
             if (LCMinp) then
                 NIPol = NIPol + 1
@@ -92,8 +94,8 @@ contains
                 goto 100
             endif
             !
-            50   write (LU_OUT, *) 'Current airfoil differs from airfoil of stored polar'
-            write (LU_OUT, 99001)
+            50   if (show_output) write (*, *) 'Current airfoil differs from airfoil of stored polar'
+            if (show_output) write (*, 99001)
             99001 format (&
                     /'   - - - - - - - - - - - - - - - - - - - - - - - - - - - -'&
                     /'    0  abort polar accumulation'&
@@ -108,8 +110,8 @@ contains
                 call apcopy(Ip)
             endif
             !
-            100  write (LU_OUT, *)
-            write (LU_OUT, *) 'Setting current parameters to those of stored polar'
+            100  if (show_output) write (*, *)
+            if (show_output) write (*, *) 'Setting current parameters to those of stored polar'
             !
             NAMe = NAMepol(Ip)
             call strip(NAMe, NNAme)
@@ -155,7 +157,7 @@ contains
                 CPOlxy(i, 2, Ip) = Y(i)
             enddo
             !
-            write (LU_OUT, 99002) Ip, NAMepol(Ip)
+            if (show_output) write (*, 99002) Ip, NAMepol(Ip)
             99002 format (/' Polar', i3, ' newly created for accumulation'/' Airfoil archived with polar: ', a)
         endif
         !
@@ -287,7 +289,7 @@ contains
         if (npf==0) then
             prompt = 'Enter  polar save filename' // '  OR  <return> for no file^'
         else
-            write (LU_OUT, *) 'Default polar save filename:  ', PFName(Ip)(1:npf)
+            if (show_output) write (*, *) 'Default polar save filename:  ', PFName(Ip)(1:npf)
             prompt = 'Enter  new filename' // '  OR  "none"' // '  OR  <return> for default^'
         endif
         !
@@ -303,8 +305,10 @@ contains
         !
         if (nfn==0) then
             LPFile = .false.
-            write (LU_OUT, *)
-            write (LU_OUT, *) 'Polar save file will NOT be written'
+            if (show_output) then
+                write (*, *)
+                write (*, *) 'Polar save file will NOT be written'
+            endif
             return
         endif
         !
@@ -320,7 +324,7 @@ contains
         if (error) then
             !
             !---- READ error trap
-            write (LU_OUT, *) 'Old polar save file READ error'
+            if (show_output) write (*, *) 'Old polar save file READ error'
             close (Lu)
             goto 99999
         else
@@ -346,25 +350,29 @@ contains
                     & XSTripp(1, Ip)/=XSTrip(1) .or. XSTripp(2, Ip)/=XSTrip(2))&
                     & then
                 !
-                write (LU_OUT, 99001) NAMe, NAMepol(Ip), REInf1, REYnp1(Ip), MINf1, MAChp1(Ip), RETyp, IREtyp(Ip), MATyp, &
-                        & IMAtyp(Ip), ACRit(1), ACRitp(1, Ip), ACRit(2), ACRitp(2, Ip), XSTrip(1), XSTripp(1, Ip), &
-                        & XSTrip(2), XSTripp(2, Ip)
+                if (show_output) then
+                    write (*, 99001) NAMe, NAMepol(Ip), REInf1, REYnp1(Ip), MINf1, MAChp1(Ip), RETyp, IREtyp(Ip), MATyp, &
+                            & IMAtyp(Ip), ACRit(1), ACRitp(1, Ip), ACRit(2), ACRitp(2, Ip), XSTrip(1), XSTripp(1, Ip), &
+                            & XSTrip(2), XSTripp(2, Ip)
+                    99001  format (&
+                            /'               Current                         Save file'&
+                            /'           ------------------              ------------------'&
+                            /' name  :   ', A, A&
+                            /' Re    :   ', F12.0, 20X, F12.0&
+                            /' Mach  :   ', F12.4, 20X, F12.4&
+                            /' Retyp :   ', I7, 25X, I7&
+                            /' Matyp :   ', I7, 25X, I7&
+                            /' NcritT:   ', F12.4, 20X, F12.4&
+                            /' NcritB:   ', F12.4, 20X, F12.4&
+                            /' xtr T :   ', F12.4, 20X, F12.4&
+                            /' xtr B :   ', F12.4, 20X, F12.4)
+                end if
                 !
-                99001  format (&
-                        /'               Current                         Save file'&
-                        /'           ------------------              ------------------'&
-                        /' name  :   ', A, A&
-                        /' Re    :   ', F12.0, 20X, F12.0&
-                        /' Mach  :   ', F12.4, 20X, F12.4&
-                        /' Retyp :   ', I7, 25X, I7&
-                        /' Matyp :   ', I7, 25X, I7&
-                        /' NcritT:   ', F12.4, 20X, F12.4&
-                        /' NcritB:   ', F12.4, 20X, F12.4&
-                        /' xtr T :   ', F12.4, 20X, F12.4&
-                        /' xtr B :   ', F12.4, 20X, F12.4)
                 !
-                write (LU_OUT, *)
-                write (LU_OUT, *) 'Current parameters different from old save file values.'
+                if (show_output) then
+                    write (*, *)
+                    write (*, *) 'Current parameters different from old save file values.'
+                endif
                 call askl('Set current parameters to old save file values ?^', OK)
                 !
                 if (OK) then
@@ -379,15 +387,19 @@ contains
                     XSTrip(1) = XSTripp(1, Ip)
                     XSTrip(2) = XSTripp(2, Ip)
                 else
-                    write (LU_OUT, *)
-                    write (LU_OUT, *) 'Old polar save file NOT available for appending'
+                    if (show_output) then
+                        write (*, *)
+                        write (*, *) 'Old polar save file NOT available for appending'
+                    endif
                     return
                 endif
             endif
             !
             !---- display polar save file just read in
-            write (LU_OUT, *)
-            write (LU_OUT, *) 'Old polar save file read in ...'
+            if (show_output) then
+                write (*, *)
+                write (*, *) 'Old polar save file read in ...'
+            endif
             call polwrit(6, ' ', error, .true., NAX, 1, NAPol(Ip), &
                     CPOl(1, 1, Ip), IPOl, NIPol, REYnp1(Ip), MAChp1(Ip), ACRitp(1, Ip), &
                     & XSTripp(1, Ip), PTRatp(Ip), ETApp(Ip), &
@@ -396,8 +408,10 @@ contains
             !
             !---- enable writing to the save file
             LPFile = .true.
-            write (LU_OUT, *)
-            write (LU_OUT, *) 'Old polar save file available for appending'
+            if (show_output) then
+                write (*, *)
+                write (*, *) 'Old polar save file available for appending'
+            endif
             return
         endif
         !
@@ -428,12 +442,14 @@ contains
         !
         !---- enable writing to the save file
         LPFile = .true.
-        write (LU_OUT, *)
-        write (LU_OUT, *) 'New polar save file available'
+        if (show_output) then
+            write (*, *)
+            write (*, *) 'New polar save file available'
+        endif
         return
         !
         !---- the polar save file doesn't exist, so write new header
-        200  write (LU_OUT, *) 'New polar save file OPEN error'
+        200  if (show_output) write (*, *) 'New polar save file OPEN error'
         !
         !..........................................
     99999 end subroutine plrini
@@ -492,7 +508,7 @@ contains
         if (npf==0) then
             prompt = 'Enter  polar dump filename' // '  OR  <return> for no file^'
         else
-            write (LU_OUT, *) 'Default polar dump filename:  ', PFNamx(Ip)(1:npf)
+            if (show_output) write (*, *) 'Default polar dump filename:  ', PFNamx(Ip)(1:npf)
             prompt = 'Enter  new filename' // '  OR  "none"' // '  OR  <return> for default^'
         endif
         !
@@ -503,8 +519,10 @@ contains
         !
         if (nfn==0) then
             LPFilx = .false.
-            write (LU_OUT, *)
-            write (LU_OUT, *) 'Polar dump file will NOT be written'
+            if (show_output) then
+                write (*, *)
+                write (*, *) 'Polar dump file will NOT be written'
+            endif
             return
         endif
         !
@@ -546,7 +564,7 @@ contains
         if (namdif .or. reynx/=REInf1 .or. machx/=MINf1 .or. retypx/=RETyp .or. matypx/=MATyp .or. acritx(1)/=ACRit(1) .or.&
                 & acritx(2)/=ACRit(2)) then
             !
-            write (LU_OUT, 99001) namex, NAMe, reynx, REInf1, machx, MINf1, retypx, RETyp, matypx, MATyp, acritx(1), &
+            if (show_output) write (*, 99001) namex, NAMe, reynx, REInf1, machx, MINf1, retypx, RETyp, matypx, MATyp, acritx(1), &
                     & ACRit(1), acritx(1), ACRit(2)
             !
             99001 format (&
@@ -560,8 +578,10 @@ contains
                     /' NcritT:   ', F12.4, 20X, F12.4&
                     /' NcritB:   ', F12.4, 20X, F12.4)
             !
-            write (LU_OUT, *)
-            write (LU_OUT, *) 'Current parameters different from old dump file values.'
+            if (show_output) then
+                write (*, *)
+                write (*, *) 'Current parameters different from old dump file values.'
+            endif
             call askl('Set current parameters to old dump file values ?^', OK)
             !
             if (OK) then
@@ -574,16 +594,20 @@ contains
                 ACRit(1) = acritx(1)
                 ACRit(2) = acritx(2)
             else
-                write (LU_OUT, *)
-                write (LU_OUT, *) 'Old polar dump file NOT available for appending'
+                if (show_output) then
+                    write (*, *)
+                    write (*, *) 'Old polar dump file NOT available for appending'
+                endif
                 return
             endif
         endif
         !
         !---- enable writing to the save file
         LPFilx = .true.
-        write (LU_OUT, *)
-        write (LU_OUT, *) 'Old polar dump file available for appending'
+        if (show_output) then
+            write (*, *)
+            write (*, *) 'Old polar dump file available for appending'
+        endif
         return
         !
         !
@@ -600,18 +624,20 @@ contains
         !
         !---- enable writing to the save file
         LPFilx = .true.
-        write (LU_OUT, *)
-        write (LU_OUT, *) 'New polar dump file available'
+        if (show_output) then
+            write (*, *)
+            write (*, *) 'New polar dump file available'
+        endif
         return
         !
         !---- OPEN error trap
-        300  write (LU_OUT, 99002) FNAme
+        300  if (show_output) write (*, 99002) FNAme
         !..........................................
         99002 format (' OPEN error on polar dump file ', a48)
         return
         !
         !---- READ error trap
-        400  write (LU_OUT, *) 'Polar dump file READ error'
+        400  if (show_output) write (*, *) 'Polar dump file READ error'
         close (Lu)
     end subroutine plxini
     !*==PLRADD.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
@@ -657,10 +683,10 @@ contains
         !
         !---- add point to storage arrays
         if (Ip==0) then
-            write (LU_OUT, *) 'No active polar is declared. Point not stored.'
+            if (show_output) write (*, *) 'No active polar is declared. Point not stored.'
             !
         elseif (NAPol(Ip)==NAX) then
-            write (LU_OUT, *) 'Polar storage arrays full. Point not stored'
+            if (show_output) write (*, *) 'Polar storage arrays full. Point not stored'
             !
         else
             NAPol(Ip) = NAPol(Ip) + 1
@@ -705,7 +731,7 @@ contains
             endif
             CPOl(ia, IMC, Ip) = CPMn
             !
-            write (LU_OUT, 99001) Ip
+            if (show_output) write (*, 99001) Ip
             99001 format (/' Point added to stored polar', i3)
         endif
         !
@@ -731,10 +757,10 @@ contains
                     & VERsion, .false.)
             close (Lu)
             NIPol = NIPol0
-            write (LU_OUT, 99002) PFName(Ip)
+            if (show_output) write (*, 99002) PFName(Ip)
             99002 format (' Point written to save file  ', a48)
         else
-            write (LU_OUT, 99003)
+            if (show_output) write (*, 99003)
             99003 format (' Save file unspecified or not available')
         endif
         !
@@ -782,7 +808,7 @@ contains
         !
         !
         if (.not.LPFilx) then
-            write (LU_OUT, 99001)
+            if (show_output) write (*, 99001)
             99001 format (' Dump file unspecified or not available')
             return
         endif
@@ -848,7 +874,7 @@ contains
         enddo
         !
         close (Lu)
-        write (LU_OUT, 99002) PFNamx(Ip)
+        if (show_output) write (*, 99002) PFNamx(Ip)
         99002 format (' Point written to dump file ', a48)
         !
     end subroutine plxadd
@@ -945,11 +971,14 @@ contains
         !---------------------------------------------
         !
         data cltyp/'     ', '/sqCL', '/CL  '/
-        write (LU_OUT, *)
-        write (LU_OUT, 99002) '       airfoil                    Re           Mach     ', &
+        if (show_output) then
+            write (*, *)
+            write (*, 99002) '       airfoil                    Re           Mach     ', &
                 &'  NcritT  NcritB  XtripT  XtripB       file'
-        write (LU_OUT, 99002) '      ------------------------  ------------  ----------', &
+            write (*, 99002) '      ------------------------  ------------  ----------', &
                 &'  ------  ------  ------  ------    -------------------'
+
+        endif
         !CC     >  10  NACA 0012 (mod)           1.232e6/sqCL  0.781/sqCL
         !CC         9.00    9.00   1.000   1.000
         !CC     1234567890123456789012345678901234567890123456789012345678901234567890
@@ -979,9 +1008,11 @@ contains
             endif
             !
             call strip(PFName(ip), npf)
-            write (LU_OUT, 99001) cacc, ip, NAMepol(ip), rman, iexp, cltyp(iret), MAChp1(ip), cltyp(imat), ACRitp(1, ip), &
-                    & ACRitp(2, ip), XSTripp(1, ip), XSTripp(2, ip), cfil, PFName(ip)(1:npf)
-            99001 format (1x, a1, i3, 2x, a24, f7.3, 'e', i1, a5, f7.3, a5, 2F8.2, 2F8.3, 2x, a1, 1x, a)
+            if (show_output) then
+                write (*, 99001) cacc, ip, NAMepol(ip), rman, iexp, cltyp(iret), MAChp1(ip), cltyp(imat), ACRitp(1, ip), &
+                        & ACRitp(2, ip), XSTripp(1, ip), XSTripp(2, ip), cfil, PFName(ip)(1:npf)
+                99001 format (1x, a1, i3, 2x, a24, f7.3, 'e', i1, a5, f7.3, a5, 2F8.2, 2F8.3, 2x, a1, 1x, a)
+            end if
         enddo
         !
         99002 format (1x, a, a)
@@ -1023,13 +1054,15 @@ contains
         !---------------------------------------------
         !     Prints summary of reference polars IR1..IR2
         !---------------------------------------------
-        write (LU_OUT, *)
-        write (LU_OUT, 99002) '       reference polar                          '
-        write (LU_OUT, 99002) '      ------------------------------------------'
+        if (show_output) then
+            write (*, *)
+            write (*, 99002) '       reference polar                          '
+            write (*, 99002) '      ------------------------------------------'
+        endif
         !CC                  123456789012345678901234567890123456789012345678
         !
         do ir = Ir1, Ir2
-            write (LU_OUT, 99001) ir, NAMeref(ir)
+            if (show_output) write (*, 99001) ir, NAMeref(ir)
             99001 format (1x, 1x, i3, 2x, a48)
         enddo
         !
@@ -1167,7 +1200,7 @@ contains
 
 
     subroutine polaxi(Cpolplf, Xcdwid, Xalwid, Xocwid)
-        use i_xfoil, only: LU_OUT
+        use i_xfoil, only: show_output
         use m_userio, only: readr
         use i_pindex
         implicit none
@@ -1204,16 +1237,18 @@ contains
         !
         data cvar/'Alpha', '  CL ', '  CD ', ' -CM '/
         !
-        write (LU_OUT, *) 'Enter new axis annotations,', ' or <return> to leave unchanged...'
-        write (LU_OUT, *)
+        if (show_output) then
+            write (*, *) 'Enter new axis annotations,', ' or <return> to leave unchanged...'
+            write (*, *)
+        endif
         !
         do kv = 1, 4
             do
-                write (LU_OUT, 99001) cvar(kv), (Cpolplf(j, kv), j = 1, 3)
+                if (show_output) write (*, 99001) cvar(kv), (Cpolplf(j, kv), j = 1, 3)
                 99001  format (3x, a, '  min, max, delta:', 3F11.5)
                 call readr(3, Cpolplf(1, kv), error)
                 if (error) then
-                    write (LU_OUT, *) 'READ error.  Enter again.'
+                    if (show_output) write (*, *) 'READ error.  Enter again.'
                     cycle
                 endif
                 exit

@@ -27,7 +27,7 @@
 module m_userio
 contains
     subroutine aski(Prompt, Iinput)
-        use i_xfoil, only: LU_OUT
+        use i_xfoil, only: show_output
         implicit none
         !
         !*** Start of declarations rewritten by SPAG
@@ -64,7 +64,7 @@ contains
         np = index(Prompt, '^') - 1
         if (np<=0) np = len(Prompt)
         !
-        100  write (LU_OUT, 99001) Prompt(1:np)
+        100  if (show_output) write (*, 99001) Prompt(1:np)
         !
         99001 format (/a, '   i>  ', $)
         !
@@ -77,7 +77,7 @@ contains
 
 
     subroutine askr(Prompt, Rinput)
-        use i_xfoil, only: LU_OUT
+        use i_xfoil, only: show_output
         implicit none
         !
         !*** Start of declarations rewritten by SPAG
@@ -114,7 +114,7 @@ contains
         np = index(Prompt, '^') - 1
         if (np<=0) np = len(Prompt)
         !
-        100  write (LU_OUT, 99001) Prompt(1:np)
+        100  if (show_output) write (*, 99001) Prompt(1:np)
         !
         99001 format (/a, '   r>  ', $)
         !
@@ -127,7 +127,7 @@ contains
 
 
     subroutine askl(Prompt, Linput)
-        use i_xfoil, only: LU_OUT
+        use i_xfoil, only: show_output
         implicit none
         !
         !*** Start of declarations rewritten by SPAG
@@ -165,7 +165,7 @@ contains
         if (np<=0) np = len(Prompt)
         do
             !
-            write (LU_OUT, 99001) Prompt(1:np)
+            if (show_output) write (*, 99001) Prompt(1:np)
             !
             99001 format (/a, ' y/n>  ', $)
             read (*, 99002) char
@@ -184,7 +184,7 @@ contains
 
 
     subroutine asks(Prompt, Input)
-        use i_xfoil, only: LU_OUT
+        use i_xfoil, only: show_output
         implicit none
         !
         !*** Start of declarations rewritten by SPAG
@@ -219,7 +219,7 @@ contains
         np = index(Prompt, '^') - 1
         if (np<=0) np = len(Prompt)
         !
-        write (LU_OUT, 99001) Prompt(1:np)
+        if (show_output) write (*, 99001) Prompt(1:np)
         !
         99001 format (/a, '   s>  ', $)
         read (*, 99002) Input
@@ -231,7 +231,7 @@ contains
 
 
     subroutine askc(Prompt, Comand, Cargs)
-        use i_xfoil, only: LU_OUT
+        use i_xfoil, only: show_output
         implicit none
         !
         !*** Start of declarations rewritten by SPAG
@@ -270,7 +270,7 @@ contains
         np = index(Prompt, '^') - 1
         if (np<=0) np = len(Prompt)
         !
-        write (LU_OUT, 99001) Prompt(1:np)
+        if (show_output) write (*, 99001) Prompt(1:np)
         !
         99001 format (/a, '   c>  ', $)
         read (*, 99002) line

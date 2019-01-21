@@ -270,7 +270,7 @@ contains
 
 
     function trchek2()
-        use i_xfoil, only: LU_OUT, abort_on_nan
+        use i_xfoil, only: show_output, abort_on_nan
         use i_xbl
         implicit none
 
@@ -486,9 +486,11 @@ contains
             endif
             !
         enddo
-        write (LU_OUT, *) 'TRCHEK2: N2 convergence failed.'
-        write (LU_OUT, 99001) X1, XT, X2, AMPl1, amplt, AMPl2, ax, da2
-        99001 format (1x, 'x:', 3F9.5, '  N:', 3F7.3, '  Nx:', f8.3, '   dN:', e10.3)
+        if (show_output) then
+            write (*, *) 'TRCHEK2: N2 convergence failed.'
+            write (*, 99001) X1, XT, X2, AMPl1, amplt, AMPl2, ax, da2
+            99001 format (1x, 'x:', 3F9.5, '  N:', 3F7.3, '  Nx:', f8.3, '   dN:', e10.3)
+        endif
 
         ! Check if ANY of these printed variables contain NaN's. If they do, convergence will never be reached.
         if (X1 /= X1 .or. XT /= XT .or. X2 /= X2 .or. AMPl1 /= AMPl1 .or. &

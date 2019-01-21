@@ -1098,7 +1098,7 @@ contains
         !-    (fraction of smaller panel length adjacent to TE)
         bwt = 0.1
         !
-        write (LU_OUT, *) 'Calculating unit vorticity distributions ...'
+        if (show_output) write (*, *) 'Calculating unit vorticity distributions ...'
         !
         do i = 1, N
             GAM(i) = 0.
@@ -1292,7 +1292,7 @@ contains
         !     matrix for current airfoil and wake geometry.
         !-----------------------------------------------------
         !
-        write (LU_OUT, *) 'Calculating source influence matrix ...'
+        if (show_output) write (*, *) 'Calculating source influence matrix ...'
         !
         if (.not.LADij) then
             !
@@ -1433,12 +1433,12 @@ contains
         !     vorticity and/or mass source distributions.
         !-----------------------------------------------------
         !
-        write (LU_OUT, *) 'Calculating wake trajectory ...'
+        if (show_output) write (*, *) 'Calculating wake trajectory ...'
         !
         !---- number of wake points
         NW = N / 12 + 10 * int(WAKlen)
         if (NW>IWX) then
-            write (LU_OUT, *) 'Array size (IWX) too small.  Last wake point index reduced.'
+            if (show_output) write (*, *) 'Array size (IWX) too small.  Last wake point index reduced.'
             NW = IWX
         endif
         !
@@ -1542,7 +1542,7 @@ contains
             if (GAM(i)>=0.0 .and. GAM(i + 1)<0.0) goto 100
         enddo
         !
-        write (LU_OUT, *) 'STFIND: Stagnation point not found. Continuing ...'
+        if (show_output) write (*, *) 'STFIND: Stagnation point not found. Continuing ...'
         i = N / 2
         !
         !
@@ -1636,8 +1636,10 @@ contains
         !
         iblmax = max(IBLte(1), IBLte(2)) + NW
         if (iblmax>IVX) then
-            write (LU_OUT, *) ' ***  BL array overflow.'
-            write (LU_OUT, *) ' ***  Increase IVX to at least', iblmax
+            if (show_output) then
+                write (*, *) ' ***  BL array overflow.'
+                write (*, *) ' ***  Increase IVX to at least', iblmax
+            endif
             stop
         endif
         !

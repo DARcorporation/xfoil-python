@@ -22,7 +22,7 @@
 module m_aread
 contains
     subroutine aread(Lu, Fname, Nmax, X, Y, N, Name, Ispars, Itype, Info)
-        use i_xfoil, only: LU_OUT
+        use i_xfoil, only: show_output
         use m_userio, only: getflt, aski
         implicit none
         !
@@ -109,8 +109,10 @@ contains
                             !------ no name, just two valid numbers... must be plain airfoil file
                             Name = ' '
                             if (Info>0) then
-                                write (LU_OUT, *)
-                                write (LU_OUT, *) 'Plain airfoil file'
+                                if (show_output) then
+                                    write (*, *)
+                                    write (*, *) 'Plain airfoil file'
+                                endif
                             endif
                             Itype = 1
                             rewind (Lu)
@@ -128,8 +130,10 @@ contains
                             !------ less than four numbers... usual .dat labeled file
                             Name = line1
                             if (Info>0) then
-                                write (LU_OUT, *)
-                                write (LU_OUT, *) 'Labeled airfoil file.  Name:  ', Name
+                                if (show_output) then
+                                    write (*, *)
+                                    write (*, *) 'Labeled airfoil file.  Name:  ', Name
+                                endif
                             endif
                             Itype = 2
                             rewind (Lu)
@@ -138,8 +142,10 @@ contains
                         else
                             !------ four or more numbers... MSES or MISES file
                             if (Info>0) then
-                                write (LU_OUT, *)
-                                write (LU_OUT, *) 'MSES airfoil file.  Name:  ', Name
+                                if (show_output) then
+                                    write (*, *)
+                                    write (*, *) 'MSES airfoil file.  Name:  ', Name
+                                endif
                             endif
                             Itype = 3
                             Ispars = line2
@@ -183,9 +189,9 @@ contains
                                     endif
                                 enddo
                             enddo
-                            write (LU_OUT, 99001) Nmax
+                            if (show_output) write (*, 99001) Nmax
                             99001              format (/' Buffer array size exceeded'/' Maximum number of points: ', i4)
-                            write (LU_OUT, 99005)
+                            if (show_output) write (*, 99005)
                             if (lopen) close (Lu)
                             Itype = 0
                             return
@@ -200,16 +206,16 @@ contains
         return
         !
         200  nfn = index(Fname, ' ') + 1
-        write (LU_OUT, 99002) Fname(1:nfn)
+        if (show_output) write (*, 99002) Fname(1:nfn)
         99002 format (/' File OPEN error.  Nonexistent file:  ', a)
-        write (LU_OUT, 99005)
+        if (show_output) write (*, 99005)
         Itype = 0
         return
         !
         300  if (lopen) close (Lu)
-        write (LU_OUT, 99003)
+        if (show_output) write (*, 99003)
         99003 format (/' File READ error.  Unrecognizable file format')
-        write (LU_OUT, 99005)
+        if (show_output) write (*, 99005)
         Itype = 0
         return
         !...............................................................
