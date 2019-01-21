@@ -84,7 +84,7 @@ class XFoil(object):
         x = np.asfortranarray(np.zeros(n), dtype=c_float)
         y = np.asfortranarray(np.zeros(n), dtype=c_float)
         self._lib.get_airfoil(x.ctypes.data_as(fptr), y.ctypes.data_as(fptr), byref(c_int(n)))
-        return Airfoil(x, y)
+        return Airfoil(x.astype(float), y.astype(float))
 
     @airfoil.setter
     def airfoil(self, airfoil):
@@ -266,7 +266,7 @@ class XFoil(object):
         cl[isnan] = np.nan
         cd[isnan] = np.nan
         cm[isnan] = np.nan
-        return a, cl, cd, cm
+        return a.astype(float), cl.astype(float), cd.astype(float), cm.astype(float)
 
     def cseq(self, cl_start, cl_end, cl_step):
         """Analyze airfoil at a sequence of lift coefficients.
@@ -300,4 +300,4 @@ class XFoil(object):
         cl[isnan] = np.nan
         cd[isnan] = np.nan
         cm[isnan] = np.nan
-        return a, cl, cd, cm
+        return a.astype(float), cl.astype(float), cd.astype(float), cm.astype(float)
