@@ -280,7 +280,7 @@ contains
             setbl = mrchue()
             if (setbl) then
                 LBLini = .true.
-            else
+            elseif (abort_on_nan) then
                 return
             end if
         endif
@@ -289,7 +289,7 @@ contains
         !
         !---- march BL with current Ue and Ds to establish transition
         setbl = mrchdu()
-        if (.not. setbl) return
+        if (abort_on_nan .and. .not. setbl) return
         !
         do is = 1, 2
             do ibl = 2, NBL(is)
@@ -421,7 +421,7 @@ contains
                 !---- check for transition and set TRAN, XT, etc. if found
                 if (TRAn) then
                     setbl = trchek()
-                    if (.not. setbl) return
+                    if (abort_on_nan .and. .not. setbl) return
                     ami = AMPl2
                 endif
                 if (ibl==ITRan(is) .and. .not.TRAn) write (LU_OUT, *) 'SETBL: Xtr???  n1 n2: ', AMPl1, AMPl2
@@ -803,7 +803,7 @@ contains
                     !-------- check for transition and set appropriate flags and things
                     if ((.not.SIMi) .and. (.not.TURb)) then
                         mrchue = trchek()
-                        if (.not. mrchue) return
+                        if (abort_on_nan .and. .not. mrchue) return
                         ami = AMPl2
                         !
                         if (TRAn) then
@@ -987,7 +987,7 @@ contains
                 !------- check for transition and set appropriate flags and things
                 if ((.not.SIMi) .and. (.not.TURb)) then
                     mrchue = trchek()
-                    if (.not. mrchue) return
+                    if (abort_on_nan .and. .not. mrchue) return
                     ami = AMPl2
                     if (TRAn) ITRan(is) = ibl
                     if (.not.TRAn) ITRan(is) = ibl + 2
@@ -1166,7 +1166,7 @@ contains
                     !-------- check for transition and set appropriate flags and things
                     if ((.not.SIMi) .and. (.not.TURb)) then
                         mrchdu = trchek()
-                        if (.not. mrchdu) return
+                        if (abort_on_nan .and. .not. mrchdu) return
                         ami = AMPl2
                         if (TRAn) ITRan(is) = ibl
                         if (.not.TRAn) ITRan(is) = ibl + 2
@@ -1333,7 +1333,7 @@ contains
                 !------- check for transition and set appropriate flags and things
                 if ((.not.SIMi) .and. (.not.TURb)) then
                     mrchdu = trchek()
-                    if (.not. mrchdu) return
+                    if (abort_on_nan .and. .not. mrchdu) return
                     ami = AMPl2
                     if (TRAn) ITRan(is) = ibl
                     if (.not.TRAn) ITRan(is) = ibl + 2

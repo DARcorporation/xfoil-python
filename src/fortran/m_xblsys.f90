@@ -270,7 +270,7 @@ contains
 
 
     function trchek2()
-        use i_xfoil, only: LU_OUT
+        use i_xfoil, only: LU_OUT, abort_on_nan
         use i_xbl
         implicit none
 
@@ -494,7 +494,7 @@ contains
         if (X1 /= X1 .or. XT /= XT .or. X2 /= X2 .or. AMPl1 /= AMPl1 .or. &
             amplt /= amplt .or. AMPl2 /= AMPl2 .or. ax /= ax .or. da2 /= da2) then
             trchek2 = .false.
-            return
+            if (abort_on_nan) return
         end if
         !
         !
@@ -506,7 +506,7 @@ contains
         !---- set transition interval flag
         TRAn = TRForc .or. TRFree
         !
-        if (.not.TRAn) return
+        if (abort_on_nan .and. .not.TRAn) return
         !
         !---- resolve if both forced and free transition
         if (TRFree .and. TRForc) then

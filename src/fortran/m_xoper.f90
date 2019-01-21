@@ -2562,7 +2562,7 @@ contains
             !
             !------ fill Newton system for BL variables
             viscal = setbl()
-            if (.not. viscal) return
+            if (abort_on_nan .and. .not. viscal) return
             !
             !------ solve Newton system with custom solver
             call blsolv
