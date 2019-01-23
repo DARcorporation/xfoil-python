@@ -167,7 +167,6 @@ contains
         if (spec <= 0) then
             write(0, *) 'Invalid NACA specifier. Specify a NACA 4 or 5 series airfoil code.'
         else
-            write(*, *) 'Gonna call naca now...'
             call naca(spec)
         end if
     end subroutine set_naca
@@ -261,7 +260,7 @@ contains
 
     function get_max_iter() bind(c, name='get_max_iter')
         use i_xfoil, only: ITMax
-        real(c_float) :: get_max_iter
+        integer(c_int) :: get_max_iter
         get_max_iter = ITMax
     end function get_max_iter
 

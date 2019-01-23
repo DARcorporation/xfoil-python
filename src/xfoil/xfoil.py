@@ -57,8 +57,10 @@ class XFoil(object):
         self._lib.init()
         self._airfoil = None
 
+        self._lib.get_print.restype = c_bool
         self._lib.get_reynolds.restype = c_float
         self._lib.get_mach.restype = c_float
+        self._lib.get_n_crit.restype = c_float
 
     def __del__(self):
         handle = self._lib._handle
@@ -71,7 +73,7 @@ class XFoil(object):
     @property
     def print(self):
         """bool: True if console output should be shown."""
-        return self._lib.get_print().value
+        return self._lib.get_print()
 
     @print.setter
     def print(self, value):
