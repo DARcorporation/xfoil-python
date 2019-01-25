@@ -67,6 +67,8 @@ class XFoil(object):
         del self._lib
         try:
             ctypes.windll.kernel32.FreeLibrary(handle)
+        except AttributeError:
+            pass
         finally:
             os.remove(self._lib_path)
 
