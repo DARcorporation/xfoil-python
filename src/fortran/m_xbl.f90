@@ -1301,7 +1301,6 @@ contains
                 !
                 if (show_output) write (*, 99001) ibl, is, dmax
                 99001  format (' MRCHDU: Convergence failed at', i4, '  side', i2, '    Res =', e12.4)
-                mrchdu = .false.
                 !
                 !------ the current unconverged solution might still be reasonable...
                 !CC        IF(DMAX .LE. 0.1) GO TO 110
