@@ -204,17 +204,18 @@ class XFoil(object):
 
         Returns
         -------
-        cl, cd, cm : float
-            Corresponding values of the lift, drag, and moment coefficients.
+        cl, cd, cm, cp : float
+            Corresponding values of the lift, drag, moment, and minimum pressure coefficients.
         """
         cl = c_float()
         cd = c_float()
         cm = c_float()
+        cp = c_float()
         conv = c_bool()
 
-        self._lib.alfa(byref(c_float(a)), byref(cl), byref(cd), byref(cm), byref(conv))
+        self._lib.alfa(byref(c_float(a)), byref(cl), byref(cd), byref(cm), byref(cp), byref(conv))
 
-        return (cl.value, cd.value, cm.value) if conv else (np.nan, np.nan, np.nan)
+        return (cl.value, cd.value, cm.value, cp.value) if conv else (np.nan, np.nan, np.nan, np.nan)
 
     def cl(self, cl):
         """"Analyze airfoil at a fixed lift coefficient.
@@ -226,17 +227,18 @@ class XFoil(object):
 
         Returns
         -------
-        a, cd, cm : float
-            Corresponding angle of attack, drag coefficient, and moment coefficient.
+        a, cd, cm, cp : float
+            Corresponding values of the angle of attack, drag, moment, and minimum pressure coefficients.
         """
         a = c_float()
         cd = c_float()
         cm = c_float()
+        cp = c_float()
         conv = c_bool()
 
         self._lib.cl(byref(c_float(cl)), byref(a), byref(cd), byref(cm), byref(conv))
 
-        return (a.value, cd.value, cm.value) if conv else (np.nan, np.nan, np.nan)
+        return (cl.value, cd.value, cm.value, cp.value) if conv else (np.nan, np.nan, np.nan, np.nan)
 
     def aseq(self, a_start, a_end, a_step):
         """Analyze airfoil at a sequence of angles of attack.
@@ -250,8 +252,8 @@ class XFoil(object):
 
         Returns
         -------
-        a, cl, cd, cm : np.ndarray
-            Lists of angles of attack and their corresponding lift, drag, and moment coefficients.
+        a, cl, cd, cm, co : np.ndarray
+            Lists of angles of attack and their corresponding lift, drag, moment, and minimum pressure coefficients.
         """
         n = abs(int((a_end - a_start) / a_step))
 
@@ -259,18 +261,21 @@ class XFoil(object):
         cl = np.zeros(n, dtype=c_float)
         cd = np.zeros(n, dtype=c_float)
         cm = np.zeros(n, dtype=c_float)
+        cp = np.zeros(n, dtype=c_float)
         conv = np.zeros(n, dtype=c_bool)
 
         self._lib.aseq(byref(c_float(a_start)), byref(c_float(a_end)), byref(c_int(n)),
                        a.ctypes.data_as(fptr), cl.ctypes.data_as(fptr),
-                       cd.ctypes.data_as(fptr), cm.ctypes.data_as(fptr), conv.ctypes.data_as(bptr))
+                       cd.ctypes.data_as(fptr), cm.ctypes.data_as(fptr),
+                       cp.ctypes.data_as(fptr), conv.ctypes.data_as(bptr))
 
         isnan = np.logical_not(conv)
         a[isnan] = np.nan
         cl[isnan] = np.nan
         cd[isnan] = np.nan
         cm[isnan] = np.nan
-        return a.astype(float), cl.astype(float), cd.astype(float), cm.astype(float)
+        cp[isnan] = np.nan
+        return a.astype(float), cl.astype(float), cd.astype(float), cm.astype(float), cp.astype(float)
 
     def cseq(self, cl_start, cl_end, cl_step):
         """Analyze airfoil at a sequence of lift coefficients.
@@ -284,8 +289,8 @@ class XFoil(object):
 
         Returns
         -------
-        a, cl, cd, cm : np.ndarray
-            Lists of angles of attack and their corresponding lift, drag, and moment coefficients.
+        a, cl, cd, cm, co : np.ndarray
+            Lists of angles of attack and their corresponding lift, drag, moment, and minimum pressure coefficients.
         """
         n = abs(int((cl_end - cl_start) / cl_step))
 
@@ -293,15 +298,18 @@ class XFoil(object):
         cl = np.zeros(n, dtype=c_float)
         cd = np.zeros(n, dtype=c_float)
         cm = np.zeros(n, dtype=c_float)
+        cp = np.zeros(n, dtype=c_float)
         conv = np.zeros(n, dtype=c_bool)
 
         self._lib.cseq(byref(c_float(cl_start)), byref(c_float(cl_end)), byref(c_int(n)),
                        a.ctypes.data_as(fptr), cl.ctypes.data_as(fptr),
-                       cd.ctypes.data_as(fptr), cm.ctypes.data_as(fptr), conv.ctypes.data_as(bptr))
+                       cd.ctypes.data_as(fptr), cm.ctypes.data_as(fptr),
+                       cp.ctypes.data_as(fptr), conv.ctypes.data_as(bptr))
 
         isnan = np.logical_not(conv)
         a[isnan] = np.nan
         cl[isnan] = np.nan
         cd[isnan] = np.nan
         cm[isnan] = np.nan
-        return a.astype(float), cl.astype(float), cd.astype(float), cm.astype(float)
+        cp[isnan] = np.nan
+        return a.astype(float), cl.astype(float), cd.astype(float), cm.astype(float), cp.astype(float)

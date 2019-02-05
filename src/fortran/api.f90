@@ -321,12 +321,12 @@ contains
         LQSppl = .false.
     end subroutine filter
 
-    subroutine alfa_(a_input, cl_out, cd_out, cm_out, conv) bind(c, name='alfa')
+    subroutine alfa_(a_input, cl_out, cd_out, cm_out, cp_out, conv) bind(c, name='alfa')
         use m_xoper, only: specal, viscal, fcpmin
         use i_xfoil
 
         real(c_float), intent(in) :: a_input
-        real(c_float), intent(out) :: cl_out, cd_out, cm_out
+        real(c_float), intent(out) :: cl_out, cd_out, cm_out, cp_out
         logical(c_bool), intent(out) :: conv
         ADEg = a_input
 
@@ -348,14 +348,17 @@ contains
         cl_out = CL
         cd_out = CD
         cm_out = CM
+
+        call fcpmin
+        cp_out = CPMn
     end subroutine alfa_
 
-    subroutine cl_(cl_input, a_out, cd_out, cm_out, conv) bind(c, name='cl')
-        use m_xoper, only: speccl, viscal
+    subroutine cl_(cl_input, a_out, cd_out, cm_out, cp_out, conv) bind(c, name='cl')
+        use m_xoper, only: speccl, viscal, fcpmin
         use i_xfoil
 
         real(c_float), intent(in) :: cl_input
-        real(c_float), intent(out) :: a_out, cd_out, cm_out
+        real(c_float), intent(out) :: a_out, cd_out, cm_out, cp_out
         logical(c_bool), intent(out) :: conv
 
         CLSpec = cl_input
@@ -378,15 +381,18 @@ contains
         a_out = ALFa / DTOr
         cd_out = CD
         cm_out = CM
+
+        call fcpmin
+        cp_out = CPMn
     end subroutine cl_
 
     subroutine aseq(a_start, a_end, n_step, &
-                    a_arr, cl_arr, cd_arr, cm_arr, conv_arr) bind(c, name='aseq')
-        use m_xoper, only: specal, viscal
+                    a_arr, cl_arr, cd_arr, cm_arr, cp_arr, conv_arr) bind(c, name='aseq')
+        use m_xoper, only: specal, viscal, fcpmin
         use i_xfoil
         real(c_float), intent(in) :: a_start, a_end
         integer(c_int), intent(in) :: n_step
-        real(c_float), dimension(n_step), intent(inout) :: a_arr, cl_arr, cd_arr, cm_arr
+        real(c_float), dimension(n_step), intent(inout) :: a_arr, cl_arr, cd_arr, cm_arr, cp_arr
         logical(c_bool), dimension(n_step), intent(inout) :: conv_arr
         integer :: i, j, iseqex, itmaxs
         real :: a0, da, nan
@@ -419,6 +425,9 @@ contains
             cd_arr(i) = CD
             cm_arr(i) = CM
 
+            call fcpmin
+            cp_arr(i) = CPMn
+
             if ((LVConv .and. conv_arr(i)) .or. .not.LVIsc) then
                 conv_arr(i) = .true.
             elseif (LVIsc .and. .not. (LVConv .and. conv_arr(i))) then
@@ -428,12 +437,12 @@ contains
     end subroutine aseq
 
     subroutine cseq(cl_start, cl_end, n_step, &
-            a_arr, cl_arr, cd_arr, cm_arr, conv_arr) bind(c, name='cseq')
-        use m_xoper, only: specal, viscal, speccl
+            a_arr, cl_arr, cd_arr, cm_arr, cp_arr, conv_arr) bind(c, name='cseq')
+        use m_xoper, only: specal, viscal, speccl, fcpmin
         use i_xfoil
         real(c_float), intent(in) :: cl_start, cl_end
         integer(c_int), intent(in) :: n_step
-        real(c_float), dimension(n_step), intent(inout) :: a_arr, cl_arr, cd_arr, cm_arr
+        real(c_float), dimension(n_step), intent(inout) :: a_arr, cl_arr, cd_arr, cm_arr, cp_arr
         logical(c_bool), dimension(n_step), intent(inout) :: conv_arr
         integer :: i, j, iseqex, itmaxs
         real :: cl0, dcl
@@ -462,6 +471,9 @@ contains
             cl_arr(i) = CL
             cd_arr(i) = CD
             cm_arr(i) = CM
+
+            call fcpmin
+            cp_arr(i) = CPMn
 
             if ((LVConv .and. conv_arr(i)) .or. .not.LVIsc) then
                 conv_arr(i) = .true.
