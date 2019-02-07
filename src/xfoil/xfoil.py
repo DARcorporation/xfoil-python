@@ -236,9 +236,9 @@ class XFoil(object):
         cp = c_float()
         conv = c_bool()
 
-        self._lib.cl(byref(c_float(cl)), byref(a), byref(cd), byref(cm), byref(conv))
+        self._lib.cl(byref(c_float(cl)), byref(a), byref(cd), byref(cm), byref(cp), byref(conv))
 
-        return (cl.value, cd.value, cm.value, cp.value) if conv else (np.nan, np.nan, np.nan, np.nan)
+        return (a.value, cd.value, cm.value, cp.value) if conv else (np.nan, np.nan, np.nan, np.nan)
 
     def aseq(self, a_start, a_end, a_step):
         """Analyze airfoil at a sequence of angles of attack.
