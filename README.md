@@ -82,12 +82,12 @@ For the range of angles of attack, we will go from -20 degrees to 20 degrees wit
 ```pycon
 >>>  xf.Re = 1e6
 >>>  xf.max_iter = 40
->>>  a, cl, cd, cm = xf.aseq(-20, 20, 0.5)
+>>>  a, cl, cd, cm, cp = xf.aseq(-20, 20, 0.5)
 ```
 
 The XFOIL library should produce a lot of output, which should be familiar to those who have used the original XFOIL 
 application before. The final result are lists of angles of attack, `a`, and the corresponding lift coefficients, `cl`, 
-drag coefficients, `cd`, and moment coefficients, `cm`. We can now, for example, plot the lift curve for this airfoil:
+drag coefficients, `cd`, moment coefficients, `cm`, and minimum pressure coefficients `cp`. We can now, for example, plot the lift curve for this airfoil:
 
 ```pycon
 >>>  import matplotlib.pyplot as plt
@@ -105,7 +105,7 @@ coefficient, or a range of lift coefficients. The commands for these operations 
 ```pycon
 >>>  cl, cd, cm = xf.a(10)
 >>>  a, cd, cm = xf.cl(1)
->>>  a, cl, cd, cm = xf.cseq(-0.5, 0.5, 0.05)
+>>>  a, cl, cd, cm, cp = xf.cseq(-0.5, 0.5, 0.05)
 ```
 
 to analyze for an angle of attack of 10 degrees, a lift coefficient of 1.0, and for a range of lift coefficients from
