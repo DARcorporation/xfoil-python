@@ -78,32 +78,35 @@ class TestXFoil(unittest.TestCase):
         """Analyse the NACA 0012 at Re = 1e6, M = 0, α = 10 degrees and verify the results."""
         xf = XFoil()
         xf.airfoil = naca0012
-        xf.conditions = (1e6, 0)
+        xf.Re = 1e6
         xf.max_iter = 100
-        cl, cd, cm = xf.a(10)
+        cl, cd, cm, cp = xf.a(10)
 
         self.assertAlmostEqual(cl, 1.0809, 4)
         self.assertAlmostEqual(cd, 0.0150, 4)
         self.assertAlmostEqual(cm, 0.0053, 4)
+        self.assertAlmostEqual(cp, -5.5766, 4)
 
     def test_cl(self):
         """Analyse the NACA 0012 at Re = 1e6, M = 0, C_l = 1 and verify the results."""
         xf = XFoil()
         xf.airfoil = naca0012
-        xf.conditions = (1e6, 0)
-        a, cd, cm = xf.cl(1)
+        xf.Re = 1e6
+        xf.max_iter = 40
+        a, cd, cm, cp = xf.cl(1)
 
         self.assertAlmostEqual(a, 9.0617, 4)
         self.assertAlmostEqual(cd, 0.0135, 4)
         self.assertAlmostEqual(cm, 0.0013, 4)
+        self.assertAlmostEqual(cp, -4.7361, 4)        
 
     def test_aseq(self):
         """Analyse the NACA 0012 at Re = 1e6, M = 0, α = -20, -19.5, ..., 19.5 and verify the results."""
         xf = XFoil()
         xf.airfoil = naca0012
-        xf.conditions = (1e6, 0)
-        xf.max_iter = 40
-        a, cl, cd, cm = xf.aseq(-20, 20, 0.5)
+        xf.Re = 1e6
+        xf.max_iter = 150
+        a, cl, cd, cm, cp = xf.aseq(-20, 20, 0.5)
 
         self.assertNumpyArraysAlmostEqual(a, np.arange(-20, 20, 0.5), 4)
         self.assertNumpyArraysAlmostEqual(cl, np.array([
@@ -133,25 +136,37 @@ class TestXFoil(unittest.TestCase):
             +0.0017, -0.0011, -0.0043, -0.0074, -0.0092, -0.0066, -0.0039, -0.0013, +0.0010, +0.0034,
             +0.0053, +0.0074, +0.0091, +0.0111, +0.0133, +0.0155, +0.0182, +0.0236, +0.0267, +0.0294,
             +0.0310, +0.0315, +0.0302, +0.0264, +0.0208, +0.0149, +0.0082, +0.0008, -0.0070, -0.0152]), 4)
+        self.assertNumpyArraysAlmostEqual(cp, np.array([
+            -8.7529, -9.1022, -9.4043, -9.6795, -9.9144,-10.0823,-10.1471,-10.2631,-10.2124, -9.9857,
+            -9.6607, -9.3056, -8.9297, -8.5174, -8.1933, -7.7313, -7.252 , -6.8146, -6.3743, -5.9255,
+            -5.5074, -5.0771, -4.6898, -4.3144, -3.9609, -3.6169, -3.2973, -2.9287, -2.5654, -2.2316,
+            -1.9300, -1.6496, -1.4162, -1.2171, -1.0441, -0.8914, -0.7602, -0.6490, -0.5560, -0.4790,
+            -0.4139, -0.4790, -0.5560, -0.6490, -0.7602, -0.8914, -1.0441, -1.2172, -1.4162, -1.6497,
+            -1.9301, -2.2316, -2.5655, -2.9289, -3.2968, -3.6164, -3.9604, -4.3141, -4.6896, -5.0771,
+            -5.5077, -5.9260, -6.3751, -6.8156, -7.2537, -7.7335, -8.1964, -8.5225, -8.9357, -9.3128,
+            -9.6696, -9.9962,-10.2224,-10.2701,-10.1655,-10.1009, -9.9321, -9.6953, -9.4179, -9.1134]), 4)        
 
     def test_cseq(self):
         """Analyse the NACA 0012 at Re = 1e6, M = 0, C_l = -0.5, -0.45, ..., 0.45 and verify the results."""
         xf = XFoil()
         xf.airfoil = naca0012
-        xf.conditions = (1e6, 0.)
-        xf.max_iter = 40
-        a, cl, cd, cm = xf.cseq(-0.5, 0.5, 0.05)
+        xf.Re = 1e6
+        xf.max_iter = 100
+        a, cl, cd, cm, cp = xf.cseq(-0.5, 0.5, 0.05)
 
         self.assertNumpyArraysAlmostEqual(cl, np.arange(-0.5, 0.5, 0.05), 4)
         self.assertNumpyArraysAlmostEqual(a, np.array([
             -4.5879, -4.1765, -3.7446, -3.2848, -2.8112, -2.3371, -1.8666, -1.3981, -0.9324, -0.4659,
-            -0.0000, +0.4659, +0.9323, +1.3981, +1.8665, +2.3370, +2.8111, +3.2847, +3.7445, +4.1764]), +4)
+            -0.0000, +0.4659, +0.9323, +1.3981, +1.8665, +2.3370, +2.8111, +3.2847, +3.7445, +4.1764]), 4)
         self.assertNumpyArraysAlmostEqual(cd, np.array([
             +0.0079, +0.0075, +0.0070, +0.0066, +0.0063, +0.0060, +0.0058, +0.0056, +0.0055, +0.0054,
             +0.0054, +0.0054, +0.0055, +0.0056, +0.0058, +0.0060, +0.0063, +0.0066, +0.0070, +0.0075]), 4)
         self.assertNumpyArraysAlmostEqual(cm, np.array([
             -0.0045, -0.0055, -0.0058, -0.0054, -0.0045, -0.0036, -0.0028, -0.0020, -0.0013, -0.0007,
             -0.0000, +0.0007, +0.0013, +0.0020, +0.0028, +0.0036,  0.0045, +0.0054, +0.0058, +0.0055]), 4)
+        self.assertNumpyArraysAlmostEqual(cp, np.array([
+            -1.6956, -1.4979, -1.3122, -1.1402, -0.9828, -0.8469, -0.7287, -0.6286, -0.5449, -0.4743,
+            -0.4139, -0.4743, -0.5449, -0.6286, -0.7287, -0.8469, -0.9828, -1.1402, -1.3122, -1.4979]), 4)
 
 
 if __name__ == '__main__':
