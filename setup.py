@@ -24,7 +24,7 @@ from setuptools import setup
 from setuptools.extension import Extension
 from setuptools.command.build_ext import build_ext
 
-version = '1.0.0'
+version = '1.0.1'
 
 options = {k: 'OFF' for k in ['--opt', '--debug', '--cuda']}
 for flag in options.keys():
