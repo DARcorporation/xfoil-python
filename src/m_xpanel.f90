@@ -1350,7 +1350,7 @@ contains
         do i = N + 1, N + NW
             !
             iw = i - N
-            if (iw > iwx) then
+            if (iw > iwx .or. iw <= 0) then
                 exit
             end if
             !
