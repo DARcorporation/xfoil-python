@@ -47,7 +47,7 @@ class Airfoil(object):
     @x.setter
     def x(self, value):
         v = value.flatten()
-        self.coords.resize((v.size, 2))
+        self.coords = np.resize(self.coords, (v.size, 2))
         self.coords[:, 0] = v[:]
 
     @property
@@ -58,5 +58,5 @@ class Airfoil(object):
     @y.setter
     def y(self, value):
         v = value.flatten()
-        self.coords.resize((v.size, 2))
+        self.coords = np.resize(self.coords, (v.size, 2))
         self.coords[:, 1] = v[:]
