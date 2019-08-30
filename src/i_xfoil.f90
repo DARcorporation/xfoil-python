@@ -26,8 +26,8 @@ module i_xfoil
     !*** Start of declarations rewritten by SPAG
     !
     ! PARAMETER definitions
-    !
-    integer, parameter :: IQX = 370, IPX = 5, ISX = 2, IWX = IQX / 8 + 2, IBX = 4 * IQX, IZX = IQX + IWX, &
+    ! IQX = 370 originally
+    integer, parameter :: IQX = 640, IPX = 5, ISX = 2, IWX = IQX / 8 + 2, IBX = 4 * IQX, IZX = IQX + IWX, &
             & IVX = IQX / 2 + IWX + 50, NAX = 800, NPX = 12, NFX = 128, NTX = 2 * IBX
     !
     ! Local variables

@@ -1350,6 +1350,9 @@ contains
         do i = N + 1, N + NW
             !
             iw = i - N
+            if (iw > iwx) then
+                exit
+            end if
             !
             !------ airfoil contribution at wake panel node
             call psilin(i, X(i), Y(i), NX(i), NY(i), psi, psi_n, .false., .true.)
