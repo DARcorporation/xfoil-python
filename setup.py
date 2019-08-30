@@ -24,7 +24,7 @@ from setuptools import setup
 from setuptools.extension import Extension
 from setuptools.command.build_ext import build_ext
 
-version = '0.0.16'
+version = '1.0.0'
 
 options = {k: 'OFF' for k in ['--opt', '--debug', '--cuda']}
 for flag in options.keys():
@@ -118,6 +118,7 @@ setup(
     version=version,
     description='Stripped down version of XFOIL as compiled python module ',
     long_description=readme(),
+    long_description_content_type='text/markdown',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Science/Research',
