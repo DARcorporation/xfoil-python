@@ -137,7 +137,7 @@ setup(
     author_email='contact@daniel-de-vries.com',
     license='GNU General Public License v3 or later (GPLv3+)',
     packages=['xfoil'],
-    package_dir={'': 'src'},
+    # package_dir={'': 'src'},
     ext_modules=[CMakeExtension('xfoil.xfoil')],
     cmdclass={'build_ext': CMakeBuild},
     install_requires=['numpy'],
