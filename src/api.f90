@@ -266,13 +266,9 @@ contains
 
     subroutine reset_bls() bind(c, name='reset_bls')
         use i_xfoil, only: LBLini, LIPan, show_output
-        LBLini = .not.LBLini
-        if (LBLini) then
-            if (show_output) write (*, *) 'BLs are assumed to be initialized'
-        else
-            if (show_output) write (*, *) 'BLs will be initialized on next point'
-            LIPan = .false.
-        endif
+        LBLini = .false.
+        LIPan = .false.
+        if (show_output) write (*, *) 'BLs will be initialized on next point'
     end subroutine reset_bls
 
     subroutine repanel(n_panel, cv_par, cte_ratio, ctr_ratio, &
