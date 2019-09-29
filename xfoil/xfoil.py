@@ -313,3 +313,20 @@ class XFoil(object):
         cm[isnan] = np.nan
         cp[isnan] = np.nan
         return a.astype(float), cl.astype(float), cd.astype(float), cm.astype(float), cp.astype(float)
+
+    def get_cp_distribution(self):
+        """Get the Cp distribution from the last converged point.
+
+        Returns
+        -------
+        x : np.array
+            X-coordinates
+        cp : np.ndarray
+            Pressure coefficients at the corresponding x-coordinates
+        """
+        n = self._lib.get_n_cp()
+        x = np.zeros(n, dtype=c_float)
+        cp = np.zeros(n, dtype=c_float)
+
+        self._lib.get_cp(x.ctypes.data_as(fptr), cp.ctypes.data_as(fptr), byref(c_int(n)))
+        return x.astype(float), cp.astype(float)
