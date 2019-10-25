@@ -2514,10 +2514,13 @@ contains
         !
         ! Local variables
         !
-        real :: cdpdif, ddef, delp, dpds, duds, edef, fnum, hfrac, hk, hki, hkm, hkmax, patt, pdef, pdefi, &
-                & pdefm, psep
+        real :: cdpdif, delp, hfrac, hki, hkm, hkmax, patt, pdefi, pdefm, psep
         real, save :: eps1
-        integer :: i, ibl, iblm, iblp, idec, ione, is, iten, iter, izero, lu, niter
+        integer :: i, ibl, is, iter, niter
+
+! These are used by the weird writing to a file code
+!        real :: ddef, dpds, duds, edef, fnum, hk, pdef
+!        integer :: i, iblm, iblp, idec, ione, iten, izero, lu
         !
         !*** End of declarations rewritten by SPAG
         !
@@ -2698,35 +2701,36 @@ contains
         if (show_output) write (*, 99004) ACRit(is), hkmax, CD, 2.0 * psep, 2.0 * patt, 2.0 * delp, XOCtr(is)
         99004 format (1x, f10.3, f10.4, f11.6, 3F11.6, f10.4, '     #')
 
-        izero = ichar('0')
-
-        !c      fnum = acrit(is)
-        fnum = XSTrip(is) * 100.0
-
-        iten = int(fnum / 9.99999)
-        ione = int((fnum - float(10 * iten)) / 0.99999)
-        idec = int((fnum - float(10 * iten) - float(ione)) / 0.09999)
-
-        FNAme = char(iten + izero) // char(ione + izero) // char(idec + izero) // '.bl'
-        lu = 44
-        open (lu, file = FNAme, status = 'unknown')
-        rewind (lu)
-        write (lu, '(a,a)') '#       s         ue          H          P         K ', '        x    -m du/dx'
-        !       1234567890 1234567890 1234567890 1234567890 1234567890 1234567890
-        do ibl = 2, IBLte(is)
-            iblm = max(ibl - 1, 2)
-            iblp = min(ibl + 1, IBLte(is))
-            i = IPAn(ibl, is)
-            hk = DSTr(ibl, is) / THEt(ibl, is)
-            ddef = DSTr(ibl, is) * UEDg(ibl, is)
-            pdef = THEt(ibl, is) * UEDg(ibl, is)**2
-            edef = TSTr(ibl, is) * UEDg(ibl, is)**3 * 0.5
-            duds = (UEDg(iblp, is) - UEDg(iblm, is)) / (XSSi(iblp, is) - XSSi(iblm, is))
-            dpds = -ddef * duds
-            write (lu, 99005) XSSi(ibl, is), UEDg(ibl, is), hk, pdef, edef, X(i), dpds
-            99005 format (1x, 3F11.4, 2F11.6, f11.3, e14.6)
-        enddo
-        close (lu)
+! This stuff seems to only write stuff to a file, which seems unecessary to do each time viscal is called...
+!        izero = ichar('0')
+!
+!        !c      fnum = acrit(is)
+!        fnum = XSTrip(is) * 100.0
+!
+!        iten = int(fnum / 9.99999)
+!        ione = int((fnum - float(10 * iten)) / 0.99999)
+!        idec = int((fnum - float(10 * iten) - float(ione)) / 0.09999)
+!
+!        FNAme = char(iten + izero) // char(ione + izero) // char(idec + izero) // '.bl'
+!        lu = 44
+!        open (lu, file = FNAme, status = 'unknown')
+!        rewind (lu)
+!        write (lu, '(a,a)') '#       s         ue          H          P         K ', '        x    -m du/dx'
+!        !       1234567890 1234567890 1234567890 1234567890 1234567890 1234567890
+!        do ibl = 2, IBLte(is)
+!            iblm = max(ibl - 1, 2)
+!            iblp = min(ibl + 1, IBLte(is))
+!            i = IPAn(ibl, is)
+!            hk = DSTr(ibl, is) / THEt(ibl, is)
+!            ddef = DSTr(ibl, is) * UEDg(ibl, is)
+!            pdef = THEt(ibl, is) * UEDg(ibl, is)**2
+!            edef = TSTr(ibl, is) * UEDg(ibl, is)**3 * 0.5
+!            duds = (UEDg(iblp, is) - UEDg(iblm, is)) / (XSSi(iblp, is) - XSSi(iblm, is))
+!            dpds = -ddef * duds
+!            write (lu, 99005) XSSi(ibl, is), UEDg(ibl, is), hk, pdef, edef, X(i), dpds
+!            99005 format (1x, 3F11.4, 2F11.6, f11.3, e14.6)
+!        enddo
+!        close (lu)
 
     end function viscal
     !*==DCPOUT.f90  processed by SPAG 7.21DC at 11:25 on 11 Jan 2019
