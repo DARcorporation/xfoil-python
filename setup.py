@@ -27,7 +27,7 @@ from setuptools.command.build_ext import build_ext
 
 __version__ = re.findall(
     r"""__version__ = ["']+([0-9\.]*)["']+""",
-    open('cst/__init__.py').read(),
+    open('xfoil/__init__.py').read(),
 )[0]
 
 options = {k: 'OFF' for k in ['--opt', '--debug', '--cuda']}
