@@ -266,13 +266,9 @@ contains
 
     subroutine reset_bls() bind(c, name='reset_bls')
         use i_xfoil, only: LBLini, LIPan, show_output
-        LBLini = .not.LBLini
-        if (LBLini) then
-            if (show_output) write (*, *) 'BLs are assumed to be initialized'
-        else
-            if (show_output) write (*, *) 'BLs will be initialized on next point'
-            LIPan = .false.
-        endif
+        LBLini = .false.
+        LIPan = .false.
+        if (show_output) write (*, *) 'BLs will be initialized on next point'
     end subroutine reset_bls
 
     subroutine repanel(n_panel, cv_par, cte_ratio, ctr_ratio, &
@@ -482,5 +478,36 @@ contains
             endif
         end do
     end subroutine cseq
+
+
+    function get_n_cp() bind(c, name='get_n_cp')
+        use i_xfoil, only: N
+        integer(c_int) :: get_n_cp
+        get_n_cp = N
+    end function get_n_cp
+
+    subroutine get_cp(x_out, cp_out, n_points) bind(c, name='get_cp')
+        use s_xfoil, only: comset
+        use m_xoper
+        use i_xfoil
+        implicit none
+
+        integer(c_int), intent(in) :: n_points
+        real(c_float), dimension(n_points), intent(inout) :: x_out, cp_out
+
+        real :: beta, bfac, cpcom, cpinc, den
+        integer :: i
+
+        call comset
+        beta = sqrt(1.0 - MINf**2)
+        bfac = 0.5 * MINf**2 / (1.0 + beta)
+
+        do i = 1, N
+            cpinc = 1.0 - (GAM(i) / QINf)**2
+            den = beta + bfac * cpinc
+            cp_out(i) = cpinc / den
+            x_out(i) = X(i)
+        enddo
+    end subroutine get_cp
 
 end module api

@@ -17,6 +17,7 @@
 #   along with XFoil.  If not, see <https://www.gnu.org/licenses/>.
 import os
 import platform
+import re
 import subprocess
 import sys
 
@@ -24,7 +25,10 @@ from setuptools import setup
 from setuptools.extension import Extension
 from setuptools.command.build_ext import build_ext
 
-version = '0.0.16'
+__version__ = re.findall(
+    r"""__version__ = ["']+([0-9\.]*)["']+""",
+    open('xfoil/__init__.py').read(),
+)[0]
 
 options = {k: 'OFF' for k in ['--opt', '--debug', '--cuda']}
 for flag in options.keys():
@@ -115,9 +119,10 @@ def readme():
 
 setup(
     name='xfoil',
-    version=version,
+    version=__version__,
     description='Stripped down version of XFOIL as compiled python module ',
     long_description=readme(),
+    long_description_content_type='text/markdown',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Science/Research',
@@ -132,12 +137,12 @@ setup(
     ],
     keywords='xfoil airfoil aerodynamic analysis',
     url='https://github.com/daniel-de-vries/xfoil-python',
-    download_url='https://github.com/daniel-de-vries/xfoil-python/tarball/' + version,
+    download_url='https://github.com/daniel-de-vries/xfoil-python/tarball/' + __version__,
     author='Daniël de Vries',
     author_email='contact@daniel-de-vries.com',
     license='GNU General Public License v3 or later (GPLv3+)',
     packages=['xfoil'],
-    package_dir={'': 'src'},
+    # package_dir={'': 'src'},
     ext_modules=[CMakeExtension('xfoil.xfoil')],
     cmdclass={'build_ext': CMakeBuild},
     install_requires=['numpy'],
