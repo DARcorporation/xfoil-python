@@ -82,7 +82,7 @@ For the range of angles of attack, we will go from -20 degrees to 20 degrees wit
 ```pycon
 >>>  xf.Re = 1e6
 >>>  xf.max_iter = 40
->>>  a, cl, cd, cm = xf.aseq(-20, 20, 0.5)
+>>>  a, cl, cd, cm, co = xf.aseq(-20, 20, 0.5)
 ```
 
 The XFOIL library should produce a lot of output, which should be familiar to those who have used the original XFOIL 
@@ -105,7 +105,7 @@ coefficient, or a range of lift coefficients. The commands for these operations 
 ```pycon
 >>>  cl, cd, cm = xf.a(10)
 >>>  a, cd, cm = xf.cl(1)
->>>  a, cl, cd, cm = xf.cseq(-0.5, 0.5, 0.05)
+>>>  a, cl, cd, cm, co = xf.cseq(-0.5, 0.5, 0.05)
 ```
 
 to analyze for an angle of attack of 10 degrees, a lift coefficient of 1.0, and for a range of lift coefficients from
