@@ -30,6 +30,12 @@ here = os.path.abspath(os.path.dirname(__file__))
 lib_path = glob.glob(os.path.join(here, 'libxfoil.*'))[0]
 lib_ext = lib_path[lib_path.rfind('.'):]
 
+for path in os.getenv('PATH').split(os.pathsep):
+    try:
+        os.add_dll_directory(path)
+    except:
+        pass
+
 fptr = POINTER(c_float)
 bptr = POINTER(c_bool)
 
