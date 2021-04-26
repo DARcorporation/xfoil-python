@@ -1,4 +1,6 @@
-# -*- coding: utf-8 -*-
+b, navigate to the main page of the repository.
+Under your repository name, click Issues.
+Click New issue.# -*- coding: utf-8 -*-
 #   Copyright (c) 2019 D. de Vries
 #
 #   This file is part of XFoil.
@@ -257,12 +259,12 @@ class XFoil(object):
         """
         n = abs(int((a_end - a_start) / a_step))
 
-        a = np.zeros(n, dtype=c_float)
-        cl = np.zeros(n, dtype=c_float)
-        cd = np.zeros(n, dtype=c_float)
-        cm = np.zeros(n, dtype=c_float)
-        cp = np.zeros(n, dtype=c_float)
-        conv = np.zeros(n, dtype=c_bool)
+        a = np.zeros(n+1, dtype=c_float)
+        cl = np.zeros(n+1, dtype=c_float)
+        cd = np.zeros(n+1, dtype=c_float)
+        cm = np.zeros(n+1, dtype=c_float)
+        cp = np.zeros(n+1, dtype=c_float)
+        conv = np.zeros(n+1, dtype=c_bool)
 
         self._lib.aseq(byref(c_float(a_start)), byref(c_float(a_end)), byref(c_int(n)),
                        a.ctypes.data_as(fptr), cl.ctypes.data_as(fptr),
