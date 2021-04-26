@@ -388,8 +388,8 @@ contains
         use i_xfoil
         real(c_float), intent(in) :: a_start, a_end
         integer(c_int), intent(in) :: n_step
-        real(c_float), dimension(n_step), intent(inout) :: a_arr, cl_arr, cd_arr, cm_arr, cp_arr
-        logical(c_bool), dimension(n_step), intent(inout) :: conv_arr
+        real(c_float), dimension(n_step+1), intent(inout) :: a_arr, cl_arr, cd_arr, cm_arr, cp_arr
+        logical(c_bool), dimension(n_step+1), intent(inout) :: conv_arr
         integer :: i, j, iseqex, itmaxs
         real :: a0, da, nan
 
@@ -404,7 +404,7 @@ contains
         !----- initialize unconverged-point counter
         iseqex = 0
 
-        do i=1, n_step
+        do i=1, n_step+1
             ALFa = a0 + da * float(i - 1)
             if (abs(ALFa - AWAke)>1.0E-5) LWAke = .false.
             if (abs(ALFa - AVIsc)>1.0E-5) LVConv = .false.
