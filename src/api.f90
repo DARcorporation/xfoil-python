@@ -487,7 +487,7 @@ contains
         get_n_cp = N
     end function get_n_cp
 
-    subroutine get_cp(x_out, cp_out, n_points) bind(c, name='get_cp')
+    subroutine get_cp(x_out, y_out, cp_out, n_points) bind(c, name='get_cp')
         use s_xfoil, only: comset
         use m_xoper
         use i_xfoil
@@ -508,6 +508,7 @@ contains
             den = beta + bfac * cpinc
             cp_out(i) = cpinc / den
             x_out(i) = X(i)
+            y_out(i) = Y(i)
         enddo
     end subroutine get_cp
 

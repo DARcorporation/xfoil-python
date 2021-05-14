@@ -321,12 +321,15 @@ class XFoil(object):
         -------
         x : np.array
             X-coordinates
+        y : np.array
+            Y-coordinates
         cp : np.ndarray
             Pressure coefficients at the corresponding x-coordinates
         """
         n = self._lib.get_n_cp()
         x = np.zeros(n, dtype=c_float)
+        y = np.zeros(n, dtype=c_float)
         cp = np.zeros(n, dtype=c_float)
 
-        self._lib.get_cp(x.ctypes.data_as(fptr), cp.ctypes.data_as(fptr), byref(c_int(n)))
-        return x.astype(float), cp.astype(float)
+        self._lib.get_cp(x.ctypes.data_as(fptr), y.ctypes.data_as(fptr), cp.ctypes.data_as(fptr), byref(c_int(n)))
+        return x.astype(float), y.astype(float), cp.astype(float)
