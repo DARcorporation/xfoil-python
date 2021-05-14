@@ -494,7 +494,7 @@ contains
         implicit none
 
         integer(c_int), intent(in) :: n_points
-        real(c_float), dimension(n_points), intent(inout) :: x_out, cp_out
+        real(c_float), dimension(n_points), intent(inout) :: x_out, y_out, cp_out
 
         real :: beta, bfac, cpcom, cpinc, den
         integer :: i
