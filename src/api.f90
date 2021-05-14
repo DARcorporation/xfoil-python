@@ -203,6 +203,7 @@ contains
 
         if (M /= MINf) then
             MINf = M
+            MINf1 = M
 
             call comset
             if (MINf>0.0 .and. show_output) write (*, 99003) CPStar, QSTar / QINf
