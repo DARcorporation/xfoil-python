@@ -203,6 +203,7 @@ contains
 
         if (M /= MINf) then
             MINf = M
+            MINf1 = M
 
             call comset
             if (MINf>0.0 .and. show_output) write (*, 99003) CPStar, QSTar / QINf
@@ -486,14 +487,14 @@ contains
         get_n_cp = N
     end function get_n_cp
 
-    subroutine get_cp(x_out, cp_out, n_points) bind(c, name='get_cp')
+    subroutine get_cp(x_out, y_out, cp_out, n_points) bind(c, name='get_cp')
         use s_xfoil, only: comset
         use m_xoper
         use i_xfoil
         implicit none
 
         integer(c_int), intent(in) :: n_points
-        real(c_float), dimension(n_points), intent(inout) :: x_out, cp_out
+        real(c_float), dimension(n_points), intent(inout) :: x_out, y_out, cp_out
 
         real :: beta, bfac, cpcom, cpinc, den
         integer :: i
@@ -507,6 +508,7 @@ contains
             den = beta + bfac * cpinc
             cp_out(i) = cpinc / den
             x_out(i) = X(i)
+            y_out(i) = Y(i)
         enddo
     end subroutine get_cp
 
