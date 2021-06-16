@@ -146,5 +146,5 @@ setup(
     ext_modules=[CMakeExtension('xfoil.xfoil')],
     cmdclass={'build_ext': CMakeBuild},
     install_requires=['numpy'],
-    zip_save=False
+    zip_safe=False
 )
